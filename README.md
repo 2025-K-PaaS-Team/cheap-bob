@@ -12,4 +12,3 @@
 |Backend|Frontend|
 |:---:|:---:|
 |[Hyeonsang Cho](https://github.com/hyeonsang010716)|[gimgyuwon](https://github.com/gimgyuwon)|
-| ![](사진자유) | ![](사진자유) |

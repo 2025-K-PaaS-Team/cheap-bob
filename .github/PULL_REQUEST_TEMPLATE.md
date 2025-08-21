@@ -5,7 +5,11 @@
 ## Summary
 - 
 
+<!-- PR 설명 -->
 ## Description
+- 
+
+## Category
 - [ ] 새로운 기능 추가 <!-- feat -->
 - [ ] 버그 수정 <!-- fix -->
 - [ ] UI/UX 변경 <!-- style -->
