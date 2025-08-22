@@ -10,11 +10,20 @@ class Settings(BaseSettings):
 
     DEBUG: bool = False
     
+    # PostgreSQL 정보
     DB_HOST: str
     DB_PORT: int
     DB_USER: str
     DB_PASSWORD: str
     DB_NAME: str
+    
+    #Oauth2.0 정보
+    GOOGLE_CLIENT_ID: str
+    GOOGLE_CLIENT_SECRET: str
+    KAKAO_CLIENT_ID: str
+    KAKAO_CLIENT_SECRET: str
+    NAVER_CLIENT_ID: str
+    NAVER_CLIENT_SECRET: str
     
     @property
     def DATABASE_URL(self) -> str:
