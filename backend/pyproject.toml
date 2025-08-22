@@ -1,7 +1,7 @@
 [project]
-name = "project"
+name = "cheapbob"
 version = "0.1.0"
-description = "Add your description here"
+description = "CheapBob Backend"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
