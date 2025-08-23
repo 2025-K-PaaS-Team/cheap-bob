@@ -14,9 +14,12 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.get("/{provider}/login/customer")
 async def customer_oauth_login(
     provider: OAuthProvider,
-    state: str = Query(None)
+    state: str = Query(None, description= "추후 보안을 위해 넣은 파라미터, 지금은 None으로 해도 상관없음")
 ):
+    # oauth 로그인 선택
     oauth_client = OAuthClientFactory.create(provider)
+    
+    # oauth Redirect
     auth_url = oauth_client.get_authorization_url(
         state=state or "",
         user_type=UserType.CUSTOMER.value
@@ -24,15 +27,17 @@ async def customer_oauth_login(
     return RedirectResponse(url=auth_url)
 
 
+# Customer OAuth 로그인 콜백
 @router.get("/{provider}/callback/customer")
 async def customer_oauth_callback(
     provider: OAuthProvider,
     response: Response,
     code: str = Query(...),
-    state: str = Query(None),
+    state: str = Query(None, description= "추후 보안을 위해 넣은 파라미터, 지금은 None으로 해도 상관없음"),
     oauth_service: OAuthService = Depends(get_oauth_service)
 ):
     try:
+        # 토큰 생성
         token_response = await oauth_service.authenticate(
             provider=provider,
             code=code,
@@ -63,25 +68,31 @@ async def customer_oauth_callback(
 @router.get("/{provider}/login/seller")
 async def seller_oauth_login(
     provider: OAuthProvider,
-    state: str = Query(None)
+    state: str = Query(None, description= "추후 보안을 위해 넣은 파라미터, 지금은 None으로 해도 상관없음")
 ):
+    # oauth 로그인 선택
     oauth_client = OAuthClientFactory.create(provider)
+    
+    # oauth Redirect
     auth_url = oauth_client.get_authorization_url(
         state=state or "",
         user_type=UserType.SELLER.value
     )
+    
     return RedirectResponse(url=auth_url)
 
 
+# Seller OAuth 로그인 콜백
 @router.get("/{provider}/callback/seller")
 async def seller_oauth_callback(
     provider: OAuthProvider,
     response: Response,
     code: str = Query(...),
-    state: str = Query(None),
+    state: str = Query(None, description= "추후 보안을 위해 넣은 파라미터, 지금은 None으로 해도 상관없음"),
     oauth_service: OAuthService = Depends(get_oauth_service)
 ):
     try:
+        # 토큰 생성
         token_response = await oauth_service.authenticate(
             provider=provider,
             code=code,

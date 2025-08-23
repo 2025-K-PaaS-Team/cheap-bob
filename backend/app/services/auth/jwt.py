@@ -48,7 +48,7 @@ class JWTService:
     
     def verify_and_refresh_token(self, token: str) -> Tuple[bool, Optional[str], Optional[Dict]]:
         """
-        토큰을 검증하고 필요시 갱신합니다.
+        토크 검증 함수
         
         Returns:
             Tuple[bool, Optional[str], Optional[Dict]]: 

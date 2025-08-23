@@ -42,7 +42,3 @@ def get_oauth_service(
         seller_repository=seller_repository,
         jwt_service=jwt_service
     )
-
-
-# JWTServiceDep = Annotated[JWTService, Depends(get_jwt_service)]
-# OAuthServiceDep = Annotated[OAuthService, Depends(get_oauth_service)]

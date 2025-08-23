@@ -41,8 +41,3 @@ class SellerInDB(UserBase):
     
     class Config:
         from_attributes = True
-
-# Post 방식이었을 때, 필요했던
-# class OAuthLoginRequest(BaseModel):
-#     code: str
-#     state: Optional[str] = None
