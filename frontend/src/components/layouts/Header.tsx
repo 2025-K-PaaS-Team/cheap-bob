@@ -9,9 +9,13 @@ const Header = () => {
   }
 
   return (
-    <div className="p-4 flex flex-row justify-between">
-      <h3 className="border-2 py-2 px-10 w-full">SearchBar & Icon Header</h3>
-      <img src="/rice.svg" alt="searchIcon" width="35" />
+    <div className="p-4 flex flex-row justify-between items-center">
+      <div>광화문 홍길동 어쩌구로 행복하동</div>
+      {/* icon list */}
+      <div className="flex flex-row gap-x-4">
+        <img src="/icon/search.svg" alt="searchIcon" width="25" />
+        <img src="/icon/notification.svg" alt="searchIcon" width="25" />
+      </div>
     </div>
   );
 };
