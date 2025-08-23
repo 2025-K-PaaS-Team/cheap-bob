@@ -13,21 +13,27 @@ const Home = () => {
       <div className="fixed bottom-30 w-full flex flex-col max-w-[400px]">
         <h3
           className="bg-yellow-500 p-3 rounded-xl"
-          onClick={() => handleClick("/kakao")}
+          onClick={() => handleClick("/login-kakao")}
         >
           카카오톡으로 로그인하기
         </h3>
         <h3
           className="bg-green-500 p-3 rounded-xl"
-          onClick={() => handleClick("/naver")}
+          onClick={() => handleClick("/login-naver")}
         >
           네이버로 로그인하기
         </h3>
         <h3
           className="bg-blue-300 p-3 rounded-xl"
-          onClick={() => handleClick("google")}
+          onClick={() => handleClick("login-google")}
         >
           구글로 로그인하기
+        </h3>
+        <h3
+          className="bg-gray-300 p-3 rounded-xl"
+          onClick={() => handleClick("/store-list")}
+        >
+          로그인 스킵
         </h3>
       </div>
     </div>
