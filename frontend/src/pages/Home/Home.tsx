@@ -1,40 +1,27 @@
-import { useNavigate } from "react-router";
+import { LoginButton } from "@components/home";
 
 const Home = () => {
-  const navigate = useNavigate();
-
-  const handleClick = (link: string) => navigate(link);
-
   return (
     <div className="flex justify-center">
       {/* title */}
       <h1 className="flex">저렴한끼</h1>
       {/* login */}
       <div className="fixed bottom-30 w-full flex flex-col max-w-[400px]">
-        <h3
-          className="bg-yellow-500 p-3 rounded-xl"
-          onClick={() => handleClick("/login-kakao")}
-        >
-          카카오톡으로 로그인하기
-        </h3>
-        <h3
-          className="bg-green-500 p-3 rounded-xl"
-          onClick={() => handleClick("/login-naver")}
-        >
-          네이버로 로그인하기
-        </h3>
-        <h3
-          className="bg-blue-300 p-3 rounded-xl"
-          onClick={() => handleClick("login-google")}
-        >
-          구글로 로그인하기
-        </h3>
-        <h3
-          className="bg-gray-300 p-3 rounded-xl"
-          onClick={() => handleClick("/store-list")}
-        >
-          로그인 스킵
-        </h3>
+        <LoginButton
+          provider="kakao"
+          label="카카오톡으로 로그인하기"
+          color="bg-yellow-500"
+        />
+        <LoginButton
+          provider="naver"
+          label="네이버로 로그인하기"
+          color="bg-green-500"
+        />
+        <LoginButton
+          provider="google"
+          label="구글로 로그인하기"
+          color="bg-blue-300"
+        />
       </div>
     </div>
   );
