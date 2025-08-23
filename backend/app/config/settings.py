@@ -10,6 +10,10 @@ class Settings(BaseSettings):
 
     DEBUG: bool
     
+    # Environment
+    ENVIRONMENT: str
+    FRONTEND_URL: str
+    
     # PostgreSQL 정보
     DB_HOST: str
     DB_PORT: int
@@ -25,6 +29,7 @@ class Settings(BaseSettings):
     NAVER_CLIENT_ID: str
     NAVER_CLIENT_SECRET: str
     
+    # 암호화
     JWT_SECRET: str
     JWT_ALGORITHM: str
     JWT_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days

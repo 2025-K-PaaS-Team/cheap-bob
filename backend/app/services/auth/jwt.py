@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 from jose import JWTError, jwt
 
@@ -45,3 +45,36 @@ class JWTService:
             user_type=user_type
         )
         return access_token
+    
+    def verify_and_refresh_token(self, token: str) -> Tuple[bool, Optional[str], Optional[Dict]]:
+        """
+        토큰을 검증하고 필요시 갱신합니다.
+        
+        Returns:
+            Tuple[bool, Optional[str], Optional[Dict]]: 
+            - bool: 토큰 유효성
+            - Optional[str]: 갱신된 토큰 (갱신이 필요한 경우)
+            - Optional[Dict]: 디코드된 payload
+        """
+        payload = self.decode_access_token(token)
+        
+        if not payload:
+            return False, None, None
+        
+        # 토큰 만료 시간 확인
+        exp = datetime.fromtimestamp(payload['exp'], tz=timezone.utc)
+        now = datetime.now(timezone.utc)
+        
+        # 토큰이 만료되었으면 무효
+        if exp < now:
+            return False, None, None
+        
+        # 토큰 만료까지 5분 미만 남았으면 갱신
+        if exp - now < timedelta(minutes=5):
+            new_token = self.create_user_token(
+                email=payload['sub'],
+                user_type=payload['user_type']
+            )
+            return True, new_token, payload
+        
+        return True, None, payload

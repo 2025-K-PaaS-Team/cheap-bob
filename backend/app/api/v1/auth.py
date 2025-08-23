@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.responses import RedirectResponse
 
 from app.api.deps import OAuthService, get_oauth_service
 from app.config.oauth import OAuthProvider
+from app.config.settings import settings
 from app.schemas.auth import TokenResponse, UserType
 from app.services.oauth.factory import OAuthClientFactory
 
@@ -23,19 +24,34 @@ async def customer_oauth_login(
     return RedirectResponse(url=auth_url)
 
 
-@router.get("/{provider}/callback/customer", response_model=TokenResponse)
+@router.get("/{provider}/callback/customer")
 async def customer_oauth_callback(
     provider: OAuthProvider,
+    response: Response,
     code: str = Query(...),
     state: str = Query(None),
     oauth_service: OAuthService = Depends(get_oauth_service)
 ):
     try:
-        return await oauth_service.authenticate(
+        token_response = await oauth_service.authenticate(
             provider=provider,
             code=code,
             user_type=UserType.CUSTOMER
         )
+        
+        # JWT 쿠키 설정
+        response.set_cookie(
+            key="access_token",
+            value=token_response.access_token,
+            httponly=True,
+            secure=settings.ENVIRONMENT == "production",
+            samesite="lax",
+            max_age=settings.JWT_EXPIRE_MINUTES
+        )
+        
+        frontend_url = settings.FRONTEND_URL
+        return RedirectResponse(url=f"{frontend_url}/auth/success")
+        
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -57,19 +73,34 @@ async def seller_oauth_login(
     return RedirectResponse(url=auth_url)
 
 
-@router.get("/{provider}/callback/seller", response_model=TokenResponse)
+@router.get("/{provider}/callback/seller")
 async def seller_oauth_callback(
     provider: OAuthProvider,
+    response: Response,
     code: str = Query(...),
     state: str = Query(None),
     oauth_service: OAuthService = Depends(get_oauth_service)
 ):
     try:
-        return await oauth_service.authenticate(
+        token_response = await oauth_service.authenticate(
             provider=provider,
             code=code,
             user_type=UserType.SELLER
         )
+        
+        # JWT 쿠키 설정
+        response.set_cookie(
+            key="access_token",
+            value=token_response.access_token,
+            httponly=True,
+            secure=settings.ENVIRONMENT == "production",
+            samesite="lax",
+            max_age=settings.JWT_EXPIRE_MINUTES
+        )
+        
+        frontend_url = settings.FRONTEND_URL
+        return RedirectResponse(url=f"{frontend_url}/auth/success")
+        
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
