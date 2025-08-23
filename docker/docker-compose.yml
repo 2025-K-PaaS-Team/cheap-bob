@@ -1,0 +1,43 @@
+# version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cheapbob-postgres
+    environment:
+      POSTGRES_USER: cheap
+      POSTGRES_PASSWORD: bob
+      POSTGRES_DB: cheapbob
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+    networks:
+      - cheapbob-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cheap -d cheapbob"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../docker/backend/Dockerfile
+    container_name: cheapbob-backend
+    env_file:
+      - ../backend/.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - cheapbob-network
+    volumes:
+      - ../backend:/app
+
+networks:
+  cheapbob-network:
+    driver: bridge
+
+volumes:
+  postgresql-data:
