@@ -8,7 +8,7 @@ class Settings(BaseSettings):
         case_sensitive=True
     )
 
-    DEBUG: bool = False
+    DEBUG: bool
     
     # PostgreSQL 정보
     DB_HOST: str
@@ -25,6 +25,13 @@ class Settings(BaseSettings):
     NAVER_CLIENT_ID: str
     NAVER_CLIENT_SECRET: str
     
+    JWT_SECRET: str
+    JWT_ALGORITHM: str
+    JWT_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
+    
+    # OAuth Redirect URIs
+    OAUTH_REDIRECT_BASE_URL: str
+
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
