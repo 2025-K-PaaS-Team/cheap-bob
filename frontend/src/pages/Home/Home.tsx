@@ -1,6 +1,9 @@
 import { LoginButton } from "@components/home";
+import { useNavigate } from "react-router";
 
 const Home = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="flex justify-center">
       {/* title */}
@@ -22,6 +25,12 @@ const Home = () => {
           label="구글로 로그인하기"
           color="bg-blue-300"
         />
+        <h3
+          className="bg-gray-300 p-3 rounded-xl text-center cursor-pointer"
+          onClick={() => navigate("/store-list")}
+        >
+          로그인 스킵
+        </h3>
       </div>
     </div>
   );
