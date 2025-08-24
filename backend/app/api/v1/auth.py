@@ -54,6 +54,11 @@ async def customer_oauth_callback(
             max_age=settings.JWT_EXPIRE_MINUTES
         )
         
+        # 프론트 로컬 개발 용
+        if state == '1004':
+            frontend_url = settings.FRONTEND_LOCAL_URL
+            return RedirectResponse(url=f"{frontend_url}/auth/success")    
+        
         frontend_url = settings.FRONTEND_URL
         return RedirectResponse(url=f"{frontend_url}/auth/success")
         
@@ -108,6 +113,11 @@ async def seller_oauth_callback(
             samesite="lax",
             max_age=settings.JWT_EXPIRE_MINUTES
         )
+        
+        # 프론트 로컬 개발 용
+        if state == '1004':
+            frontend_url = settings.FRONTEND_LOCAL_URL
+            return RedirectResponse(url=f"{frontend_url}/auth/success") 
         
         frontend_url = settings.FRONTEND_URL
         return RedirectResponse(url=f"{frontend_url}/auth/success")

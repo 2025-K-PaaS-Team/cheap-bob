@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     # Environment
     ENVIRONMENT: str
     FRONTEND_URL: str
+    FRONTEND_LOCAL_URL: str
     
     # PostgreSQL 정보
     DB_HOST: str
