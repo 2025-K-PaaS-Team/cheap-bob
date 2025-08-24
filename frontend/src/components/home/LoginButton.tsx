@@ -1,5 +1,3 @@
-import axios from "axios";
-
 interface loginButtonProps {
   provider: "kakao" | "google" | "naver";
   label: string;
