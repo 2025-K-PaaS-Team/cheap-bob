@@ -6,9 +6,10 @@ interface loginButtonProps {
 
 const LoginButton = ({ provider, label, color }: loginButtonProps) => {
   const handleLogin = () => {
+    const state = provider === "kakao" ? "1004" : null;
     window.location.href = `${
       import.meta.env.VITE_API_BASE_URL
-    }/api/v1/auth/${provider}/login/customer`;
+    }/api/v1/auth/${provider}/login/customer${state ? `?state=${state}` : ""}`;
   };
 
   return (
