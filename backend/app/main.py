@@ -12,17 +12,20 @@ app = FastAPI(
     debug=settings.DEBUG
 )
 
+# JWT 인증 미들웨어 추가
+jwt_service = JWTService()
+app.add_middleware(JWTAuthMiddleware, jwt_service=jwt_service)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=[
+        settings.FRONTEND_URL,    
+        settings.FRONTEND_LOCAL_URL
+    ], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# JWT 인증 미들웨어 추가
-jwt_service = JWTService()
-app.add_middleware(JWTAuthMiddleware, jwt_service=jwt_service)
 
 app.include_router(api_router, prefix="/api/v1")
 
