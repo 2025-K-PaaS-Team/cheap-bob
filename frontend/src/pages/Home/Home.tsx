@@ -1,17 +1,17 @@
 import { LoginButton } from "@components/home";
-import axios from "axios";
+// import axios from "axios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
 const Home = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("accessToken");
+  // const token = localStorage.getItem("accessToken");
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
 
     if (token) {
-      navigate("store-list");
+      navigate("lab");
     }
   });
 
@@ -45,16 +45,11 @@ const Home = () => {
           label="네이버로 로그인하기"
           color="bg-green-500"
         />
-        <LoginButton
-          provider="google"
-          label="구글로 로그인하기"
-          color="bg-blue-300"
-        />
         <h3
           className="bg-gray-300 p-3 rounded-xl text-center cursor-pointer"
-          onClick={() => navigate("/store-list")}
+          onClick={() => navigate("/lab")}
         >
-          로그인 스킵
+          로그인 스킵하고 페이지 탐험하기
         </h3>
       </div>
     </div>

@@ -57,7 +57,6 @@ const Map = () => {
 
   return (
     <>
-      <h1>Lab page: Naver Map API</h1>
       <div id="map" style={{ width: "100%", height: "400px" }}></div>;
     </>
   );
