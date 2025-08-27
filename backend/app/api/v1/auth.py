@@ -44,23 +44,17 @@ async def customer_oauth_callback(
             user_type=UserType.CUSTOMER
         )
         
-        # JWT 쿠키 설정
-        response.set_cookie(
-            key="access_token",
-            value=token_response.access_token,
-            httponly=True,
-            secure=settings.ENVIRONMENT == "production",
-            samesite="lax",
-            max_age=settings.JWT_EXPIRE_MINUTES
-        )
-        
         # 프론트 로컬 개발 용
         if state == '1004':
             frontend_url = settings.FRONTEND_LOCAL_URL
-            return RedirectResponse(url=f"{frontend_url}/auth/success")    
+
+        else:
+            frontend_url = settings.FRONTEND_URL
+            
+        response = RedirectResponse(url=f"{frontend_url}/auth/success?token={token_response.access_token}")
         
-        frontend_url = settings.FRONTEND_URL
-        return RedirectResponse(url=f"{frontend_url}/auth/success")
+        return response
+        
         
     except Exception as e:
         raise HTTPException(
@@ -104,23 +98,16 @@ async def seller_oauth_callback(
             user_type=UserType.SELLER
         )
         
-        # JWT 쿠키 설정
-        response.set_cookie(
-            key="access_token",
-            value=token_response.access_token,
-            httponly=True,
-            secure=settings.ENVIRONMENT == "production",
-            samesite="lax",
-            max_age=settings.JWT_EXPIRE_MINUTES
-        )
-        
         # 프론트 로컬 개발 용
         if state == '1004':
             frontend_url = settings.FRONTEND_LOCAL_URL
-            return RedirectResponse(url=f"{frontend_url}/auth/success") 
+
+        else:
+            frontend_url = settings.FRONTEND_URL
+            
+        response = RedirectResponse(url=f"{frontend_url}/auth/success?token={token_response.access_token}")
         
-        frontend_url = settings.FRONTEND_URL
-        return RedirectResponse(url=f"{frontend_url}/auth/success")
+        return response
         
     except Exception as e:
         raise HTTPException(
