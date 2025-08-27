@@ -1,14 +1,23 @@
 import { LoginButton } from "@components/home";
+import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
 const Home = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+
+    if (token) {
+      navigate("store-list");
+    }
+  });
+
   return (
     <div className="flex justify-center">
       {/* title */}
       <h1 className="flex">저렴한끼</h1>
-      {/* login */}
+
       <div className="fixed bottom-30 w-full flex flex-col max-w-[400px]">
         <LoginButton
           provider="kakao"
