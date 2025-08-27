@@ -1,9 +1,11 @@
 import { LoginButton } from "@components/home";
+import axios from "axios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
 const Home = () => {
   const navigate = useNavigate();
+  const token = localStorage.getItem("accessToken");
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -12,6 +14,20 @@ const Home = () => {
       navigate("store-list");
     }
   });
+
+  // login localstorage api connection test
+  // axios
+  //   .get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/test/auth`, {
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //   })
+  //   .then((res) => {
+  //     console.log(res.data);
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //   });
 
   return (
     <div className="flex justify-center">
