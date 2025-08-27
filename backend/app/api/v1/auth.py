@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from fastapi.responses import RedirectResponse
 
-from app.api.deps import OAuthService, get_oauth_service
+from app.api.deps import OAuthService, get_jwt_service, get_oauth_service
 from app.config.oauth import OAuthProvider
 from app.config.settings import settings
 from app.schemas.auth import TokenResponse, UserType
+from app.services.auth.jwt import JWTService
 from app.services.oauth.factory import OAuthClientFactory
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -44,23 +45,17 @@ async def customer_oauth_callback(
             user_type=UserType.CUSTOMER
         )
         
-        # JWT 쿠키 설정
-        response.set_cookie(
-            key="access_token",
-            value=token_response.access_token,
-            httponly=True,
-            secure=settings.ENVIRONMENT == "production",
-            samesite="lax",
-            max_age=settings.JWT_EXPIRE_MINUTES
-        )
-        
         # 프론트 로컬 개발 용
         if state == '1004':
             frontend_url = settings.FRONTEND_LOCAL_URL
-            return RedirectResponse(url=f"{frontend_url}/auth/success")    
+
+        else:
+            frontend_url = settings.FRONTEND_URL
+            
+        response = RedirectResponse(url=f"{frontend_url}/auth/success?token={token_response.access_token}")
         
-        frontend_url = settings.FRONTEND_URL
-        return RedirectResponse(url=f"{frontend_url}/auth/success")
+        return response
+        
         
     except Exception as e:
         raise HTTPException(
@@ -104,26 +99,52 @@ async def seller_oauth_callback(
             user_type=UserType.SELLER
         )
         
-        # JWT 쿠키 설정
-        response.set_cookie(
-            key="access_token",
-            value=token_response.access_token,
-            httponly=True,
-            secure=settings.ENVIRONMENT == "production",
-            samesite="lax",
-            max_age=settings.JWT_EXPIRE_MINUTES
-        )
-        
         # 프론트 로컬 개발 용
         if state == '1004':
             frontend_url = settings.FRONTEND_LOCAL_URL
-            return RedirectResponse(url=f"{frontend_url}/auth/success") 
+
+        else:
+            frontend_url = settings.FRONTEND_URL
+            
+        response = RedirectResponse(url=f"{frontend_url}/auth/success?token={token_response.access_token}")
         
-        frontend_url = settings.FRONTEND_URL
-        return RedirectResponse(url=f"{frontend_url}/auth/success")
+        return response
         
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+
+
+# 토큰 갱신 엔드포인트
+@router.post("/refresh")
+async def refresh_token(
+    request: Request,
+    jwt_service: JWTService = Depends(get_jwt_service)
+):
+    """JWT 토큰을 갱신하는 엔드포인트"""
+    # Authorization 헤더에서 토큰 추출
+    authorization = request.headers.get("Authorization")
+    
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="유효하지 않은 인증 헤더입니다."
+        )
+    
+    token = authorization[7:]  # "Bearer " 제거
+    
+    # 토큰 검증 및 갱신
+    is_valid, new_token, payload = jwt_service.verify_and_refresh_token(token)
+    
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="유효하지 않은 토큰입니다."
+        )
+    
+    # 새 토큰이 생성되었으면 반환, 아니면 기존 토큰 반환
+    return TokenResponse(
+        access_token=new_token if new_token else token
+    )
