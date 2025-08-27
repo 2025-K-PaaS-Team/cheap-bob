@@ -27,14 +27,23 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         if any(path.startswith(excluded) for excluded in self.exclude_paths):
             return await call_next(request)
         
-        # 쿠키에서 access_token 가져오기
-        access_token = request.cookies.get("access_token")
+        # Authorization 헤더에서 access_token 가져오기
+        authorization = request.headers.get("Authorization")
         
-        if not access_token:
+        if not authorization:
             return JSONResponse(
                 status_code=401,
                 content={"detail": "인증이 필요합니다."}
             )
+        
+        # Bearer 토큰 형식 확인
+        if not authorization.startswith("Bearer "):
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "유효하지 않은 인증 형식입니다."}
+            )
+        
+        access_token = authorization[7:]  # "Bearer " 제거
         
         # 토큰 검증 및 갱신
         is_valid, new_token, payload = self.jwt_service.verify_and_refresh_token(access_token)
@@ -51,15 +60,8 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         # 다음 미들웨어 또는 엔드포인트 호출
         response = await call_next(request)
         
-        # 토큰이 갱신되었으면 새 쿠키 설정
+        # 토큰이 갱신되었으면 응답 헤더에 새 토큰 전달
         if new_token:
-            response.set_cookie(
-                key="access_token",
-                value=new_token,
-                httponly=True,
-                secure=request.url.scheme == "https",
-                samesite="lax",
-                max_age=self.jwt_service.expire_minutes
-            )
+            response.headers["X-New-Token"] = new_token
         
         return response
