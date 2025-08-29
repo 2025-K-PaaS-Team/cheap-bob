@@ -285,6 +285,7 @@ dependencies = [
     { name = "httpx" },
     { name = "loguru" },
     { name = "passlib", extra = ["bcrypt"] },
+    { name = "portone-server-sdk" },
     { name = "psycopg2-binary" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -307,6 +308,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.25.0" },
     { name = "loguru", specifier = ">=0.7.0" },
     { name = "passlib", extras = ["bcrypt"], specifier = ">=1.7.4" },
+    { name = "portone-server-sdk", specifier = "==0.16.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.0" },
     { name = "pydantic", specifier = ">=2.5.0" },
     { name = "pydantic-settings", specifier = ">=2.1.0" },
@@ -826,6 +828,18 @@ wheels = [
 [package.optional-dependencies]
 bcrypt = [
     { name = "bcrypt" },
+]
+
+[[package]]
+name = "portone-server-sdk"
+version = "0.16.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e9/0f/7e979a08add429ac56d8f12a14a81d81228c6bf29da56c58a8e1f81eef9f/portone_server_sdk-0.16.0.tar.gz", hash = "sha256:b68b44d5846c794f01e32903242e3edd7de9b5557abf2c1fe5485c7d38d0ba3d", size = 344111 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/52/b1b246fe673c72c63d2fdfacc7b5ff54b303bf7e40ae73ee65306054bbac/portone_server_sdk-0.16.0-py3-none-any.whl", hash = "sha256:d29aa37a85a77493b1fb60dd80aafb6b013df82a538d7be72154dbd62cc8a766", size = 853979 },
 ]
 
 [[package]]

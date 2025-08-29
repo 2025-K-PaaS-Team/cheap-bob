@@ -13,6 +13,7 @@ dependencies = [
     "httpx>=0.25.0",
     "loguru>=0.7.0",
     "passlib[bcrypt]>=1.7.4",
+    "portone-server-sdk==0.16.0",
     "psycopg2-binary>=2.9.0",
     "pydantic>=2.5.0",
     "pydantic-settings>=2.1.0",
