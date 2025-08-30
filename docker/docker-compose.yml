@@ -33,7 +33,7 @@ services:
     networks:
       - cheapbob-network
     volumes:
-      - ../backend:/app
+      - ../backend:/backend
 
 networks:
   cheapbob-network:
