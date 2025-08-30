@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /backend
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
+ENV PYTHONPATH="/backend/app:${PYTHONPATH}"
 
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
@@ -21,12 +22,12 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync
 
 # Copy entrypoint script first and set permissions
-COPY entrypoint.sh /app/
-RUN chmod +x /app/entrypoint.sh
+COPY entrypoint.sh /backend/
+RUN chmod +x /backend/entrypoint.sh
 
 # Copy application code
 COPY . .
 
 EXPOSE 8000
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/backend/entrypoint.sh"]
