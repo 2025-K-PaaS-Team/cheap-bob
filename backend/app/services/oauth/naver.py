@@ -1,5 +1,5 @@
-from app.config.oauth import OAuthConfig, OAuthProvider
-from app.services.oauth.base import OAuthClient, OAuthUser
+from config.oauth import OAuthConfig, OAuthProvider
+from services.oauth.base import OAuthClient, OAuthUser
 
 
 class NaverOAuthClient(OAuthClient):

@@ -3,8 +3,8 @@ from typing import Dict, List, Optional
 import uuid
 import random
 
-from app.examples.products import fake_stores_products, fake_payments, fake_portone_config
-from app.core.portone import PortOneClient
+from examples.products import fake_stores_products, fake_payments, fake_portone_config
+from core.portone import PortOneClient
 
 class PaymentService:
     """

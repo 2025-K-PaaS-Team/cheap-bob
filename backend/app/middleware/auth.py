@@ -2,7 +2,7 @@ from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from app.services.auth.jwt import JWTService
+from services.auth.jwt import JWTService
 
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):

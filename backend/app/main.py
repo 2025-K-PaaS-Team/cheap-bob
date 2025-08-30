@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1.api import api_router
-from app.config.settings import settings
-from app.middleware.auth import JWTAuthMiddleware
-from app.services.auth.jwt import JWTService
+from api.v1.api import api_router
+from config.settings import settings
+from middleware.auth import JWTAuthMiddleware
+from services.auth.jwt import JWTService
 
 app = FastAPI(
     title="CheapBob API",

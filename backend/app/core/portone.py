@@ -1,6 +1,6 @@
 import json
 import portone_server_sdk as portone
-from app.config.settings import settings
+from config.settings import settings
 from fastapi import HTTPException
 from typing import Any
 

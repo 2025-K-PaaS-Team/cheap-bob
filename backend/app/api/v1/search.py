@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, Path
 
-from app.schemas.product import (
+from schemas.product import (
     ProductsResponse, ProductInfo
 )
 
-from app.examples.products import fake_stores_products
+from examples.products import fake_stores_products
 
 router = APIRouter(prefix="/search", tags=["search"])
 

@@ -1,8 +1,8 @@
-from app.config.oauth import OAUTH_CONFIGS, OAuthProvider
-from app.services.oauth.base import OAuthClient
-from app.services.oauth.google import GoogleOAuthClient
-from app.services.oauth.kakao import KakaoOAuthClient
-from app.services.oauth.naver import NaverOAuthClient
+from config.oauth import OAUTH_CONFIGS, OAuthProvider
+from services.oauth.base import OAuthClient
+from services.oauth.google import GoogleOAuthClient
+from services.oauth.kakao import KakaoOAuthClient
+from services.oauth.naver import NaverOAuthClient
 
 
 class OAuthClientFactory:

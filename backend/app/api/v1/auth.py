@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from fastapi.responses import RedirectResponse
 
-from app.api.deps import OAuthService, get_jwt_service, get_oauth_service
-from app.config.oauth import OAuthProvider
-from app.config.settings import settings
-from app.schemas.auth import TokenResponse, UserType
-from app.services.auth.jwt import JWTService
-from app.services.oauth.factory import OAuthClientFactory
+from api.deps import OAuthService, get_jwt_service, get_oauth_service
+from config.oauth import OAuthProvider
+from config.settings import settings
+from schemas.auth import TokenResponse, UserType
+from services.auth.jwt import JWTService
+from services.oauth.factory import OAuthClientFactory
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
