@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     # OAuth Redirect URIs
     OAUTH_REDIRECT_BASE_URL: str
 
+    # 테스트 용
+    test_portone_v2_api_secret: str
+
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
