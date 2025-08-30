@@ -3,7 +3,7 @@ from typing import Dict, Optional
 
 from httpx import AsyncClient
 
-from app.config.oauth import OAuthConfig, OAuthProvider
+from config.oauth import OAuthConfig, OAuthProvider
 
 
 class OAuthUser:

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict
 
-from app.config.settings import settings
+from config.settings import settings
 
 
 class OAuthProvider(str, Enum):

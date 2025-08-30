@@ -17,12 +17,32 @@ done
 
 echo "Database is up - executing migrations"
 
+# 현재 디렉토리 확인
+echo "Current directory: $(pwd)"
+echo "Files in current directory:"
+ls -la
+
+# Python 및 uv 환경 확인
+echo "Python version:"
+python --version
+echo "UV version:"
+uv --version
+
+# 가상환경 재설치
+echo "Installing dependencies..."
+cd /backend
+uv sync
+
+# alembic 설치 확인
+echo "Checking alembic installation..."
+uv pip list | grep alembic || echo "alembic not found in pip list"
+
 # 데이터베이스 마이그레이션 실행
 echo "Running database migrations..."
-uv run alembic upgrade head
+uv run python -m alembic upgrade head
 
 # 애플리케이션 시작
 echo "Starting application..."
-exec uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+cd /backend && exec uv run python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 # Docker 실행 실패하면 확인하기 -> chmod +x entrypoint.sh

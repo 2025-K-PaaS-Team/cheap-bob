@@ -3,7 +3,7 @@ from typing import Dict, Optional, Tuple
 
 from jose import JWTError, jwt
 
-from app.config.settings import settings
+from config.settings import settings
 
 
 class JWTService:

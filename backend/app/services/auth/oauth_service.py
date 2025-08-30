@@ -2,12 +2,12 @@ from typing import Union
 
 from fastapi import HTTPException, status
 
-from app.config.oauth import OAuthProvider
-from app.repositories.customer import CustomerRepository
-from app.repositories.seller import SellerRepository
-from app.schemas.auth import TokenResponse, UserType
-from app.services.auth.jwt import JWTService
-from app.services.oauth.factory import OAuthClientFactory
+from config.oauth import OAuthProvider
+from repositories.customer import CustomerRepository
+from repositories.seller import SellerRepository
+from schemas.auth import TokenResponse, UserType
+from services.auth.jwt import JWTService
+from services.oauth.factory import OAuthClientFactory
 
 
 class OAuthService:

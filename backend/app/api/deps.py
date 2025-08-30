@@ -3,11 +3,11 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.session import get_db
-from app.repositories.customer import CustomerRepository
-from app.repositories.seller import SellerRepository
-from app.services.auth.jwt import JWTService
-from app.services.auth.oauth_service import OAuthService
+from database.session import get_db
+from repositories.customer import CustomerRepository
+from repositories.seller import SellerRepository
+from services.auth.jwt import JWTService
+from services.auth.oauth_service import OAuthService
 
 
 # Database dependency

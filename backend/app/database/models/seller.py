@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.sql import func
-from app.database.session import Base
+from database.session import Base
 
 
 class Seller(Base):

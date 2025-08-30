@@ -1,7 +1,7 @@
 from typing import Dict
 from fastapi import APIRouter, HTTPException, Path
 
-from app.schemas.payment import (
+from schemas.payment import (
     PaymentInitRequest,
     PaymentInitResponse,
     PaymentConfirmRequest,
@@ -10,7 +10,7 @@ from app.schemas.payment import (
     PaymentRefundResponse
 )
 
-from app.services.payment import PaymentService
+from services.payment import PaymentService
 
 router = APIRouter(prefix="/payment", tags=["payment"])
 
