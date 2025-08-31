@@ -1,10 +1,6 @@
 import { Navigate, Route, Routes } from "react-router";
-import Home from "@pages/Home";
 import { Layout } from "@components/layouts";
-import { LoginSuccess } from "@pages/Login";
-import { StoreList } from "@pages/StoreList";
-import { StoreDetail } from "@pages/StoreDetail";
-import Lab, { Map } from "@pages/Lab";
+import { Home, My, StoreDetail, StoreList, Login, Lab, Map } from "@pages";
 
 const App = () => {
   return (
@@ -12,10 +8,12 @@ const App = () => {
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
         {/* login */}
-        <Route path="/auth/success" element={<LoginSuccess />} />
+        <Route path="/auth/success" element={<Login />} />
         {/* store */}
         <Route path="/store-list" element={<StoreList />} />
         <Route path="/store-detail" element={<StoreDetail />} />
+        {/* mypage */}
+        <Route path="/my" element={<My />} />
         {/* lab */}
         <Route path="/lab" element={<Lab />}>
           <Route path="map" element={<Map />} />

@@ -11,7 +11,7 @@ const Home = () => {
     const token = localStorage.getItem("accessToken");
 
     if (token) {
-      navigate("lab");
+      navigate("store-list");
     }
   });
 

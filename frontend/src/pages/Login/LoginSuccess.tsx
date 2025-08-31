@@ -16,11 +16,7 @@ const LoginSuccess = () => {
     }
   }, [searchParams, navigate]);
 
-  return (
-    <>
-      <div>Login Success</div>
-    </>
-  );
+  return;
 };
 
 export default LoginSuccess;
