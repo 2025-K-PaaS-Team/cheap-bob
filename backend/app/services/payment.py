@@ -12,7 +12,7 @@ class PaymentService:
     """
     
     @staticmethod
-    async def create_payment_session(product_id: str, quantity: int) -> Dict:
+    async def create_payment_session(product_id: str, quantity: int, customer_email: Optional[str] = None) -> Dict:
         """
         결제 세션을 생성하고 포트원 결제 정보를 반환합니다.
         """
@@ -67,7 +67,7 @@ class PaymentService:
         }
     
     @staticmethod
-    async def verify_payment(payment_id: str) -> Dict:
+    async def verify_payment(payment_id: str, customer_email: Optional[str] = None) -> Dict:
         """
         포트원에서 결제를 검증하고 결제 상태를 업데이트합니다.
         """
@@ -85,7 +85,7 @@ class PaymentService:
         }
         
     @staticmethod
-    async def process_refund(payment_id: str, reason: str = "고객 요청") -> Dict:
+    async def process_refund(payment_id: str, reason: str = "고객 요청", customer_email: Optional[str] = None) -> Dict:
         """
         결제를 환불 처리합니다.
         """
