@@ -19,6 +19,7 @@ from services.payment import PaymentService
 
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
+from config.settings import settings
 
 router = APIRouter(prefix="/orders", tags=["Seller-Order"])
 
@@ -288,7 +289,7 @@ async def cancel_order(
     quantity = await order_repo.cancel_order(order_id)
     
     # 재고 복구
-    max_retries = 3
+    max_retries = settings.MAX_RETRY_LOCK
     for attempt in range(max_retries):
         try:
             current_product = await product_repo.get_by_product_id(order.product_id)

@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     # OAuth Redirect URIs
     OAUTH_REDIRECT_BASE_URL: str
     
+    # 낙관적 Lock 재시도 횟수
+    MAX_RETRY_LOCK: int
+    
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

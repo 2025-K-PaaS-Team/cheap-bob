@@ -17,6 +17,7 @@ from schemas.payment import (
 )
 from services.payment import PaymentService
 from utils.id_generator import generate_payment_id
+from config.settings import settings
 
 router = APIRouter(prefix="/payment", tags=["Customer-Payment"])
 
@@ -79,7 +80,7 @@ async def init_payment(
     payment_id = generate_payment_id()
     
     # 낙관적 락을 사용하여 재고 차감
-    max_retries = 3
+    max_retries = settings.MAX_RETRY_LOCK
     for attempt in range(max_retries):
         try:
             # 최신 상품 정보 조회
@@ -268,7 +269,7 @@ async def cancel_payment(
         )
     
     # 낙관적 락을 사용하여 재고 복구
-    max_retries = 3
+    max_retries = settings.MAX_RETRY_LOCK
     for attempt in range(max_retries):
         try:
             # 최신 상품 정보 조회

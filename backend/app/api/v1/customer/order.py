@@ -18,6 +18,7 @@ from schemas.customer_order import (
     CustomerOrderCancelResponse
 )
 from services.payment import PaymentService
+from config.settings import settings
 
 router = APIRouter(prefix="/orders", tags=["Customer-Order"])
 
@@ -251,7 +252,7 @@ async def delete_order(
     quantity = await order_repo.cancel_order(order_id)
     
     # 낙관적 락을 사용하여 재고 복구
-    max_retries = 3
+    max_retries = settings.MAX_RETRY_LOCK
     for attempt in range(max_retries):
         try:
             # 최신 상품 정보 조회
