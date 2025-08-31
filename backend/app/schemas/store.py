@@ -38,3 +38,22 @@ class StoreProductsResponse(BaseModel):
     store_name: str = Field(..., description="가게 이름")
     products: List[StoreProductResponse] = Field(default_factory=list, description="상품 목록")
     total: int = Field(..., description="전체 상품 수")
+
+
+class StorePaymentInfoCreateRequest(BaseModel):
+    portone_store_id: str = Field(..., description="포트원 가게 ID")
+    portone_channel_id: str = Field(..., description="포트원 채널 ID")
+    portone_secret_key: str = Field(..., description="포트원 시크릿 키")
+
+
+class StorePaymentInfoResponse(BaseModel):
+    store_id: str = Field(..., description="가게 고유 ID")
+    portone_store_id: Optional[str] = Field(None, description="포트원 가게 ID")
+    portone_channel_id: Optional[str] = Field(None, description="포트원 채널 ID")
+    
+    class Config:
+        from_attributes = True
+
+
+class StorePaymentInfoStatusResponse(BaseModel):
+    info_status: bool = Field(..., description="결제 정보 등록 여부")
