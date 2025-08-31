@@ -15,6 +15,6 @@ class Store(Base):
     
     # Relationships
     seller = relationship("Seller", backref="stores")
-    location = relationship("StoreLocation", back_populates="store", uselist=False)
+    # location = relationship("StoreLocation", back_populates="store", uselist=False)
     payment_info = relationship("StorePaymentInfo", back_populates="store", uselist=False)
     products = relationship("StoreProductInfo", back_populates="store")
