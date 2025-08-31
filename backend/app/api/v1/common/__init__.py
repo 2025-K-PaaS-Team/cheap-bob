@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from api.v1.common import health, test
+from api.v1.common import health
 
 router = APIRouter(prefix="/common", tags=["Common"])
 
