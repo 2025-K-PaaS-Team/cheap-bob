@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Dict, List, Optional
-import uuid
 import random
 
 from examples.products import fake_stores_products, fake_payments, fake_portone_config
 from core.portone import PortOneClient
+from utils.id_generator import generate_payment_id
 
 class PaymentService:
     """
@@ -43,7 +43,7 @@ class PaymentService:
             }
         
         # 결제 ID 생성
-        payment_id = f"PAY_{uuid.uuid4().hex[:8]}_{int(datetime.now().timestamp())}"
+        payment_id = generate_payment_id()
         total_amount = product_info["price"] * quantity
         
         # 결제 정보 저장
