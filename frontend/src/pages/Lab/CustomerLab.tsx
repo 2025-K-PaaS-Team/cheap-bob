@@ -1,10 +1,10 @@
 import { Outlet } from "react-router";
 import { useNavigate } from "react-router";
-import axios from "axios";
+// import axios from "axios";
 
 const CustomerLab = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("accessToken");
+  // const token = localStorage.getItem("accessToken");
 
   // api/v1/test/
   // axios

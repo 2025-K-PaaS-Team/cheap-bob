@@ -22,6 +22,9 @@ const SellerLab = () => {
     status: "IDLE",
   });
 
+  // build 에러 방지용 임시 콘솔
+  console.log(paymentStatus);
+
   // const [item, setItem] = useState(null);
   // dummy item
   const item: item = {
