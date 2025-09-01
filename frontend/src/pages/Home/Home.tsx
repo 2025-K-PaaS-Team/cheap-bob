@@ -1,11 +1,9 @@
 import { LoginButton } from "@components/home";
-// import axios from "axios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
 const Home = () => {
   const navigate = useNavigate();
-  // const token = localStorage.getItem("accessToken");
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -14,20 +12,6 @@ const Home = () => {
       navigate("store-list");
     }
   });
-
-  // login localstorage api connection test
-  // axios
-  //   .get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/test/auth`, {
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //   })
-  //   .then((res) => {
-  //     console.log(res.data);
-  //   })
-  //   .catch((err) => {
-  //     console.error(err);
-  //   });
 
   return (
     <div className="flex justify-center">
@@ -44,6 +28,18 @@ const Home = () => {
           provider="naver"
           label="네이버로 로그인하기"
           color="bg-green-500"
+        />
+        <LoginButton
+          provider="kakao"
+          label="[점주] 카카오톡으로 로그인하기"
+          color="bg-amber-500"
+          isCustomer={false}
+        />
+        <LoginButton
+          provider="naver"
+          label="[점주] 네이버로 로그인하기"
+          color="bg-teal-500"
+          isCustomer={false}
         />
         <h3
           className="bg-gray-300 p-3 rounded-xl text-center cursor-pointer"

@@ -1,8 +1,26 @@
 import { Outlet } from "react-router";
 import { useNavigate } from "react-router";
+import axios from "axios";
 
 const Lab = () => {
   const navigate = useNavigate();
+  const token = localStorage.getItem("accessToken");
+
+  // api/v1/test/
+  // axios
+  //   .get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/test/auth`, {
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //   })
+  //   .then((res) => {
+  //     console.log(res.data);
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //   });
+
+  // 
 
   return (
     <div className="gap-y-5">
