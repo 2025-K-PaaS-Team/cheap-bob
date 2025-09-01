@@ -9,14 +9,12 @@ const CustomerHome = () => {
     const token = localStorage.getItem("accessToken");
 
     if (token) {
-      alert(
-        "기존 로그인 기록이 감지되었습니다.\n 3초 뒤 고객용 실험실 페이지로 이동합니다."
-      );
-      setTimeout(() => {
-        navigate("lab");
-      }, 3000);
+      alert("이미 로그인이 되어 있어요.");
+      // setTimeout(() => {
+      //   navigate("lab");
+      // }, 3000);
     }
-  });
+  }, []);
 
   return (
     <div className="flex justify-center">
@@ -35,10 +33,16 @@ const CustomerHome = () => {
           color="bg-green-500"
         />
         <h3
-          className="bg-gray-300 p-3 rounded-xl text-center cursor-pointer"
-          onClick={() => navigate("/lab")}
+          className="bg-pink-300 p-3 rounded-xl text-center cursor-pointer"
+          onClick={() => navigate("/s", { replace: true })}
         >
-          로그인 스킵하고 페이지 탐험하기
+          점주 페이지로 이동
+        </h3>
+        <h3
+          className="bg-gray-300 p-3 rounded-xl text-center cursor-pointer"
+          onClick={() => navigate("/c/lab")}
+        >
+          실험실로 이동
         </h3>
       </div>
     </div>
