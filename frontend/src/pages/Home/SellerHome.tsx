@@ -2,14 +2,19 @@ import { LoginButton } from "@components/home";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
-const Home = () => {
+const SellerHome = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
 
     if (token) {
-      navigate("store-list");
+      alert(
+        "기존 로그인 기록이 감지되었습니다.\n 3초 뒤 점주용 실험실 페이지로 이동합니다."
+      );
+      setTimeout(() => {
+        navigate("lab");
+      }, 3000);
     }
   });
 
@@ -19,16 +24,6 @@ const Home = () => {
       <h1 className="flex">저렴한끼</h1>
 
       <div className="fixed bottom-30 w-full flex flex-col max-w-[400px]">
-        <LoginButton
-          provider="kakao"
-          label="카카오톡으로 로그인하기"
-          color="bg-yellow-500"
-        />
-        <LoginButton
-          provider="naver"
-          label="네이버로 로그인하기"
-          color="bg-green-500"
-        />
         <LoginButton
           provider="kakao"
           label="[점주] 카카오톡으로 로그인하기"
@@ -52,4 +47,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default SellerHome;

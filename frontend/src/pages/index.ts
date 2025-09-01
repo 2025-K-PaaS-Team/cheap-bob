@@ -1,8 +1,9 @@
-export { default as Home } from "./Home";
 export { default as My } from "./My";
-export { default as Lab } from "./Lab";
 export { default as StoreDetail } from "./StoreDetail";
 export { default as StoreList } from "./StoreList";
-export { default as Login } from "./Login";
+export { default as LoginCallback } from "./LoginCallback";
 
+// lab
 export { default as Map } from "./Lab/Map";
+export { default as CustomerLab } from "./Lab/CustomerLab";
+export { default as SellerLab } from "./Lab/SellerLab";

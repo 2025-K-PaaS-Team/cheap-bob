@@ -2,7 +2,7 @@ import { Outlet } from "react-router";
 import { useNavigate } from "react-router";
 import axios from "axios";
 
-const Lab = () => {
+const SellerLab = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("accessToken");
 
@@ -19,8 +19,6 @@ const Lab = () => {
   //   .catch((err) => {
   //     console.error(err);
   //   });
-
-  // 
 
   return (
     <div className="gap-y-5">
@@ -47,4 +45,4 @@ const Lab = () => {
   );
 };
 
-export default Lab;
+export default SellerLab;
