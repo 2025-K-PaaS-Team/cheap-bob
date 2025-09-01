@@ -2,14 +2,22 @@ interface loginButtonProps {
   provider: "kakao" | "google" | "naver";
   label: string;
   color: string;
+  isCustomer?: boolean;
 }
 
-const LoginButton = ({ provider, label, color }: loginButtonProps) => {
+const LoginButton = ({
+  provider,
+  label,
+  color,
+  isCustomer = true,
+}: loginButtonProps) => {
   const handleLogin = () => {
     const state = provider === "kakao" ? "1004" : null;
     window.location.href = `${
       import.meta.env.VITE_API_BASE_URL
-    }/api/v1/auth/${provider}/login/customer${state ? `?state=${state}` : ""}`;
+    }/api/v1/auth/${provider}/login/${isCustomer ? `customer` : "seller"}${
+      state ? `?state=${state}` : ""
+    }`;
   };
 
   return (

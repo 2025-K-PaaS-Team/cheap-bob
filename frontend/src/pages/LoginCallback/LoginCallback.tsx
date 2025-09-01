@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
-const LoginSuccess = () => {
+const LoginCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -16,11 +16,7 @@ const LoginSuccess = () => {
     }
   }, [searchParams, navigate]);
 
-  return (
-    <>
-      <div>Login Success</div>
-    </>
-  );
+  return null;
 };
 
-export default LoginSuccess;
+export default LoginCallback;

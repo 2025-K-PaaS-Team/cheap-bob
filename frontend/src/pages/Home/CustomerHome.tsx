@@ -1,33 +1,20 @@
 import { LoginButton } from "@components/home";
-// import axios from "axios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
-const Home = () => {
+const CustomerHome = () => {
   const navigate = useNavigate();
-  // const token = localStorage.getItem("accessToken");
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
 
     if (token) {
-      navigate("lab");
+      alert("이미 로그인이 되어 있어요.");
+      // setTimeout(() => {
+      //   navigate("lab");
+      // }, 3000);
     }
-  });
-
-  // login localstorage api connection test
-  // axios
-  //   .get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/test/auth`, {
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //   })
-  //   .then((res) => {
-  //     console.log(res.data);
-  //   })
-  //   .catch((err) => {
-  //     console.error(err);
-  //   });
+  }, []);
 
   return (
     <div className="flex justify-center">
@@ -46,14 +33,20 @@ const Home = () => {
           color="bg-green-500"
         />
         <h3
-          className="bg-gray-300 p-3 rounded-xl text-center cursor-pointer"
-          onClick={() => navigate("/lab")}
+          className="bg-pink-300 p-3 rounded-xl text-center cursor-pointer"
+          onClick={() => navigate("/s", { replace: true })}
         >
-          로그인 스킵하고 페이지 탐험하기
+          점주 페이지로 이동
+        </h3>
+        <h3
+          className="bg-gray-300 p-3 rounded-xl text-center cursor-pointer"
+          onClick={() => navigate("/c/lab")}
+        >
+          실험실로 이동
         </h3>
       </div>
     </div>
   );
 };
 
-export default Home;
+export default CustomerHome;
