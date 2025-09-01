@@ -302,9 +302,9 @@ const SellerLab = () => {
         >
           결제 정보 등록 (POST: seller/stores)
         </button>
-        {myStore && (
+        {paymentInfo && (
           <div className="w-full text-green-500">
-            결제 정보: {JSON.stringify(myStore)}
+            결제 정보: {JSON.stringify(paymentInfo)}
           </div>
         )}
       </div>
