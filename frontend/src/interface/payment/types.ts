@@ -12,3 +12,15 @@ export type ItemType = {
   currencyLabel: "원";
   img: string;
 };
+
+export type PaymentRequestType = {
+  product_id: string;
+  quantity: number;
+};
+
+export type PaymentResponseType = {
+  payment_id: string;
+  channel_id: string;
+  store_id: string;
+  total_amount: number;
+};
