@@ -20,3 +20,20 @@ export const getStore = async (): Promise<StoreResponseType> => {
 
   return data;
 };
+
+// PUT: update my store
+export const updateStore = async (
+  storeId: string,
+  body: StoreRequestType
+): Promise<StoreResponseType> => {
+  const { data } = await sellerStoreApi.put<StoreResponseType>(
+    `/${storeId}`,
+    body
+  );
+  return data;
+};
+
+// DELETE: delete my store
+export const deleteStore = async (storeId: string): Promise<void> => {
+  await sellerStoreApi.delete<StoreResponseType>(`/${storeId}`);
+};

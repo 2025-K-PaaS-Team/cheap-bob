@@ -1,6 +1,6 @@
-import { createStore, getStore } from "@services";
+import { createStore, getStore, updateStore } from "@services";
 import PortOne from "@portone/browser-sdk/v2";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { StoreResponseType } from "@interface";
 
 const SellerLab = () => {
@@ -82,6 +82,7 @@ const SellerLab = () => {
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [newStore, setNewStore] = useState<StoreResponseType | null>(null);
   const [myStore, setMyStore] = useState<StoreResponseType | null>(null);
+  const [storeName, setStoreName] = useState<string>("");
 
   // create seller store
   const handleCreateStore = async () => {
@@ -108,6 +109,29 @@ const SellerLab = () => {
       setErrMsg(msg);
     }
   };
+
+  // udpate seller store
+  const hadnleUpdateStore = async () => {
+    if (!myStore) return;
+    const name = storeName?.trim();
+    if (!name) {
+      setErrMsg("가게 이름을 입력해주세요");
+      return;
+    }
+
+    try {
+      await updateStore(myStore.store_id, { store_name: name });
+    } catch (err) {
+      console.error("udpate 실패", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // my store 바뀔 때 store name도 업데이트
+  useEffect(() => {
+    if (myStore) setStoreName(myStore.store_name);
+  }, [myStore]);
 
   return (
     <div className="min-h-screen m-5 gap-y-2 flex flex-col justify-center items-center">
@@ -139,7 +163,11 @@ const SellerLab = () => {
 
       {/* 가게 등록 테스트 */}
       <h2>가게 등록 테스트</h2>
+
+      {/* err message */}
       {errMsg && <div className="text-red-600">{errMsg}</div>}
+
+      {/* create store */}
       <button
         className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
         onClick={() => handleCreateStore()}
@@ -151,6 +179,8 @@ const SellerLab = () => {
           등록된 가게 정보: {JSON.stringify(newStore)}
         </div>
       )}
+
+      {/* get my store */}
       <button
         className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
         onClick={() => handleGetStore()}
@@ -161,6 +191,34 @@ const SellerLab = () => {
         <div className="w-full text-green-500">
           내 가게 정보: {JSON.stringify(myStore)}
         </div>
+      )}
+
+      {/* update my store */}
+      <button
+        className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+        onClick={() => hadnleUpdateStore()}
+      >
+        가게 정보 업데이트 (PUT: seller/stores)
+      </button>
+      {myStore && (
+        <>
+          <div className="w-full text-green-500 text-center">
+            업데이트 할 가게 이름을 입력하소
+          </div>
+          <input
+            type="text"
+            className="border-2 border-green-500 p-2"
+            placeholder="업데이트 할 가게 이름을 입력하쇼"
+            value={storeName}
+            onChange={(e) => setStoreName(e.target.value)}
+          />
+          <button
+            onClick={() => hadnleUpdateStore()}
+            className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+          >
+            저장하수
+          </button>
+        </>
       )}
     </div>
   );
