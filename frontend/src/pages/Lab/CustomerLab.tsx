@@ -1,7 +1,7 @@
 // import { Outlet } from "react-router";
 // import { useNavigate } from "react-router";
 
-import { PaymentResponseType } from "@interface";
+import type { PaymentResponseType } from "@interface";
 import { getSpecificStore, getStores } from "@services";
 import { initPayment } from "@services/customer/payment";
 import { useState } from "react";
@@ -61,6 +61,9 @@ const CustomerLab = () => {
         NAVER MAP API
       </button> */}
       {/* <Outlet /> */}
+
+      {/* err message */}
+      {errMsg && <div className="text-red-600">{errMsg}</div>}
 
       {/* 가게 검색 테스트 */}
       <div className="flex flex-col space-y-2 p-2 w-full p-2">
