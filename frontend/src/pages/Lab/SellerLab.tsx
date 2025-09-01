@@ -34,8 +34,8 @@ const SellerLab = () => {
     setPaymentStatus({ status: "PENDING" });
     const paymentId = randomId();
     const payment = await PortOne.requestPayment({
-      storeId: "store-368b20a0-d0e0-4770-bf3e-0b51eaa97466",
-      channelKey: "channel-key-9d9848fb-cd40-4dba-a157-33089c0fb971",
+      storeId: "store-f7494ada-17a2-49c9-bb23-183d354afb27",
+      channelKey: "channel-key-2bde6533-669f-4e5a-ae0c-5a471f10a463",
       paymentId,
       orderName: item.name,
       totalAmount: item.price,
@@ -163,78 +163,94 @@ const SellerLab = () => {
         </div>
       </form>
 
-      {/* 가게 등록 테스트 */}
-      <h2>가게 등록 테스트</h2>
-
       {/* err message */}
       {errMsg && <div className="text-red-600">{errMsg}</div>}
 
-      {/* create store */}
-      <button
-        className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
-        onClick={() => handleCreateStore()}
-      >
-        가게 등록하기 (POST: seller/stores)
-      </button>
-      {newStore && (
-        <div className="w-full text-green-500">
-          등록된 가게 정보: {JSON.stringify(newStore)}
-        </div>
-      )}
+      {/* 가게 등록 테스트 */}
+      <div className="flex flex-col space-y-2">
+        <h2>가게 등록 테스트</h2>
 
-      {/* get my store */}
-      <button
-        className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
-        onClick={() => handleGetStore()}
-      >
-        가게 정보 가져오기 (GET: seller/stores)
-      </button>
-      {myStore && (
-        <div className="w-full text-green-500">
-          내 가게 정보: {JSON.stringify(myStore)}
-        </div>
-      )}
-
-      {/* update my store */}
-      <button
-        className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
-        onClick={() => hadnleUpdateStore()}
-      >
-        가게 정보 업데이트 (PUT: seller/stores)
-      </button>
-      {myStore && (
-        <>
-          <div className="w-full text-green-500 text-center">
-            업데이트 할 가게 이름을 입력하소
+        {/* create store */}
+        <button
+          className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleCreateStore()}
+        >
+          가게 등록하기 (POST: seller/stores)
+        </button>
+        {newStore && (
+          <div className="w-full text-green-500">
+            등록된 가게 정보: {JSON.stringify(newStore)}
           </div>
-          <input
-            type="text"
-            className="border-2 border-green-500 p-2"
-            placeholder="업데이트 할 가게 이름을 입력하쇼"
-            value={storeName}
-            onChange={(e) => setStoreName(e.target.value)}
-          />
-          <button
-            onClick={() => hadnleUpdateStore()}
-            className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
-          >
-            저장하수
-          </button>
-        </>
-      )}
+        )}
+        {/* get my store */}
+        <button
+          className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetStore()}
+        >
+          가게 정보 가져오기 (GET: seller/stores)
+        </button>
+        {myStore && (
+          <div className="w-full text-green-500">
+            내 가게 정보: {JSON.stringify(myStore)}
+          </div>
+        )}
+        {/* update my store */}
+        <button
+          className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => hadnleUpdateStore()}
+        >
+          가게 정보 업데이트 (PUT: seller/stores)
+        </button>
+        {myStore && (
+          <>
+            <div className="w-full text-green-500 text-center">
+              업데이트 할 가게 이름을 입력하소
+            </div>
+            <input
+              type="text"
+              className="border-2 border-green-500 p-2"
+              placeholder="업데이트 할 가게 이름을 입력하쇼"
+              value={storeName}
+              onChange={(e) => setStoreName(e.target.value)}
+            />
+            <button
+              onClick={() => hadnleUpdateStore()}
+              className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+            >
+              저장하수
+            </button>
+          </>
+        )}
+        {/* delete my store */}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => hadnleDeleteStore()}
+        >
+          가게 삭제하기 (DELETE: seller/stores)
+        </button>
+        {myStore && (
+          <div className="w-full text-green-500">
+            내 가게 정보: {JSON.stringify(myStore)}
+          </div>
+        )}
+      </div>
 
-      {/* delete my store */}
-      <button
-        className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
-        onClick={() => hadnleDeleteStore()}
-      >
-        가게 삭제하기 (DELETE: seller/stores)
-      </button>
-      {myStore && (
-        <div className="w-full text-green-500">
-          내 가게 정보: {JSON.stringify(myStore)}
-        </div>
-      )}
+      {/* 물품 등록 테스트 */}
+      <div className="flex flex-col space-y-2">
+        <h2>물품 등록 테스트</h2>
+        {/* create product */}
+        <button
+          className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleCreateStore()}
+        >
+          물품 등록하기 (POST: seller/products)
+        </button>
+        {newStore && (
+          <div className="w-full text-green-500">
+            등록된 가게 정보: {JSON.stringify(newStore)}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
