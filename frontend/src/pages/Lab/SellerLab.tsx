@@ -120,6 +120,7 @@ const SellerLab = () => {
     }
   };
 
+  // delete seller store
   const hadnleDeleteStore = async () => {
     if (!myStore) return;
     const ok = window.confirm("정말 이 가게를 삭제하실 건가요?");
