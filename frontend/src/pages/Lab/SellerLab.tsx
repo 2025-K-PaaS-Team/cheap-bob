@@ -1,4 +1,4 @@
-import { createStore, getStore, updateStore } from "@services";
+import { createStore, deleteStore, getStore, updateStore } from "@services";
 import PortOne from "@portone/browser-sdk/v2";
 import { useEffect, useState } from "react";
 import type { StoreResponseType } from "@interface";
@@ -128,6 +128,22 @@ const SellerLab = () => {
     }
   };
 
+  const hadnleDeleteStore = async () => {
+    if (!myStore) return;
+    const ok = window.confirm("정말 이 가게를 삭제하실 건가요?");
+    if (!ok) return;
+    try {
+      setErrMsg(null);
+      await deleteStore(myStore.store_id);
+      setMyStore(null);
+      setStoreName("");
+    } catch (err) {
+      console.error("delete 실패", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
   // my store 바뀔 때 store name도 업데이트
   useEffect(() => {
     if (myStore) setStoreName(myStore.store_name);
@@ -219,6 +235,19 @@ const SellerLab = () => {
             저장하수
           </button>
         </>
+      )}
+
+      {/* delete my store */}
+      <button
+        className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+        onClick={() => hadnleDeleteStore()}
+      >
+        가게 삭제하기 (DELETE: seller/stores)
+      </button>
+      {myStore && (
+        <div className="w-full text-green-500">
+          내 가게 정보: {JSON.stringify(myStore)}
+        </div>
       )}
     </div>
   );
