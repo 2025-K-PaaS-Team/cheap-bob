@@ -29,3 +29,11 @@ export const sellerStoreApi = attachInterceptors(
     headers: { "Content-Type": "application/json" },
   })
 );
+
+export const paymentApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/customer/payment`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);

@@ -2,24 +2,10 @@ import { createStore, deleteStore, getStore, updateStore } from "@services";
 import PortOne from "@portone/browser-sdk/v2";
 import { useEffect, useState } from "react";
 import type { StoreResponseType } from "@interface";
+import type { PaymentStatusType, ItemType } from "@interface";
 
 const SellerLab = () => {
-  type PaymentStatus = {
-    status: "IDLE" | "PENDING" | "SUCCESS" | "FAILED";
-    message?: string;
-    code?: string;
-  };
-
-  type item = {
-    id: number;
-    name: string;
-    price: number;
-    currency: "KRW";
-    currencyLabel: "원";
-    img: string;
-  };
-
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatusType>({
     status: "IDLE",
   });
 
@@ -28,7 +14,7 @@ const SellerLab = () => {
 
   // const [item, setItem] = useState(null);
   // dummy item
-  const item: item = {
+  const item: ItemType = {
     id: 1219,
     name: "행복한하루",
     price: 1000,
