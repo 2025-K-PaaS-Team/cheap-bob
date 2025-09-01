@@ -1,7 +1,13 @@
-import { createStore, deleteStore, getStore, updateStore } from "@services";
+import {
+  createProduct,
+  createStore,
+  deleteStore,
+  getStore,
+  updateStore,
+} from "@services";
 import PortOne from "@portone/browser-sdk/v2";
 import { useEffect, useState } from "react";
-import type { StoreResponseType } from "@interface";
+import type { ProductRequestType, StoreResponseType } from "@interface";
 import type { PaymentStatusType, ItemType } from "@interface";
 
 const SellerLab = () => {
@@ -130,6 +136,28 @@ const SellerLab = () => {
     }
   };
 
+  const [newProduct, setNewProduct] = useState<ProductRequestType | null>(null);
+
+  // create seller product
+  const handleCreateProduct = async () => {
+    if (!myStore) return;
+    try {
+      const product = await createProduct({
+        store_id: myStore.store_id,
+        product_name: "행복조각",
+        initial_stock: 10,
+        price: 1004,
+        sale: 50,
+      });
+      console.log("등록 성공:", newStore);
+      setNewProduct(product);
+    } catch (err: unknown) {
+      console.error("등록 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
   // my store 바뀔 때 store name도 업데이트
   useEffect(() => {
     if (myStore) setStoreName(myStore.store_name);
@@ -138,36 +166,43 @@ const SellerLab = () => {
   return (
     <div className="min-h-screen m-5 gap-y-2 flex flex-col justify-center items-center">
       {/* 결제 테스트 */}
-      <h2>결제 테스트</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="rounded-xl w-full bg-yellow-200 p-3">
-          {!item ? (
-            <div>결제 정보를 불러오는 중입니다.</div>
-          ) : (
-            <>
-              {" "}
-              <div className="font-bold">{item.name}</div>
-              <img src={item.img} alt="" />
-              <div>
-                {item.price}
-                {item.currencyLabel}
-              </div>
-              <div className="flex flex-row gap-x-5">
-                <button type="submit" className="p-3 bg-orange-300 rounded-xl">
-                  결제
-                </button>
-                <button className="p-3 bg-gray-300 rounded-xl">새로고침</button>
-              </div>
-            </>
-          )}
-        </div>
-      </form>
+      <div className="flex flex-col space-y-2 p-2 w-full p-2">
+        <h2>결제 테스트</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="rounded-xl w-full bg-yellow-200 p-3">
+            {!item ? (
+              <div>결제 정보를 불러오는 중입니다.</div>
+            ) : (
+              <>
+                {" "}
+                <div className="font-bold">{item.name}</div>
+                <img src={item.img} alt="" />
+                <div>
+                  {item.price}
+                  {item.currencyLabel}
+                </div>
+                <div className="flex flex-row gap-x-5">
+                  <button
+                    type="submit"
+                    className="p-3 bg-orange-300 rounded-xl"
+                  >
+                    결제
+                  </button>
+                  <button className="p-3 bg-gray-300 rounded-xl">
+                    새로고침
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </form>
+      </div>
 
       {/* err message */}
       {errMsg && <div className="text-red-600">{errMsg}</div>}
 
       {/* 가게 등록 테스트 */}
-      <div className="flex flex-col space-y-2">
+      <div className="flex flex-col space-y-2 p-2 w-full p-2">
         <h2>가게 등록 테스트</h2>
 
         {/* create store */}
@@ -236,18 +271,18 @@ const SellerLab = () => {
       </div>
 
       {/* 물품 등록 테스트 */}
-      <div className="flex flex-col space-y-2">
+      <div className="flex flex-col space-y-2 p-2 w-full p-2">
         <h2>물품 등록 테스트</h2>
         {/* create product */}
         <button
           className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
-          onClick={() => handleCreateStore()}
+          onClick={() => handleCreateProduct()}
         >
           물품 등록하기 (POST: seller/products)
         </button>
         {newStore && (
           <div className="w-full text-green-500">
-            등록된 가게 정보: {JSON.stringify(newStore)}
+            등록된 물품 정보: {JSON.stringify(newProduct)}
           </div>
         )}
       </div>
