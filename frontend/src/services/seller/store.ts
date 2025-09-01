@@ -1,6 +1,8 @@
 import { sellerStoreApi } from "@services/client";
 
 import type {
+  StorePaymentInfoRequestType,
+  StorePaymentInfoResponseType,
   StoreRequestType,
   StoreResponseType,
 } from "@interface/seller/types";
@@ -36,4 +38,17 @@ export const updateStore = async (
 // DELETE: delete my store
 export const deleteStore = async (storeId: string): Promise<void> => {
   await sellerStoreApi.delete<StoreResponseType>(`/${storeId}`);
+};
+
+// POST: register store payment info
+export const registerStorePayment = async (
+  storeId: string,
+  body: StorePaymentInfoRequestType
+): Promise<StorePaymentInfoResponseType> => {
+  const { data } = await sellerStoreApi.post<StorePaymentInfoResponseType>(
+    `/${storeId}/payment-info`,
+    body
+  );
+
+  return data;
 };

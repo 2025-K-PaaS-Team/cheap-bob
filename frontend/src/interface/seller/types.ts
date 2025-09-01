@@ -18,12 +18,24 @@ export type ProductRequestType = {
 };
 
 export type ProductResponseType = {
-  product_id: "string";
-  store_id: "string";
-  product_name: "string";
+  product_id: string;
+  store_id: string;
+  product_name: string;
   initial_stock: number;
   current_stock: number;
   price: number;
   sale: number;
   version: number;
+};
+
+export type StorePaymentInfoRequestType = {
+  portone_store_id: string;
+  portone_channel_id: string;
+  portone_secret_key: string;
+};
+
+export type StorePaymentInfoResponseType = {
+  store_id: string;
+  portone_store_id: string;
+  portone_channel_id: string;
 };

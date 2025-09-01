@@ -3,11 +3,16 @@ import {
   createStore,
   deleteStore,
   getStore,
+  registerStorePayment,
   updateStore,
 } from "@services";
 import PortOne from "@portone/browser-sdk/v2";
 import { useEffect, useState } from "react";
-import type { ProductRequestType, StoreResponseType } from "@interface";
+import type {
+  StorePaymentInfoResponseType,
+  ProductRequestType,
+  StoreResponseType,
+} from "@interface";
 import type { PaymentStatusType, ItemType } from "@interface";
 
 const SellerLab = () => {
@@ -75,6 +80,8 @@ const SellerLab = () => {
   const [newStore, setNewStore] = useState<StoreResponseType | null>(null);
   const [myStore, setMyStore] = useState<StoreResponseType | null>(null);
   const [storeName, setStoreName] = useState<string>("");
+  const [paymentInfo, setPaymentInfo] =
+    useState<StorePaymentInfoResponseType | null>(null);
 
   // create seller store
   const handleCreateStore = async () => {
@@ -152,6 +159,23 @@ const SellerLab = () => {
       });
       console.log("등록 성공:", newStore);
       setNewProduct(product);
+    } catch (err: unknown) {
+      console.error("등록 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // register payemnt info
+  const handleRegisterPayment = async () => {
+    try {
+      const payment = await registerStorePayment("STR_1756711885_298d70b4", {
+        portone_store_id: "store-f7494ada-17a2-49c9-bb23-183d354afb27",
+        portone_channel_id: "channel-key-2bde6533-669f-4e5a-ae0c-5a471f10a463",
+        portone_secret_key:
+          "jzfLikccL6YFl6ho9b38zylZXKFz9jh6jrxeowL6YDdDInnplMZZELVKx3VSsNaTmmB7IVk8KQxPBHLt",
+      });
+      setPaymentInfo(payment);
     } catch (err: unknown) {
       console.error("등록 실패:", err);
       const msg = err instanceof Error ? err.message : "실패했슈...";
@@ -257,6 +281,7 @@ const SellerLab = () => {
             </button>
           </>
         )}
+
         {/* delete my store */}
         <button
           className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
@@ -267,6 +292,19 @@ const SellerLab = () => {
         {myStore && (
           <div className="w-full text-green-500">
             내 가게 정보: {JSON.stringify(myStore)}
+          </div>
+        )}
+
+        {/* register payemnt info */}
+        <button
+          className={`bg-green-500 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleRegisterPayment()}
+        >
+          결제 정보 등록 (POST: seller/stores)
+        </button>
+        {myStore && (
+          <div className="w-full text-green-500">
+            결제 정보: {JSON.stringify(myStore)}
           </div>
         )}
       </div>
