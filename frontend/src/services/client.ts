@@ -1,20 +1,31 @@
-import axios from "axios";
+import axios, { type AxiosInstance } from "axios";
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: false,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+const BASE = `${import.meta.env.VITE_API_BASE_URL}/api/v1`;
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
-  if (token) {
-    config.headers = config.headers ?? {};
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+const attachInterceptors = (instance: AxiosInstance) => {
+  instance.interceptors.request.use((config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+  return instance;
+};
 
-export default api;
+export const api = attachInterceptors(
+  axios.create({
+    baseURL: BASE,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const sellerStoreApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/stores`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);

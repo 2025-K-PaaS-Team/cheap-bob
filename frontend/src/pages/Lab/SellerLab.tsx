@@ -1,6 +1,7 @@
-import { createStore } from "@services";
+import { createStore, getStore } from "@services";
 import PortOne from "@portone/browser-sdk/v2";
 import { useState } from "react";
+import type { StoreResponseType } from "@interface";
 
 const SellerLab = () => {
   type PaymentStatus = {
@@ -78,13 +79,33 @@ const SellerLab = () => {
     }
   };
 
-  // create store
+  const [errMsg, setErrMsg] = useState<string | null>(null);
+  const [newStore, setNewStore] = useState<StoreResponseType | null>(null);
+  const [myStore, setMyStore] = useState<StoreResponseType | null>(null);
+
+  // create seller store
   const handleCreateStore = async () => {
     try {
-      const newStore = await createStore({ store_name: "test store name" });
+      const store = await createStore({ store_name: "test store name" });
       console.log("등록 성공:", newStore);
-    } catch (err) {
+      setNewStore(store);
+    } catch (err: unknown) {
       console.error("등록 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // get seller store
+  const handleGetStore = async () => {
+    try {
+      const store = await getStore();
+      setMyStore(store);
+      console.log("get 성공", myStore);
+    } catch (err) {
+      console.error("get 실패", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
     }
   };
 
@@ -118,12 +139,29 @@ const SellerLab = () => {
 
       {/* 가게 등록 테스트 */}
       <h2>가게 등록 테스트</h2>
+      {errMsg && <div className="text-red-600">{errMsg}</div>}
       <button
-        className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+        className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
         onClick={() => handleCreateStore()}
       >
         가게 등록하기 (POST: seller/stores)
       </button>
+      {newStore && (
+        <div className="w-full text-green-500">
+          등록된 가게 정보: {JSON.stringify(newStore)}
+        </div>
+      )}
+      <button
+        className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
+        onClick={() => handleGetStore()}
+      >
+        가게 정보 가져오기 (GET: seller/stores)
+      </button>
+      {myStore && (
+        <div className="w-full text-green-500">
+          내 가게 정보: {JSON.stringify(myStore)}
+        </div>
+      )}
     </div>
   );
 };
