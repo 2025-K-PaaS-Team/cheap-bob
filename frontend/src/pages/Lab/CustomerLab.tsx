@@ -20,10 +20,11 @@ import {
   confrimPayment,
   initPayment,
 } from "@services/customer/payment";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 
 const CustomerLab = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [stores, setStores] = useState(null);
   const [store, setStore] = useState(null);
@@ -155,19 +156,25 @@ const CustomerLab = () => {
   };
 
   /* err message */
-  useEffect(() => {
-    window.alert(errMsg);
-  }, [errMsg]);
+  // useEffect(() => {
+  //   window.alert(errMsg);
+  // }, [errMsg]);
 
   return (
     <div className="min-h-screen m-5 gap-y-2 flex flex-col justify-center items-center">
-      {/* <button
-        className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
-        onClick={() => navigate("map")}
+      <button
+        onClick={() => navigate("/c/lab-map")}
+        className={`bg-violet-100 p-3 rounded-xl text-center cursor-pointer`}
       >
-        NAVER MAP API
-      </button> */}
-      {/* <Outlet /> */}
+        네이버 맵 api 테스트 하러 가기
+      </button>
+
+      <button
+        onClick={() => navigate("/c/lab-portone")}
+        className={`bg-amber-100 p-3 rounded-xl text-center cursor-pointer`}
+      >
+        포트원 결제 테스트 하러 가기
+      </button>
 
       {/* 가게 검색 테스트 */}
       <div className="flex flex-col space-y-2 p-2 w-full p-2">

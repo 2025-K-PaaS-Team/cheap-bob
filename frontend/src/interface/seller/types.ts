@@ -6,16 +6,19 @@ export type StoreBase = {
 };
 
 export type ProductBase = {
-  product_id: string;
-  store_id: string;
   product_name: string;
-  initial_stock: number;
-  current_stock: number;
   price: number;
   sale: number;
 };
 
-export type StoreProduct = Omit<ProductBase, "store_id">;
+export type ProductStockBase = ProductBase & {
+  product_id: string;
+  store_id: string;
+  initial_stock: number;
+  current_stock: number;
+};
+
+export type StoreProduct = Omit<ProductStockBase, "store_id">;
 
 export type StoreRequestType = {
   store_name: string;
@@ -32,11 +35,11 @@ export type StoreWithProductResponseType = StoreBase & {
 };
 
 export type ProductRequestType = Omit<
-  ProductBase,
+  ProductStockBase,
   "product_id" | "current_stock"
 >;
 
-export type ProductResponseType = ProductBase & {
+export type ProductResponseType = ProductStockBase & {
   version: number;
 };
 
@@ -55,4 +58,8 @@ export type StorePaymentStatusType = {
 
 export type StorePaymentInfoResponseType = PaymentBase & {
   store_id: string;
+};
+
+export type UpdateProductStockRequestType = {
+  stock: number;
 };
