@@ -1,6 +1,3 @@
-// import { Outlet } from "react-router";
-// import { useNavigate } from "react-router";
-
 import type { PaymentConfirmType, PaymentResponseType } from "@interface";
 import type {
   OrderDeleteResponseType,
@@ -20,7 +17,7 @@ import {
   confrimPayment,
   initPayment,
 } from "@services/customer/payment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 const CustomerLab = () => {
@@ -156,9 +153,9 @@ const CustomerLab = () => {
   };
 
   /* err message */
-  // useEffect(() => {
-  //   window.alert(errMsg);
-  // }, [errMsg]);
+  useEffect(() => {
+    console.error(errMsg);
+  }, [errMsg]);
 
   return (
     <div className="min-h-screen m-5 gap-y-2 flex flex-col justify-center items-center">

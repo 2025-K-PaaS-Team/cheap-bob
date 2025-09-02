@@ -1,11 +1,14 @@
 import {
   createProduct,
   createStore,
+  deleteProduct,
   deleteStore,
   getStore,
   getStorePaymentStatus,
   getStoreProduct,
   registerStorePayment,
+  updateProductPrice,
+  updateProductStock,
   updateStore,
 } from "@services";
 import { useEffect, useState } from "react";
@@ -31,7 +34,7 @@ const SellerLab = () => {
 
   /* err message */
   useEffect(() => {
-    window.alert(errMsg);
+    console.error(errMsg);
   }, [errMsg]);
 
   // create seller store
@@ -140,6 +143,57 @@ const SellerLab = () => {
       setNewProduct(product);
     } catch (err: unknown) {
       console.error("등록 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // update product price
+  const handleUpdateProductPrice = async () => {
+    if (!myProduct) return;
+    try {
+      const product = await updateProductPrice(
+        myProduct.products[0].product_id,
+        {
+          product_name: myProduct.products[0].product_id,
+          price: 9999,
+          sale: 50,
+        }
+      );
+      console.log("가격 업데이트 성공:", newStore);
+      setNewProduct(product);
+    } catch (err: unknown) {
+      console.error("가격 업데이트 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // delete product
+  const handleDeleteProduct = async () => {
+    if (!myProduct) return;
+    try {
+      await deleteProduct(myProduct.products[0].product_id);
+      console.log("상품 삭제 성공:", newStore);
+    } catch (err: unknown) {
+      console.error("상품 삭제 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // update product stock
+  const handleUpdateProductStock = async () => {
+    if (!myProduct) return;
+    try {
+      const product = await updateProductStock(
+        myProduct.products[0].product_id,
+        { stock: 10 }
+      );
+      console.log("상품 스톡 업데이트 성공:", product);
+      setMyProduct(myProduct);
+    } catch (err: unknown) {
+      console.error("상품 스톡 업데이트 실패:", err);
       const msg = err instanceof Error ? err.message : "실패했슈...";
       setErrMsg(msg);
     }
@@ -297,7 +351,7 @@ const SellerLab = () => {
         {/* update product price */}
         <button
           className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
-          onClick={() => handleCreateProduct()}
+          onClick={() => handleUpdateProductPrice()}
         >
           물품 가격 변경하기 (PUT: seller/products)
         </button>
@@ -310,7 +364,7 @@ const SellerLab = () => {
         {/* create product */}
         <button
           className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
-          onClick={() => handleCreateProduct()}
+          onClick={() => handleDeleteProduct()}
         >
           물품 삭제하기 (DELETE: seller/products)
         </button>
@@ -323,7 +377,7 @@ const SellerLab = () => {
         {/* update product stock */}
         <button
           className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
-          onClick={() => handleCreateProduct()}
+          onClick={() => handleUpdateProductStock()}
         >
           물품 수량 변경 (PATCH: seller/products)
         </button>
