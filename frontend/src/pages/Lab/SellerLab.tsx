@@ -1,88 +1,56 @@
-import { createStore, deleteStore, getStore, updateStore } from "@services";
-import PortOne from "@portone/browser-sdk/v2";
+import {
+  createProduct,
+  createStore,
+  deleteProduct,
+  deleteStore,
+  getStore,
+  getStorePaymentStatus,
+  getStoreProduct,
+  registerStorePayment,
+  updateProductPrice,
+  updateProductStock,
+  updateStore,
+} from "@services";
 import { useEffect, useState } from "react";
-import type { StoreResponseType } from "@interface";
+import type {
+  StorePaymentInfoResponseType,
+  ProductRequestType,
+  StoreResponseType,
+  StoreWithProductResponseType,
+  StorePaymentStatusType,
+  GetStoreOrderType,
+  UpdateOrderAcceptType,
+  CancelOrderResponseType,
+} from "@interface";
+import {
+  cancelOrder,
+  getStoreOrder,
+  getStorePendingOrder,
+  updateOrderAccept,
+} from "@services/seller/order";
 
 const SellerLab = () => {
-  type PaymentStatus = {
-    status: "IDLE" | "PENDING" | "SUCCESS" | "FAILED";
-    message?: string;
-    code?: string;
-  };
-
-  type item = {
-    id: number;
-    name: string;
-    price: number;
-    currency: "KRW";
-    currencyLabel: "원";
-    img: string;
-  };
-
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({
-    status: "IDLE",
-  });
-
-  // build 에러 방지용 임시 콘솔
-  console.log(paymentStatus);
-
-  // const [item, setItem] = useState(null);
-  // dummy item
-  const item: item = {
-    id: 1219,
-    name: "행복한하루",
-    price: 1000,
-    currency: "KRW",
-    currencyLabel: "원",
-    img: "https://velog.velcdn.com/images/gimgyuwon/profile/e18f35d4-46dd-4ea7-859a-53bfaaad629b/image.png",
-  };
-
-  const randomId = () => {
-    return [...crypto.getRandomValues(new Uint32Array(2))]
-      .map((word) => word.toString(16).padStart(8, "0"))
-      .join("");
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setPaymentStatus({ status: "PENDING" });
-    const paymentId = randomId();
-    const payment = await PortOne.requestPayment({
-      storeId: "store-368b20a0-d0e0-4770-bf3e-0b51eaa97466",
-      channelKey: "channel-key-9d9848fb-cd40-4dba-a157-33089c0fb971",
-      paymentId,
-      orderName: item.name,
-      totalAmount: item.price,
-      currency: item.currency,
-      payMethod: "CARD",
-      customer: {
-        fullName: "김규원",
-        email: "gimgyuwon2@gmail.com",
-        phoneNumber: "01086910510",
-      },
-      customData: {
-        item: item.id,
-      },
-    });
-
-    if (!payment) {
-      setPaymentStatus({ status: "FAILED" });
-      return;
-    }
-
-    // 실패 케이스
-    if (payment.code !== undefined) {
-      setPaymentStatus({
-        status: "FAILED",
-        message: payment?.message,
-      });
-    }
-  };
-
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [newStore, setNewStore] = useState<StoreResponseType | null>(null);
   const [myStore, setMyStore] = useState<StoreResponseType | null>(null);
   const [storeName, setStoreName] = useState<string>("");
+  const [myProduct, setMyProduct] =
+    useState<StoreWithProductResponseType | null>(null);
+  const [StorePaymentStatus, setStorePaymentStatus] =
+    useState<StorePaymentStatusType | null>(null);
+  const [paymentInfo, setPaymentInfo] =
+    useState<StorePaymentInfoResponseType | null>(null);
+  const [order, setOrder] = useState<GetStoreOrderType | null>(null);
+  const [pendingOrder, setPendingOrder] = useState<GetStoreOrderType | null>(
+    null
+  );
+  const [accept, setAccept] = useState<UpdateOrderAcceptType | null>(null);
+  const [cancel, setCancel] = useState<CancelOrderResponseType | null>(null);
+
+  /* err message */
+  useEffect(() => {
+    console.error(errMsg);
+  }, [errMsg]);
 
   // create seller store
   const handleCreateStore = async () => {
@@ -128,6 +96,7 @@ const SellerLab = () => {
     }
   };
 
+  // delete seller store
   const hadnleDeleteStore = async () => {
     if (!myStore) return;
     const ok = window.confirm("정말 이 가게를 삭제하실 건가요?");
@@ -144,6 +113,177 @@ const SellerLab = () => {
     }
   };
 
+  // get store product
+  const handleGetStoreProduct = async () => {
+    if (!myStore) return;
+    try {
+      const myProduct = await getStoreProduct(myStore.store_id);
+      console.log("get store product 성공", myProduct);
+      setMyProduct(myProduct);
+    } catch (err: unknown) {
+      console.error("get store produc 실패", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // get store payment status info
+  const handleGetStorePaymentStatus = async () => {
+    if (!myStore) return;
+    try {
+      const storePaymentStatus = await getStorePaymentStatus(myStore.store_id);
+      console.log("get store payment status 성공", storePaymentStatus);
+      setStorePaymentStatus(storePaymentStatus);
+    } catch (err: unknown) {
+      console.error("get store produc 실패", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  const [newProduct, setNewProduct] = useState<ProductRequestType | null>(null);
+
+  // create seller product
+  const handleCreateProduct = async () => {
+    if (!myStore) return;
+    try {
+      const product = await createProduct({
+        store_id: myStore.store_id,
+        product_name: "행복조각",
+        initial_stock: 10,
+        price: 1004,
+        sale: 50,
+      });
+      console.log("등록 성공:", newStore);
+      setNewProduct(product);
+    } catch (err: unknown) {
+      console.error("등록 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // update product price
+  const handleUpdateProductPrice = async () => {
+    if (!myProduct) return;
+    try {
+      const product = await updateProductPrice(
+        myProduct.products[0].product_id,
+        {
+          product_name: myProduct.products[0].product_id,
+          price: 9999,
+          sale: 50,
+        }
+      );
+      console.log("가격 업데이트 성공:", newStore);
+      setNewProduct(product);
+    } catch (err: unknown) {
+      console.error("가격 업데이트 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // delete product
+  const handleDeleteProduct = async () => {
+    if (!myProduct) return;
+    try {
+      await deleteProduct(myProduct.products[0].product_id);
+      console.log("상품 삭제 성공:", newStore);
+    } catch (err: unknown) {
+      console.error("상품 삭제 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // update product stock
+  const handleUpdateProductStock = async () => {
+    if (!myProduct) return;
+    try {
+      const product = await updateProductStock(
+        myProduct.products[0].product_id,
+        { stock: 10 }
+      );
+      console.log("상품 스톡 업데이트 성공:", product);
+      setMyProduct(myProduct);
+    } catch (err: unknown) {
+      console.error("상품 스톡 업데이트 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // register payemnt info
+  const handleRegisterPayment = async () => {
+    if (!myStore) return;
+    try {
+      const payment = await registerStorePayment(myStore.store_id, {
+        portone_store_id: "store-f7494ada-17a2-49c9-bb23-183d354afb27",
+        portone_channel_id: "channel-key-2bde6533-669f-4e5a-ae0c-5a471f10a463",
+        portone_secret_key:
+          "jzfLikccL6YFl6ho9b38zylZXKFz9jh6jrxeowL6YDdDInnplMZZELVKx3VSsNaTmmB7IVk8KQxPBHLt",
+      });
+      setPaymentInfo(payment);
+    } catch (err: unknown) {
+      console.error("등록 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // get store order
+  const handleGetStoreOrder = async () => {
+    if (!myStore) return;
+    try {
+      const order = await getStoreOrder(myStore?.store_id);
+      setOrder(order);
+    } catch (err: unknown) {
+      console.error("get 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // get store pending order
+  const handleGetStorePendingOrder = async () => {
+    if (!myStore) return;
+    try {
+      const pendingOrder = await getStorePendingOrder(myStore?.store_id);
+      setPendingOrder(pendingOrder);
+    } catch (err: unknown) {
+      console.error("get 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // update order accept
+  const hadnleUpdateOrderAccept = async () => {
+    try {
+      const accept = await updateOrderAccept("PAY_23caf6f1_1756795736");
+      setAccept(accept);
+    } catch (err: unknown) {
+      console.error("patch 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // cancel order
+  const hadnleCancelOrder = async () => {
+    try {
+      const cancel = await cancelOrder("PAY_23caf6f1_1756795736", {
+        reason: "판매자 요청",
+      });
+      setCancel(cancel);
+    } catch (err: unknown) {
+      console.error("post 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
   // my store 바뀔 때 store name도 업데이트
   useEffect(() => {
     if (myStore) setStoreName(myStore.store_name);
@@ -151,104 +291,239 @@ const SellerLab = () => {
 
   return (
     <div className="min-h-screen m-5 gap-y-2 flex flex-col justify-center items-center">
-      {/* 결제 테스트 */}
-      <h2>결제 테스트</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="rounded-xl w-full bg-yellow-200 p-3">
-          {!item ? (
-            <div>결제 정보를 불러오는 중입니다.</div>
-          ) : (
-            <>
-              {" "}
-              <div className="font-bold">{item.name}</div>
-              <img src={item.img} alt="" />
-              <div>
-                {item.price}
-                {item.currencyLabel}
-              </div>
-              <div className="flex flex-row gap-x-5">
-                <button type="submit" className="p-3 bg-orange-300 rounded-xl">
-                  결제
-                </button>
-                <button className="p-3 bg-gray-300 rounded-xl">새로고침</button>
-              </div>
-            </>
-          )}
-        </div>
-      </form>
-
       {/* 가게 등록 테스트 */}
-      <h2>가게 등록 테스트</h2>
+      <div className="flex flex-col space-y-2 p-2 w-full p-2">
+        <h2>가게 등록 테스트</h2>
 
-      {/* err message */}
-      {errMsg && <div className="text-red-600">{errMsg}</div>}
-
-      {/* create store */}
-      <button
-        className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
-        onClick={() => handleCreateStore()}
-      >
-        가게 등록하기 (POST: seller/stores)
-      </button>
-      {newStore && (
-        <div className="w-full text-green-500">
-          등록된 가게 정보: {JSON.stringify(newStore)}
-        </div>
-      )}
-
-      {/* get my store */}
-      <button
-        className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
-        onClick={() => handleGetStore()}
-      >
-        가게 정보 가져오기 (GET: seller/stores)
-      </button>
-      {myStore && (
-        <div className="w-full text-green-500">
-          내 가게 정보: {JSON.stringify(myStore)}
-        </div>
-      )}
-
-      {/* update my store */}
-      <button
-        className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
-        onClick={() => hadnleUpdateStore()}
-      >
-        가게 정보 업데이트 (PUT: seller/stores)
-      </button>
-      {myStore && (
-        <>
-          <div className="w-full text-green-500 text-center">
-            업데이트 할 가게 이름을 입력하소
+        {/* create store */}
+        <button
+          className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleCreateStore()}
+        >
+          가게 등록하기 (POST: seller/stores)
+        </button>
+        {newStore && (
+          <div className="w-full text-green-500">
+            등록된 가게 정보: {JSON.stringify(newStore)}
           </div>
-          <input
-            type="text"
-            className="border-2 border-green-500 p-2"
-            placeholder="업데이트 할 가게 이름을 입력하쇼"
-            value={storeName}
-            onChange={(e) => setStoreName(e.target.value)}
-          />
-          <button
-            onClick={() => hadnleUpdateStore()}
-            className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
-          >
-            저장하수
-          </button>
-        </>
-      )}
+        )}
+        {/* get my store */}
+        <button
+          className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetStore()}
+        >
+          가게 정보 가져오기 (GET: seller/stores)
+        </button>
+        {myStore && (
+          <div className="w-full text-green-500">
+            내 가게 정보: {JSON.stringify(myStore)}
+          </div>
+        )}
+        {/* update my store */}
+        <button
+          className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => hadnleUpdateStore()}
+        >
+          가게 정보 업데이트 (PUT: seller/stores)
+        </button>
+        {myStore && (
+          <>
+            <div className="w-full text-green-500 text-center">
+              업데이트 할 가게 이름을 입력하소
+            </div>
+            <input
+              type="text"
+              className="border-2 border-green-500 p-2"
+              placeholder="업데이트 할 가게 이름을 입력하쇼"
+              value={storeName}
+              onChange={(e) => setStoreName(e.target.value)}
+            />
+            <button
+              onClick={() => hadnleUpdateStore()}
+              className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+            >
+              저장하수
+            </button>
+          </>
+        )}
 
-      {/* delete my store */}
-      <button
-        className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
-        onClick={() => hadnleDeleteStore()}
-      >
-        가게 삭제하기 (DELETE: seller/stores)
-      </button>
-      {myStore && (
-        <div className="w-full text-green-500">
-          내 가게 정보: {JSON.stringify(myStore)}
-        </div>
-      )}
+        {/* delete my store */}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => hadnleDeleteStore()}
+        >
+          가게 삭제하기 (DELETE: seller/stores)
+        </button>
+        {myStore && (
+          <div className="w-full text-green-500">
+            내 가게 정보: {JSON.stringify(myStore)}
+          </div>
+        )}
+
+        {/* get store product */}
+        <button
+          className={`bg-green-500 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetStoreProduct()}
+        >
+          가게 물품 가져오기 (GET: seller/stores)
+        </button>
+        {myProduct && (
+          <div className="w-full text-green-500">
+            내 가게 물품 정보: {JSON.stringify(myProduct)}
+          </div>
+        )}
+
+        {/* get store payment status */}
+        <button
+          className={`bg-green-500 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetStorePaymentStatus()}
+        >
+          가게 결제 정보 상태 확인 (GET: seller/stores)
+        </button>
+        {StorePaymentStatus && (
+          <div className="w-full text-green-500">
+            결제 정보 등록 상태: {JSON.stringify(StorePaymentStatus)}
+          </div>
+        )}
+
+        {/* register payemnt info */}
+        <button
+          className={`bg-green-700 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleRegisterPayment()}
+        >
+          결제 정보 등록 (POST: seller/stores)
+        </button>
+        {paymentInfo && (
+          <div className="w-full text-green-500">
+            결제 정보: {JSON.stringify(paymentInfo)}
+          </div>
+        )}
+      </div>
+
+      {/* 물품 등록 테스트 */}
+      <div className="flex flex-col space-y-2 p-2 w-full p-2">
+        <h2>물품 테스트</h2>
+        {/* create product */}
+        <button
+          className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleCreateProduct()}
+        >
+          물품 등록하기 (POST: seller/products)
+        </button>
+        {newStore && (
+          <div className="w-full text-green-500">
+            등록된 물품 정보: {JSON.stringify(newProduct)}
+          </div>
+        )}
+
+        {/* update product price */}
+        <button
+          className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleUpdateProductPrice()}
+        >
+          물품 가격 변경하기 (PUT: seller/products)
+        </button>
+        {newStore && (
+          <div className="w-full text-green-500">
+            수정된 물품 정보: {JSON.stringify(newProduct)}
+          </div>
+        )}
+
+        {/* create product */}
+        <button
+          className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleDeleteProduct()}
+        >
+          물품 삭제하기 (DELETE: seller/products)
+        </button>
+        {newStore && (
+          <div className="w-full text-green-500">
+            삭제된 물품 정보: {JSON.stringify(newProduct)}
+          </div>
+        )}
+
+        {/* update product stock */}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleUpdateProductStock()}
+        >
+          물품 수량 변경 (PATCH: seller/products)
+        </button>
+        {newStore && (
+          <div className="w-full text-green-500">
+            변경된 물품 정보: {JSON.stringify(newProduct)}
+          </div>
+        )}
+
+        {/* update product stock */}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleUpdateProductStock()}
+        >
+          물품 수량 변경 (PATCH: seller/products)
+        </button>
+        {newStore && (
+          <div className="w-full text-green-500">
+            변경된 물품 정보: {JSON.stringify(newProduct)}
+          </div>
+        )}
+      </div>
+
+      {/* 주문 테스트 */}
+      <div className="flex flex-col space-y-2 p-2 w-full p-2">
+        <h2>주문 테스트</h2>
+        {/* get store order */}
+        <button
+          className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetStoreOrder()}
+        >
+          주문 가져오기 (GET: seller/orders)
+        </button>
+        {order && (
+          <div className="w-full text-green-500">
+            등록된 물품 정보: {JSON.stringify(order)}
+          </div>
+        )}
+
+        {/* get store pending order */}
+        <button
+          className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetStorePendingOrder()}
+        >
+          대기 주문 가져오기 (GET: seller/orders)
+        </button>
+        {pendingOrder && (
+          <div className="w-full text-green-500">
+            대기중 물품 정보: {JSON.stringify(pendingOrder)}
+          </div>
+        )}
+
+        {/* update order accept */}
+        <button
+          className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => hadnleUpdateOrderAccept()}
+        >
+          주문 수락하기 (PATCH: seller/orders)
+        </button>
+        {accept && (
+          <div className="w-full text-green-500">
+            수락된 물품 정보: {JSON.stringify(accept)}
+          </div>
+        )}
+
+        {/* update order accept */}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => hadnleCancelOrder()}
+        >
+          주문 취소하기 (POST: seller/orders)
+        </button>
+        {cancel && (
+          <div className="w-full text-green-500">
+            취소된 물품 정보: {JSON.stringify(cancel)}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

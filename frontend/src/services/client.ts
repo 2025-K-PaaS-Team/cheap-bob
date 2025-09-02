@@ -29,3 +29,51 @@ export const sellerStoreApi = attachInterceptors(
     headers: { "Content-Type": "application/json" },
   })
 );
+
+export const sellerProductApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/products`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const sellerOrderApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/orders`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const paymentApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/customer/payment`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const customerSearchApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/customer/search/stores`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const customerPaymentApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/customer/payment`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const customerOrderApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/customer/orders`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);

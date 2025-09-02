@@ -7,3 +7,4 @@ export { default as LoginCallback } from "./LoginCallback";
 export { default as Map } from "./Lab/Map";
 export { default as CustomerLab } from "./Lab/CustomerLab";
 export { default as SellerLab } from "./Lab/SellerLab";
+export { default as PortOneLab } from "./Lab/PortoneLab";
