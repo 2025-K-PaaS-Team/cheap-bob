@@ -2,19 +2,39 @@
 // import { useNavigate } from "react-router";
 
 import type { PaymentConfirmType, PaymentResponseType } from "@interface";
-import { getSpecificStore, getStores } from "@services";
+import type {
+  OrderDeleteResponseType,
+  OrderDetailResponseType,
+  OrdersResponseType,
+} from "@interface/customer/types";
+import {
+  deleteOrder,
+  getCurrentOrders,
+  getOrderDetail,
+  getOrders,
+  getSpecificStore,
+  getStores,
+} from "@services";
 import {
   cancelPayment,
   confrimPayment,
   initPayment,
 } from "@services/customer/payment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const CustomerLab = () => {
   // const navigate = useNavigate();
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [stores, setStores] = useState(null);
   const [store, setStore] = useState(null);
+  const [orders, setOrders] = useState<OrdersResponseType | null>(null);
+  const [currentOrders, setCurrentOrders] = useState<OrdersResponseType | null>(
+    null
+  );
+  const [orderDetail, setOrderDetail] =
+    useState<OrderDetailResponseType | null>(null);
+  const [orderDelete, setOrderDelete] =
+    useState<OrderDeleteResponseType | null>(null);
 
   const handleGetStores = async () => {
     try {
@@ -46,7 +66,7 @@ const CustomerLab = () => {
   const handleInitPayment = async () => {
     try {
       const payment = await initPayment({
-        product_id: "PRD_1756712045_97763a9d",
+        product_id: "PRD_1756784201_a87c76a4",
         quantity: 1,
       });
       console.log("초기화 성공", payment);
@@ -84,6 +104,61 @@ const CustomerLab = () => {
     }
   };
 
+  const handleGetOrders = async () => {
+    try {
+      const orders = await getOrders();
+      console.log("주문 목록 가져오기 성공", orders);
+      setOrders(orders);
+    } catch (err: unknown) {
+      console.error("get stores fail");
+      const msg = err instanceof Error ? err.message : "실패해소";
+      setErrMsg(msg);
+    }
+  };
+
+  const handleGetCurrentOrders = async () => {
+    try {
+      const currentOrder = await getCurrentOrders();
+      console.log("현재 주문 목록 가져오기 성공", orders);
+      setCurrentOrders(currentOrder);
+    } catch (err: unknown) {
+      console.error("get current stores fail");
+      const msg = err instanceof Error ? err.message : "실패해소";
+      setErrMsg(msg);
+    }
+  };
+
+  const handleGetOrderDetail = async () => {
+    if (!orders) return;
+    try {
+      const orderDetail = await getOrderDetail(orders.orders[0]?.payment_id);
+      console.log("주문 상세 가져오기 성공", orderDetail);
+      setOrderDetail(orderDetail);
+    } catch (err: unknown) {
+      console.error("get order detail failed", err);
+      const msg = err instanceof Error ? err.message : "실패해소";
+      setErrMsg(msg);
+    }
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!orders) return;
+    try {
+      const orderDelete = await deleteOrder(orders.orders[0]?.payment_id);
+      console.log("결제 취소 성공", orderDelete);
+      setOrderDelete(orderDelete);
+    } catch (err: unknown) {
+      console.error("get order detail failed", err);
+      const msg = err instanceof Error ? err.message : "실패해소";
+      setErrMsg(msg);
+    }
+  };
+
+  /* err message */
+  useEffect(() => {
+    window.alert(errMsg);
+  }, [errMsg]);
+
   return (
     <div className="min-h-screen m-5 gap-y-2 flex flex-col justify-center items-center">
       {/* <button
@@ -93,9 +168,6 @@ const CustomerLab = () => {
         NAVER MAP API
       </button> */}
       {/* <Outlet /> */}
-
-      {/* err message */}
-      {errMsg && <div className="text-red-600">{errMsg}</div>}
 
       {/* 가게 검색 테스트 */}
       <div className="flex flex-col space-y-2 p-2 w-full p-2">
@@ -166,6 +238,62 @@ const CustomerLab = () => {
         {payment && (
           <div className="w-full text-green-500">
             결제 취소: {JSON.stringify(cancel)}
+          </div>
+        )}
+      </div>
+
+      {/* 주문 테스트 */}
+      <div className="flex flex-col space-y-2 p-2 w-full p-2">
+        <h2>주문 테스트</h2>
+        {/* get orders */}
+        <button
+          className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetOrders()}
+        >
+          주문 목록 가져오기 (GET: /orders)
+        </button>
+        {orders && (
+          <div className="w-full text-green-500">
+            모든 주문 정보: {JSON.stringify(orders)}
+          </div>
+        )}
+
+        {/* get current orders */}
+        <button
+          className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetCurrentOrders()}
+        >
+          현재 주문 가져오기 (GET: /orders/current)
+        </button>
+        {currentOrders && (
+          <div className="w-full text-green-500">
+            현재 주문 정보: {JSON.stringify(currentOrders)}
+          </div>
+        )}
+
+        {/* get order detail */}
+        <button
+          className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetOrderDetail()}
+        >
+          주문 상세 가져오기 (GET: /orders/payment_id)
+        </button>
+        {orderDetail && (
+          <div className="w-full text-green-500">
+            현재 주문 상세: {JSON.stringify(orderDetail)}
+          </div>
+        )}
+
+        {/* cancel detail */}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleDeleteOrder()}
+        >
+          주문 취소하기 (DELETE: /orders/payment_id)
+        </button>
+        {orderDelete && (
+          <div className="w-full text-green-500">
+            현재 주문 상세: {JSON.stringify(orderDelete)}
           </div>
         )}
       </div>

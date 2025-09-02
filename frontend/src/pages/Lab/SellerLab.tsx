@@ -83,6 +83,11 @@ const SellerLab = () => {
   const [paymentInfo, setPaymentInfo] =
     useState<StorePaymentInfoResponseType | null>(null);
 
+  /* err message */
+  useEffect(() => {
+    window.alert(errMsg);
+  }, [errMsg]);
+
   // create seller store
   const handleCreateStore = async () => {
     try {
@@ -169,7 +174,7 @@ const SellerLab = () => {
   // register payemnt info
   const handleRegisterPayment = async () => {
     try {
-      const payment = await registerStorePayment("STR_1756711885_298d70b4", {
+      const payment = await registerStorePayment("STR_1756784183_5a2b6928", {
         portone_store_id: "store-f7494ada-17a2-49c9-bb23-183d354afb27",
         portone_channel_id: "channel-key-2bde6533-669f-4e5a-ae0c-5a471f10a463",
         portone_secret_key:
@@ -222,9 +227,6 @@ const SellerLab = () => {
           </div>
         </form>
       </div>
-
-      {/* err message */}
-      {errMsg && <div className="text-red-600">{errMsg}</div>}
 
       {/* 가게 등록 테스트 */}
       <div className="flex flex-col space-y-2 p-2 w-full p-2">
