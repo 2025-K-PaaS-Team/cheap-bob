@@ -18,13 +18,14 @@ export type PaymentRequestType = {
   quantity: number;
 };
 
-export type PaymentResponseType = {
+export type PaymentBaseType = {
   payment_id: string;
+};
+
+export type PaymentResponseType = PaymentBaseType & {
   channel_id: string;
   store_id: string;
   total_amount: number;
 };
 
-export type PaymentConfirmType = {
-  payment_id: string;
-};
+export type PaymentConfirmType = PaymentBaseType;

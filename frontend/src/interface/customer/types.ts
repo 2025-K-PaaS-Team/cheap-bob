@@ -1,3 +1,5 @@
+import type { TimeStamp } from "@interface/common/types";
+
 export type OrderDetailResponseType = {
   payment_id: string;
   product_id: string;
@@ -7,8 +9,8 @@ export type OrderDetailResponseType = {
   quantity: number;
   price: number;
   status: string;
-  created_at: string;
-  confirmed_at: string;
+  created_at: TimeStamp;
+  confirmed_at: TimeStamp;
 };
 
 export type OrdersResponseType = {

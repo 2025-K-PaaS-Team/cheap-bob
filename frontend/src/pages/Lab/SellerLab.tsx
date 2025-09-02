@@ -3,6 +3,8 @@ import {
   createStore,
   deleteStore,
   getStore,
+  getStorePaymentStatus,
+  getStoreProduct,
   registerStorePayment,
   updateStore,
 } from "@services";
@@ -12,6 +14,8 @@ import type {
   StorePaymentInfoResponseType,
   ProductRequestType,
   StoreResponseType,
+  StoreWithProductResponseType,
+  StorePaymentStatusType,
 } from "@interface";
 import type { PaymentStatusType, ItemType } from "@interface";
 
@@ -19,9 +23,6 @@ const SellerLab = () => {
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatusType>({
     status: "IDLE",
   });
-
-  // build 에러 방지용 임시 콘솔
-  console.log(paymentStatus);
 
   // const [item, setItem] = useState(null);
   // dummy item
@@ -43,6 +44,7 @@ const SellerLab = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPaymentStatus({ status: "PENDING" });
+    console.log("paymentStatus:", paymentStatus);
     const paymentId = randomId();
     const payment = await PortOne.requestPayment({
       storeId: "store-f7494ada-17a2-49c9-bb23-183d354afb27",
@@ -51,7 +53,7 @@ const SellerLab = () => {
       orderName: item.name,
       totalAmount: item.price,
       currency: item.currency,
-      payMethod: "CARD",
+      payMethod: "EASY_PAY",
       customer: {
         fullName: "김규원",
         email: "gimgyuwon2@gmail.com",
@@ -80,6 +82,10 @@ const SellerLab = () => {
   const [newStore, setNewStore] = useState<StoreResponseType | null>(null);
   const [myStore, setMyStore] = useState<StoreResponseType | null>(null);
   const [storeName, setStoreName] = useState<string>("");
+  const [myProduct, setMyProduct] =
+    useState<StoreWithProductResponseType | null>(null);
+  const [StorePaymentStatus, setStorePaymentStatus] =
+    useState<StorePaymentStatusType | null>(null);
   const [paymentInfo, setPaymentInfo] =
     useState<StorePaymentInfoResponseType | null>(null);
 
@@ -144,6 +150,34 @@ const SellerLab = () => {
       setStoreName("");
     } catch (err) {
       console.error("delete 실패", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // get store product
+  const handleGetStoreProduct = async () => {
+    if (!myStore) return;
+    try {
+      const myProduct = await getStoreProduct(myStore.store_id);
+      console.log("get store product 성공", myProduct);
+      setMyProduct(myProduct);
+    } catch (err: unknown) {
+      console.error("get store produc 실패", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // get store payment status info
+  const handleGetStorePaymentStatus = async () => {
+    if (!myStore) return;
+    try {
+      const storePaymentStatus = await getStorePaymentStatus(myStore.store_id);
+      console.log("get store payment status 성공", storePaymentStatus);
+      setStorePaymentStatus(storePaymentStatus);
+    } catch (err: unknown) {
+      console.error("get store produc 실패", err);
       const msg = err instanceof Error ? err.message : "실패했슈...";
       setErrMsg(msg);
     }
@@ -297,9 +331,35 @@ const SellerLab = () => {
           </div>
         )}
 
-        {/* register payemnt info */}
+        {/* get store product */}
         <button
           className={`bg-green-500 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetStoreProduct()}
+        >
+          가게 물품 가져오기 (GET: seller/stores)
+        </button>
+        {myProduct && (
+          <div className="w-full text-green-500">
+            내 가게 물품 정보: {JSON.stringify(myProduct)}
+          </div>
+        )}
+
+        {/* get store payment status */}
+        <button
+          className={`bg-green-500 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetStorePaymentStatus()}
+        >
+          가게 결제 정보 상태 확인 (GET: seller/stores)
+        </button>
+        {StorePaymentStatus && (
+          <div className="w-full text-green-500">
+            결제 정보 등록 상태: {JSON.stringify(StorePaymentStatus)}
+          </div>
+        )}
+
+        {/* register payemnt info */}
+        <button
+          className={`bg-green-700 p-3 rounded-xl text-center cursor-pointer`}
           onClick={() => handleRegisterPayment()}
         >
           결제 정보 등록 (POST: seller/stores)

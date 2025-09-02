@@ -3,8 +3,10 @@ import { sellerStoreApi } from "@services/client";
 import type {
   StorePaymentInfoRequestType,
   StorePaymentInfoResponseType,
+  StorePaymentStatusType,
   StoreRequestType,
   StoreResponseType,
+  StoreWithProductResponseType,
 } from "@interface/seller/types";
 
 // POST: create store
@@ -38,6 +40,28 @@ export const updateStore = async (
 // DELETE: delete my store
 export const deleteStore = async (storeId: string): Promise<void> => {
   await sellerStoreApi.delete<StoreResponseType>(`/${storeId}`);
+};
+
+// GET: get store products
+export const getStoreProduct = async (
+  storeId: string
+): Promise<StoreWithProductResponseType> => {
+  const { data } = await sellerStoreApi.get<StoreWithProductResponseType>(
+    `/${storeId}/products`
+  );
+
+  return data;
+};
+
+// GET: get payment info status
+export const getStorePaymentStatus = async (
+  storeId: string
+): Promise<StorePaymentStatusType> => {
+  const { data } = await sellerStoreApi.get<StorePaymentStatusType>(
+    `/${storeId}/payment-info/status`
+  );
+
+  return data;
 };
 
 // POST: register store payment info
