@@ -2,7 +2,11 @@ import type { ItemType, PaymentStatusType } from "@interface";
 import PortOne from "@portone/browser-sdk/v2";
 import { useState } from "react";
 
-const PortOneLab = () => {
+type PortOneLabProps = {
+  paymentId: string;
+};
+
+const PortOneLab = ({ paymentId }: PortOneLabProps) => {
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatusType>({
     status: "IDLE",
   });
@@ -18,17 +22,11 @@ const PortOneLab = () => {
     img: "https://velog.velcdn.com/images/gimgyuwon/profile/e18f35d4-46dd-4ea7-859a-53bfaaad629b/image.png",
   };
 
-  const randomId = () => {
-    return [...crypto.getRandomValues(new Uint32Array(2))]
-      .map((word) => word.toString(16).padStart(8, "0"))
-      .join("");
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPaymentStatus({ status: "PENDING" });
     console.log("paymentStatus:", paymentStatus);
-    const paymentId = randomId();
+    // const paymentId = randomId();
     const payment = await PortOne.requestPayment({
       storeId: "store-f7494ada-17a2-49c9-bb23-183d354afb27",
       channelKey: "channel-key-2bde6533-669f-4e5a-ae0c-5a471f10a463",
