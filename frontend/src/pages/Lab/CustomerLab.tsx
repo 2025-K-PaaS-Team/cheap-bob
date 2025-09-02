@@ -59,9 +59,10 @@ const CustomerLab = () => {
   };
 
   const handleConfrimPayment = async () => {
+    if (!payment) return;
     try {
       const confirm = await confrimPayment({
-        payment_id: "PAY_795137fd_1756775286",
+        payment_id: payment.payment_id,
       });
       console.log("결제 확인 성공", confirm);
       setConfirm(confirm);
@@ -73,8 +74,9 @@ const CustomerLab = () => {
   };
 
   const handleCancelPayment = async () => {
+    if (!payment) return;
     try {
-      const cancel = await cancelPayment("PAY_795137fd_1756775286");
+      const cancel = await cancelPayment(payment.payment_id);
       console.log("결제 취소 성공", cancel);
       setCancel(cancel);
     } catch (err: unknown) {
