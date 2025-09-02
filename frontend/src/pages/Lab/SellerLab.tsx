@@ -18,7 +18,16 @@ import type {
   StoreResponseType,
   StoreWithProductResponseType,
   StorePaymentStatusType,
+  GetStoreOrderType,
+  UpdateOrderAcceptType,
+  CancelOrderResponseType,
 } from "@interface";
+import {
+  cancelOrder,
+  getStoreOrder,
+  getStorePendingOrder,
+  updateOrderAccept,
+} from "@services/seller/order";
 
 const SellerLab = () => {
   const [errMsg, setErrMsg] = useState<string | null>(null);
@@ -31,6 +40,12 @@ const SellerLab = () => {
     useState<StorePaymentStatusType | null>(null);
   const [paymentInfo, setPaymentInfo] =
     useState<StorePaymentInfoResponseType | null>(null);
+  const [order, setOrder] = useState<GetStoreOrderType | null>(null);
+  const [pendingOrder, setPendingOrder] = useState<GetStoreOrderType | null>(
+    null
+  );
+  const [accept, setAccept] = useState<UpdateOrderAcceptType | null>(null);
+  const [cancel, setCancel] = useState<CancelOrderResponseType | null>(null);
 
   /* err message */
   useEffect(() => {
@@ -201,8 +216,9 @@ const SellerLab = () => {
 
   // register payemnt info
   const handleRegisterPayment = async () => {
+    if (!myStore) return;
     try {
-      const payment = await registerStorePayment("STR_1756784183_5a2b6928", {
+      const payment = await registerStorePayment(myStore.store_id, {
         portone_store_id: "store-f7494ada-17a2-49c9-bb23-183d354afb27",
         portone_channel_id: "channel-key-2bde6533-669f-4e5a-ae0c-5a471f10a463",
         portone_secret_key:
@@ -211,6 +227,58 @@ const SellerLab = () => {
       setPaymentInfo(payment);
     } catch (err: unknown) {
       console.error("등록 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // get store order
+  const handleGetStoreOrder = async () => {
+    if (!myStore) return;
+    try {
+      const order = await getStoreOrder(myStore?.store_id);
+      setOrder(order);
+    } catch (err: unknown) {
+      console.error("get 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // get store pending order
+  const handleGetStorePendingOrder = async () => {
+    if (!myStore) return;
+    try {
+      const pendingOrder = await getStorePendingOrder(myStore?.store_id);
+      setPendingOrder(pendingOrder);
+    } catch (err: unknown) {
+      console.error("get 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // update order accept
+  const hadnleUpdateOrderAccept = async () => {
+    try {
+      const accept = await updateOrderAccept("PAY_23caf6f1_1756795736");
+      setAccept(accept);
+    } catch (err: unknown) {
+      console.error("patch 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // cancel order
+  const hadnleCancelOrder = async () => {
+    try {
+      const cancel = await cancelOrder("PAY_23caf6f1_1756795736", {
+        reason: "판매자 요청",
+      });
+      setCancel(cancel);
+    } catch (err: unknown) {
+      console.error("post 실패:", err);
       const msg = err instanceof Error ? err.message : "실패했슈...";
       setErrMsg(msg);
     }
@@ -384,6 +452,75 @@ const SellerLab = () => {
         {newStore && (
           <div className="w-full text-green-500">
             변경된 물품 정보: {JSON.stringify(newProduct)}
+          </div>
+        )}
+
+        {/* update product stock */}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleUpdateProductStock()}
+        >
+          물품 수량 변경 (PATCH: seller/products)
+        </button>
+        {newStore && (
+          <div className="w-full text-green-500">
+            변경된 물품 정보: {JSON.stringify(newProduct)}
+          </div>
+        )}
+      </div>
+
+      {/* 주문 테스트 */}
+      <div className="flex flex-col space-y-2 p-2 w-full p-2">
+        <h2>주문 테스트</h2>
+        {/* get store order */}
+        <button
+          className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetStoreOrder()}
+        >
+          주문 가져오기 (GET: seller/orders)
+        </button>
+        {order && (
+          <div className="w-full text-green-500">
+            등록된 물품 정보: {JSON.stringify(order)}
+          </div>
+        )}
+
+        {/* get store pending order */}
+        <button
+          className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetStorePendingOrder()}
+        >
+          대기 주문 가져오기 (GET: seller/orders)
+        </button>
+        {pendingOrder && (
+          <div className="w-full text-green-500">
+            대기중 물품 정보: {JSON.stringify(pendingOrder)}
+          </div>
+        )}
+
+        {/* update order accept */}
+        <button
+          className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => hadnleUpdateOrderAccept()}
+        >
+          주문 수락하기 (PATCH: seller/orders)
+        </button>
+        {accept && (
+          <div className="w-full text-green-500">
+            수락된 물품 정보: {JSON.stringify(accept)}
+          </div>
+        )}
+
+        {/* update order accept */}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => hadnleCancelOrder()}
+        >
+          주문 취소하기 (POST: seller/orders)
+        </button>
+        {cancel && (
+          <div className="w-full text-green-500">
+            취소된 물품 정보: {JSON.stringify(cancel)}
           </div>
         )}
       </div>

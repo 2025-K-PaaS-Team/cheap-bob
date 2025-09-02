@@ -64,7 +64,7 @@ const CustomerLab = () => {
   const handleInitPayment = async () => {
     try {
       const payment = await initPayment({
-        product_id: "PRD_1756784201_a87c76a4",
+        product_id: "PRD_1756792608_2203af14",
         quantity: 1,
       });
       console.log("초기화 성공", payment);

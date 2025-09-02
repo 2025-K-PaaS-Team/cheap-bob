@@ -1,4 +1,4 @@
-import type { TimeStamp } from "@interface/common/types";
+import type { OrderBaseType, TimeStamp } from "@interface/common/types";
 
 export type StoreBase = {
   store_id: string;
@@ -62,4 +62,22 @@ export type StorePaymentInfoResponseType = PaymentBase & {
 
 export type UpdateProductStockRequestType = {
   stock: number;
+};
+
+export type GetStoreOrderType = {
+  orders: OrderBaseType[];
+  total: number;
+};
+
+export type UpdateOrderAcceptType = OrderBaseType;
+
+export type CancelOrderRequestType = {
+  reason: string;
+};
+
+export type CancelOrderResponseType = {
+  payment_id: string;
+  status: string;
+  message: string;
+  refunded_amount: 0;
 };

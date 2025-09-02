@@ -38,6 +38,14 @@ export const sellerProductApi = attachInterceptors(
   })
 );
 
+export const sellerOrderApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/orders`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
 export const paymentApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/payment`,

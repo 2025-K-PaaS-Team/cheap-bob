@@ -1,16 +1,8 @@
-import type { TimeStamp } from "@interface/common/types";
+import type { OrderBaseType } from "@interface/common/types";
 
-export type OrderDetailResponseType = {
-  payment_id: string;
-  product_id: string;
-  product_name: string;
+export type OrderDetailResponseType = OrderBaseType & {
   store_id: string;
   store_name: string;
-  quantity: number;
-  price: number;
-  status: string;
-  created_at: TimeStamp;
-  confirmed_at: TimeStamp;
 };
 
 export type OrdersResponseType = {
