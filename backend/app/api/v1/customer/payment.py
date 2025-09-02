@@ -195,8 +195,7 @@ async def confirm_payment(
     # PaymentService를 통해 결제 검증
     result = await PaymentService.verify_payment(
         request.payment_id,
-        secret_key=payment_info.portone_secret_key,
-        customer_email=current_user["sub"]
+        secret_key=payment_info.portone_secret_key
     )
     
     if not result["success"]:
