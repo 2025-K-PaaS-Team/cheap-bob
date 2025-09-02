@@ -6,7 +6,6 @@ import {
   StoreList,
   LoginCallback,
   CustomerLab,
-  Map,
   SellerLab,
 } from "@pages";
 import { CustomerHome, SellerHome } from "@pages/Home";
