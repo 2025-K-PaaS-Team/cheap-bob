@@ -1,9 +1,13 @@
 // import { Outlet } from "react-router";
 // import { useNavigate } from "react-router";
 
-import type { PaymentResponseType } from "@interface";
+import type { PaymentConfirmType, PaymentResponseType } from "@interface";
 import { getSpecificStore, getStores } from "@services";
-import { initPayment } from "@services/customer/payment";
+import {
+  cancelPayment,
+  confrimPayment,
+  initPayment,
+} from "@services/customer/payment";
 import { useState } from "react";
 
 const CustomerLab = () => {
@@ -36,6 +40,8 @@ const CustomerLab = () => {
   };
 
   const [payment, setPayment] = useState<PaymentResponseType | null>(null);
+  const [confirm, setConfirm] = useState<PaymentConfirmType | null>(null);
+  const [cancel, setCancel] = useState<PaymentConfirmType | null>(null);
 
   const handleInitPayment = async () => {
     try {
@@ -49,6 +55,30 @@ const CustomerLab = () => {
       console.error("등록 실패:", err);
       const msg = err instanceof Error ? err.message : "실패했슈...";
       setErrMsg(msg);
+    }
+  };
+
+  const handleConfrimPayment = async () => {
+    try {
+      const confirm = await confrimPayment({
+        payment_id: "PAY_795137fd_1756775286",
+      });
+      console.log("결제 확인 성공", confirm);
+      setConfirm(confirm);
+    } catch (err: unknown) {
+      console.error("결제 확인 실패", payment);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  const handleCancelPayment = async () => {
+    try {
+      const cancel = await cancelPayment("PAY_795137fd_1756775286");
+      console.log("결제 취소 성공", cancel);
+      setCancel(cancel);
+    } catch (err: unknown) {
+      console.error("");
     }
   };
 
@@ -108,6 +138,32 @@ const CustomerLab = () => {
         {payment && (
           <div className="w-full text-green-500">
             결제 정보: {JSON.stringify(payment)}
+          </div>
+        )}
+
+        {/* payment confirm */}
+        <button
+          className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleConfrimPayment()}
+        >
+          결제 확인 (GET: /payment/confirm)
+        </button>
+        {payment && (
+          <div className="w-full text-green-500">
+            결제 확인: {JSON.stringify(confirm)}
+          </div>
+        )}
+
+        {/* payment confirm */}
+        <button
+          className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleCancelPayment()}
+        >
+          결제 취소 (GET: /payment/cancel)
+        </button>
+        {payment && (
+          <div className="w-full text-green-500">
+            결제 취소: {JSON.stringify(cancel)}
           </div>
         )}
       </div>

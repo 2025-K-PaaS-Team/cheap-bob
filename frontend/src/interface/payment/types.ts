@@ -24,3 +24,7 @@ export type PaymentResponseType = {
   store_id: string;
   total_amount: number;
 };
+
+export type PaymentConfirmType = {
+  payment_id: string;
+};
