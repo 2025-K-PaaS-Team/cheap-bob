@@ -131,9 +131,9 @@ async def get_current_orders(
     )
 
 
-@router.get("/{order_id}", response_model=CustomerOrderDetailResponse)
+@router.get("/{payment_id}", response_model=CustomerOrderDetailResponse)
 async def get_order_detail(
-    order_id: str,
+    payment_id: str,
     current_user: CurrentCustomerDep,
     session: AsyncSessionDep
 ):
@@ -144,7 +144,7 @@ async def get_order_detail(
     # 주문 조회 (with product info)
     stmt = (
         select(OrderCurrentItem)
-        .where(OrderCurrentItem.payment_id == order_id)
+        .where(OrderCurrentItem.payment_id == payment_id)
         .options(selectinload(OrderCurrentItem.product))
     )
     result = await session.execute(stmt)
@@ -182,9 +182,9 @@ async def get_order_detail(
         confirmed_at=order.confirmed_at
     )
     
-@router.delete("/{order_id}", response_model=CustomerOrderCancelResponse)
+@router.delete("/{payment_id}", response_model=CustomerOrderCancelResponse)
 async def delete_order(
-    order_id: str,
+    payment_id: str,
     request: CustomerOrderCancelRequest,
     current_user: CurrentCustomerDep,
     order_repo: OrderRepositoryDep,
@@ -199,7 +199,7 @@ async def delete_order(
     # 주문 조회 (with product info)
     stmt = (
         select(OrderCurrentItem)
-        .where(OrderCurrentItem.payment_id == order_id)
+        .where(OrderCurrentItem.payment_id == payment_id)
         .options(selectinload(OrderCurrentItem.product))
     )
     result = await session.execute(stmt)
@@ -237,7 +237,7 @@ async def delete_order(
     
     # 포트원 환불 처리
     refund_result = await PaymentService.process_refund(
-        payment_id=order_id,
+        payment_id=payment_id,
         secret_key=payment_info.portone_secret_key,
         reason=request.reason
     )
@@ -249,7 +249,7 @@ async def delete_order(
         )
     
     # 주문 취소 처리
-    quantity = await order_repo.cancel_order(order_id)
+    quantity = await order_repo.cancel_order(payment_id)
     
     # 낙관적 락을 사용하여 재고 복구
     max_retries = settings.MAX_RETRY_LOCK
@@ -285,6 +285,6 @@ async def delete_order(
                 )
     
     return CustomerOrderCancelResponse(
-        payment_id=order_id,
+        payment_id=payment_id,
         refunded_amount=order.price
     )

@@ -163,9 +163,9 @@ async def get_pending_orders(
     )
 
 
-@router.patch("/{order_id}/accept", response_model=OrderItemResponse)
+@router.patch("/{payment_id}/accept", response_model=OrderItemResponse)
 async def update_order_accept(
-    order_id: str,
+    payment_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
     order_repo: OrderRepositoryDep,
@@ -177,7 +177,7 @@ async def update_order_accept(
     
     stmt = (
         select(OrderCurrentItem)
-        .where(OrderCurrentItem.payment_id == order_id)
+        .where(OrderCurrentItem.payment_id == payment_id)
         .options(selectinload(OrderCurrentItem.product))
     )
     result = await session.execute(stmt)
@@ -204,7 +204,7 @@ async def update_order_accept(
         )
     
     updated_order = await order_repo.update(
-        order_id,
+        payment_id,
         status=OrderStatus.complete,
         confirmed_at=datetime.now()
     )
@@ -222,9 +222,9 @@ async def update_order_accept(
     )
 
 
-@router.post("/{order_id}/cancel", response_model=OrderCancelResponse)
+@router.post("/{payment_id}/cancel", response_model=OrderCancelResponse)
 async def cancel_order(
-    order_id: str,
+    payment_id: str,
     request: OrderCancelRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
@@ -239,7 +239,7 @@ async def cancel_order(
     
     stmt = (
         select(OrderCurrentItem)
-        .where(OrderCurrentItem.payment_id == order_id)
+        .where(OrderCurrentItem.payment_id == payment_id)
         .options(selectinload(OrderCurrentItem.product))
     )
     result = await session.execute(stmt)
@@ -275,7 +275,7 @@ async def cancel_order(
     
     # 포트원 환불 처리
     refund_result = await PaymentService.process_refund(
-        payment_id=order_id,
+        payment_id=payment_id,
         secret_key=payment_info.portone_secret_key,
         reason=request.reason
     )
@@ -286,7 +286,7 @@ async def cancel_order(
             detail=refund_result.get("error", "환불 처리 중 오류가 발생했습니다")
         )
     
-    quantity = await order_repo.cancel_order(order_id)
+    quantity = await order_repo.cancel_order(payment_id)
     
     # 재고 복구
     max_retries = settings.MAX_RETRY_LOCK
@@ -318,7 +318,7 @@ async def cancel_order(
                 )
     
     return OrderCancelResponse(
-        payment_id=order_id,
+        payment_id=payment_id,
         status="cancelled",
         message="주문이 성공적으로 취소되었습니다",
         refunded_amount=order.price
