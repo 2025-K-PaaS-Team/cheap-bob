@@ -1,4 +1,3 @@
-import PortOneLab from "@components/Lab/PortoneLab";
 import type { PaymentConfirmType, PaymentResponseType } from "@interface";
 import type {
   OrderDeleteResponseType,
@@ -159,7 +158,7 @@ const CustomerLab = () => {
   return (
     <div className="min-h-screen m-5 gap-y-2 flex flex-col justify-center items-center">
       {/* <Map /> */}
-      {payment?.payment_id && <PortOneLab paymentId={payment.payment_id} />}
+      {/* {payment?.payment_id && <PortOneLab paymentId={payment.payment_id} />} */}
 
       {/* 가게 검색 테스트 */}
       <div className="flex flex-col space-y-2 p-2 w-full p-2">

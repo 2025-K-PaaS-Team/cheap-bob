@@ -1,36 +1,65 @@
 import { useNavigate } from "react-router";
-import dummy from "../../assets/dummy.jpg";
+import { useEffect, useState } from "react";
+import type { StoreResponseType } from "@interface";
+import { getStores } from "@services";
 
 const StoreList = () => {
+  const [stores, setStores] = useState<StoreResponseType[] | null>([]);
+  const [errMsg, setErrMsg] = useState<string | null>(null);
   const navigate = useNavigate();
-  const handleClick = (link: string) => {
-    navigate(link);
+
+  // get stores list
+  const handleGetStores = async () => {
+    try {
+      const stores = await getStores();
+      console.log("get stores 성공", stores);
+      setStores(stores);
+    } catch (err: unknown) {
+      console.error("get stores fail");
+      const msg = err instanceof Error ? err.message : "실패해소";
+      setErrMsg(msg);
+    }
+  };
+
+  useEffect(() => {
+    handleGetStores();
+  }, []);
+
+  // go to specific store detail page
+  const handleClickStore = ({ store_id }: { store_id: string }) => {
+    if (!store_id) return;
+    navigate(`${store_id}`);
   };
 
   return (
-    <div
-      className="flex flex-col justify-center p-8"
-      onClick={() => handleClick("/store-detail")}
-    >
-      {/* list */}
-      <div className="border-1 border-gray-400 shadow-md rounded-lg flex flex-col">
-        {/* img */}
-        <img src={dummy} alt="dummyStoreImg" />
-        {/* desc */}
-        <div className="flex flex-row justify-between items-center p-4">
-          {/* store info left */}
-          <div>
-            <div className="font-bold">김가네 갈비찜</div>
-            <div>서울 광화문 어쩌구1로 3길</div>
-            <div>4.2km</div>
+    <div className="flex flex-col gap-y-5 justify-center p-8">
+      {stores ? (
+        stores.map((store) => (
+          // store
+          <div
+            className="border-1 border-gray-400 shadow-md rounded-lg flex flex-col"
+            onClick={() => handleClickStore({ store_id: store.store_id })}
+            key={store.store_id}
+          >
+            {/* img */}
+            <img
+              src={
+                "https://mediahub.seoul.go.kr/uploads/mediahub/2024/01/ZmynWCLNyAQNfWWDfmSaLEByeOPGsaWZ.jpg"
+              }
+              alt="dummyStoreImg"
+            />
+            {/* desc */}
+            <div className="flex flex-row justify-between items-center p-4">
+              {/* store info left */}
+              <div>
+                <div className="font-bold">{store.store_name}</div>
+              </div>
+            </div>
           </div>
-          {/* store info right */}
-          <div className="text-end">
-            <div className="text-gray-700">26000원</div>
-            <div className="font-bold text-2xl">8282원</div>
-          </div>
-        </div>
-      </div>
+        ))
+      ) : (
+        <div>loading</div>
+      )}
     </div>
   );
   0;
