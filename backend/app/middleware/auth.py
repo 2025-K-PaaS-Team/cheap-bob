@@ -11,6 +11,7 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         self.jwt_service = jwt_service
         self.exclude_paths = [
             "/api/v1/auth/",
+            "/api/v1/common/",
             "/docs",
             "/redoc",
             "/openapi.json",
@@ -27,23 +28,26 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         if any(path.startswith(excluded) for excluded in self.exclude_paths):
             return await call_next(request)
         
-        # Authorization 헤더에서 access_token 가져오기
-        authorization = request.headers.get("Authorization")
+        access_token = None
         
-        if not authorization:
+        # 1. Authorization 헤더에서 토큰 확인
+        authorization = request.headers.get("Authorization")
+        if authorization and authorization.startswith("Bearer "):
+            access_token = authorization[7:]  # "Bearer " 제거
+        
+        # 2. URL 쿼리 파라미터에서 토큰 확인
+        if not access_token:
+            access_token = request.query_params.get("token")
+        
+        # 3. 쿠키에서 토큰 확인 (옵션)
+        if not access_token:
+            access_token = request.cookies.get("access_token")
+        
+        if not access_token:
             return JSONResponse(
                 status_code=401,
                 content={"detail": "인증이 필요합니다."}
             )
-        
-        # Bearer 토큰 형식 확인
-        if not authorization.startswith("Bearer "):
-            return JSONResponse(
-                status_code=401,
-                content={"detail": "유효하지 않은 인증 형식입니다."}
-            )
-        
-        access_token = authorization[7:]  # "Bearer " 제거
         
         # 토큰 검증 및 갱신
         is_valid, new_token, payload = self.jwt_service.verify_and_refresh_token(access_token)
@@ -56,6 +60,7 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         
         # 요청에 사용자 정보 추가
         request.state.user = payload
+        request.state.new_token = new_token  # 갱신된 토큰 저장
         
         # 다음 미들웨어 또는 엔드포인트 호출
         response = await call_next(request)

@@ -2,16 +2,23 @@ import json
 import portone_server_sdk as portone
 from config.settings import settings
 from fastapi import HTTPException
-from typing import Any
+from typing import Any, Optional
 
 class PortOneClient:
+    """
+    PortOne API 클라이언트
+    """
+    
+    def __init__(self, secret_key: Optional[str] = None):
+        """
+        secret_key가 제공되지 않으면 기본 테스트 키 사용
+        """
+        self.secret = secret_key
+        self.client = portone.PaymentClient(secret=self.secret)
 
-    client = portone.PaymentClient(secret=settings.test_portone_v2_api_secret)
-
-    @classmethod
-    def get_payment(cls, payment_id: str) -> portone.payment.PaidPayment:
+    def get_payment(self, payment_id: str) -> portone.payment.PaidPayment:
         try:
-            payment = cls.client.get_payment(payment_id=payment_id)
+            payment = self.client.get_payment(payment_id=payment_id)
             if not isinstance(payment, portone.payment.PaidPayment):
                 raise ValueError(f"유효하지 않은 결제 정보입니다. Type: {type(payment)}")
             return payment
@@ -26,8 +33,8 @@ class PortOneClient:
                 status_code=500, detail=f"예상치 못한 오류: {str(e)}"
             )
     
-    @classmethod
-    def extract_payment_details(cls, payment: portone.payment.PaidPayment) -> dict:
+    @staticmethod
+    def extract_payment_details(payment: portone.payment.PaidPayment) -> dict:
  
         # 금액 정보
         amount = payment.amount.paid if payment.amount else 0
@@ -50,12 +57,11 @@ class PortOneClient:
             "payment_method": payment_method
         }
     
-    @classmethod
-    def cancel_payment(cls, payment_id: str, reason: str = "고객 요청") -> dict:
+    def cancel_payment(self, payment_id: str, reason: str = "고객 요청") -> dict:
         try:
 
             # 환불
-            result = cls.client.cancel_payment(
+            result = self.client.cancel_payment(
                 payment_id=payment_id,
                 reason=reason
             )
