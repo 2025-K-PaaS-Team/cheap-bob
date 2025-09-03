@@ -3,6 +3,8 @@ from fastapi import APIRouter, HTTPException, Path, Depends, status
 from datetime import datetime
 from loguru import logger
 
+from utils.docs_error import create_error_responses
+
 from api.deps import CurrentCustomerDep, AsyncSessionDep
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.cart_item import CartItemRepository
@@ -44,7 +46,14 @@ OrderRepositoryDep = Annotated[OrderCurrentItemRepository, Depends(get_order_rep
 PaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_payment_info_repository)]
 
 
-@router.post("/init", response_model=PaymentInitResponse)
+@router.post("/init", response_model=PaymentInitResponse,
+    responses=create_error_responses({
+        400: "재고가 없음",
+        401:["인증 정보가 없음", "토큰 만료"],
+        404:"상품을 찾을 수 없음",
+        409: "동시성 충돌 발생"
+    })
+)
 async def init_payment(
     request: PaymentInitRequest,
     current_user: CurrentCustomerDep,
@@ -153,7 +162,14 @@ async def init_payment(
     )
 
 
-@router.post("/confirm", response_model=PaymentResponse)
+@router.post("/confirm", response_model=PaymentResponse,
+    responses=create_error_responses({
+        400: "결제 검증에 실패",
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "결제 권한이 없음",
+        404:["결제 정보를 찾을 수 없음", "상품 정보를 찾을 수 없음"]
+    })  
+)
 async def confirm_payment(
     request: PaymentConfirmRequest,
     current_user: CurrentCustomerDep,
@@ -232,7 +248,14 @@ async def confirm_payment(
     )
 
 
-@router.delete("/cancel/{payment_id}", response_model=PaymentResponse)
+@router.delete("/cancel/{payment_id}", response_model=PaymentResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "결제 취소 권한이 없음",
+        404:["결제 정보를 찾을 수 없음", "장바구니 항목을 찾을 수 없음"],
+        409: "재고 복구 중, 동시성 충돌 발생"
+    })               
+)
 async def cancel_payment(
     payment_id: str,
     current_user: CurrentCustomerDep,
