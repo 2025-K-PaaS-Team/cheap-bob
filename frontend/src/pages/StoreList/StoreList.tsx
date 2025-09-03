@@ -5,7 +5,6 @@ import { getStores } from "@services";
 
 const StoreList = () => {
   const [stores, setStores] = useState<StoreResponseType[] | null>([]);
-  const [errMsg, setErrMsg] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // get stores list
@@ -16,8 +15,6 @@ const StoreList = () => {
       setStores(stores);
     } catch (err: unknown) {
       console.error("get stores fail");
-      const msg = err instanceof Error ? err.message : "실패해소";
-      setErrMsg(msg);
     }
   };
 
