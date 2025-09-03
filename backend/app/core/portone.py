@@ -18,9 +18,6 @@ class PortOneClient:
 
     def get_payment(self, payment_id: str) -> portone.payment.PaidPayment:
         try:
-            print(f"this is secret : {self.secret}")
-            print(f"this is client : {self.client}")
-            print(f"this is payment_id : {payment_id}")
             payment = self.client.get_payment(payment_id=payment_id)
             if not isinstance(payment, portone.payment.PaidPayment):
                 raise ValueError(f"유효하지 않은 결제 정보입니다. Type: {type(payment)}")
