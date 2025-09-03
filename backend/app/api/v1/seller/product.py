@@ -1,6 +1,8 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, status
 
+from utils.docs_error import create_error_responses
+
 from api.deps import CurrentSellerDep, AsyncSessionDep
 from repositories.store import StoreRepository
 from repositories.store_product_info import StoreProductInfoRepository
@@ -27,7 +29,13 @@ StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
 ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product_repository)]
 
 
-@router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "가게를 수정할 수 있는 권한이 없음",
+        404:"등록된 가게를 찾을 수 없음"
+    })  
+)
 async def create_product(
     request: ProductCreateRequest,
     current_user: CurrentSellerDep,
@@ -69,7 +77,13 @@ async def create_product(
     return ProductResponse.model_validate(product)
 
 
-@router.put("/{product_id}", response_model=ProductResponse)
+@router.put("/{product_id}", response_model=ProductResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "가게를 수정할 수 있는 권한이 없음",
+        404:"등록된 가게를 찾을 수 없음"
+    })              
+)
 async def update_product(
     product_id: str,
     request: ProductUpdateRequest,
@@ -117,7 +131,7 @@ async def update_product_stock(
     product_repo: ProductRepositoryDep
 ):
     """
-    상품 재고 업데이트 추구 구현 - 논의 필요
+    상품 재고 업데이트(미구현) - 논의 필요
     """
     
     pass
@@ -168,7 +182,7 @@ async def delete_product(
     product_repo: ProductRepositoryDep
 ):
     """
-    상품 삭제 추후 구현 - 논의 필요
+    상품 삭제(미구현) - 논의 필요
     """
     
     pass
