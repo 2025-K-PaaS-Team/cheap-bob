@@ -12,7 +12,8 @@ const LoginButton = ({
   isCustomer = true,
 }: loginButtonProps) => {
   const handleLogin = () => {
-    const state = provider === "kakao" ? "1004" : null;
+    const isLocal = import.meta.env.VITE_IS_LOCAL === "true";
+    const state = isLocal ? null : "1004";
     window.location.href = `${
       import.meta.env.VITE_API_BASE_URL
     }/api/v1/auth/${provider}/login/${isCustomer ? `customer` : "seller"}${
