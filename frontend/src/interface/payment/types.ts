@@ -5,7 +5,7 @@ export type PaymentStatusType = {
 };
 
 export type ItemType = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   currency: "KRW";

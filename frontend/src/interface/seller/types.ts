@@ -5,6 +5,17 @@ export type StoreBase = {
   store_name: string;
 };
 
+export type ProductDetailType = {
+  product_id: string;
+  product_name: string;
+  stock: number;
+  price: number;
+};
+
+export type StoreDetailType = StoreBase & {
+  products: ProductDetailType[];
+};
+
 export type ProductBase = {
   product_name: string;
   price: number;

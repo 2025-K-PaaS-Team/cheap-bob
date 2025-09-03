@@ -4,7 +4,7 @@ const Header = () => {
   const location = useLocation();
   const path = location.pathname;
 
-  if (path !== "/store-list") {
+  if (path !== "/c/store-list") {
     return null;
   }
 
