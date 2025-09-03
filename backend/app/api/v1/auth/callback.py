@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.responses import RedirectResponse
 
+from utils.docs_error import create_error_responses
+
 from api.deps import OAuthService, get_oauth_service
 from config.oauth import OAuthProvider
 from config.settings import settings
@@ -9,7 +11,12 @@ from schemas.auth import UserType
 router = APIRouter()
 
 
-@router.get("/{provider}/callback/customer")
+@router.get("/{provider}/callback/customer",
+    responses=create_error_responses({         
+        400:"Oauth 로그인 에러가 발생",
+        409:"이미 판매자로 존재하는 회원"
+    })   
+)
 async def customer_oauth_callback(
     provider: OAuthProvider,
     response: Response,
@@ -42,7 +49,12 @@ async def customer_oauth_callback(
         )
 
 
-@router.get("/{provider}/callback/seller")
+@router.get("/{provider}/callback/seller",
+    responses=create_error_responses({         
+        400:"Oauth 로그인 에러가 발생",
+        409:"이미 소비자로 존재하는 회원"
+    })
+)
 async def seller_oauth_callback(
     provider: OAuthProvider,
     response: Response,
