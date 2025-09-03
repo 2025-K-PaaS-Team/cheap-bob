@@ -1,6 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
+
+from utils.docs_error import create_error_responses
 
 from api.deps import CurrentSellerDep, AsyncSessionDep
 from repositories.store import StoreRepository
@@ -38,7 +39,12 @@ ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product
 PaymentRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_payment_repository)]
 
 
-@router.get("", response_model=StoreResponse)
+@router.get("", response_model=StoreResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        404:"등록된 가게가 없음"
+    }) 
+)
 async def get_my_stores(
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep
@@ -59,7 +65,11 @@ async def get_my_stores(
         )
 
 
-@router.post("", response_model=StoreResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=StoreResponse, status_code=status.HTTP_201_CREATED,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"]
+    })
+)
 async def create_store(
     request: StoreCreateRequest,
     current_user: CurrentSellerDep,
@@ -80,7 +90,13 @@ async def create_store(
     return StoreResponse.model_validate(store)
 
 
-@router.put("/{store_id}", response_model=StoreResponse)
+@router.put("/{store_id}", response_model=StoreResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "가게를 수정할 수 있는 권한이 없음",
+        404:"등록된 가게를 찾을 수 없음"
+    })            
+)
 async def update_store(
     store_id: str,
     request: StoreUpdateRequest,
@@ -111,7 +127,13 @@ async def update_store(
     return StoreResponse.model_validate(updated_store)
 
 
-@router.get("/{store_id}/products", response_model=StoreProductsResponse)
+@router.get("/{store_id}/products", response_model=StoreProductsResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "가게를 수정할 수 있는 권한이 없음",
+        404:"등록된 가게를 찾을 수 없음"
+    })  
+)
 async def get_store_products(
     store_id: str,
     current_user: CurrentSellerDep,
@@ -152,13 +174,19 @@ async def delete_store(
     store_repo: StoreRepositoryDep
 ):
     """
-    내 가게 삭제 - 정책에 따라 구현, 기본 정보를 삭제할 것인가, 아닌가
+    내 가게 삭제(미구현) - 정책에 따라 구현, 기본 정보를 삭제할 것인가, 아닌가
     """
     
     pass
 
 
-@router.get("/{store_id}/payment-info/status", response_model=StorePaymentInfoStatusResponse)
+@router.get("/{store_id}/payment-info/status", response_model=StorePaymentInfoStatusResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "가게를 수정할 수 있는 권한이 없음",
+        404:"등록된 가게를 찾을 수 없음"
+    })  
+)
 async def check_payment_info_status(
     store_id: str,
     current_user: CurrentSellerDep,
@@ -192,7 +220,13 @@ async def check_payment_info_status(
     )
 
 
-@router.post("/{store_id}/payment-info", response_model=StorePaymentInfoResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{store_id}/payment-info", response_model=StorePaymentInfoResponse, status_code=status.HTTP_201_CREATED,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "가게를 수정할 수 있는 권한이 없음",
+        404:"등록된 가게를 찾을 수 없음"
+    })  
+)
 async def register_payment_info(
     store_id: str,
     request: StorePaymentInfoCreateRequest,

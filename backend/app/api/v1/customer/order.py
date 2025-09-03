@@ -4,6 +4,8 @@ from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 from datetime import datetime
 
+from utils.docs_error import create_error_responses
+
 from api.deps import CurrentCustomerDep, AsyncSessionDep
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_product_info import StoreProductInfoRepository
@@ -40,7 +42,11 @@ ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product
 PaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_payment_info_repository)]
 
 
-@router.get("", response_model=CustomerOrderListResponse)
+@router.get("", response_model=CustomerOrderListResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"]
+    })
+)
 async def get_order_history(
     current_user: CurrentCustomerDep,
     session: AsyncSessionDep
@@ -85,7 +91,11 @@ async def get_order_history(
     )
 
 
-@router.get("/current", response_model=CustomerOrderListResponse)
+@router.get("/current", response_model=CustomerOrderListResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"]
+    })
+)
 async def get_current_orders(
     current_user: CurrentCustomerDep,
     session: AsyncSessionDep
@@ -131,7 +141,13 @@ async def get_current_orders(
     )
 
 
-@router.get("/{payment_id}", response_model=CustomerOrderDetailResponse)
+@router.get("/{payment_id}", response_model=CustomerOrderDetailResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        403:"주문을 확인할 권한이 없음",
+        404: "주문을 찾을 수 없음"
+    })            
+)
 async def get_order_detail(
     payment_id: str,
     current_user: CurrentCustomerDep,
@@ -182,7 +198,15 @@ async def get_order_detail(
         confirmed_at=order.confirmed_at
     )
     
-@router.delete("/{payment_id}", response_model=CustomerOrderCancelResponse)
+@router.delete("/{payment_id}", response_model=CustomerOrderCancelResponse,
+    responses=create_error_responses({
+        400: ["이미 취소된 주문", "이미 승인된 주문"],
+        401:["인증 정보가 없음", "토큰 만료"],
+        403:"주문을 확인할 권한이 없음",
+        404:"상품을 찾을 수 없음",
+        409: "동시성 충돌 발생"
+    })               
+)
 async def delete_order(
     payment_id: str,
     request: CustomerOrderCancelRequest,

@@ -49,7 +49,7 @@ class OAuthService:
         if seller_exists:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="이미 존재하는 회원입니다."
+                detail="이미 판매자로 존재하는 회원입니다."
             )
         
         # Customer로 가입되어 있는지 체크
@@ -76,7 +76,7 @@ class OAuthService:
         if customer_exists:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="이미 존재하는 회원입니다."
+                detail="이미 소비자로 존재하는 회원입니다."
             )
         
         # Seller로 가입되어 있는지 체크

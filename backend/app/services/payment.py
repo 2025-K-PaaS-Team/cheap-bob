@@ -15,7 +15,7 @@ class PaymentService:
         """
         포트원에서 결제를 검증하고 결제 상태를 업데이트합니다.
         """
-        
+
         # 가게별 secret key를 사용하여 PortOneClient 생성
         portone_client = PortOneClient(secret_key=secret_key)
         actual_payment = portone_client.get_payment(payment_id)
