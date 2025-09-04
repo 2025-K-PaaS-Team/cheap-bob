@@ -1,7 +1,7 @@
 """
 StorePaymentInfo와 OrderHistoryItem Repository 사용 예시
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories import (
@@ -50,7 +50,7 @@ async def query_order_history(db: AsyncSession):
     )
     
     # 날짜 범위로 조회
-    today = datetime.now()
+    today = datetime.now(timezone.utc)
     last_week = today - timedelta(days=7)
     
     weekly_orders = await history_repo.get_by_date_range(
@@ -138,10 +138,10 @@ async def complex_queries(db: AsyncSession):
     )
     
     # 특정 기간 내 취소된 주문들
-    last_month = datetime.now() - timedelta(days=30)
+    last_month = datetime.now(timezone.utc) - timedelta(days=30)
     canceled_orders = await history_repo.get_by_date_range(
         start_date=last_month,
-        end_date=datetime.now(),
+        end_date=datetime.now(timezone.utc),
         status=OrderStatus.cancel
     )
     

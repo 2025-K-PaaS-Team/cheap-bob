@@ -1,5 +1,5 @@
 from typing import List, Optional
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.order_history_item import OrderHistoryItem
@@ -82,7 +82,7 @@ class OrderHistoryItemRepository(BaseRepository[OrderHistoryItem]):
                 quantity=order_data["quantity"],
                 price=order_data["price"],
                 status=order_data.get("status"),
-                created_at=order_data.get("order_time", datetime.now())
+                created_at=order_data.get("order_time", datetime.now(timezone.utc))
             )
         
         return None

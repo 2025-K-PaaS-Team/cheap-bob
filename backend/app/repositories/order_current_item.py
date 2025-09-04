@@ -1,6 +1,6 @@
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-import datetime
+import datetime, timezone
 
 from database.models.order_current_item import OrderCurrentItem
 from schemas.order import OrderStatus
@@ -43,15 +43,15 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
     
     async def accept_order(self, payment_id: str) -> Optional[OrderCurrentItem]:
         """주문 수락 처리"""
-        return await self.update(payment_id, status=OrderStatus.accepted, accepted_at=datetime.datetime.now())
+        return await self.update(payment_id, status=OrderStatus.accepted, accepted_at=datetime.datetime.now(timezone.utc))
     
     async def set_pickup_ready(self, payment_id: str) -> Optional[OrderCurrentItem]:
         """픽업 준비 완료 처리"""
-        return await self.update(payment_id, status=OrderStatus.pickup, pickup_ready_at=datetime.datetime.now())
+        return await self.update(payment_id, status=OrderStatus.pickup, pickup_ready_at=datetime.datetime.now(timezone.utc))
     
     async def complete_order(self, payment_id: str) -> Optional[OrderCurrentItem]:
         """픽업 완료 처리"""
-        return await self.update(payment_id, status=OrderStatus.complete, completed_at=datetime.datetime.now())
+        return await self.update(payment_id, status=OrderStatus.complete, completed_at=datetime.datetime.now(timezone.utc))
 
     async def cancel_order(self, payment_id: str) -> int:
         """주문 취소 처리"""
@@ -74,7 +74,7 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
             quantity=cart_item["quantity"],
             price=cart_item["price"],
             status=OrderStatus.reservation,
-            created_at=cart_item.get("order_time", datetime.now())
+            created_at=cart_item.get("order_time", datetime.now(timezone.utc))
         )
         
         return None

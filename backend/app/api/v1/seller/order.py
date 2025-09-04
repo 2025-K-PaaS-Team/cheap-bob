@@ -2,7 +2,7 @@ from typing import Annotated, List
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
-from datetime import datetime
+from datetime import datetime, timezone
 
 from utils.docs_error import create_error_responses
 
@@ -234,7 +234,7 @@ async def update_order_accept(
     updated_order = await order_repo.update(
         payment_id,
         status=OrderStatus.accepted,
-        accepted_at=datetime.now()
+        accepted_at=datetime.now(timezone.utc)
     )
     
     # response 포맷으로 변환
