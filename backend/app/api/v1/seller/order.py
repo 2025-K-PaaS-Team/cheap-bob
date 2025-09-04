@@ -127,7 +127,7 @@ async def get_pending_orders(
     session: AsyncSessionDep
 ):
     """
-    처리 대기중인 주문 조회
+    처리 대기중인 주문 조회 (reservation, accepted, pickup, complete)
     """
     
     store = await store_repo.get_by_store_id(store_id)
@@ -150,7 +150,7 @@ async def get_pending_orders(
         .where(
             and_(
                 StoreProductInfo.store_id == store_id,
-                OrderCurrentItem.status == OrderStatus.reservation
+                OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accepted, OrderStatus.pickup])
             )
         )
         .options(selectinload(OrderCurrentItem.product))

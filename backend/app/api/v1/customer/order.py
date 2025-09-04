@@ -104,14 +104,14 @@ async def get_current_orders(
     session: AsyncSessionDep
 ):
     """
-    현재 진행중인 주문 조회
+    현재 진행중인 주문 조회 (reservation, accepted, pickup)
     """
     
-    # 사용자의 현재 진행중인 주문만 조회 (reservation)
+    # 사용자의 현재 진행중인 주문만 조회 (reservation, accepted, pickup)
     stmt = (
         select(OrderCurrentItem)
         .where(OrderCurrentItem.user_id == current_user["sub"])
-        .where(OrderCurrentItem.status == OrderStatus.reservation)
+        .where(OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accepted, OrderStatus.pickup]))
         .options(
             selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
         )
