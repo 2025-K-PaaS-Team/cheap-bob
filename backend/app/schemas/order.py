@@ -1,8 +1,12 @@
 from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from database.models.order_current_item import OrderStatus
+import enum
 
+class OrderStatus(enum.Enum):
+    reservation = "reservation" # 예약 중
+    complete = "complete" # 승인 완료
+    cancel = "cancel" # 취소
 
 class OrderItemResponse(BaseModel):
     payment_id: str = Field(..., description="결제 고유 ID")

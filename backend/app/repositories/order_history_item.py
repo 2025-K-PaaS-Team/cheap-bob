@@ -2,7 +2,8 @@ from typing import List, Optional
 from datetime import datetime, date
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models.order_history_item import OrderHistoryItem, OrderStatus
+from database.models.order_history_item import OrderHistoryItem
+from schemas.order import OrderStatus
 from repositories.base import BaseRepository
 
 

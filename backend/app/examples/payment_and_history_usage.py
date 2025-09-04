@@ -9,7 +9,7 @@ from repositories import (
     OrderHistoryItemRepository,
     OrderCurrentItemRepository
 )
-from database.models.order_history_item import OrderStatus
+from schemas.order import OrderStatus
 
 
 # 1. 가게 결제 정보 관리

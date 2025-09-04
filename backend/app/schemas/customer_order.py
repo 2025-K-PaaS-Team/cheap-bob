@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from database.models.order_current_item import OrderStatus
+from schemas.order import OrderStatus
 
 
 class CustomerOrderItemResponse(BaseModel):

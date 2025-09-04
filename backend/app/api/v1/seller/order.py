@@ -9,13 +9,14 @@ from utils.docs_error import create_error_responses
 from api.deps import CurrentSellerDep, AsyncSessionDep
 from repositories.store import StoreRepository
 from repositories.order_current_item import OrderCurrentItemRepository
-from database.models.order_current_item import OrderCurrentItem, OrderStatus
+from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
 from schemas.order import (
     OrderItemResponse,
     OrderListResponse,
     OrderCancelRequest,
-    OrderCancelResponse
+    OrderCancelResponse,
+    OrderStatus
 )
 from services.payment import PaymentService
 

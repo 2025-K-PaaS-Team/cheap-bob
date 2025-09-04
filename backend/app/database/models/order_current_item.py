@@ -2,13 +2,8 @@ from sqlalchemy import Column, String, Integer, DateTime, Enum, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from database.session import Base
-import enum
 
-
-class OrderStatus(enum.Enum):
-    reservation = "reservation" # 예약 중
-    complete = "complete" # 승인 완료
-    cancel = "cancel" # 취소
+from schemas.order import OrderStatus
 
 
 class OrderCurrentItem(Base):

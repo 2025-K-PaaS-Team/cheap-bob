@@ -10,7 +10,7 @@ from api.deps import CurrentCustomerDep, AsyncSessionDep
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
-from database.models.order_current_item import OrderCurrentItem, OrderStatus
+from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
 from schemas.customer_order import (
     CustomerOrderItemResponse,
@@ -19,6 +19,7 @@ from schemas.customer_order import (
     CustomerOrderCancelRequest,
     CustomerOrderCancelResponse
 )
+from schemas.order import OrderStatus
 from services.payment import PaymentService
 from config.settings import settings
 
