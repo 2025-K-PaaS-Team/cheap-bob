@@ -19,9 +19,10 @@ from schemas.customer_order import (
     CustomerOrderCancelRequest,
     CustomerOrderCancelResponse
 )
-from schemas.order import OrderStatus
+from schemas.order import OrderStatus, PickupCompleteRequest
 from services.payment import PaymentService
 from config.settings import settings
+from utils.qr_generator import validate_qr_data
 
 router = APIRouter(prefix="/orders", tags=["Customer-Order"])
 
@@ -316,4 +317,106 @@ async def delete_order(
     return CustomerOrderCancelResponse(
         payment_id=payment_id,
         refunded_amount=order.price
+    )
+
+
+@router.patch("/{payment_id}/pickup-complete", response_model=CustomerOrderItemResponse,
+    responses=create_error_responses({
+        400:["유효하지 않은 QR 코드", "권한이 없는 사용자", "이미 픽업 완료"],
+        401:["인증 정보가 없음", "토큰 만료"],
+        404:["주문을 찾을 수 없음", "QR 코드를 찾을 수 없음"]
+    })               
+)
+async def complete_pickup(
+    payment_id: str,
+    request: PickupCompleteRequest,
+    current_user: CurrentCustomerDep,
+    order_repo: OrderRepositoryDep,
+    session: AsyncSessionDep
+):
+    """
+    픽업 완료 처리 (QR 코드 검증)
+    """
+    
+    # 주문 조회
+    stmt = (
+        select(OrderCurrentItem)
+        .where(OrderCurrentItem.payment_id == payment_id)
+        .options(selectinload(OrderCurrentItem.product))
+    )
+    result = await session.execute(stmt)
+    order = result.scalar_one_or_none()
+    
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="주문을 찾을 수 없습니다"
+        )
+    
+    # 주문 상태 확인
+    if order.status != OrderStatus.pickup:
+        if order.status == OrderStatus.complete:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="이미 픽업이 완료된 주문입니다"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="픽업 준비가 되지 않은 주문입니다"
+            )
+    
+    # QR 데이터 검증
+    is_valid, qr_data, error_msg = validate_qr_data(
+        request.qr_data,
+        current_user["sub"]
+    )
+    
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_msg
+        )
+    
+    # 세 가지 유저 ID 검증
+    # 1. JWT의 유저 ID: current_user["sub"]
+    # 2. QR의 유저 ID: qr_data["user_id"]
+    # 3. 주문의 유저 ID: order.user_id
+    
+    if not (current_user["sub"] == qr_data["user_id"] == order.user_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="권한이 없는 사용자입니다"
+        )
+    
+    # 결제 ID 검증
+    if qr_data["payment_id"] != payment_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="잘못된 QR 코드입니다"
+        )
+    
+    # 상품 ID 검증
+    if qr_data["product_id"] != order.product_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="상품 정보가 일치하지 않습니다"
+        )
+    
+    # 주문 상태를 완료로 변경
+    completed_order = await order_repo.complete_order(payment_id)
+    
+    return CustomerOrderItemResponse(
+        payment_id=completed_order.payment_id,
+        product_id=completed_order.product_id,
+        product_name=order.product.product_name,
+        store_id=order.product.store_id,
+        store_name=order.product.store.store_name,
+        quantity=completed_order.quantity,
+        price=completed_order.price,
+        status=completed_order.status,
+        created_at=completed_order.created_at,
+        accepted_at=completed_order.accepted_at,
+        pickup_ready_at=completed_order.pickup_ready_at,
+        completed_at=completed_order.completed_at
     )

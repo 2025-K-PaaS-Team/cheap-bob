@@ -40,3 +40,13 @@ class OrderCancelResponse(BaseModel):
     status: str = Field(..., description="취소 상태")
     message: str = Field(..., description="취소 메시지")
     refunded_amount: int = Field(..., description="환불 금액")
+
+
+class PickupQRResponse(BaseModel):
+    payment_id: str = Field(..., description="결제 고유 ID")
+    qr_data: str = Field(..., description="QR 코드 데이터")
+    created_at: datetime = Field(..., description="QR 생성 시간")
+
+
+class PickupCompleteRequest(BaseModel):
+    qr_data: str = Field(..., description="QR 코드 데이터")
