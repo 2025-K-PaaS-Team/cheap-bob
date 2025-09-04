@@ -101,7 +101,9 @@ async def get_store_orders(
             price=order.price,
             status=order.status,
             created_at=order.created_at,
-            confirmed_at=order.confirmed_at
+            accepted_at=order.accepted_at,
+            pickup_ready_at=order.pickup_ready_at,
+            completed_at=order.completed_at
         )
         order_responses.append(order_response)
     
@@ -168,7 +170,9 @@ async def get_pending_orders(
             price=order.price,
             status=order.status,
             created_at=order.created_at,
-            confirmed_at=order.confirmed_at
+            accepted_at=order.accepted_at,
+            pickup_ready_at=order.pickup_ready_at,
+            completed_at=order.completed_at
         )
         order_responses.append(order_response)
     
@@ -227,8 +231,8 @@ async def update_order_accept(
     
     updated_order = await order_repo.update(
         payment_id,
-        status=OrderStatus.complete,
-        confirmed_at=datetime.now()
+        status=OrderStatus.accepted,
+        accepted_at=datetime.now()
     )
     
     # response 포맷으로 변환
@@ -240,7 +244,9 @@ async def update_order_accept(
         price=updated_order.price,
         status=updated_order.status,
         created_at=updated_order.created_at,
-        confirmed_at=updated_order.confirmed_at
+        accepted_at=updated_order.accepted_at,
+        pickup_ready_at=updated_order.pickup_ready_at,
+        completed_at=updated_order.completed_at
     )
 
 

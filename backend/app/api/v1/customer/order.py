@@ -82,7 +82,9 @@ async def get_order_history(
             price=order.price,
             status=order.status,
             created_at=order.created_at,
-            confirmed_at=order.confirmed_at
+            accepted_at=order.accepted_at,
+            pickup_ready_at=order.pickup_ready_at,
+            completed_at=order.completed_at
         )
         order_responses.append(order_response)
     
@@ -132,7 +134,9 @@ async def get_current_orders(
             price=order.price,
             status=order.status,
             created_at=order.created_at,
-            confirmed_at=order.confirmed_at
+            accepted_at=order.accepted_at,
+            pickup_ready_at=order.pickup_ready_at,
+            completed_at=order.completed_at
         )
         order_responses.append(order_response)
     
@@ -250,11 +254,11 @@ async def delete_order(
             detail="이미 취소된 주문입니다"
         )
     
-    # 승인된 주문은 취소 불가
-    if order.status == OrderStatus.complete:
+    # 수락된 주문은 취소 불가
+    if order.status in [OrderStatus.accepted, OrderStatus.pickup, OrderStatus.complete]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="이미 승인된 주문은 취소할 수 없습니다"
+            detail="이미 처리 중인 주문은 취소할 수 없습니다"
         )
     
     # 가게의 결제 정보 조회

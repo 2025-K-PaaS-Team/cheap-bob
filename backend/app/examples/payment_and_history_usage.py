@@ -45,7 +45,7 @@ async def query_order_history(db: AsyncSession):
     # 사용자별 주문 내역
     user_orders = await history_repo.get_by_user_id(
         user_id="USER001",
-        status=OrderStatus.complete,
+        status=OrderStatus.accepted,
         limit=10
     )
     
@@ -80,8 +80,8 @@ async def manage_order_status(db: AsyncSession):
         status=OrderStatus.reservation
     )
     
-    # 주문 승인
-    confirmed = await history_repo.confirm_order("PAY001")
+    # 주문 수락 (예제 - 실제로는 order_current_item에서 사용)
+    # accepted = await current_repo.accept_order("PAY001")
     
     # 주문 취소 (예약 상태일 때만 가능)
     canceled = await history_repo.cancel_order("PAY002")
