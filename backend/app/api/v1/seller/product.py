@@ -5,7 +5,7 @@ from utils.docs_error import create_error_responses
 
 from api.deps import CurrentSellerDep, AsyncSessionDep
 from repositories.store import StoreRepository
-from repositories.store_product_info import StoreProductInfoRepository
+from repositories.store_product_info import StoreProductInfoRepository, StockUpdateResult
 from schemas.product import (
     ProductCreateRequest,
     ProductUpdateRequest,
@@ -13,6 +13,7 @@ from schemas.product import (
     ProductResponse
 )
 from utils.id_generator import generate_product_id
+from config.settings import settings
 
 router = APIRouter(prefix="/products", tags=["Seller-Product"])
 
@@ -122,55 +123,113 @@ async def update_product(
     return ProductResponse.model_validate(product)
 
 
-@router.patch("/{product_id}/stock", response_model=ProductResponse)
-async def update_product_stock(
+@router.patch("/{product_id}/stock/up", response_model=ProductResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        403: "이 상품의 재고를 수정할 권한이 없음",
+        404: "상품을 찾을 수 없음",
+        409: "재고 업데이트 중 충돌이 발생"
+    })
+)
+async def increase_product_stock(
     product_id: str,
-    request: ProductStockUpdateRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
     product_repo: ProductRepositoryDep
 ):
     """
-    상품 재고 업데이트(미구현) - 논의 필요
+    상품 재고 1개 증가
     """
-    
-    pass
-    
     # 상품 조회
-    # product = await product_repo.get_by_product_id(product_id)
+    product = await product_repo.get_by_product_id(product_id)
     
-    # if not product:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail="상품을 찾을 수 없습니다"
-    #     )
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="상품을 찾을 수 없습니다"
+        )
     
-    # # 가게 소유권 확인
-    # store = await store_repo.get_by_store_id(product.store_id)
+    # 가게 소유권 확인
+    store = await store_repo.get_by_store_id(product.store_id)
     
-    # if store.seller_email != current_user["sub"]:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="이 상품의 재고를 수정할 권한이 없습니다"
-    #     )
+    if store.seller_email != current_user["sub"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="이 상품의 재고를 수정할 권한이 없습니다"
+        )
     
-    # # 재고 업데이트 (낙관적 락 사용)
-    # success = await product_repo.update_lock(
-    #     product_id,
-    #     conditions={"version": product.version},
-    #     current_stock=request.stock,
-    #     version=product.version + 1
-    # )
+    # 재고 증가 (낙관적 락 사용, 최대 재시도 횟수까지)
+    max_retries = settings.MAX_RETRY_LOCK
+    for attempt in range(max_retries):
+        result = await product_repo.restore_stock(product_id, 1)
+        
+        if result == StockUpdateResult.SUCCESS:
+            # 업데이트된 상품 조회
+            updated_product = await product_repo.get_by_product_id(product_id)
+            return ProductResponse.model_validate(updated_product)
+        
+        if attempt == max_retries - 1:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="재고 업데이트 중 충돌이 발생했습니다. 다시 시도해주세요."
+            )
+
+
+@router.patch("/{product_id}/stock/down", response_model=ProductResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        403: "이 상품의 재고를 수정할 권한이 없음",
+        404: "상품을 찾을 수 없음",
+        409: ["남은 재고가 없음", "재고 업데이트 중 충돌이 발생"]
+    })
+)
+async def decrease_product_stock(
+    product_id: str,
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    product_repo: ProductRepositoryDep
+):
+    """
+    상품 재고 1개 감소
+    """
+    # 상품 조회
+    product = await product_repo.get_by_product_id(product_id)
     
-    # if not success:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_409_CONFLICT,
-    #         detail="재고 업데이트 중 충돌이 발생했습니다. 다시 시도해주세요."
-    #     )
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="상품을 찾을 수 없습니다"
+        )
     
-    # # 업데이트된 상품 조회
-    # updated_product = await product_repo.get_by_product_id(product_id)
-    # return ProductResponse.model_validate(updated_product)
+    # 가게 소유권 확인
+    store = await store_repo.get_by_store_id(product.store_id)
+    
+    if store.seller_email != current_user["sub"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="이 상품의 재고를 수정할 권한이 없습니다"
+        )
+    
+    # 재고 감소 (낙관적 락 사용, 최대 재시도 횟수까지)
+    max_retries = settings.MAX_RETRY_LOCK
+    for attempt in range(max_retries):
+        result = await product_repo.decrease_stock(product_id, 1)
+        
+        if result == StockUpdateResult.SUCCESS:
+            # 업데이트된 상품 조회
+            updated_product = await product_repo.get_by_product_id(product_id)
+            return ProductResponse.model_validate(updated_product)
+        elif result == StockUpdateResult.INSUFFICIENT_STOCK:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="남은 재고가 없습니다."
+            )
+        
+        if attempt == max_retries - 1:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="재고 업데이트 중 충돌이 발생했습니다. 다시 시도해주세요."
+            )
 
 
 
