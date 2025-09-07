@@ -17,6 +17,7 @@ class CustomerOrderItemResponse(BaseModel):
     accepted_at: Optional[datetime] = Field(None, description="주문 수락 시간")
     pickup_ready_at: Optional[datetime] = Field(None, description="픽업 준비 완료 시간")
     completed_at: Optional[datetime] = Field(None, description="픽업 완료 시간")
+    canceled_at: Optional[datetime] = Field(None, description="주문 취소 시간")
     
     class Config:
         from_attributes = True
@@ -42,6 +43,7 @@ class CustomerOrderDetailResponse(BaseModel):
     accepted_at: Optional[datetime] = Field(None, description="주문 수락 시간")
     pickup_ready_at: Optional[datetime] = Field(None, description="픽업 준비 완료 시간")
     completed_at: Optional[datetime] = Field(None, description="픽업 완료 시간")
+    canceled_at: Optional[datetime] = Field(None, description="주문 취소 시간")
     
     class Config:
         from_attributes = True
@@ -53,3 +55,7 @@ class CustomerOrderCancelRequest(BaseModel):
 class CustomerOrderCancelResponse(BaseModel):
     payment_id: str = Field(..., description="결제 고유 ID")
     refunded_amount: int = Field(..., description="환불 금액")
+    
+
+class PickupCompleteRequest(BaseModel):
+    qr_data: str = Field(..., description="QR 코드 데이터")

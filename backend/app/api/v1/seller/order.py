@@ -105,7 +105,8 @@ async def get_store_orders(
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             pickup_ready_at=order.pickup_ready_at,
-            completed_at=order.completed_at
+            completed_at=order.completed_at,
+            canceled_at=order.canceled_at
         )
         order_responses.append(order_response)
     
@@ -152,7 +153,7 @@ async def get_pending_orders(
         .where(
             and_(
                 StoreProductInfo.store_id == store_id,
-                OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accepted, OrderStatus.pickup])
+                OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept, OrderStatus.pickup])
             )
         )
         .options(selectinload(OrderCurrentItem.product))
@@ -174,7 +175,8 @@ async def get_pending_orders(
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             pickup_ready_at=order.pickup_ready_at,
-            completed_at=order.completed_at
+            completed_at=order.completed_at,
+            canceled_at=order.canceled_at
         )
         order_responses.append(order_response)
     
@@ -233,7 +235,7 @@ async def update_order_accept(
     
     updated_order = await order_repo.update(
         payment_id,
-        status=OrderStatus.accepted,
+        status=OrderStatus.accept,
         accepted_at=datetime.now(timezone.utc)
     )
     
@@ -248,7 +250,8 @@ async def update_order_accept(
         reservation_at=updated_order.reservation_at,
         accepted_at=updated_order.accepted_at,
         pickup_ready_at=updated_order.pickup_ready_at,
-        completed_at=updated_order.completed_at
+        completed_at=updated_order.completed_at,
+        canceled_at=order.canceled_at
     )
 
 
@@ -404,7 +407,7 @@ async def update_order_pickup_ready(
             detail="주문을 처리할 권한이 없습니다"
         )
     
-    if order.status != OrderStatus.accepted:
+    if order.status != OrderStatus.accept:
         if order.status == OrderStatus.reservation:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -434,7 +437,8 @@ async def update_order_pickup_ready(
         reservation_at=updated_order.reservation_at,
         accepted_at=updated_order.accepted_at,
         pickup_ready_at=updated_order.pickup_ready_at,
-        completed_at=updated_order.completed_at
+        completed_at=updated_order.completed_at,
+        canceled_at=order.canceled_at
     )
 
 

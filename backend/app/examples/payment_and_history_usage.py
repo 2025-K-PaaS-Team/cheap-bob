@@ -45,7 +45,7 @@ async def query_order_history(db: AsyncSession):
     # 사용자별 주문 내역
     user_orders = await history_repo.get_by_user_id(
         user_id="USER001",
-        status=OrderStatus.accepted,
+        status=OrderStatus.accept,
         limit=10
     )
     

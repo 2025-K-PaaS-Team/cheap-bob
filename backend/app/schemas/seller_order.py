@@ -5,7 +5,7 @@ import enum
 
 class OrderStatus(enum.Enum):
     reservation = "reservation" # 예약 중
-    accepted = "accepted" # 주문 수락
+    accept = "accept" # 주문 수락
     pickup = "pickup" # 픽업 준비 완료
     complete = "complete" # 픽업 완료
     cancel = "cancel" # 취소
@@ -21,6 +21,7 @@ class OrderItemResponse(BaseModel):
     accepted_at: Optional[datetime] = Field(None, description="주문 수락 시간")
     pickup_ready_at: Optional[datetime] = Field(None, description="픽업 준비 완료 시간")
     completed_at: Optional[datetime] = Field(None, description="픽업 완료 시간")
+    canceled_at: Optional[datetime] = Field(None, description="주문 취소 시간")
     
     class Config:
         from_attributes = True
@@ -48,5 +49,3 @@ class PickupQRResponse(BaseModel):
     created_at: datetime = Field(..., description="QR 생성 시간")
 
 
-class PickupCompleteRequest(BaseModel):
-    qr_data: str = Field(..., description="QR 코드 데이터")

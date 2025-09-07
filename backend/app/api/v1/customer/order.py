@@ -17,9 +17,10 @@ from schemas.customer_order import (
     CustomerOrderListResponse,
     CustomerOrderDetailResponse,
     CustomerOrderCancelRequest,
-    CustomerOrderCancelResponse
+    CustomerOrderCancelResponse,
+    PickupCompleteRequest
 )
-from schemas.seller_order import OrderStatus, PickupCompleteRequest
+from schemas.seller_order import OrderStatus
 from services.payment import PaymentService
 from config.settings import settings
 from utils.qr_generator import validate_qr_data
@@ -85,7 +86,8 @@ async def get_order_history(
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             pickup_ready_at=order.pickup_ready_at,
-            completed_at=order.completed_at
+            completed_at=order.completed_at,
+            canceled_at=order.canceled_at
         )
         order_responses.append(order_response)
     
@@ -112,7 +114,7 @@ async def get_current_orders(
     stmt = (
         select(OrderCurrentItem)
         .where(OrderCurrentItem.user_id == current_user["sub"])
-        .where(OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accepted, OrderStatus.pickup]))
+        .where(OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept, OrderStatus.pickup]))
         .options(
             selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
         )
@@ -137,7 +139,8 @@ async def get_current_orders(
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             pickup_ready_at=order.pickup_ready_at,
-            completed_at=order.completed_at
+            completed_at=order.completed_at,
+            canceled_at=order.canceled_at
         )
         order_responses.append(order_response)
     
@@ -258,7 +261,7 @@ async def delete_order(
         )
     
     # 수락된 주문은 취소 불가
-    if order.status in [OrderStatus.accepted, OrderStatus.pickup, OrderStatus.complete]:
+    if order.status in [OrderStatus.accept, OrderStatus.pickup, OrderStatus.complete]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="이미 처리 중인 주문은 취소할 수 없습니다"
@@ -420,5 +423,6 @@ async def complete_pickup(
         reservation_at=completed_order.reservation_at,
         accepted_at=completed_order.accepted_at,
         pickup_ready_at=completed_order.pickup_ready_at,
-        completed_at=completed_order.completed_at
+        completed_at=completed_order.completed_at,
+        canceled_at=order.canceled_at
     )
