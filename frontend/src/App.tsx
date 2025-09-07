@@ -7,6 +7,7 @@ import {
   LoginCallback,
   CustomerLab,
   SellerLab,
+  QrLab,
 } from "@pages";
 import { CustomerHome, SellerHome } from "@pages/Home";
 
@@ -27,6 +28,7 @@ const App = () => {
         <Route path="my" element={<My />} />
         {/* lab */}
         <Route path="lab" element={<CustomerLab />} />
+        <Route path="qr" element={<QrLab />} />
       </Route>
 
       {/* seller side */}
