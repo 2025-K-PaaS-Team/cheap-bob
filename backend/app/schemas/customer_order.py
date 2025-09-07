@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from schemas.order import OrderStatus
+from schemas.seller_order import OrderStatus
 
 
 class CustomerOrderItemResponse(BaseModel):
@@ -13,7 +13,7 @@ class CustomerOrderItemResponse(BaseModel):
     quantity: int = Field(..., description="구매 수량")
     price: int = Field(..., description="최종 가격 (원)")
     status: OrderStatus = Field(..., description="주문 상태")
-    created_at: datetime = Field(..., description="주문 시간")
+    reservation_at: datetime = Field(..., description="예약 주문 시간")
     accepted_at: Optional[datetime] = Field(None, description="주문 수락 시간")
     pickup_ready_at: Optional[datetime] = Field(None, description="픽업 준비 완료 시간")
     completed_at: Optional[datetime] = Field(None, description="픽업 완료 시간")
@@ -38,7 +38,7 @@ class CustomerOrderDetailResponse(BaseModel):
     unit_price: int = Field(..., description="단가 (원)")
     discount_rate: Optional[int] = Field(None, description="할인율")
     status: OrderStatus = Field(..., description="주문 상태")
-    created_at: datetime = Field(..., description="주문 시간")
+    reservation_at: datetime = Field(..., description="예약 주문 시간")
     accepted_at: Optional[datetime] = Field(None, description="주문 수락 시간")
     pickup_ready_at: Optional[datetime] = Field(None, description="픽업 준비 완료 시간")
     completed_at: Optional[datetime] = Field(None, description="픽업 완료 시간")

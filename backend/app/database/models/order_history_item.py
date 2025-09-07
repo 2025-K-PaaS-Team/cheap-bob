@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from database.session import Base
 
-from schemas.order import OrderStatus
+from schemas.seller_order import OrderStatus
 
 
 
@@ -17,10 +17,11 @@ class OrderHistoryItem(Base):
     quantity = Column(Integer, nullable=False) # 구매 수량
     price = Column(Integer, nullable=False)  # 최종 가격 (원)
     status = Column(Enum(OrderStatus), nullable=False, default=OrderStatus.reservation) # 상태
-    created_at = Column(DateTime(timezone=True), server_default=func.now()) # 구매 시간
+    reservation_at = Column(DateTime(timezone=True), server_default=func.now()) # 예약 주문 시간
     accepted_at = Column(DateTime(timezone=True))  # 주문 수락 시간
     pickup_ready_at = Column(DateTime(timezone=True))  # 픽업 준비 완료 시간
     completed_at = Column(DateTime(timezone=True))  # 픽업 완료 시간
+    canceled_at = Column(DateTime(timezone=True))  # 주문 취소 시간
     
     # Relationships
     product = relationship("StoreProductInfo", back_populates="order_history_items")

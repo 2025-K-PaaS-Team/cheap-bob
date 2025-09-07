@@ -11,7 +11,7 @@ from repositories.store import StoreRepository
 from repositories.order_current_item import OrderCurrentItemRepository
 from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
-from schemas.order import (
+from schemas.seller_order import (
     OrderItemResponse,
     OrderListResponse,
     OrderCancelRequest,
@@ -87,7 +87,7 @@ async def get_store_orders(
         .join(StoreProductInfo, OrderCurrentItem.product_id == StoreProductInfo.product_id)
         .where(StoreProductInfo.store_id == store_id)
         .options(selectinload(OrderCurrentItem.product))
-        .order_by(OrderCurrentItem.created_at.desc())
+        .order_by(OrderCurrentItem.reservation_at.desc())
     )
     
     result = await session.execute(stmt)
@@ -102,7 +102,7 @@ async def get_store_orders(
             quantity=order.quantity,
             price=order.price,
             status=order.status,
-            created_at=order.created_at,
+            reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             pickup_ready_at=order.pickup_ready_at,
             completed_at=order.completed_at
@@ -156,7 +156,7 @@ async def get_pending_orders(
             )
         )
         .options(selectinload(OrderCurrentItem.product))
-        .order_by(OrderCurrentItem.created_at)
+        .order_by(OrderCurrentItem.reservation_at)
     )
     
     result = await session.execute(stmt)
@@ -171,7 +171,7 @@ async def get_pending_orders(
             quantity=order.quantity,
             price=order.price,
             status=order.status,
-            created_at=order.created_at,
+            reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             pickup_ready_at=order.pickup_ready_at,
             completed_at=order.completed_at
@@ -245,7 +245,7 @@ async def update_order_accept(
         quantity=updated_order.quantity,
         price=updated_order.price,
         status=updated_order.status,
-        created_at=updated_order.created_at,
+        reservation_at=updated_order.reservation_at,
         accepted_at=updated_order.accepted_at,
         pickup_ready_at=updated_order.pickup_ready_at,
         completed_at=updated_order.completed_at
@@ -431,7 +431,7 @@ async def update_order_pickup_ready(
         quantity=updated_order.quantity,
         price=updated_order.price,
         status=updated_order.status,
-        created_at=updated_order.created_at,
+        reservation_at=updated_order.reservation_at,
         accepted_at=updated_order.accepted_at,
         pickup_ready_at=updated_order.pickup_ready_at,
         completed_at=updated_order.completed_at

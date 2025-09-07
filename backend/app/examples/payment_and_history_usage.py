@@ -9,7 +9,7 @@ from repositories import (
     OrderHistoryItemRepository,
     OrderCurrentItemRepository
 )
-from schemas.order import OrderStatus
+from schemas.seller_order import OrderStatus
 
 
 # 1. 가게 결제 정보 관리
@@ -119,7 +119,11 @@ async def daily_closing(db: AsyncSession):
                 "quantity": order.quantity,
                 "price": order.price,
                 "status": order.status,
-                "order_time": order.order_time
+                "reservation_at": order.reservation_at,
+                "accepted_at": order.accepted_at,
+                "pickup_ready_at": order.pickup_ready_at,
+                "completed_at": order.completed_at,
+                "canceled_at": order.canceled_at
             })
         
         history_items = await history_repo.migrate_from_current_orders(order_data)

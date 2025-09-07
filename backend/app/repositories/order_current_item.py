@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, timezone
 
 from database.models.order_current_item import OrderCurrentItem
-from schemas.order import OrderStatus
+from schemas.seller_order import OrderStatus
 from repositories.base import BaseRepository
 
 
@@ -43,19 +43,23 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
     
     async def accept_order(self, payment_id: str) -> Optional[OrderCurrentItem]:
         """주문 수락 처리"""
-        return await self.update(payment_id, status=OrderStatus.accepted, accepted_at=datetime.datetime.now(timezone.utc))
+        return await self.update(payment_id, status=OrderStatus.accepted, accepted_at=datetime.now(timezone.utc))
     
     async def set_pickup_ready(self, payment_id: str) -> Optional[OrderCurrentItem]:
         """픽업 준비 완료 처리"""
-        return await self.update(payment_id, status=OrderStatus.pickup, pickup_ready_at=datetime.datetime.now(timezone.utc))
+        return await self.update(payment_id, status=OrderStatus.pickup, pickup_ready_at=datetime.now(timezone.utc))
     
     async def complete_order(self, payment_id: str) -> Optional[OrderCurrentItem]:
         """픽업 완료 처리"""
-        return await self.update(payment_id, status=OrderStatus.complete, completed_at=datetime.datetime.now(timezone.utc))
+        return await self.update(payment_id, status=OrderStatus.complete, completed_at=datetime.now(timezone.utc))
 
     async def cancel_order(self, payment_id: str) -> int:
         """주문 취소 처리"""
-        canceled_item = await self.update(payment_id, status=OrderStatus.cancel)
+        canceled_item = await self.update(
+            payment_id,
+            status=OrderStatus.cancel,
+            canceled_at=datetime.now(timezone.utc)
+        )
         if canceled_item:
             return canceled_item.quantity
     
@@ -74,7 +78,7 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
             quantity=cart_item["quantity"],
             price=cart_item["price"],
             status=OrderStatus.reservation,
-            created_at=cart_item.get("order_time", datetime.now(timezone.utc))
+            reservation_at=cart_item.get("order_time", datetime.now(timezone.utc))
         )
         
         return None

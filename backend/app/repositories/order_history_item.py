@@ -3,7 +3,7 @@ from datetime import datetime, date, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.order_history_item import OrderHistoryItem
-from schemas.order import OrderStatus
+from schemas.seller_order import OrderStatus
 from repositories.base import BaseRepository
 
 
@@ -29,7 +29,7 @@ class OrderHistoryItemRepository(BaseRepository[OrderHistoryItem]):
         
         return await self.get_many(
             filters=filters,
-            order_by=["-created_at"],
+            order_by=["-reservation_at"],
             load_relations=["product"],
             limit=limit
         )
@@ -46,7 +46,7 @@ class OrderHistoryItemRepository(BaseRepository[OrderHistoryItem]):
         
         return await self.get_many(
             filters=filters,
-            order_by=["-created_at"]
+            order_by=["-reservation_at"]
         )
     
     async def get_by_date_range(
@@ -58,7 +58,7 @@ class OrderHistoryItemRepository(BaseRepository[OrderHistoryItem]):
     ) -> List[OrderHistoryItem]:
         """날짜 범위로 주문 내역 조회"""
         filters = {
-            "created_at": {"gte": start_date, "lte": end_date}
+            "reservation_at": {"gte": start_date, "lte": end_date}
         }
         if user_id:
             filters["user_id"] = user_id
@@ -67,7 +67,7 @@ class OrderHistoryItemRepository(BaseRepository[OrderHistoryItem]):
         
         return await self.get_many(
             filters=filters,
-            order_by=["-created_at"],
+            order_by=["-reservation_at"],
             load_relations=["product"]
         )
     
@@ -82,7 +82,11 @@ class OrderHistoryItemRepository(BaseRepository[OrderHistoryItem]):
                 quantity=order_data["quantity"],
                 price=order_data["price"],
                 status=order_data.get("status"),
-                created_at=order_data.get("order_time", datetime.now(timezone.utc))
+                reservation_at=order_data.get("reservation_at", order_data.get("order_time", datetime.now(timezone.utc))),
+                accepted_at=order_data.get("accepted_at"),
+                pickup_ready_at=order_data.get("pickup_ready_at"),
+                completed_at=order_data.get("completed_at"),
+                canceled_at=order_data.get("canceled_at")
             )
         
         return None

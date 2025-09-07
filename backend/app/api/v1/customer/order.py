@@ -19,7 +19,7 @@ from schemas.customer_order import (
     CustomerOrderCancelRequest,
     CustomerOrderCancelResponse
 )
-from schemas.order import OrderStatus, PickupCompleteRequest
+from schemas.seller_order import OrderStatus, PickupCompleteRequest
 from services.payment import PaymentService
 from config.settings import settings
 from utils.qr_generator import validate_qr_data
@@ -64,7 +64,7 @@ async def get_order_history(
         .options(
             selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
         )
-        .order_by(OrderCurrentItem.created_at.desc())
+        .order_by(OrderCurrentItem.reservation_at.desc())
     )
     
     result = await session.execute(stmt)
@@ -82,7 +82,7 @@ async def get_order_history(
             quantity=order.quantity,
             price=order.price,
             status=order.status,
-            created_at=order.created_at,
+            reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             pickup_ready_at=order.pickup_ready_at,
             completed_at=order.completed_at
@@ -116,7 +116,7 @@ async def get_current_orders(
         .options(
             selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
         )
-        .order_by(OrderCurrentItem.created_at.desc())
+        .order_by(OrderCurrentItem.reservation_at.desc())
     )
     
     result = await session.execute(stmt)
@@ -134,7 +134,7 @@ async def get_current_orders(
             quantity=order.quantity,
             price=order.price,
             status=order.status,
-            created_at=order.created_at,
+            reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             pickup_ready_at=order.pickup_ready_at,
             completed_at=order.completed_at
@@ -200,8 +200,10 @@ async def get_order_detail(
         unit_price=unit_price,
         discount_rate=discount_rate,
         status=order.status,
-        created_at=order.created_at,
-        confirmed_at=order.confirmed_at
+        reservation_at=order.reservation_at,
+        accepted_at=order.accepted_at,
+        pickup_ready_at=order.pickup_ready_at,
+        completed_at=order.completed_at
     )
     
 @router.delete("/{payment_id}", response_model=CustomerOrderCancelResponse,
@@ -415,7 +417,7 @@ async def complete_pickup(
         quantity=completed_order.quantity,
         price=completed_order.price,
         status=completed_order.status,
-        created_at=completed_order.created_at,
+        reservation_at=completed_order.reservation_at,
         accepted_at=completed_order.accepted_at,
         pickup_ready_at=completed_order.pickup_ready_at,
         completed_at=completed_order.completed_at
