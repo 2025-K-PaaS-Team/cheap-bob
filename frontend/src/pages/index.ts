@@ -8,3 +8,4 @@ export { default as Map } from "../components/Lab/Map";
 export { default as CustomerLab } from "./Lab/CustomerLab";
 export { default as SellerLab } from "./Lab/SellerLab";
 export { default as PortOneLab } from "../components/Lab/PortoneLab";
+export {default as QrLab} from './Lab/QrLab'
