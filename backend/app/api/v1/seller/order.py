@@ -4,6 +4,8 @@ from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 from datetime import datetime
 
+from utils.docs_error import create_error_responses
+
 from api.deps import CurrentSellerDep, AsyncSessionDep
 from repositories.store import StoreRepository
 from repositories.order_current_item import OrderCurrentItemRepository
@@ -46,7 +48,13 @@ ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product
 PaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_payment_info_repository)]
 
 
-@router.get("/{store_id}", response_model=OrderListResponse)
+@router.get("/{store_id}", response_model=OrderListResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "가게를 수정할 수 있는 권한이 없음",
+        404:"등록된 가게를 찾을 수 없음"
+    })          
+)
 async def get_store_orders(
     store_id: str,
     current_user: CurrentSellerDep,
@@ -102,7 +110,13 @@ async def get_store_orders(
     )
 
 
-@router.get("/{store_id}/pending", response_model=OrderListResponse)
+@router.get("/{store_id}/pending", response_model=OrderListResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "가게를 수정할 수 있는 권한이 없음",
+        404:"등록된 가게를 찾을 수 없음"
+    })                 
+)
 async def get_pending_orders(
     store_id: str,
     current_user: CurrentSellerDep,
@@ -163,7 +177,14 @@ async def get_pending_orders(
     )
 
 
-@router.patch("/{payment_id}/accept", response_model=OrderItemResponse)
+@router.patch("/{payment_id}/accept", response_model=OrderItemResponse,
+    responses=create_error_responses({
+        400:"이미 처리한 주문",
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "가게를 수정할 수 있는 권한이 없음",
+        404:"등록된 가게를 찾을 수 없음"
+    })                   
+)
 async def update_order_accept(
     payment_id: str,
     current_user: CurrentSellerDep,
@@ -222,7 +243,15 @@ async def update_order_accept(
     )
 
 
-@router.post("/{payment_id}/cancel", response_model=OrderCancelResponse)
+@router.post("/{payment_id}/cancel", response_model=OrderCancelResponse,
+    responses=create_error_responses({
+        400:"이미 취소한 주문",
+        401:["인증 정보가 없음", "토큰 만료"],
+        403: "가게를 수정할 수 있는 권한이 없음",
+        404:"등록된 가게를 찾을 수 없음",
+        409:"재고 복구 중, 충돌 발생"
+    })                    
+)
 async def cancel_order(
     payment_id: str,
     request: OrderCancelRequest,
