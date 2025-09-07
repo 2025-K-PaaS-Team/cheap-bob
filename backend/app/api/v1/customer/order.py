@@ -20,7 +20,7 @@ from schemas.customer_order import (
     CustomerOrderCancelResponse,
     PickupCompleteRequest
 )
-from schemas.seller_order import OrderStatus
+from schemas.order import OrderStatus
 from services.payment import PaymentService
 from config.settings import settings
 from utils.qr_generator import validate_qr_data

@@ -10,7 +10,7 @@ from repositories.store_product_info import StoreProductInfoRepository
 from repositories.cart_item import CartItemRepository
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
-from schemas.seller_order import OrderStatus
+from schemas.order import OrderStatus
 from schemas.payment import (
     PaymentInitRequest,
     PaymentInitResponse,

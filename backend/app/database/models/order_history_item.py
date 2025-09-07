@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from database.session import Base
 
-from schemas.seller_order import OrderStatus
+from schemas.order import OrderStatus
 
 
 

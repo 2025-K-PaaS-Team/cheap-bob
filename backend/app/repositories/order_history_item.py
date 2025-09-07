@@ -3,7 +3,7 @@ from datetime import datetime, date, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.order_history_item import OrderHistoryItem
-from schemas.seller_order import OrderStatus
+from schemas.order import OrderStatus
 from repositories.base import BaseRepository
 
 
