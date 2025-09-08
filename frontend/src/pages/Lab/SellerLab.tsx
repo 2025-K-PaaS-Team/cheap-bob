@@ -14,13 +14,13 @@ import {
 import { useEffect, useState } from "react";
 import type {
   StorePaymentInfoResponseType,
-  ProductRequestType,
   StoreResponseType,
   StoreWithProductResponseType,
   StorePaymentStatusType,
   GetStoreOrderType,
   UpdateOrderAcceptType,
   CancelOrderResponseType,
+  ProductStockBase,
 } from "@interface";
 import {
   cancelOrder,
@@ -36,6 +36,15 @@ const SellerLab = () => {
   const [storeName, setStoreName] = useState<string>("");
   const [myProduct, setMyProduct] =
     useState<StoreWithProductResponseType | null>(null);
+  const [newProduct, setNewProduct] = useState<ProductStockBase>({
+    product_id: "",
+    store_id: "",
+    product_name: "",
+    initial_stock: 0,
+    current_stock: 0,
+    price: 0,
+    sale: 0,
+  });
   const [StorePaymentStatus, setStorePaymentStatus] =
     useState<StorePaymentStatusType | null>(null);
   const [paymentInfo, setPaymentInfo] =
@@ -141,18 +150,16 @@ const SellerLab = () => {
     }
   };
 
-  const [newProduct, setNewProduct] = useState<ProductRequestType | null>(null);
-
   // create seller product
   const handleCreateProduct = async () => {
-    if (!myStore) return;
+    if (!myStore || !newProduct) return;
     try {
       const product = await createProduct({
         store_id: myStore.store_id,
-        product_name: "행복조각",
-        initial_stock: 10,
-        price: 1004,
-        sale: 50,
+        product_name: newProduct.product_name,
+        initial_stock: newProduct.initial_stock,
+        price: newProduct.price,
+        sale: newProduct.sale,
       });
       console.log("등록 성공:", newStore);
       setNewProduct(product);
@@ -410,6 +417,61 @@ const SellerLab = () => {
         >
           물품 등록하기 (POST: seller/products)
         </button>
+        {newProduct && (
+          <>
+            <div className="w-full text-green-500 text-center">
+              물품 정보를 입력하소
+            </div>
+            <input
+              type="text"
+              className="border-2 border-green-500 p-2"
+              placeholder="물품 이름을 입력하소"
+              value={newProduct?.product_name}
+              onChange={(e) =>
+                setNewProduct({ ...newProduct, product_name: e.target.value })
+              }
+            />
+            <input
+              type="number"
+              className="border-2 border-green-500 p-2"
+              placeholder="초기 수량을 입력하소"
+              value={newProduct?.initial_stock}
+              onChange={(e) =>
+                setNewProduct({
+                  ...newProduct,
+                  initial_stock: parseInt(e.target.value),
+                })
+              }
+            />
+            <input
+              type="number"
+              className="border-2 border-green-500 p-2"
+              placeholder="초기 가격을 입력하소"
+              value={newProduct?.price}
+              onChange={(e) =>
+                setNewProduct({
+                  ...newProduct,
+                  price: parseInt(e.target.value),
+                })
+              }
+            />
+            <input
+              type="number"
+              className="border-2 border-green-500 p-2"
+              placeholder="초기 할인율 입력하소"
+              value={newProduct?.sale}
+              onChange={(e) =>
+                setNewProduct({ ...newProduct, sale: parseInt(e.target.value) })
+              }
+            />
+            <button
+              onClick={() => handleCreateProduct()}
+              className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+            >
+              저장하수
+            </button>
+          </>
+        )}
         {newStore && (
           <div className="w-full text-green-500">
             등록된 물품 정보: {JSON.stringify(newProduct)}

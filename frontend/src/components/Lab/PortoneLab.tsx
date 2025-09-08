@@ -1,12 +1,10 @@
 import type {
   ItemType,
   PaymentResponseType,
-  PaymentStatusType,
   ProductDetailType,
 } from "@interface";
 import PortOne from "@portone/browser-sdk/v2";
-import { initPayment } from "@services";
-import { useState } from "react";
+import { confrimPayment, initPayment } from "@services";
 
 type PortOneLabProps = {
   storeId: string;
@@ -14,13 +12,6 @@ type PortOneLabProps = {
 };
 
 const PortOneLab = ({ storeId, product }: PortOneLabProps) => {
-  const [payment, setPayment] = useState<PaymentResponseType | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatusType>({
-    status: "IDLE",
-  });
-
-  console.log(payment, paymentStatus);
-
   const item: ItemType = {
     id: product.product_id,
     name: product.product_name,
@@ -32,26 +23,38 @@ const PortOneLab = ({ storeId, product }: PortOneLabProps) => {
 
   const handleInitPayment = async (): Promise<PaymentResponseType | null> => {
     try {
-      const payment = await initPayment({
+      const res = await initPayment({
         product_id: product.product_id,
         quantity: 1,
       });
-      console.log("초기화 성공", payment);
-      setPayment(payment);
-      return payment;
+      console.log("초기화 성공", res);
+      return res;
     } catch (err: unknown) {
       console.error("등록 실패:", err);
       return null;
     }
   };
 
+  const handleConfrimPayment = async (payment_id: string) => {
+    console.log("payment_id", payment_id);
+    try {
+      const confirm = await confrimPayment({
+        payment_id: payment_id,
+      });
+      console.log("결제 확인 성공", confirm);
+      return confirm;
+    } catch (err: unknown) {
+      console.error("결제 확인 실패", payment_id);
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setPaymentStatus({ status: "PENDING" });
 
     const paymentResult = await handleInitPayment();
     if (!paymentResult) {
-      setPaymentStatus({ status: "FAILED", message: "결제 초기화 실패" });
+      console.log("paymentResult is not existed", paymentResult);
       return;
     }
 
@@ -81,20 +84,13 @@ const PortOneLab = ({ storeId, product }: PortOneLabProps) => {
         },
       });
 
-      if (!response || response.code !== undefined) {
-        setPaymentStatus({
-          status: "FAILED",
-          message: response?.message ?? "결제 실패",
-        });
-        return;
-      }
-
-      setPaymentStatus({ status: "SUCCESS" });
       console.log("결제 성공!", response);
     } catch (err: unknown) {
       console.error("결제 요청 실패:", err);
-      setPaymentStatus({ status: "FAILED", message: "결제 요청 실패" });
     }
+
+    const confirmResult = await handleConfrimPayment(paymentResult.payment_id);
+    console.log("confirmResult", confirmResult);
   };
 
   return (
