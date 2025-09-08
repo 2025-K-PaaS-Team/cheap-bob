@@ -308,7 +308,7 @@ async def confirm_payment(
             "quantity": cart_item.quantity,
             "price": cart_item.price,
             "status": OrderStatus.reservation,
-            "created_at": datetime.now(timezone.utc)
+            "reservation_at": datetime.now(timezone.utc)
         }
         
         await order_repo.create(**order_data)
