@@ -9,8 +9,10 @@ import {
   SellerLab,
   QrLab,
   Order,
+  Store,
+  OrderManage,
 } from "@pages";
-import { CustomerHome, SellerHome } from "@pages/Home";
+import { CustomerHome, SellerHome } from "@pages/Common/Home";
 
 const App = () => {
   return (
@@ -38,6 +40,11 @@ const App = () => {
       <Route path="/s" element={<Layout />}>
         {/* home */}
         <Route index element={<SellerHome />} />
+        {/* order */}
+        <Route path="order" element={<OrderManage />} />
+        {/* store */}
+        <Route path="store" element={<Store />} />
+        {/* lab */}
         <Route path="lab" element={<SellerLab />} />
       </Route>
 
