@@ -8,7 +8,7 @@ from sqlalchemy import pool
 from alembic import context
 
 sys.path.append(str(Path(__file__).parent.parent))
-# sys.path.append(str(Path(__file__).parent.parent / "app")) 데이터베이스 마이그레이션 할 때
+# sys.path.append(str(Path(__file__).parent.parent / "app")) # 데이터베이스 마이그레이션 할 때
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
