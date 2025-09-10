@@ -90,5 +90,12 @@ export type CancelOrderResponseType = {
   payment_id: string;
   status: string;
   message: string;
-  refunded_amount: 0;
+  refunded_amount: number;
+};
+
+
+export type GetQrCodeType = {
+  payment_id: string;
+  qr_data: string;
+  created_at: TimeStamp;
 };

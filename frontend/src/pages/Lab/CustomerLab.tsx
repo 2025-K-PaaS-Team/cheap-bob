@@ -1,9 +1,6 @@
 import type { PaymentConfirmType, PaymentResponseType } from "@interface";
-import type {
-  OrderDeleteResponseType,
-  OrderDetailResponseType,
-  OrdersResponseType,
-} from "@interface/customer/types";
+import type { OrderBaseType } from "@interface/common/types";
+import type { OrderDeleteResponseType } from "@interface/customer/order";
 import {
   deleteOrder,
   getCurrentOrders,
@@ -23,7 +20,7 @@ const CustomerLab = () => {
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [stores, setStores] = useState(null);
   const [store, setStore] = useState(null);
-  const [orders, setOrders] = useState<OrdersResponseType | null>(null);
+  const [orders, setOrders] = useState<OrderBaseType[] | null>(null);
   const [currentOrders, setCurrentOrders] = useState<OrdersResponseType | null>(
     null
   );

@@ -1,19 +1,19 @@
 import type {
   OrderDeleteResponseType,
   OrderDetailResponseType,
-  OrdersResponseType,
-} from "@interface/customer/types";
+  OrderResponseType,
+} from "@interface/customer/order";
 import { customerOrderApi } from "@services/client";
 
 // GET: get order history
-export const getOrders = async (): Promise<OrdersResponseType> => {
+export const getOrders = async (): Promise<OrderResponseType> => {
   const { data } = await customerOrderApi.get("");
 
   return data;
 };
 
 // GET: get current order
-export const getCurrentOrders = async (): Promise<OrdersResponseType> => {
+export const getCurrentOrders = async (): Promise<OrderResponseType> => {
   const { data } = await customerOrderApi.get("/current");
   return data;
 };

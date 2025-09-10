@@ -8,6 +8,7 @@ import {
   CustomerLab,
   SellerLab,
   QrLab,
+  Order,
 } from "@pages";
 import { CustomerHome, SellerHome } from "@pages/Home";
 
@@ -24,6 +25,8 @@ const App = () => {
         {/* store */}
         <Route path="stores" element={<StoreList />} />
         <Route path="stores/:storeId" element={<StoreDetail />} />
+        {/* order */}
+        <Route path="order" element={<Order />} />
         {/* mypage */}
         <Route path="my" element={<My />} />
         {/* lab */}
