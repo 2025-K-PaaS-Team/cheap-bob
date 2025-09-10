@@ -1,9 +1,9 @@
-import type { OrderBaseType, TimeStamp } from "@interface/common/types";
-
-export type StoreBase = {
-  store_id: string;
-  store_name: string;
-};
+import type {
+  OrderBaseType,
+  QrBaseType,
+  StoreBaseType,
+  TimeStamp,
+} from "@interface/common/types";
 
 export type ProductDetailType = {
   product_id: string;
@@ -12,7 +12,7 @@ export type ProductDetailType = {
   price: number;
 };
 
-export type StoreDetailType = StoreBase & {
+export type StoreDetailType = StoreBaseType & {
   products: ProductDetailType[];
 };
 
@@ -35,12 +35,12 @@ export type StoreRequestType = {
   store_name: string;
 };
 
-export type StoreResponseType = StoreBase & {
+export type StoreResponseType = StoreBaseType & {
   seller_email: string;
   created_at: TimeStamp;
 };
 
-export type StoreWithProductResponseType = StoreBase & {
+export type StoreWithProductResponseType = StoreBaseType & {
   products: StoreProduct[];
   total: number;
 };
@@ -82,13 +82,14 @@ export type GetStoreOrderType = {
 
 export type UpdateOrderAcceptType = OrderBaseType;
 
-export type CancelOrderRequestType = {
-  reason: string;
-};
-
 export type CancelOrderResponseType = {
   payment_id: string;
   status: string;
   message: string;
-  refunded_amount: 0;
+  refunded_amount: number;
+};
+
+export type GetQrCodeType = QrBaseType & {
+  payment_id: string;
+  created_at: TimeStamp;
 };

@@ -30,9 +30,12 @@ const StoreDetail = () => {
       {store && (
         <div className="flex flex-col gap-y-5 justify-center p-8">
           <h3>가게 이름: {store.store_name}</h3>
-          <div className="gap-y-5 flex flex-col">
-            {store.products.map((p) => (
-              <div className="border-1 border-gray-400 shadow-md rounded-lg flex flex-col gap-y-2">
+          <div key={store.store_name} className="gap-y-5 flex flex-col">
+            {store.products.map((p, idx) => (
+              <div
+                key={idx}
+                className="border-1 border-gray-400 shadow-md rounded-lg flex flex-col gap-y-2"
+              >
                 <img
                   src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyMNzjqxn4hQQ8bmPj7I1VN8DEWEKf5AsILQ&s"
                   className="flex items-center justify-center w-full"

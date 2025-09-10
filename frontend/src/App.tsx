@@ -7,8 +7,12 @@ import {
   LoginCallback,
   CustomerLab,
   SellerLab,
+  QrLab,
+  Order,
+  Store,
+  OrderManage,
 } from "@pages";
-import { CustomerHome, SellerHome } from "@pages/Home";
+import { CustomerHome, SellerHome } from "@pages/Common/Home";
 
 const App = () => {
   return (
@@ -23,16 +27,24 @@ const App = () => {
         {/* store */}
         <Route path="stores" element={<StoreList />} />
         <Route path="stores/:storeId" element={<StoreDetail />} />
+        {/* order */}
+        <Route path="order" element={<Order />} />
         {/* mypage */}
         <Route path="my" element={<My />} />
         {/* lab */}
         <Route path="lab" element={<CustomerLab />} />
+        <Route path="qr" element={<QrLab />} />
       </Route>
 
       {/* seller side */}
       <Route path="/s" element={<Layout />}>
         {/* home */}
         <Route index element={<SellerHome />} />
+        {/* order */}
+        <Route path="order" element={<OrderManage />} />
+        {/* store */}
+        <Route path="store" element={<Store />} />
+        {/* lab */}
         <Route path="lab" element={<SellerLab />} />
       </Route>
 

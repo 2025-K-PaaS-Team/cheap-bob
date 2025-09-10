@@ -1,6 +1,8 @@
 from typing import Annotated, List
 from fastapi import APIRouter, HTTPException, Path, Depends, status
 
+from utils.docs_error import create_error_responses
+
 from api.deps import CurrentCustomerDep, AsyncSessionDep
 from schemas.product import ProductsResponse, ProductInfo
 from schemas.store import StoreResponse
@@ -22,7 +24,11 @@ StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
 ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product_repository)]
 
 
-@router.get("/stores", response_model=List[StoreResponse])
+@router.get("/stores", response_model=List[StoreResponse],
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"]
+    })
+)
 async def get_stores(
     current_user: CurrentCustomerDep,
     store_repo: StoreRepositoryDep
@@ -39,7 +45,12 @@ async def get_stores(
     return [StoreResponse.model_validate(store) for store in stores]
 
 
-@router.get("/stores/{store_id}/products", response_model=ProductsResponse)
+@router.get("/stores/{store_id}/products", response_model=ProductsResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        404:"가게를 찾을 수 없음"
+    })             
+)
 async def get_store_products(
     store_id: str,
     current_user: CurrentCustomerDep,

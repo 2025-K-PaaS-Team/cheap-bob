@@ -1,8 +1,18 @@
 // import Wrapper from "./Wrapper";
-import { Wrapper, Main, Footer, Header } from "@components/layouts";
-import { Outlet } from "react-router";
+import {
+  Wrapper,
+  Main,
+  Footer,
+  Header,
+  SellerFooter,
+} from "@components/layouts";
+import { Outlet, useLocation } from "react-router";
 
 const Layout = () => {
+  const location = useLocation();
+  const path = location.pathname;
+  const isCustomer = path.includes("c");
+
   return (
     <>
       <Wrapper>
@@ -10,7 +20,7 @@ const Layout = () => {
         <Main>
           <Outlet />
         </Main>
-        <Footer />
+        {isCustomer ? <Footer /> : <SellerFooter />}
       </Wrapper>
     </>
   );

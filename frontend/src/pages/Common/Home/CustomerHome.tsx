@@ -9,10 +9,7 @@ const CustomerHome = () => {
     const token = localStorage.getItem("accessToken");
 
     if (token) {
-      // alert("이미 로그인이 되어 있어요.");
-      setTimeout(() => {
-        navigate("stores");
-      }, 3000);
+      navigate("stores");
     }
   }, []);
 

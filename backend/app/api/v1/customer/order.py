@@ -4,21 +4,26 @@ from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 from datetime import datetime
 
+from utils.docs_error import create_error_responses
+
 from api.deps import CurrentCustomerDep, AsyncSessionDep
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
-from database.models.order_current_item import OrderCurrentItem, OrderStatus
+from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
 from schemas.customer_order import (
     CustomerOrderItemResponse,
     CustomerOrderListResponse,
     CustomerOrderDetailResponse,
     CustomerOrderCancelRequest,
-    CustomerOrderCancelResponse
+    CustomerOrderCancelResponse,
+    PickupCompleteRequest
 )
+from schemas.order import OrderStatus
 from services.payment import PaymentService
 from config.settings import settings
+from utils.qr_generator import validate_qr_data
 
 router = APIRouter(prefix="/orders", tags=["Customer-Order"])
 
@@ -40,7 +45,11 @@ ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product
 PaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_payment_info_repository)]
 
 
-@router.get("", response_model=CustomerOrderListResponse)
+@router.get("", response_model=CustomerOrderListResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"]
+    })
+)
 async def get_order_history(
     current_user: CurrentCustomerDep,
     session: AsyncSessionDep
@@ -56,7 +65,7 @@ async def get_order_history(
         .options(
             selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
         )
-        .order_by(OrderCurrentItem.created_at.desc())
+        .order_by(OrderCurrentItem.reservation_at.desc())
     )
     
     result = await session.execute(stmt)
@@ -74,8 +83,11 @@ async def get_order_history(
             quantity=order.quantity,
             price=order.price,
             status=order.status,
-            created_at=order.created_at,
-            confirmed_at=order.confirmed_at
+            reservation_at=order.reservation_at,
+            accepted_at=order.accepted_at,
+            pickup_ready_at=order.pickup_ready_at,
+            completed_at=order.completed_at,
+            canceled_at=order.canceled_at
         )
         order_responses.append(order_response)
     
@@ -85,24 +97,28 @@ async def get_order_history(
     )
 
 
-@router.get("/current", response_model=CustomerOrderListResponse)
+@router.get("/current", response_model=CustomerOrderListResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"]
+    })
+)
 async def get_current_orders(
     current_user: CurrentCustomerDep,
     session: AsyncSessionDep
 ):
     """
-    현재 진행중인 주문 조회
+    현재 진행중인 주문 조회 (reservation, accepted, pickup)
     """
     
-    # 사용자의 현재 진행중인 주문만 조회 (reservation)
+    # 사용자의 현재 진행중인 주문만 조회 (reservation, accepted, pickup)
     stmt = (
         select(OrderCurrentItem)
         .where(OrderCurrentItem.user_id == current_user["sub"])
-        .where(OrderCurrentItem.status == OrderStatus.reservation)
+        .where(OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept, OrderStatus.pickup]))
         .options(
             selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
         )
-        .order_by(OrderCurrentItem.created_at.desc())
+        .order_by(OrderCurrentItem.reservation_at.desc())
     )
     
     result = await session.execute(stmt)
@@ -120,8 +136,11 @@ async def get_current_orders(
             quantity=order.quantity,
             price=order.price,
             status=order.status,
-            created_at=order.created_at,
-            confirmed_at=order.confirmed_at
+            reservation_at=order.reservation_at,
+            accepted_at=order.accepted_at,
+            pickup_ready_at=order.pickup_ready_at,
+            completed_at=order.completed_at,
+            canceled_at=order.canceled_at
         )
         order_responses.append(order_response)
     
@@ -131,7 +150,13 @@ async def get_current_orders(
     )
 
 
-@router.get("/{payment_id}", response_model=CustomerOrderDetailResponse)
+@router.get("/{payment_id}", response_model=CustomerOrderDetailResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        403:"주문을 확인할 권한이 없음",
+        404: "주문을 찾을 수 없음"
+    })            
+)
 async def get_order_detail(
     payment_id: str,
     current_user: CurrentCustomerDep,
@@ -145,7 +170,9 @@ async def get_order_detail(
     stmt = (
         select(OrderCurrentItem)
         .where(OrderCurrentItem.payment_id == payment_id)
-        .options(selectinload(OrderCurrentItem.product))
+        .options(
+            selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
+        )
     )
     result = await session.execute(stmt)
     order = result.scalar_one_or_none()
@@ -178,11 +205,21 @@ async def get_order_detail(
         unit_price=unit_price,
         discount_rate=discount_rate,
         status=order.status,
-        created_at=order.created_at,
-        confirmed_at=order.confirmed_at
+        reservation_at=order.reservation_at,
+        accepted_at=order.accepted_at,
+        pickup_ready_at=order.pickup_ready_at,
+        completed_at=order.completed_at
     )
     
-@router.delete("/{payment_id}", response_model=CustomerOrderCancelResponse)
+@router.delete("/{payment_id}", response_model=CustomerOrderCancelResponse,
+    responses=create_error_responses({
+        400: ["이미 취소된 주문", "이미 승인된 주문"],
+        401:["인증 정보가 없음", "토큰 만료"],
+        403:"주문을 확인할 권한이 없음",
+        404:"상품을 찾을 수 없음",
+        409: "동시성 충돌 발생"
+    })               
+)
 async def delete_order(
     payment_id: str,
     request: CustomerOrderCancelRequest,
@@ -225,11 +262,11 @@ async def delete_order(
             detail="이미 취소된 주문입니다"
         )
     
-    # 승인된 주문은 취소 불가
-    if order.status == OrderStatus.complete:
+    # 수락된 주문은 취소 불가
+    if order.status in [OrderStatus.accept, OrderStatus.pickup, OrderStatus.complete]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="이미 승인된 주문은 취소할 수 없습니다"
+            detail="이미 처리 중인 주문은 취소할 수 없습니다"
         )
     
     # 가게의 결제 정보 조회
@@ -287,4 +324,109 @@ async def delete_order(
     return CustomerOrderCancelResponse(
         payment_id=payment_id,
         refunded_amount=order.price
+    )
+
+
+@router.patch("/{payment_id}/pickup-complete", response_model=CustomerOrderItemResponse,
+    responses=create_error_responses({
+        400:["유효하지 않은 QR 코드", "권한이 없는 사용자", "이미 픽업 완료"],
+        401:["인증 정보가 없음", "토큰 만료"],
+        404:["주문을 찾을 수 없음", "QR 코드를 찾을 수 없음"]
+    })               
+)
+async def complete_pickup(
+    payment_id: str,
+    request: PickupCompleteRequest,
+    current_user: CurrentCustomerDep,
+    order_repo: OrderRepositoryDep,
+    session: AsyncSessionDep
+):
+    """
+    픽업 완료 처리 (QR 코드 검증)
+    """
+    
+    # 주문 조회
+    stmt = (
+        select(OrderCurrentItem)
+        .where(OrderCurrentItem.payment_id == payment_id)
+        .options(
+            selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
+        )
+    )
+    result = await session.execute(stmt)
+    order = result.scalar_one_or_none()
+    
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="주문을 찾을 수 없습니다"
+        )
+    
+    # 주문 상태 확인
+    if order.status != OrderStatus.pickup:
+        if order.status == OrderStatus.complete:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="이미 픽업이 완료된 주문입니다"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="픽업 준비가 되지 않은 주문입니다"
+            )
+    
+    # QR 데이터 검증
+    is_valid, qr_data, error_msg = validate_qr_data(
+        request.qr_data,
+        current_user["sub"]
+    )
+    
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_msg
+        )
+    
+    # 세 가지 유저 ID 검증
+    # 1. JWT의 유저 ID: current_user["sub"]
+    # 2. QR의 유저 ID: qr_data["user_id"]
+    # 3. 주문의 유저 ID: order.user_id
+    
+    if not (current_user["sub"] == qr_data["user_id"] == order.user_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="권한이 없는 사용자입니다"
+        )
+    
+    # 결제 ID 검증
+    if qr_data["payment_id"] != payment_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="잘못된 QR 코드입니다"
+        )
+    
+    # 상품 ID 검증
+    if qr_data["product_id"] != order.product_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="상품 정보가 일치하지 않습니다"
+        )
+    
+    # 주문 상태를 완료로 변경
+    completed_order = await order_repo.complete_order(payment_id)
+    
+    return CustomerOrderItemResponse(
+        payment_id=completed_order.payment_id,
+        product_id=completed_order.product_id,
+        product_name=order.product.product_name,
+        store_id=order.product.store_id,
+        store_name=order.product.store.store_name,
+        quantity=completed_order.quantity,
+        price=completed_order.price,
+        status=completed_order.status,
+        reservation_at=completed_order.reservation_at,
+        accepted_at=completed_order.accepted_at,
+        pickup_ready_at=completed_order.pickup_ready_at,
+        completed_at=completed_order.completed_at,
+        canceled_at=order.canceled_at
     )
