@@ -1,9 +1,10 @@
 import type { PaymentConfirmType, PaymentResponseType } from "@interface";
+import type { OrderBaseType } from "@interface/common/types";
 import type {
   OrderDeleteResponseType,
   OrderDetailResponseType,
-  OrdersResponseType,
-} from "@interface/customer/types";
+  OrderResponseType,
+} from "@interface/customer/order";
 import {
   deleteOrder,
   getCurrentOrders,
@@ -23,8 +24,8 @@ const CustomerLab = () => {
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [stores, setStores] = useState(null);
   const [store, setStore] = useState(null);
-  const [orders, setOrders] = useState<OrdersResponseType | null>(null);
-  const [currentOrders, setCurrentOrders] = useState<OrdersResponseType | null>(
+  const [orders, setOrders] = useState<OrderBaseType[] | null>(null);
+  const [currentOrders, setCurrentOrders] = useState<OrderResponseType | null>(
     null
   );
   const [orderDetail, setOrderDetail] =
@@ -104,7 +105,7 @@ const CustomerLab = () => {
     try {
       const orders = await getOrders();
       console.log("주문 목록 가져오기 성공", orders);
-      setOrders(orders);
+      setOrders(orders.orders);
     } catch (err: unknown) {
       console.error("get stores fail");
       const msg = err instanceof Error ? err.message : "실패해소";
@@ -127,9 +128,9 @@ const CustomerLab = () => {
   const handleGetOrderDetail = async () => {
     if (!orders) return;
     try {
-      const orderDetail = await getOrderDetail(orders.orders[0]?.payment_id);
-      console.log("주문 상세 가져오기 성공", orderDetail);
-      setOrderDetail(orderDetail);
+      const res = await getOrderDetail(orders[0]?.payment_id);
+      console.log("주문 상세 가져오기 성공", res);
+      setOrderDetail(res);
     } catch (err: unknown) {
       console.error("get order detail failed", err);
       const msg = err instanceof Error ? err.message : "실패해소";
@@ -140,7 +141,9 @@ const CustomerLab = () => {
   const handleDeleteOrder = async () => {
     if (!orders) return;
     try {
-      const orderDelete = await deleteOrder(orders.orders[0]?.payment_id);
+      const orderDelete = await deleteOrder(orders[0]?.payment_id, {
+        reason: "개인 사정",
+      });
       console.log("결제 취소 성공", orderDelete);
       setOrderDelete(orderDelete);
     } catch (err: unknown) {

@@ -1,13 +1,13 @@
 import type { OrderBaseType } from "@interface/common/types";
 
-export type OrderDetailResponseType = OrderBaseType & {
-  store_id: string;
-  store_name: string;
+export type OrderResponseType = {
+  orders: OrderBaseType[];
+  total: number;
 };
 
-export type OrdersResponseType = {
-  orders: OrderDetailResponseType[];
-  total: number;
+export type OrderDetailResponseType = OrderBaseType & {
+  unit_price: number;
+  discount_rate: number;
 };
 
 export type OrderDeleteRequestType = {

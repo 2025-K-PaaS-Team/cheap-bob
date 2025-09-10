@@ -1,33 +1,38 @@
 import {
   createProduct,
   createStore,
+  DecreaseProductStock,
   deleteProduct,
   deleteStore,
   getStore,
   getStorePaymentStatus,
   getStoreProduct,
+  IncreaseProductStock,
   registerStorePayment,
   updateProductPrice,
-  updateProductStock,
   updateStore,
 } from "@services";
 import { useEffect, useState } from "react";
-import type {
-  StorePaymentInfoResponseType,
-  ProductRequestType,
-  StoreResponseType,
-  StoreWithProductResponseType,
-  StorePaymentStatusType,
-  GetStoreOrderType,
-  UpdateOrderAcceptType,
-  CancelOrderResponseType,
+import {
+  type StorePaymentInfoResponseType,
+  type StoreResponseType,
+  type StoreWithProductResponseType,
+  type StorePaymentStatusType,
+  type GetStoreOrderType,
+  type UpdateOrderAcceptType,
+  type CancelOrderResponseType,
+  type ProductStockBase,
+  type GetQrCodeType,
 } from "@interface";
 import {
   cancelOrder,
+  GetOrderQr,
   getStoreOrder,
   getStorePendingOrder,
   updateOrderAccept,
+  updatePickupReady,
 } from "@services/seller/order";
+import { QRCodeSVG } from "qrcode.react";
 
 const SellerLab = () => {
   const [errMsg, setErrMsg] = useState<string | null>(null);
@@ -36,6 +41,15 @@ const SellerLab = () => {
   const [storeName, setStoreName] = useState<string>("");
   const [myProduct, setMyProduct] =
     useState<StoreWithProductResponseType | null>(null);
+  const [newProduct, setNewProduct] = useState<ProductStockBase>({
+    product_id: "",
+    store_id: "",
+    product_name: "",
+    initial_stock: 0,
+    current_stock: 0,
+    price: 0,
+    sale: 0,
+  });
   const [StorePaymentStatus, setStorePaymentStatus] =
     useState<StorePaymentStatusType | null>(null);
   const [paymentInfo, setPaymentInfo] =
@@ -46,6 +60,10 @@ const SellerLab = () => {
   );
   const [accept, setAccept] = useState<UpdateOrderAcceptType | null>(null);
   const [cancel, setCancel] = useState<CancelOrderResponseType | null>(null);
+  const [pickup, setPickup] = useState<UpdateOrderAcceptType | null>(null);
+  const [qrData, setQrData] = useState<GetQrCodeType | null>(null);
+
+  console.log("myProduct", myProduct);
 
   /* err message */
   useEffect(() => {
@@ -141,18 +159,16 @@ const SellerLab = () => {
     }
   };
 
-  const [newProduct, setNewProduct] = useState<ProductRequestType | null>(null);
-
   // create seller product
   const handleCreateProduct = async () => {
-    if (!myStore) return;
+    if (!myStore || !newProduct) return;
     try {
       const product = await createProduct({
         store_id: myStore.store_id,
-        product_name: "행복조각",
-        initial_stock: 10,
-        price: 1004,
-        sale: 50,
+        product_name: newProduct.product_name,
+        initial_stock: newProduct.initial_stock,
+        price: newProduct.price,
+        sale: newProduct.sale,
       });
       console.log("등록 성공:", newStore);
       setNewProduct(product);
@@ -197,18 +213,33 @@ const SellerLab = () => {
     }
   };
 
-  // update product stock
-  const handleUpdateProductStock = async () => {
+  // Increase product stock
+  const handleIncreaseStock = async () => {
     if (!myProduct) return;
     try {
-      const product = await updateProductStock(
-        myProduct.products[0].product_id,
-        { stock: 10 }
+      const product = await IncreaseProductStock(
+        myProduct.products[0].product_id
       );
-      console.log("상품 스톡 업데이트 성공:", product);
+      console.log("상품 스톡 증가 성공:", product);
       setMyProduct(myProduct);
     } catch (err: unknown) {
-      console.error("상품 스톡 업데이트 실패:", err);
+      console.error("상품 스톡 증가 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // Decrease product stock
+  const handleDecreaseStock = async () => {
+    if (!myProduct) return;
+    try {
+      const product = await DecreaseProductStock(
+        myProduct.products[0].product_id
+      );
+      console.log("상품 스톡 증가 성공:", product);
+      setMyProduct(myProduct);
+    } catch (err: unknown) {
+      console.error("상품 스톡 증가 실패:", err);
       const msg = err instanceof Error ? err.message : "실패했슈...";
       setErrMsg(msg);
     }
@@ -261,7 +292,7 @@ const SellerLab = () => {
   // update order accept
   const hadnleUpdateOrderAccept = async () => {
     try {
-      const accept = await updateOrderAccept("PAY_23caf6f1_1756795736");
+      const accept = await updateOrderAccept("PAY_df1b315a_1757484627");
       setAccept(accept);
     } catch (err: unknown) {
       console.error("patch 실패:", err);
@@ -273,12 +304,38 @@ const SellerLab = () => {
   // cancel order
   const hadnleCancelOrder = async () => {
     try {
-      const cancel = await cancelOrder("PAY_23caf6f1_1756795736", {
+      const cancel = await cancelOrder("PAY_df1b315a_1757484627", {
         reason: "판매자 요청",
       });
       setCancel(cancel);
     } catch (err: unknown) {
       console.error("post 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // update order pickup ready
+  const handlePickupReady = async () => {
+    try {
+      const res = await updatePickupReady("PAY_df1b315a_1757484627");
+      console.log("handlePickupready", res);
+      setPickup(res);
+    } catch (err: unknown) {
+      console.error("handlePickupReady 실패:", err);
+      const msg = err instanceof Error ? err.message : "실패했슈...";
+      setErrMsg(msg);
+    }
+  };
+
+  // get qr data
+  const handleGetOrderQr = async () => {
+    try {
+      const res = await GetOrderQr("PAY_df1b315a_1757484627");
+      console.log("handleGetOrderQr", res);
+      setQrData(res);
+    } catch (err: unknown) {
+      console.error("handleGetOrderQr 실패:", err);
       const msg = err instanceof Error ? err.message : "실패했슈...";
       setErrMsg(msg);
     }
@@ -410,6 +467,61 @@ const SellerLab = () => {
         >
           물품 등록하기 (POST: seller/products)
         </button>
+        {newProduct && (
+          <>
+            <div className="w-full text-green-500 text-center">
+              물품 정보를 입력하소
+            </div>
+            <input
+              type="text"
+              className="border-2 border-green-500 p-2"
+              placeholder="물품 이름을 입력하소"
+              value={newProduct?.product_name}
+              onChange={(e) =>
+                setNewProduct({ ...newProduct, product_name: e.target.value })
+              }
+            />
+            <input
+              type="number"
+              className="border-2 border-green-500 p-2"
+              placeholder="초기 수량을 입력하소"
+              value={newProduct?.initial_stock}
+              onChange={(e) =>
+                setNewProduct({
+                  ...newProduct,
+                  initial_stock: parseInt(e.target.value),
+                })
+              }
+            />
+            <input
+              type="number"
+              className="border-2 border-green-500 p-2"
+              placeholder="초기 가격을 입력하소"
+              value={newProduct?.price}
+              onChange={(e) =>
+                setNewProduct({
+                  ...newProduct,
+                  price: parseInt(e.target.value),
+                })
+              }
+            />
+            <input
+              type="number"
+              className="border-2 border-green-500 p-2"
+              placeholder="초기 할인율 입력하소"
+              value={newProduct?.sale}
+              onChange={(e) =>
+                setNewProduct({ ...newProduct, sale: parseInt(e.target.value) })
+              }
+            />
+            <button
+              onClick={() => handleCreateProduct()}
+              className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+            >
+              저장하수
+            </button>
+          </>
+        )}
         {newStore && (
           <div className="w-full text-green-500">
             등록된 물품 정보: {JSON.stringify(newProduct)}
@@ -445,9 +557,9 @@ const SellerLab = () => {
         {/* update product stock */}
         <button
           className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
-          onClick={() => handleUpdateProductStock()}
+          onClick={() => handleIncreaseStock()}
         >
-          물품 수량 변경 (PATCH: seller/products)
+          물품 수량 +1 (PATCH: seller/products)
         </button>
         {newStore && (
           <div className="w-full text-green-500">
@@ -458,9 +570,9 @@ const SellerLab = () => {
         {/* update product stock */}
         <button
           className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
-          onClick={() => handleUpdateProductStock()}
+          onClick={() => handleDecreaseStock()}
         >
-          물품 수량 변경 (PATCH: seller/products)
+          물품 수량 -1 (PATCH: seller/products)
         </button>
         {newStore && (
           <div className="w-full text-green-500">
@@ -511,7 +623,7 @@ const SellerLab = () => {
           </div>
         )}
 
-        {/* update order accept */}
+        {/* cancel order */}
         <button
           className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
           onClick={() => hadnleCancelOrder()}
@@ -523,6 +635,28 @@ const SellerLab = () => {
             취소된 물품 정보: {JSON.stringify(cancel)}
           </div>
         )}
+
+        {/* update order pickup ready*/}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handlePickupReady()}
+        >
+          주문 픽업 준비 완료로 변경 (PATCH: seller/orders)
+        </button>
+        {pickup && (
+          <div className="w-full text-green-500">
+            픽업준비 물품 정보: {JSON.stringify(pickup)}
+          </div>
+        )}
+
+        {/* get order qr */}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetOrderQr()}
+        >
+          ORDER QR 받기 (POST: seller/orders)
+        </button>
+        {qrData && <QRCodeSVG value={qrData.qr_data} size={100} />}
       </div>
     </div>
   );
