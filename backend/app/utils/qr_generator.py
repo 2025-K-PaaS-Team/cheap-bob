@@ -27,7 +27,7 @@ def encode_qr_data(user_id: str, payment_id: str, product_id: str) -> Tuple[str,
     }
     
     # JWT로 암호화
-    encoded = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+    encoded = jwt.encode(payload, settings.JWT_SECRET, algorithm="HS256")
     return encoded, created_at
 
 
@@ -42,7 +42,7 @@ def decode_qr_data(qr_data: str) -> Optional[Dict[str, str]]:
         디코딩된 데이터 딕셔너리 또는 None (유효하지 않은 경우)
     """
     try:
-        decoded = jwt.decode(qr_data, settings.SECRET_KEY, algorithms=["HS256"])
+        decoded = jwt.decode(qr_data, settings.JWT_SECRET, algorithms=["HS256"])
         return {
             "user_id": decoded.get("user_id"),
             "payment_id": decoded.get("payment_id"),
