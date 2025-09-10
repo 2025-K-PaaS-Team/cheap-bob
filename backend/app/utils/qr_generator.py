@@ -16,19 +16,19 @@ def encode_qr_data(user_id: str, payment_id: str, product_id: str) -> Tuple[str,
     Returns:
         인코딩된 QR 데이터 문자열
     """
-    created_at = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc)
     
     payload = {
         "user_id": user_id,
         "payment_id": payment_id,
         "product_id": product_id,
-        "created_at": created_at,
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=5)  # 5분 유효
+        "iat": now,
+        "exp": now + timedelta(minutes=5)
     }
     
     # JWT로 암호화
-    encoded = jwt.encode(payload, settings.JWT_SECRET, algorithm="HS256")
-    return encoded, created_at
+    encoded = jwt.encode(payload, settings.JWT_SECRET, settings.JWT_ALGORITHM)
+    return encoded, now
 
 
 def decode_qr_data(qr_data: str) -> Optional[Dict[str, str]]:
@@ -42,12 +42,12 @@ def decode_qr_data(qr_data: str) -> Optional[Dict[str, str]]:
         디코딩된 데이터 딕셔너리 또는 None (유효하지 않은 경우)
     """
     try:
-        decoded = jwt.decode(qr_data, settings.JWT_SECRET, algorithms=["HS256"])
+        decoded = jwt.decode(qr_data, settings.JWT_SECRET, settings.JWT_ALGORITHM)
         return {
             "user_id": decoded.get("user_id"),
             "payment_id": decoded.get("payment_id"),
             "product_id": decoded.get("product_id"),
-            "created_at": decoded.get("created_at")
+            "created_at": decoded.get("iat")
         }
     except jwt.ExpiredSignatureError:
         return None  # 만료된 QR
