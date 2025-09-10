@@ -39,3 +39,11 @@ export type OrderBaseType = PaymentBaseType &
     quantity: number;
     price: number;
   };
+
+export type CancelOrderRequestType = {
+  reason: string;
+};
+
+export type QrBaseType = {
+  qr_data: string;
+};

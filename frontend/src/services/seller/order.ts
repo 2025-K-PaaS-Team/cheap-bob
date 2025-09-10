@@ -1,11 +1,13 @@
 import type {
-  CancelOrderRequestType,
   CancelOrderResponseType,
   GetQrCodeType,
   GetStoreOrderType,
   UpdateOrderAcceptType,
 } from "@interface";
-import type { OrderStatusType } from "@interface/common/types";
+import type {
+  CancelOrderRequestType,
+  OrderStatusBaseType,
+} from "@interface/common/types";
 import { sellerOrderApi } from "@services/client";
 
 // GET: get store orders
@@ -48,7 +50,7 @@ export const cancelOrder = async (
 // PATCH: update order pickup ready
 export const updatePickupReady = async (
   paymentId: string
-): Promise<OrderStatusType> => {
+): Promise<OrderStatusBaseType> => {
   const { data } = await sellerOrderApi.patch(`/${paymentId}/pickup-ready`);
 
   return data;

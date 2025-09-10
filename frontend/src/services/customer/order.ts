@@ -1,4 +1,9 @@
 import type {
+  CancelOrderRequestType,
+  OrderBaseType,
+  QrBaseType,
+} from "@interface/common/types";
+import type {
   OrderDeleteResponseType,
   OrderDetailResponseType,
   OrderResponseType,
@@ -29,9 +34,25 @@ export const getOrderDetail = async (
 
 // DELETE: delete order
 export const deleteOrder = async (
-  paymentId: string
+  paymentId: string,
+  body: CancelOrderRequestType
 ): Promise<OrderDeleteResponseType> => {
-  const { data } = await customerOrderApi.delete(`/${paymentId}`);
+  const { data } = await customerOrderApi.delete(`/${paymentId}`, {
+    data: body,
+  });
+
+  return data;
+};
+
+// PATCH: patch pickup complete
+export const completePickup = async (
+  paymentId: string,
+  body: QrBaseType
+): Promise<OrderBaseType> => {
+  const { data } = await customerOrderApi.patch(
+    `/${paymentId}/pickup-complete`,
+    body
+  );
 
   return data;
 };
