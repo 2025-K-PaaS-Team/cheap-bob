@@ -2,7 +2,6 @@ import type {
   ProductBase,
   ProductRequestType,
   ProductResponseType,
-  UpdateProductStockRequestType,
 } from "@interface";
 import { sellerProductApi } from "@services/client";
 
@@ -32,14 +31,23 @@ export const deleteProduct = async (productId: string): Promise<void> => {
   await sellerProductApi.delete<void>(`/${productId}`);
 };
 
-// PATCH: update product stock
-export const updateProductStock = async (
-  productId: string,
-  body: UpdateProductStockRequestType
+// PATCH: Increase product stock
+export const IncreaseProductStock = async (
+  productId: string
 ): Promise<ProductResponseType> => {
   const { data } = await sellerProductApi.patch<ProductResponseType>(
-    `/${productId}/stock`,
-    body
+    `/${productId}/stock/up`
+  );
+
+  return data;
+};
+
+// PATCH: Decrease product stock
+export const DecreaseProductStock = async (
+  productId: string
+): Promise<ProductResponseType> => {
+  const { data } = await sellerProductApi.patch<ProductResponseType>(
+    `/${productId}/stock/down`
   );
 
   return data;
