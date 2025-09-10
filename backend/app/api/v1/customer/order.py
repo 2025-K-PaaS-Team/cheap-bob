@@ -170,7 +170,9 @@ async def get_order_detail(
     stmt = (
         select(OrderCurrentItem)
         .where(OrderCurrentItem.payment_id == payment_id)
-        .options(selectinload(OrderCurrentItem.product))
+        .options(
+            selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
+        )
     )
     result = await session.execute(stmt)
     order = result.scalar_one_or_none()
@@ -347,7 +349,9 @@ async def complete_pickup(
     stmt = (
         select(OrderCurrentItem)
         .where(OrderCurrentItem.payment_id == payment_id)
-        .options(selectinload(OrderCurrentItem.product))
+        .options(
+            selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
+        )
     )
     result = await session.execute(stmt)
     order = result.scalar_one_or_none()
