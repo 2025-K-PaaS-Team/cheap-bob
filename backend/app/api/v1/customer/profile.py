@@ -27,7 +27,6 @@ from schemas.customer_preferences_response import (
     AllergyDeleteRequest
 )
 
-
 router = APIRouter(prefix="/profile", tags=["Customer-Profile"])
 
 
@@ -222,12 +221,14 @@ async def create_preferred_menus(
         )
     
     # 새로운 메뉴 추가
-    await preferred_menu_repo.create_bulk_for_customer(
+    created_menus = await preferred_menu_repo.create_bulk_for_customer(
         customer_email=customer_email,
         menu_types=menu_data.menu_types
     )
     
-    return PreferredMenuListResponse(preferred_menus=list(new_types | existing_types))
+    # 기존 메뉴 + 새로 생성된 메뉴
+    all_menus = existing_menus + created_menus
+    return PreferredMenuListResponse(preferred_menus=all_menus)
 
 
 @router.delete(
@@ -308,12 +309,14 @@ async def create_nutrition_types(
         )
     
     # 새로운 타입 추가
-    await nutrition_type_repo.create_bulk_for_customer(
+    created_types = await nutrition_type_repo.create_bulk_for_customer(
         customer_email=customer_email,
         nutrition_types=type_data.nutrition_types
     )
     
-    return NutritionTypeListResponse(nutrition_types=list(new_types | existing_nutrition_types))
+    # 기존 타입 + 새로 생성된 타입
+    all_types = existing_types + created_types
+    return NutritionTypeListResponse(nutrition_types=all_types)
 
 
 @router.delete(
@@ -394,12 +397,14 @@ async def create_allergies(
         )
     
     # 새로운 알레르기 추가
-    await allergy_repo.create_bulk_for_customer(
+    created_allergies = await allergy_repo.create_bulk_for_customer(
         customer_email=customer_email,
         allergy_types=allergy_data.allergy_types
     )
     
-    return AllergyListResponse(allergies=list(new_types | existing_types))
+    # 기존 알레르기 + 새로 생성된 알레르기
+    all_allergies = existing_allergies + created_allergies
+    return AllergyListResponse(allergies=all_allergies)
 
 
 @router.delete(
