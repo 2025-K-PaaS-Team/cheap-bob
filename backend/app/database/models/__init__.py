@@ -9,6 +9,7 @@ from database.models.cart_item import CartItem
 from database.models.order_current_item import OrderCurrentItem
 from database.models.order_history_item import OrderHistoryItem
 from database.models.customer_preferences import CustomerPreferredMenu, CustomerNutritionType, CustomerAllergy
+from database.models.customer_detail import CustomerDetail
 
 __all__ = [
     "Base",
@@ -23,5 +24,6 @@ __all__ = [
     "OrderHistoryItem",
     "CustomerPreferredMenu",
     "CustomerNutritionType",
-    "CustomerAllergy"
+    "CustomerAllergy",
+    "CustomerDetail"
 ]

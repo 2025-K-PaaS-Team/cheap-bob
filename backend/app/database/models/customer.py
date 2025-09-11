@@ -12,6 +12,7 @@ class Customer(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships
+    detail = relationship("CustomerDetail", back_populates="customer", uselist=False, cascade="all, delete-orphan")
     preferred_menus = relationship("CustomerPreferredMenu", back_populates="customer", cascade="all, delete-orphan")
     nutrition_types = relationship("CustomerNutritionType", back_populates="customer", cascade="all, delete-orphan")
     allergies = relationship("CustomerAllergy", back_populates="customer", cascade="all, delete-orphan")

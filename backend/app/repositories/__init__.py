@@ -7,6 +7,12 @@ from repositories.store_product_info import StoreProductInfoRepository
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
 from repositories.order_history_item import OrderHistoryItemRepository
+from repositories.customer_preferences import (
+    CustomerPreferredMenuRepository,
+    CustomerNutritionTypeRepository,
+    CustomerAllergyRepository
+)
+from repositories.customer_detail import CustomerDetailRepository
 
 __all__ = [
     "BaseRepository",
@@ -17,5 +23,9 @@ __all__ = [
     "StoreProductInfoRepository",
     "OrderCurrentItemRepository",
     "StorePaymentInfoRepository",
-    "OrderHistoryItemRepository"
+    "OrderHistoryItemRepository",
+    "CustomerPreferredMenuRepository",
+    "CustomerNutritionTypeRepository",
+    "CustomerAllergyRepository",
+    "CustomerDetailRepository"
 ]
