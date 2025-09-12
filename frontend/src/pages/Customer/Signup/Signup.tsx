@@ -1,3 +1,4 @@
+import { SignupLab } from "@pages/Common";
 import { CreateCustomerDetail } from "@services";
 import { useState } from "react";
 
@@ -6,7 +7,7 @@ const Signup = () => {
   const [phone, setPhone] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // 페이지 리로딩 방지
+    e.preventDefault();
 
     try {
       const res = await CreateCustomerDetail({
@@ -40,6 +41,8 @@ const Signup = () => {
           제출하기
         </button>
       </form>
+
+      <SignupLab />
     </div>
   );
 };
