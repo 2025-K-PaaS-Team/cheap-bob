@@ -2,22 +2,25 @@ from typing import Annotated, List
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
-from datetime import datetime
+from datetime import datetime, timezone
 
 from utils.docs_error import create_error_responses
 
 from api.deps import CurrentSellerDep, AsyncSessionDep
 from repositories.store import StoreRepository
 from repositories.order_current_item import OrderCurrentItemRepository
-from database.models.order_current_item import OrderCurrentItem, OrderStatus
+from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
-from schemas.order import (
+from schemas.seller_order import (
     OrderItemResponse,
     OrderListResponse,
     OrderCancelRequest,
-    OrderCancelResponse
+    OrderCancelResponse,
+    OrderStatus,
+    PickupQRResponse
 )
 from services.payment import PaymentService
+from utils.qr_generator import encode_qr_data
 
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
@@ -84,7 +87,7 @@ async def get_store_orders(
         .join(StoreProductInfo, OrderCurrentItem.product_id == StoreProductInfo.product_id)
         .where(StoreProductInfo.store_id == store_id)
         .options(selectinload(OrderCurrentItem.product))
-        .order_by(OrderCurrentItem.created_at.desc())
+        .order_by(OrderCurrentItem.reservation_at.desc())
     )
     
     result = await session.execute(stmt)
@@ -99,8 +102,11 @@ async def get_store_orders(
             quantity=order.quantity,
             price=order.price,
             status=order.status,
-            created_at=order.created_at,
-            confirmed_at=order.confirmed_at
+            reservation_at=order.reservation_at,
+            accepted_at=order.accepted_at,
+            pickup_ready_at=order.pickup_ready_at,
+            completed_at=order.completed_at,
+            canceled_at=order.canceled_at
         )
         order_responses.append(order_response)
     
@@ -124,7 +130,7 @@ async def get_pending_orders(
     session: AsyncSessionDep
 ):
     """
-    처리 대기중인 주문 조회
+    처리 대기중인 주문 조회 (reservation, accepted, pickup, complete)
     """
     
     store = await store_repo.get_by_store_id(store_id)
@@ -147,11 +153,11 @@ async def get_pending_orders(
         .where(
             and_(
                 StoreProductInfo.store_id == store_id,
-                OrderCurrentItem.status == OrderStatus.reservation
+                OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept, OrderStatus.pickup])
             )
         )
         .options(selectinload(OrderCurrentItem.product))
-        .order_by(OrderCurrentItem.created_at)
+        .order_by(OrderCurrentItem.reservation_at)
     )
     
     result = await session.execute(stmt)
@@ -166,8 +172,11 @@ async def get_pending_orders(
             quantity=order.quantity,
             price=order.price,
             status=order.status,
-            created_at=order.created_at,
-            confirmed_at=order.confirmed_at
+            reservation_at=order.reservation_at,
+            accepted_at=order.accepted_at,
+            pickup_ready_at=order.pickup_ready_at,
+            completed_at=order.completed_at,
+            canceled_at=order.canceled_at
         )
         order_responses.append(order_response)
     
@@ -226,8 +235,8 @@ async def update_order_accept(
     
     updated_order = await order_repo.update(
         payment_id,
-        status=OrderStatus.complete,
-        confirmed_at=datetime.now()
+        status=OrderStatus.accept,
+        accepted_at=datetime.now(timezone.utc)
     )
     
     # response 포맷으로 변환
@@ -238,8 +247,11 @@ async def update_order_accept(
         quantity=updated_order.quantity,
         price=updated_order.price,
         status=updated_order.status,
-        created_at=updated_order.created_at,
-        confirmed_at=updated_order.confirmed_at
+        reservation_at=updated_order.reservation_at,
+        accepted_at=updated_order.accepted_at,
+        pickup_ready_at=updated_order.pickup_ready_at,
+        completed_at=updated_order.completed_at,
+        canceled_at=order.canceled_at
     )
 
 
@@ -351,4 +363,143 @@ async def cancel_order(
         status="cancelled",
         message="주문이 성공적으로 취소되었습니다",
         refunded_amount=order.price
+    )
+
+
+@router.patch("/{payment_id}/pickup-ready", response_model=OrderItemResponse,
+    responses=create_error_responses({
+        400:["이미 처리된 주문", "주문 수락이 되지 않은 주문"],
+        401:["인증 정보가 없음", "토큰 만료"],
+        403:"가게를 수정할 수 있는 권한이 없음",
+        404:"주문을 찾을 수 없음"
+    })                   
+)
+async def update_order_pickup_ready(
+    payment_id: str,
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    order_repo: OrderRepositoryDep,
+    session: AsyncSessionDep
+):
+    """
+    픽업 준비 완료 및 QR 코드 생성
+    """
+    
+    stmt = (
+        select(OrderCurrentItem)
+        .where(OrderCurrentItem.payment_id == payment_id)
+        .options(selectinload(OrderCurrentItem.product))
+    )
+    result = await session.execute(stmt)
+    order = result.scalar_one_or_none()
+    
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="주문을 찾을 수 없습니다"
+        )
+    
+    store = await store_repo.get_by_store_id(order.product.store_id)
+    
+    if store.seller_email != current_user["sub"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="주문을 처리할 권한이 없습니다"
+        )
+    
+    if order.status != OrderStatus.accept:
+        if order.status == OrderStatus.reservation:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="주문이 아직 수락되지 않았습니다"
+            )
+        elif order.status in [OrderStatus.pickup, OrderStatus.complete]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="이미 처리된 주문입니다"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="취소된 주문입니다"
+            )
+    
+    # 주문 상태를 픽업 준비 완료로 변경
+    updated_order = await order_repo.set_pickup_ready(payment_id)
+    
+    return OrderItemResponse(
+        payment_id=updated_order.payment_id,
+        product_id=updated_order.product_id,
+        product_name=order.product.product_name,
+        quantity=updated_order.quantity,
+        price=updated_order.price,
+        status=updated_order.status,
+        reservation_at=updated_order.reservation_at,
+        accepted_at=updated_order.accepted_at,
+        pickup_ready_at=updated_order.pickup_ready_at,
+        completed_at=updated_order.completed_at,
+        canceled_at=order.canceled_at
+    )
+
+
+@router.get("/{payment_id}/qr", response_model=PickupQRResponse,
+    responses=create_error_responses({
+        400:"픽업 준비가 되지 않은 주문",
+        401:["인증 정보가 없음", "토큰 만료"],
+        403:"가게를 수정할 수 있는 권한이 없음",
+        404:"주문을 찾을 수 없음"
+    })            
+)
+async def get_order_qr(
+    payment_id: str,
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    session: AsyncSessionDep
+):
+    """
+    픽업 QR 코드 생성, 5분 유효
+    """
+    
+    # 주문 조회
+    stmt = (
+        select(OrderCurrentItem)
+        .where(OrderCurrentItem.payment_id == payment_id)
+        .options(selectinload(OrderCurrentItem.product))
+    )
+    result = await session.execute(stmt)
+    order = result.scalar_one_or_none()
+    
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="주문을 찾을 수 없습니다"
+        )
+    
+    # 가게 권한 확인
+    store = await store_repo.get_by_store_id(order.product.store_id)
+    
+    if store.seller_email != current_user["sub"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="이 주문의 QR 코드를 조회할 권한이 없습니다"
+        )
+    
+    # 주문 상태 확인
+    if order.status != OrderStatus.pickup:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="픽업 준비가 되지 않은 주문입니다"
+        )
+    
+    # JWT 기반 QR 코드 생성
+    qr_data, created_at = encode_qr_data(
+        user_id=order.user_id,
+        payment_id=payment_id,
+        product_id=order.product_id
+    )
+    
+    return PickupQRResponse(
+        payment_id=payment_id,
+        qr_data=qr_data,
+        created_at=created_at
     )

@@ -1,7 +1,7 @@
 """
 StorePaymentInfo와 OrderHistoryItem Repository 사용 예시
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories import (
@@ -9,7 +9,7 @@ from repositories import (
     OrderHistoryItemRepository,
     OrderCurrentItemRepository
 )
-from database.models.order_history_item import OrderStatus
+from schemas.order import OrderStatus
 
 
 # 1. 가게 결제 정보 관리
@@ -45,12 +45,12 @@ async def query_order_history(db: AsyncSession):
     # 사용자별 주문 내역
     user_orders = await history_repo.get_by_user_id(
         user_id="USER001",
-        status=OrderStatus.complete,
+        status=OrderStatus.accept,
         limit=10
     )
     
     # 날짜 범위로 조회
-    today = datetime.now()
+    today = datetime.now(timezone.utc)
     last_week = today - timedelta(days=7)
     
     weekly_orders = await history_repo.get_by_date_range(
@@ -80,8 +80,8 @@ async def manage_order_status(db: AsyncSession):
         status=OrderStatus.reservation
     )
     
-    # 주문 승인
-    confirmed = await history_repo.confirm_order("PAY001")
+    # 주문 수락 (예제 - 실제로는 order_current_item에서 사용)
+    # accepted = await current_repo.accept_order("PAY001")
     
     # 주문 취소 (예약 상태일 때만 가능)
     canceled = await history_repo.cancel_order("PAY002")
@@ -119,7 +119,11 @@ async def daily_closing(db: AsyncSession):
                 "quantity": order.quantity,
                 "price": order.price,
                 "status": order.status,
-                "order_time": order.order_time
+                "reservation_at": order.reservation_at,
+                "accepted_at": order.accepted_at,
+                "pickup_ready_at": order.pickup_ready_at,
+                "completed_at": order.completed_at,
+                "canceled_at": order.canceled_at
             })
         
         history_items = await history_repo.migrate_from_current_orders(order_data)
@@ -138,10 +142,10 @@ async def complex_queries(db: AsyncSession):
     )
     
     # 특정 기간 내 취소된 주문들
-    last_month = datetime.now() - timedelta(days=30)
+    last_month = datetime.now(timezone.utc) - timedelta(days=30)
     canceled_orders = await history_repo.get_by_date_range(
         start_date=last_month,
-        end_date=datetime.now(),
+        end_date=datetime.now(timezone.utc),
         status=OrderStatus.cancel
     )
     

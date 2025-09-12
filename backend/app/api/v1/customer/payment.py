@@ -1,6 +1,6 @@
 from typing import Dict, Annotated
 from fastapi import APIRouter, HTTPException, Path, Depends, status
-from datetime import datetime
+from datetime import datetime, timezone
 from loguru import logger
 
 from utils.docs_error import create_error_responses
@@ -10,7 +10,7 @@ from repositories.store_product_info import StoreProductInfoRepository
 from repositories.cart_item import CartItemRepository
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
-from database.models.order_current_item import OrderStatus
+from schemas.order import OrderStatus
 from schemas.payment import (
     PaymentInitRequest,
     PaymentInitResponse,
@@ -308,7 +308,7 @@ async def confirm_payment(
             "quantity": cart_item.quantity,
             "price": cart_item.price,
             "status": OrderStatus.reservation,
-            "created_at": datetime.now()
+            "reservation_at": datetime.now(timezone.utc)
         }
         
         await order_repo.create(**order_data)
