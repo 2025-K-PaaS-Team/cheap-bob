@@ -2,7 +2,7 @@ import type { TimeStamp } from "@interface/common/types";
 
 export type CustomerDetailBaseType = {
   nickname: string;
-  phone_number: number;
+  phone_number: string;
 };
 
 export type CustomerDetailType = CustomerDetailBaseType & {

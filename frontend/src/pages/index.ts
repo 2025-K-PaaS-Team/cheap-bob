@@ -3,6 +3,7 @@ export { default as StoreDetail } from "./Customer/StoreDetail";
 export { default as StoreList } from "./Customer/StoreList";
 export { default as LoginCallback } from "./Common/LoginCallback";
 export { default as Order } from "./Customer/Order";
+export { default as Signup } from "./Customer/Signup";
 
 // seller
 export { default as Store } from "./Seller/Store";

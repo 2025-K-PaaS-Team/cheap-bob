@@ -17,7 +17,7 @@ export const CheckCustomerDetail =
 export const CreateCustomerDetail = async (
   body: CustomerDetailBaseType
 ): Promise<CustomerDetailType> => {
-  const { data } = await customerProfileApi.post("/profile/detail", body);
+  const { data } = await customerProfileApi.post("/detail", body);
 
   return data;
 };

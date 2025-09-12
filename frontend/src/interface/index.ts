@@ -1,3 +1,3 @@
 export * from "./seller/types";
 export * from "./payment/types";
-export * from "./customer/onboarding";
+export * from "./customer/signup";

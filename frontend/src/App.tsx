@@ -11,6 +11,7 @@ import {
   Order,
   Store,
   OrderManage,
+  Signup,
 } from "@pages";
 import { CustomerHome, SellerHome } from "@pages/Common/Home";
 
@@ -24,6 +25,8 @@ const App = () => {
       <Route path="/c" element={<Layout />}>
         {/* home */}
         <Route index element={<CustomerHome />} />
+        {/* signup */}
+        <Route path="signup" element={<Signup />} />
         {/* store */}
         <Route path="stores" element={<StoreList />} />
         <Route path="stores/:storeId" element={<StoreDetail />} />

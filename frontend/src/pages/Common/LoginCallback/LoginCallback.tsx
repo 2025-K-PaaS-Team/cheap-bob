@@ -13,7 +13,7 @@ const LoginCallback = () => {
       if (res.has_detail) {
         navigate("/");
       } else {
-        navigate("signup");
+        // navigate("/c/signup");
       }
     } catch (err: unknown) {
       console.error("err", err);
