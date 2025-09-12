@@ -77,3 +77,11 @@ export const customerOrderApi = attachInterceptors(
     headers: { "Content-Type": "application/json" },
   })
 );
+
+export const customerProfileApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/customer/profile`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
