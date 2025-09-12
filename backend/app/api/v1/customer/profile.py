@@ -60,11 +60,11 @@ AllergyRepositoryDep = Annotated[CustomerAllergyRepository, Depends(get_allergy_
     })
 )
 async def check_customer_detail(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     customer_detail_repo: CustomerDetailRepositoryDep
 ):
     """소비자 상세 정보 존재 여부를 확인"""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     
     detail = await customer_detail_repo.get_by_customer(customer_email)
     
@@ -83,11 +83,11 @@ async def check_customer_detail(
     })
 )
 async def get_customer_detail(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     customer_detail_repo: CustomerDetailRepositoryDep
 ):
     """소비자 상세 정보를 조회"""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     
     detail = await customer_detail_repo.get_by_customer(customer_email)
     if not detail:
@@ -109,12 +109,12 @@ async def get_customer_detail(
     })
 )
 async def create_customer_detail(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     customer_detail_repo: CustomerDetailRepositoryDep,
     detail_data: CustomerDetailCreate
 ):
     """소비자 상세 정보를 등록"""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     
     # 이미 존재하는지 확인
     existing = await customer_detail_repo.exists_for_customer(customer_email)
@@ -143,12 +143,12 @@ async def create_customer_detail(
     })
 )
 async def update_customer_detail(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     customer_detail_repo: CustomerDetailRepositoryDep,
     detail_data: CustomerDetailUpdate
 ):
     """소비자 상세 정보를 수정합니다."""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     
     # 수정할 데이터가 없는 경우
     update_dict = detail_data.model_dump(exclude_unset=True)
@@ -181,11 +181,11 @@ async def update_customer_detail(
     })
 )
 async def get_preferred_menus(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     preferred_menu_repo: PreferredMenuRepositoryDep
 ):
     """소비자의 선호 메뉴 목록을 조회"""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     menus = await preferred_menu_repo.get_by_customer(customer_email)
     return PreferredMenuListResponse(preferred_menus=menus)
 
@@ -200,12 +200,12 @@ async def get_preferred_menus(
     })
 )
 async def create_preferred_menus(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     preferred_menu_repo: PreferredMenuRepositoryDep,
     menu_data: PreferredMenuCreateRequest
 ):
     """소비자의 선호 메뉴를 추가 - 여러 개를 한번에 추가할 수 있음"""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     
     # 기존 메뉴 확인하여 중복 체크
     existing_menus = await preferred_menu_repo.get_by_customer(customer_email)
@@ -241,12 +241,12 @@ async def create_preferred_menus(
     })
 )
 async def delete_preferred_menu(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     preferred_menu_repo: PreferredMenuRepositoryDep,
     menu_data: PreferredMenuDeleteRequest
 ):
     """소비자의 특정 선호 메뉴를 삭제"""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     
     deleted = await preferred_menu_repo.delete_for_customer(
         customer_email=customer_email,
@@ -269,11 +269,11 @@ async def delete_preferred_menu(
     })
 )
 async def get_nutrition_types(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     nutrition_type_repo: NutritionTypeRepositoryDep
 ):
     """소비자의 영양 타입 목록을 조회"""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     types = await nutrition_type_repo.get_by_customer(customer_email)
     return NutritionTypeListResponse(nutrition_types=types)
 
@@ -288,12 +288,12 @@ async def get_nutrition_types(
     })
 )
 async def create_nutrition_types(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     nutrition_type_repo: NutritionTypeRepositoryDep,
     type_data: NutritionTypeCreateRequest
 ):
     """소비자의 영양 타입을 추가. 여러 개를 한번에 추가할 수 있음."""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     
     # 기존 타입 확인하여 중복 체크
     existing_types = await nutrition_type_repo.get_by_customer(customer_email)
@@ -329,12 +329,12 @@ async def create_nutrition_types(
     })
 )
 async def delete_nutrition_type(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     nutrition_type_repo: NutritionTypeRepositoryDep,
     type_data: NutritionTypeDeleteRequest
 ):
     """소비자의 특정 영양 타입을 삭제"""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     
     deleted = await nutrition_type_repo.delete_for_customer(
         customer_email=customer_email,
@@ -357,11 +357,11 @@ async def delete_nutrition_type(
     })
 )
 async def get_allergies(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     allergy_repo: AllergyRepositoryDep
 ):
     """소비자의 알레르기 목록을 조회"""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     allergies = await allergy_repo.get_by_customer(customer_email)
     return AllergyListResponse(allergies=allergies)
 
@@ -376,12 +376,12 @@ async def get_allergies(
     })
 )
 async def create_allergies(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     allergy_repo: AllergyRepositoryDep,
     allergy_data: AllergyCreateRequest
 ):
     """소비자의 알레르기를 추가. 여러 개를 한번에 추가할 수 있음."""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     
     # 기존 알레르기 확인하여 중복 체크
     existing_allergies = await allergy_repo.get_by_customer(customer_email)
@@ -417,12 +417,12 @@ async def create_allergies(
     })
 )
 async def delete_allergy(
-    current_customer: CurrentCustomerDep,
+    current_user: CurrentCustomerDep,
     allergy_repo: AllergyRepositoryDep,
     allergy_data: AllergyDeleteRequest
 ):
     """소비자의 특정 알레르기를 삭제"""
-    customer_email = current_customer["email"]
+    customer_email = current_user["sub"]
     
     deleted = await allergy_repo.delete_for_customer(
         customer_email=customer_email,
