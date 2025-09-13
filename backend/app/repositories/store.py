@@ -28,7 +28,7 @@ class StoreRepository(BaseRepository[Store]):
         """모든 가게를 관계 데이터와 함께 조회"""
         return await self.get_many(
             order_by=["-created_at"],
-            load_relations=["seller", "address", "payment_info", "products"]
+            load_relations=["seller", "address", "payment_info", "products", "sns_info", "images"]
         )
     
     async def search_by_name(self, keyword: str) -> List[Store]:
@@ -43,6 +43,22 @@ class StoreRepository(BaseRepository[Store]):
         query = (
             select(Store)
             .options(selectinload(Store.address))
+            .where(Store.store_id == store_id)
+        )
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
+    
+    async def get_with_full_info(self, store_id: str) -> Optional[Store]:
+        """가게를 모든 관련 정보와 함께 조회"""
+        query = (
+            select(Store)
+            .options(
+                selectinload(Store.address),
+                selectinload(Store.sns_info),
+                selectinload(Store.payment_info),
+                selectinload(Store.seller),
+                selectinload(Store.images)
+            )
             .where(Store.store_id == store_id)
         )
         result = await self.session.execute(query)

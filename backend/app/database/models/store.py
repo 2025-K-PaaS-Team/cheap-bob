@@ -29,3 +29,5 @@ class Store(Base):
     payment_info = relationship("StorePaymentInfo", back_populates="store", uselist=False)
     products = relationship("StoreProductInfo", back_populates="store")
     address = relationship("Address", back_populates="stores")
+    sns_info = relationship("StoreSNS", back_populates="store", uselist=False)
+    images = relationship("StoreImage", back_populates="store", cascade="all, delete-orphan")

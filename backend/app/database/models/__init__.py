@@ -10,6 +10,8 @@ from database.models.order_history_item import OrderHistoryItem
 from database.models.customer_preferences import CustomerPreferredMenu, CustomerNutritionType, CustomerAllergy
 from database.models.customer_detail import CustomerDetail
 from database.models.address import Address
+from database.models.store_sns import StoreSNS
+from database.models.store_image import StoreImage
 
 __all__ = [
     "Base",
@@ -25,5 +27,7 @@ __all__ = [
     "CustomerNutritionType",
     "CustomerAllergy",
     "CustomerDetail",
-    "Address"
+    "Address",
+    "StoreSNS",
+    "StoreImage"
 ]
