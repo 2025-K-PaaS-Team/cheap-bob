@@ -14,6 +14,7 @@ from database.models.store_sns import StoreSNS
 from database.models.store_image import StoreImage
 from database.models.store_operation_info import StoreOperationInfo
 from database.models.store_operation_info_modification import StoreOperationInfoModification
+from database.models.product_nutrition import ProductNutrition
 
 __all__ = [
     "Base",
@@ -33,5 +34,6 @@ __all__ = [
     "StoreSNS",
     "StoreImage",
     "StoreOperationInfo",
-    "StoreOperationInfoModification"
+    "StoreOperationInfoModification",
+    "ProductNutrition"
 ]

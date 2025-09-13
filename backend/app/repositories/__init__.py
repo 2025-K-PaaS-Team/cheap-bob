@@ -18,6 +18,7 @@ from repositories.store_sns import StoreSNSRepository
 from repositories.store_image import StoreImageRepository
 from repositories.store_operation_info import StoreOperationInfoRepository
 from repositories.store_operation_info_modification import StoreOperationInfoModificationRepository
+from repositories.product_nutrition import ProductNutritionRepository
 
 __all__ = [
     "BaseRepository",
@@ -37,5 +38,6 @@ __all__ = [
     "StoreSNSRepository",
     "StoreImageRepository",
     "StoreOperationInfoRepository",
-    "StoreOperationInfoModificationRepository"
+    "StoreOperationInfoModificationRepository",
+    "ProductNutritionRepository"
 ]
