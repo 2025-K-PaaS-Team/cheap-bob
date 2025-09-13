@@ -13,6 +13,7 @@ from repositories.customer_preferences import (
     CustomerAllergyRepository
 )
 from repositories.customer_detail import CustomerDetailRepository
+from repositories.address import AddressRepository
 
 __all__ = [
     "BaseRepository",
@@ -27,5 +28,6 @@ __all__ = [
     "CustomerPreferredMenuRepository",
     "CustomerNutritionTypeRepository",
     "CustomerAllergyRepository",
-    "CustomerDetailRepository"
+    "CustomerDetailRepository",
+    "AddressRepository"
 ]
