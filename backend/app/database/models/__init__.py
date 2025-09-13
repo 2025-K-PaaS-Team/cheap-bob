@@ -12,6 +12,8 @@ from database.models.customer_detail import CustomerDetail
 from database.models.address import Address
 from database.models.store_sns import StoreSNS
 from database.models.store_image import StoreImage
+from database.models.store_operation_info import StoreOperationInfo
+from database.models.store_operation_info_modification import StoreOperationInfoModification
 
 __all__ = [
     "Base",
@@ -29,5 +31,7 @@ __all__ = [
     "CustomerDetail",
     "Address",
     "StoreSNS",
-    "StoreImage"
+    "StoreImage",
+    "StoreOperationInfo",
+    "StoreOperationInfoModification"
 ]
