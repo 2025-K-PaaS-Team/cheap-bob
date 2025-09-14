@@ -1,9 +1,11 @@
 from typing import List, Optional, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from enum import Enum
 
 from database.models.store_product_info import StoreProductInfo
+from database.models.product_nutrition import ProductNutrition
 from repositories.base import BaseRepository
 
 
@@ -28,16 +30,6 @@ class StoreProductInfoRepository(BaseRepository[StoreProductInfo]):
             filters={"store_id": store_id},
             order_by=["product_name"]
         )
-        
-    # async def get_available_products(self, store_id: str) -> List[StoreProductInfo]:
-    #     """재고가 있는 상품만 조회"""
-    #     return await self.get_many(
-    #         filters={
-    #             "store_id": store_id,
-    #             "current_stock": {"gt": 0}
-    #         },
-    #         order_by=["-current_stock", "product_name"]
-    #     )
     
     async def get_sale_products(self, store_id: Optional[str] = None) -> List[StoreProductInfo]:
         """세일 중인 상품 조회"""
@@ -83,3 +75,24 @@ class StoreProductInfoRepository(BaseRepository[StoreProductInfo]):
             return StockUpdateResult.SUCCESS
         
         return StockUpdateResult.LOCK_CONFLICT
+    
+    async def get_with_nutrition_info(self, product_id: str) -> Optional[StoreProductInfo]:
+        """영양 정보와 함께 상품 조회"""
+        query = (
+            select(StoreProductInfo)
+            .where(StoreProductInfo.product_id == product_id)
+            .options(selectinload(StoreProductInfo.nutrition_info))
+        )
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
+    
+    async def get_by_store_with_nutrition(self, store_id: str) -> List[StoreProductInfo]:
+        """가게의 모든 상품을 영양 정보와 함께 조회"""
+        query = (
+            select(StoreProductInfo)
+            .where(StoreProductInfo.store_id == store_id)
+            .options(selectinload(StoreProductInfo.nutrition_info))
+            .order_by(StoreProductInfo.product_name)
+        )
+        result = await self.session.execute(query)
+        return result.scalars().unique().all()
