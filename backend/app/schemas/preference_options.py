@@ -21,3 +21,8 @@ class NutritionTypeOptions(BaseModel):
 class AllergyTypeOptions(BaseModel):
     """알레르기 타입 옵션 목록"""
     options: List[PreferenceOption] = Field(..., description="알레르기 타입 옵션 목록")
+
+
+class ToppingTypeOptions(BaseModel):
+    """토핑 타입 옵션 목록"""
+    options: List[PreferenceOption] = Field(..., description="토핑 타입 옵션 목록")

@@ -2,8 +2,8 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 from repositories.base import BaseRepository
-from database.models.customer_preferences import CustomerPreferredMenu, CustomerNutritionType, CustomerAllergy
-from schemas.food_preferences import PreferredMenu, NutritionType, AllergyType
+from database.models.customer_preferences import CustomerPreferredMenu, CustomerNutritionType, CustomerAllergy, CustomerToppingType
+from schemas.food_preferences import PreferredMenu, NutritionType, AllergyType, ToppingType
 
 
 class CustomerPreferredMenuRepository(BaseRepository[CustomerPreferredMenu]):
@@ -138,6 +138,52 @@ class CustomerAllergyRepository(BaseRepository[CustomerAllergy]):
             delete(self.model).where(
                 self.model.customer_email == customer_email,
                 self.model.allergy_type == allergy_type
+            )
+        )
+        await self.session.commit()
+        return result.rowcount > 0
+
+
+class CustomerToppingTypeRepository(BaseRepository[CustomerToppingType]):
+    def __init__(self, session: AsyncSession):
+        super().__init__(CustomerToppingType, session)
+    
+    async def get_by_customer(self, customer_email: str) -> List[CustomerToppingType]:
+        """특정 고객의 모든 토핑 타입 조회"""
+        result = await self.session.execute(
+            select(self.model).where(self.model.customer_email == customer_email)
+        )
+        return result.scalars().all()
+    
+    async def create_for_customer(self, customer_email: str, topping_type: ToppingType) -> CustomerToppingType:
+        """고객의 토핑 타입 추가"""
+        return await self.create(
+            customer_email=customer_email,
+            topping_type=topping_type
+        )
+    
+    async def create_bulk_for_customer(self, customer_email: str, topping_types: List[ToppingType]) -> List[CustomerToppingType]:
+        """고객의 여러 토핑 타입 한번에 추가"""
+        created_items = []
+        for topping_type in topping_types:
+            obj = self.model(
+                customer_email=customer_email,
+                topping_type=topping_type
+            )
+            self.session.add(obj)
+            created_items.append(obj)
+        
+        await self.session.commit()
+        for obj in created_items:
+            await self.session.refresh(obj)
+        return created_items
+    
+    async def delete_for_customer(self, customer_email: str, topping_type: ToppingType) -> bool:
+        """고객의 특정 토핑 타입 삭제"""
+        result = await self.session.execute(
+            delete(self.model).where(
+                self.model.customer_email == customer_email,
+                self.model.topping_type == topping_type
             )
         )
         await self.session.commit()

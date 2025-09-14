@@ -10,7 +10,8 @@ from repositories.order_history_item import OrderHistoryItemRepository
 from repositories.customer_preferences import (
     CustomerPreferredMenuRepository,
     CustomerNutritionTypeRepository,
-    CustomerAllergyRepository
+    CustomerAllergyRepository,
+    CustomerToppingTypeRepository
 )
 from repositories.customer_detail import CustomerDetailRepository
 from repositories.address import AddressRepository
@@ -33,6 +34,7 @@ __all__ = [
     "CustomerPreferredMenuRepository",
     "CustomerNutritionTypeRepository",
     "CustomerAllergyRepository",
+    "CustomerToppingTypeRepository",
     "CustomerDetailRepository",
     "AddressRepository",
     "StoreSNSRepository",

@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Enum
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from database.session import Base
-from schemas.food_preferences import PreferredMenu, NutritionType, AllergyType
+from schemas.food_preferences import PreferredMenu, NutritionType, AllergyType, ToppingType
 
 
 class CustomerPreferredMenu(Base):
@@ -42,3 +42,16 @@ class CustomerAllergy(Base):
     
     # Relationships
     customer = relationship("Customer", back_populates="allergies")
+
+
+class CustomerToppingType(Base):
+    """고객 선호 토핑"""
+    __tablename__ = "customer_topping_types"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    customer_email = Column(String(255), ForeignKey("customers.email"), nullable=False)
+    topping_type = Column(Enum(ToppingType), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationships
+    customer = relationship("Customer", back_populates="topping_types")
