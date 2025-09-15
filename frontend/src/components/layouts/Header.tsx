@@ -1,22 +1,21 @@
-import { useLocation } from "react-router";
+import { useNavigate } from "react-router";
 
 const Header = () => {
-  const location = useLocation();
-  const path = location.pathname;
-
-  if (path !== "/c/store-list") {
-    return null;
-  }
+  const navigate = useNavigate();
+  const handleClickBefore = () => {
+    navigate(-1);
+  };
 
   return (
-    <div className="p-4 flex flex-row justify-between items-center">
-      <div>광화문 홍길동 어쩌구로 행복하동</div>
-      {/* icon list */}
-      <div className="flex flex-row gap-x-4">
-        <img src="/icon/search.svg" alt="searchIcon" width="25" />
-        <img src="/icon/notification.svg" alt="searchIcon" width="25" />
+    <>
+      <div className="h-[85px] pt-[40px] px-[14px]">
+        <img
+          src="/icon/before.svg"
+          alt="beforeArrow"
+          onClick={handleClickBefore}
+        />
       </div>
-    </div>
+    </>
   );
 };
 

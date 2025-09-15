@@ -13,11 +13,12 @@ const Layout = () => {
   const path = location.pathname;
   const isCustomer = path.startsWith("c");
   const notFooter = path === "/c";
+  const notHeader = path === "/c";
 
   return (
     <>
       <Wrapper>
-        <Header />
+        {!notHeader && <Header />}
         <Main>
           <Outlet />
         </Main>

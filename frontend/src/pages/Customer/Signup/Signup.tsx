@@ -23,6 +23,8 @@ const Signup = () => {
 
   return (
     <div>
+      <hr className="h-[8px] bg-[#D9D9D9] border-none" />
+      <hr className="h-[8px] bg-[#222222] border-none" />
       <form onSubmit={handleSubmit} className="p-3 gap-y-3 flex flex-col w-50">
         <input
           placeholder="어떻게 불러드릴까요"
