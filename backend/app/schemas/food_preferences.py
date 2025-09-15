@@ -32,3 +32,17 @@ class AllergyType(enum.Enum):
     pork = "pork" #돼지고기
     beef = "beef" # 쇠고기
     chicken = "chicken" # 닭고기
+
+
+class ToppingType(enum.Enum):
+    """토핑 종류"""
+    egg_mayo = "egg_mayo" # 에그마요
+    chicken_breast = "chicken_breast" # 닭가슴살
+    onion_flake = "onion_flake" # 어니언 후레이크
+    toasted_bread = "toasted_bread" # 구운 식빵
+    sweet_pumpkin = "sweet_pumpkin" # 단호박
+    ricotta_cheese = "ricotta_cheese" # 리코타치즈
+    shrimp = "shrimp" # 새우
+    smoked_salmon = "smoked_salmon" # 훈제연어
+    avocado = "avocado" # 아보카도
+    pork_belly = "pork_belly" # 우삼겹

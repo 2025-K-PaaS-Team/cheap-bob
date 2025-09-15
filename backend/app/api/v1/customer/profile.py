@@ -7,7 +7,8 @@ from repositories.customer_detail import CustomerDetailRepository
 from repositories.customer_preferences import (
     CustomerPreferredMenuRepository,
     CustomerNutritionTypeRepository,
-    CustomerAllergyRepository
+    CustomerAllergyRepository,
+    CustomerToppingTypeRepository
 )
 from schemas.customer_detail import (
     CustomerDetailCheckResponse,
@@ -24,7 +25,10 @@ from schemas.customer_preferences_response import (
     NutritionTypeDeleteRequest,
     AllergyListResponse,
     AllergyCreateRequest,
-    AllergyDeleteRequest
+    AllergyDeleteRequest,
+    ToppingTypeListResponse,
+    ToppingTypeCreateRequest,
+    ToppingTypeDeleteRequest
 )
 
 router = APIRouter(prefix="/profile", tags=["Customer-Profile"])
@@ -46,10 +50,15 @@ def get_allergy_repository(session: AsyncSessionDep) -> CustomerAllergyRepositor
     return CustomerAllergyRepository(session)
 
 
+def get_topping_type_repository(session: AsyncSessionDep) -> CustomerToppingTypeRepository:
+    return CustomerToppingTypeRepository(session)
+
+
 CustomerDetailRepositoryDep = Annotated[CustomerDetailRepository, Depends(get_customer_detail_repository)]
 PreferredMenuRepositoryDep = Annotated[CustomerPreferredMenuRepository, Depends(get_preferred_menu_repository)]
 NutritionTypeRepositoryDep = Annotated[CustomerNutritionTypeRepository, Depends(get_nutrition_type_repository)]
 AllergyRepositoryDep = Annotated[CustomerAllergyRepository, Depends(get_allergy_repository)]
+ToppingTypeRepositoryDep = Annotated[CustomerToppingTypeRepository, Depends(get_topping_type_repository)]
 
 
 @router.get(
@@ -433,4 +442,92 @@ async def delete_allergy(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="해당 알레르기를 찾을 수 없습니다"
+        )
+
+
+# 토핑 타입 엔드포인트
+@router.get(
+    "/topping-types",
+    response_model=ToppingTypeListResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"]
+    })
+)
+async def get_topping_types(
+    current_user: CurrentCustomerDep,
+    topping_type_repo: ToppingTypeRepositoryDep
+):
+    """소비자의 토핑 타입 목록을 조회"""
+    customer_email = current_user["sub"]
+    types = await topping_type_repo.get_by_customer(customer_email)
+    return ToppingTypeListResponse(topping_types=types)
+
+
+@router.post(
+    "/topping-types",
+    response_model=ToppingTypeListResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses=create_error_responses({
+        400: ["잘못된 입력 형식", "중복된 토핑 타입"],
+        401: ["인증 정보가 없음", "토큰 만료"]
+    })
+)
+async def create_topping_types(
+    current_user: CurrentCustomerDep,
+    topping_type_repo: ToppingTypeRepositoryDep,
+    type_data: ToppingTypeCreateRequest
+):
+    """소비자의 토핑 타입을 추가. 여러 개를 한번에 추가할 수 있음."""
+    customer_email = current_user["sub"]
+    
+    # 기존 타입 확인하여 중복 체크
+    existing_types = await topping_type_repo.get_by_customer(customer_email)
+    existing_topping_types = {t.topping_type for t in existing_types}
+    
+    new_types = set(type_data.topping_types)
+    duplicates = new_types & existing_topping_types
+    
+    if duplicates:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"이미 등록된 토핑 타입이 있습니다: {', '.join(d.value for d in duplicates)}"
+        )
+    
+    # 새로운 타입 추가
+    created_types = await topping_type_repo.create_bulk_for_customer(
+        customer_email=customer_email,
+        topping_types=type_data.topping_types
+    )
+    
+    # 기존 타입 + 새로 생성된 타입
+    all_types = existing_types + created_types
+    return ToppingTypeListResponse(topping_types=all_types)
+
+
+@router.delete(
+    "/topping-types",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=create_error_responses({
+        400: ["잘못된 입력 형식"],
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: ["토핑 타입을 찾을 수 없음"]
+    })
+)
+async def delete_topping_type(
+    current_user: CurrentCustomerDep,
+    topping_type_repo: ToppingTypeRepositoryDep,
+    type_data: ToppingTypeDeleteRequest
+):
+    """소비자의 특정 토핑 타입을 삭제"""
+    customer_email = current_user["sub"]
+    
+    deleted = await topping_type_repo.delete_for_customer(
+        customer_email=customer_email,
+        topping_type=type_data.topping_type
+    )
+    
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="해당 토핑 타입을 찾을 수 없습니다"
         )
