@@ -13,7 +13,6 @@ import {
   GetNutritionOptionList,
   getOrderDetail,
   getOrders,
-  getPreferOptionList,
   getSpecificStore,
   getStores,
   GetToppingOptionList,
@@ -169,7 +168,7 @@ const CustomerLab = () => {
 
   const handleGetMenuOption = async () => {
     try {
-      const res = await getMenuOptionList();
+      const menu = await getMenuOptionList();
     } catch (err: unknown) {
       console.error("get prefer menu option fail", err);
     }
@@ -356,9 +355,9 @@ const CustomerLab = () => {
         >
           영양 옵션 가져오기 (GET: /common/options)
         </button>
-        {preferMenu && (
+        {preferNutrition && (
           <div className="w-full text-green-500">
-            현재 선호 영양: {JSON.stringify(preferMenu)}
+            현재 선호 영양: {JSON.stringify(preferNutrition)}
           </div>
         )}
         <button
@@ -367,9 +366,9 @@ const CustomerLab = () => {
         >
           알러지 옵션 가져오기 (GET: /common/options)
         </button>
-        {preferMenu && (
+        {preferAllergy && (
           <div className="w-full text-green-500">
-            현재 선호 알러지: {JSON.stringify(preferMenu)}
+            현재 선호 알러지: {JSON.stringify(preferAllergy)}
           </div>
         )}
         <button
@@ -378,9 +377,9 @@ const CustomerLab = () => {
         >
           토핑 옵션 가져오기 (GET: /common/options)
         </button>
-        {preferMenu && (
+        {preferTopping && (
           <div className="w-full text-green-500">
-            현재 선호 토핑: {JSON.stringify(preferMenu)}
+            현재 선호 토핑: {JSON.stringify(preferTopping)}
           </div>
         )}
       </div>
