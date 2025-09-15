@@ -2,12 +2,15 @@ import {
   CrateNutrition,
   CreateAllergies,
   CreatePreferMenu,
+  CreateTopping,
   DeleteAllergies,
   DeleteNutrition,
   DeletePreferMenu,
+  DeleteTopping,
   GetAllergies,
   GetNutrition,
   GetPreferMenu,
+  GetTopping,
   UpdateCustomerDetail,
 } from "@services";
 
@@ -97,6 +100,31 @@ const SignupLab = () => {
     }
   };
 
+  //   topping
+  const handleGetTopping = async () => {
+    try {
+      const res = await GetTopping();
+    } catch (err: unknown) {
+      console.error("fail", err);
+    }
+  };
+
+  const handleCreateTopping = async () => {
+    try {
+      const res = await CreateTopping({ topping_types: ["egg_mayo"] });
+    } catch (err: unknown) {
+      console.error("fail", err);
+    }
+  };
+
+  const handleDeleteTopping = async () => {
+    try {
+      const res = await DeleteTopping({ topping_type: "egg_mayo" });
+    } catch (err: unknown) {
+      console.error("fail", err);
+    }
+  };
+
   return (
     <div className="m-3 gap-y-3 flex flex-col">
       <button
@@ -141,6 +169,19 @@ const SignupLab = () => {
       </button>
 
       <button onClick={handleDeleteAllergies} className="bg-yellow-400 p-3">
+        DeleteAllergies
+      </button>
+
+      {/* topping */}
+      <button onClick={handleGetTopping} className="bg-yellow-500 p-3">
+        GetAllergies
+      </button>
+
+      <button onClick={handleCreateTopping} className="bg-yellow-500 p-3">
+        CreateAllergies
+      </button>
+
+      <button onClick={handleDeleteTopping} className="bg-yellow-500 p-3">
         DeleteAllergies
       </button>
     </div>

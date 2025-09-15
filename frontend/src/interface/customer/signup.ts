@@ -69,3 +69,21 @@ export type PreferAllergiesBaseType = {
 export type PreferAllergiesType = {
   allergies: PreferAllergiesBaseType[];
 };
+
+export type ToppingBaseType = {
+  topping_types: string[];
+};
+
+export type PreferToppingBaseType = {
+  id: number;
+  topping_type: string;
+  created_at: TimeStamp;
+};
+
+export type PreferToppingType = {
+  topping_types: PreferToppingBaseType[];
+};
+
+export type ToppingDeleteType = {
+  topping_type: string;
+};

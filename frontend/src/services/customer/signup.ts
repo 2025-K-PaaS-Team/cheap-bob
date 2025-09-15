@@ -11,6 +11,9 @@ import type {
   PreferAllergiesType,
   PreferMenuType,
   PreferNutritionType,
+  PreferToppingType,
+  ToppingBaseType,
+  ToppingDeleteType,
 } from "@interface";
 import { customerProfileApi } from "@services/client";
 
@@ -107,10 +110,33 @@ export const CreateAllergies = async (
 };
 
 // DELETE: delete allergy
-export const DeleteAllergies = async (
-  body: AllergieDeleteType
-): Promise<PreferAllergiesType> => {
+export const DeleteAllergies = async (body: AllergieDeleteType) => {
   const { data } = await customerProfileApi.delete("/allergies", {
+    data: body,
+  });
+
+  return data;
+};
+
+// GET: get Topping
+export const GetTopping = async (): Promise<PreferToppingType> => {
+  const { data } = await customerProfileApi.get("/topping-types");
+
+  return data;
+};
+
+// POST: create Topping
+export const CreateTopping = async (
+  body: ToppingBaseType
+): Promise<PreferToppingType> => {
+  const { data } = await customerProfileApi.post("/topping-types", body);
+
+  return data;
+};
+
+// DELETE: delete Topping
+export const DeleteTopping = async (body: ToppingDeleteType) => {
+  const { data } = await customerProfileApi.delete("/topping-types", {
     data: body,
   });
 
