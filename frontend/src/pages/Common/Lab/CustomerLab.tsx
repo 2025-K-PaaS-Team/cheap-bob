@@ -1,5 +1,6 @@
 import type { PaymentConfirmType, PaymentResponseType } from "@interface";
 import type { OrderBaseType } from "@interface/common/types";
+import type { optionType } from "@interface/customer/option";
 import type {
   OrderDeleteResponseType,
   OrderDetailResponseType,
@@ -7,11 +8,15 @@ import type {
 } from "@interface/customer/order";
 import {
   deleteOrder,
+  GetAllegyOptionList,
   getCurrentOrders,
+  getMenuOptionList,
+  GetNutritionOptionList,
   getOrderDetail,
   getOrders,
   getSpecificStore,
   getStores,
+  GetToppingOptionList,
 } from "@services";
 import {
   cancelPayment,
@@ -153,6 +158,50 @@ const CustomerLab = () => {
     }
   };
 
+  // option
+  const [preferMenu, setPreferMenu] = useState<optionType | null>(null);
+  const [preferNutrition, setPreferNutrition] = useState<optionType | null>(
+    null
+  );
+  const [preferAllergy, setPreferAllergy] = useState<optionType | null>(null);
+  const [preferTopping, setPreferTopping] = useState<optionType | null>(null);
+
+  const handleGetMenuOption = async () => {
+    try {
+      const menu = await getMenuOptionList();
+      setPreferMenu(menu);
+    } catch (err: unknown) {
+      console.error("get prefer menu option fail", err);
+    }
+  };
+
+  const handleGetNutritionOption = async () => {
+    try {
+      const nutrition = await GetNutritionOptionList();
+      setPreferNutrition(nutrition);
+    } catch (err: unknown) {
+      console.error("get prefer nutrion option fail", err);
+    }
+  };
+
+  const handleGetAllergyOption = async () => {
+    try {
+      const allergy = await GetAllegyOptionList();
+      setPreferAllergy(allergy);
+    } catch (err: unknown) {
+      console.error("get prefer allergy option fail", err);
+    }
+  };
+
+  const handleGetToppingOption = async () => {
+    try {
+      const topping = await GetToppingOptionList();
+      setPreferTopping(topping);
+    } catch (err: unknown) {
+      console.error("get prefer menu option fail", err);
+    }
+  };
+
   /* err message */
   useEffect(() => {
     console.error(errMsg);
@@ -288,6 +337,53 @@ const CustomerLab = () => {
         {orderDelete && (
           <div className="w-full text-green-500">
             현재 주문 상세: {JSON.stringify(orderDelete)}
+          </div>
+        )}
+
+        {/* option */}
+        <h2>선호 옵션 가져오기</h2>
+        <button
+          className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetMenuOption()}
+        >
+          메뉴 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferMenu && (
+          <div className="w-full text-green-500">
+            현재 선호 메뉴: {JSON.stringify(preferMenu)}
+          </div>
+        )}
+        <button
+          className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetNutritionOption()}
+        >
+          영양 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferNutrition && (
+          <div className="w-full text-green-500">
+            현재 선호 영양: {JSON.stringify(preferNutrition)}
+          </div>
+        )}
+        <button
+          className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetAllergyOption()}
+        >
+          알러지 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferAllergy && (
+          <div className="w-full text-green-500">
+            현재 선호 알러지: {JSON.stringify(preferAllergy)}
+          </div>
+        )}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetToppingOption()}
+        >
+          토핑 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferTopping && (
+          <div className="w-full text-green-500">
+            현재 선호 토핑: {JSON.stringify(preferTopping)}
           </div>
         )}
       </div>
