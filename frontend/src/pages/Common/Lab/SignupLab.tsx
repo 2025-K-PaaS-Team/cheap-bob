@@ -21,6 +21,7 @@ const SignupLab = () => {
         nickname: "Logitex",
         phone_number: "01099998888",
       });
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -29,6 +30,7 @@ const SignupLab = () => {
   const handleGetPreferMenu = async () => {
     try {
       const res = await GetPreferMenu();
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -37,6 +39,7 @@ const SignupLab = () => {
   const handleCreatePreferMenu = async () => {
     try {
       const res = await CreatePreferMenu({ menu_types: ["salad"] });
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -45,6 +48,7 @@ const SignupLab = () => {
   const handleDeletePreferMenu = async () => {
     try {
       const res = await DeletePreferMenu({ menu_type: "salad" });
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -54,6 +58,7 @@ const SignupLab = () => {
   const handleGetNutrition = async () => {
     try {
       const res = await GetNutrition();
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -62,6 +67,7 @@ const SignupLab = () => {
   const handleCreateNutrition = async () => {
     try {
       const res = await CrateNutrition({ nutrition_types: ["diet"] });
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -70,6 +76,7 @@ const SignupLab = () => {
   const handleDeleteNutrition = async () => {
     try {
       const res = await DeleteNutrition({ nutrition_type: "diet" });
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -79,6 +86,7 @@ const SignupLab = () => {
   const handleGetAllergies = async () => {
     try {
       const res = await GetAllergies();
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -87,6 +95,7 @@ const SignupLab = () => {
   const handleCreateAllergies = async () => {
     try {
       const res = await CreateAllergies({ allergy_types: ["seafood"] });
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -95,6 +104,7 @@ const SignupLab = () => {
   const handleDeleteAllergies = async () => {
     try {
       const res = await DeleteAllergies({ allergy_type: "seafood" });
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -104,6 +114,7 @@ const SignupLab = () => {
   const handleGetTopping = async () => {
     try {
       const res = await GetTopping();
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -112,6 +123,7 @@ const SignupLab = () => {
   const handleCreateTopping = async () => {
     try {
       const res = await CreateTopping({ topping_types: ["egg_mayo"] });
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
@@ -120,6 +132,7 @@ const SignupLab = () => {
   const handleDeleteTopping = async () => {
     try {
       const res = await DeleteTopping({ topping_type: "egg_mayo" });
+      console.log(res);
     } catch (err: unknown) {
       console.error("fail", err);
     }
