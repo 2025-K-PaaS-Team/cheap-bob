@@ -93,3 +93,10 @@ export type GetQrCodeType = QrBaseType & {
   payment_id: string;
   created_at: TimeStamp;
 };
+
+export type MapBaseType = {
+  road_address: string;
+  building_name: string;
+  lng: string;
+  lat: string;
+};

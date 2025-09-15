@@ -47,3 +47,8 @@ export type CancelOrderRequestType = {
 export type QrBaseType = {
   qr_data: string;
 };
+
+export type CoordBaseType = {
+  lat: string;
+  lng: string;
+};
