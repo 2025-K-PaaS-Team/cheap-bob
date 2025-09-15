@@ -1,12 +1,13 @@
 import { CommonBtn } from "@components/common";
-import { Agree } from "@components/customer/signup";
+import { Agree, Enter } from "@components/customer/signup";
 
 type SignupSwiperProps = {
   title: string;
   type: "agree" | "enter" | "select";
+  placeholder?: string;
 };
 
-const SignupSwiper = ({ title, type }: SignupSwiperProps) => {
+const SignupSwiper = ({ title, type, placeholder }: SignupSwiperProps) => {
   return (
     <>
       <div className="relative h-full px-[20px] pt-[42px]">
@@ -20,6 +21,7 @@ const SignupSwiper = ({ title, type }: SignupSwiperProps) => {
         {/* type: agree */}
         {type === "agree" && <Agree />}
         {/* type: enter */}
+        {type === "enter" && <Enter placeholder={placeholder ?? ""} />}
         {/* type: select */}
         <CommonBtn label="다음" />
       </div>

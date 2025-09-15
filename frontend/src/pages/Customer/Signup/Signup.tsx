@@ -38,6 +38,20 @@ const Signup = () => {
             type="agree"
           />
         </SwiperSlide>
+        <SwiperSlide>
+          <SignupSwiper
+            title={`어떻게 불러드릴까요?`}
+            type="enter"
+            placeholder="7자 이내로 닉네임을 입력하세요"
+          />
+        </SwiperSlide>
+        <SwiperSlide>
+          <SignupSwiper
+            title={`전화번호를 입력해주세요`}
+            type="enter"
+            placeholder="번호를 입력하세요"
+          />
+        </SwiperSlide>
         <SwiperSlide>Slide2</SwiperSlide>
       </Swiper>
 
