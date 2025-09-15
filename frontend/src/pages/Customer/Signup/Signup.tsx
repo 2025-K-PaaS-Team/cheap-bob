@@ -52,7 +52,22 @@ const Signup = () => {
             placeholder="번호를 입력하세요"
           />
         </SwiperSlide>
-        <SwiperSlide>Slide2</SwiperSlide>
+        <SwiperSlide>
+          <SignupSwiper
+            title={`영양 목표를\n선택해주세요`}
+            type="select"
+            subTitle="내 목표 맞춤형 식사를 추천해드려요."
+          />
+        </SwiperSlide>
+        <SwiperSlide>
+          <SignupSwiper title={`선호하는 메뉴를\n선택해주세요`} type="select" />
+        </SwiperSlide>
+        <SwiperSlide>
+          <SignupSwiper title={`선호하는 토핑을\n선택해주세요`} type="select" />
+        </SwiperSlide>
+        <SwiperSlide>
+          <SignupSwiper title={`못 먹는 음식을\n선택해주세요`} type="select" />
+        </SwiperSlide>
       </Swiper>
 
       {/* <form onSubmit={handleSubmit} className="p-3 gap-y-3 flex flex-col w-50">
