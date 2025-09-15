@@ -1,4 +1,4 @@
-import { LoginButton } from "@components/home";
+import { LoginButton } from "@components/common/home";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 

@@ -38,4 +38,11 @@
     font-weight: 700;
     margin: 0.5em;
   }
+
+  .mySwiper {
+    --swiper-pagination-color: #222222; /* 초록 */
+    --swiper-pagination-bullet-inactive-color: #bfbfbf;
+    --swiper-pagination-bullet-size: 10px;
+    --swiper-pagination-bullet-inactive-opacity: 1;
+  }
 }

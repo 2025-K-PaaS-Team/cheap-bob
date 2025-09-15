@@ -1,7 +1,12 @@
-import { LoginButton } from "@components/home";
+import { LoginButton, SwiperBase } from "@components/common/home";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import Swiper from "swiper";
+import { Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import { homeSwiperMap } from "@constant";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -9,39 +14,31 @@ const Home = () => {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
 
-    // if (token) {
-    //   navigate("stores");
-    // }
+    if (token) {
+      navigate("stores");
+    }
   }, []);
 
   return (
-    <div className="flex justify-center">
-      {/* title */}
-      <h1 className="flex">저렴한끼</h1>
+    <div className="flex justify-center w-full">
+      {/* swiper */}
+      <Swiper
+        pagination={{ clickable: true }}
+        modules={[Pagination]}
+        className="mySwiper items-center flex h-[460px] mt-[119px]"
+      >
+        {homeSwiperMap.map((slide, idx) => (
+          <SwiperSlide key={idx}>
+            <SwiperBase title={slide.title} img={slide.img} />
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
-      <div className="fixed bottom-30 w-full flex flex-col max-w-[400px]">
-        <LoginButton
-          provider="kakao"
-          label="카카오톡으로 로그인하기"
-          color="bg-yellow-500"
-        />
-        <LoginButton
-          provider="naver"
-          label="네이버로 로그인하기"
-          color="bg-green-500"
-        />
-        <h3
-          className="bg-pink-300 p-3 rounded-xl text-center cursor-pointer"
-          onClick={() => navigate("/s", { replace: true })}
-        >
-          점주 페이지로 이동
-        </h3>
-        <h3
-          className="bg-gray-300 p-3 rounded-xl text-center cursor-pointer"
-          onClick={() => navigate("/c/lab")}
-        >
-          실험실로 이동
-        </h3>
+      {/* login button */}
+      <div className="fixed bottom-[38px] flex flex-col gap-y-[10px]">
+        <LoginButton provider="kakao" label="카카오로 계속하기" />
+        <LoginButton provider="naver" label="네이버로 계속하기" />
+        <LoginButton provider="google" label="구글로 계속하기" />
       </div>
     </div>
   );
