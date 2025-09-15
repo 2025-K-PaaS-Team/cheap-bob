@@ -78,6 +78,14 @@ export const customerOrderApi = attachInterceptors(
   })
 );
 
+export const optionInfoApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/common/options`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
 // kakao
 const kakaoAttachInterceptors = (instance: AxiosInstance) => {
   instance.interceptors.request.use((config) => {

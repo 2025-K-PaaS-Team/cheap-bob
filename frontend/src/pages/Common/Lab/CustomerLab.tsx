@@ -7,17 +7,23 @@ import type {
 } from "@interface/customer/order";
 import {
   deleteOrder,
+  GetAllegyOptionList,
   getCurrentOrders,
+  getMenuOptionList,
+  GetNutritionOptionList,
   getOrderDetail,
   getOrders,
+  getPreferOptionList,
   getSpecificStore,
   getStores,
+  GetToppingOptionList,
 } from "@services";
 import {
   cancelPayment,
   confrimPayment,
   initPayment,
 } from "@services/customer/payment";
+import type { OptionType } from "dayjs";
 import { useEffect, useState } from "react";
 
 const CustomerLab = () => {
@@ -150,6 +156,46 @@ const CustomerLab = () => {
       console.error("get order detail failed", err);
       const msg = err instanceof Error ? err.message : "실패해소";
       setErrMsg(msg);
+    }
+  };
+
+  // option
+  const [preferMenu, setPreferMenu] = useState<OptionType | null>(null);
+  const [preferNutrition, setPreferNutrition] = useState<OptionType | null>(
+    null
+  );
+  const [preferAllergy, setPreferAllergy] = useState<OptionType | null>(null);
+  const [preferTopping, setPreferTopping] = useState<OptionType | null>(null);
+
+  const handleGetMenuOption = async () => {
+    try {
+      const res = await getMenuOptionList();
+    } catch (err: unknown) {
+      console.error("get prefer menu option fail", err);
+    }
+  };
+
+  const handleGetNutritionOption = async () => {
+    try {
+      const res = await GetNutritionOptionList();
+    } catch (err: unknown) {
+      console.error("get prefer nutrion option fail", err);
+    }
+  };
+
+  const handleGetAllergyOption = async () => {
+    try {
+      const res = await GetAllegyOptionList();
+    } catch (err: unknown) {
+      console.error("get prefer allergy option fail", err);
+    }
+  };
+
+  const handleGetToppingOption = async () => {
+    try {
+      const res = await GetToppingOptionList();
+    } catch (err: unknown) {
+      console.error("get prefer menu option fail", err);
     }
   };
 
@@ -288,6 +334,53 @@ const CustomerLab = () => {
         {orderDelete && (
           <div className="w-full text-green-500">
             현재 주문 상세: {JSON.stringify(orderDelete)}
+          </div>
+        )}
+
+        {/* option */}
+        <h2>선호 옵션 가져오기</h2>
+        <button
+          className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetMenuOption()}
+        >
+          메뉴 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferMenu && (
+          <div className="w-full text-green-500">
+            현재 선호 메뉴: {JSON.stringify(preferMenu)}
+          </div>
+        )}
+        <button
+          className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetNutritionOption()}
+        >
+          영양 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferMenu && (
+          <div className="w-full text-green-500">
+            현재 선호 영양: {JSON.stringify(preferMenu)}
+          </div>
+        )}
+        <button
+          className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetAllergyOption()}
+        >
+          알러지 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferMenu && (
+          <div className="w-full text-green-500">
+            현재 선호 알러지: {JSON.stringify(preferMenu)}
+          </div>
+        )}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetToppingOption()}
+        >
+          토핑 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferMenu && (
+          <div className="w-full text-green-500">
+            현재 선호 토핑: {JSON.stringify(preferMenu)}
           </div>
         )}
       </div>
