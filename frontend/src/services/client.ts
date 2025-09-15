@@ -77,3 +77,24 @@ export const customerOrderApi = attachInterceptors(
     headers: { "Content-Type": "application/json" },
   })
 );
+
+// kakao
+const kakaoAttachInterceptors = (instance: AxiosInstance) => {
+  instance.interceptors.request.use((config) => {
+    const token = import.meta.env.VITE_KAKAO_REST_API;
+    if (token) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `KakaoAK ${token}`;
+    }
+    return config;
+  });
+  return instance;
+};
+
+export const kakaoApi = kakaoAttachInterceptors(
+  axios.create({
+    baseURL: `https://dapi.kakao.com/v2/local/search/address.json`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);

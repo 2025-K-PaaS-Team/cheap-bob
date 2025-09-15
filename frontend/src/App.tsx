@@ -11,8 +11,10 @@ import {
   Order,
   Store,
   OrderManage,
+  CustomerMapLab,
 } from "@pages";
 import { CustomerHome, SellerHome } from "@pages/Common/Home";
+import { SellerMapLab } from "@pages/Common";
 
 const App = () => {
   return (
@@ -33,6 +35,7 @@ const App = () => {
         <Route path="my" element={<My />} />
         {/* lab */}
         <Route path="lab" element={<CustomerLab />} />
+        <Route path="lab/map" element={<CustomerMapLab />} />
         <Route path="qr" element={<QrLab />} />
       </Route>
 
@@ -46,6 +49,7 @@ const App = () => {
         <Route path="store" element={<Store />} />
         {/* lab */}
         <Route path="lab" element={<SellerLab />} />
+        <Route path="lab/map" element={<SellerMapLab />} />
       </Route>
 
       {/* 루트 접근시 고객 홈으로 */}
