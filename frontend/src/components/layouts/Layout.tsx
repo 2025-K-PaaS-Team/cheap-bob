@@ -11,7 +11,8 @@ import { Outlet, useLocation } from "react-router";
 const Layout = () => {
   const location = useLocation();
   const path = location.pathname;
-  const isCustomer = path.includes("c");
+  const isCustomer = path.startsWith("c");
+  const notFooter = path === "/c";
 
   return (
     <>
@@ -20,7 +21,7 @@ const Layout = () => {
         <Main>
           <Outlet />
         </Main>
-        {isCustomer ? <Footer /> : <SellerFooter />}
+        {!notFooter && (isCustomer ? <Footer /> : <SellerFooter />)}
       </Wrapper>
     </>
   );

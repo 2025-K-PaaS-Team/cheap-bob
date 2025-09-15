@@ -13,8 +13,9 @@ import {
   OrderManage,
   Signup,
   CustomerMapLab,
+  CustomerHome,
+  SellerHome,
 } from "@pages";
-import { CustomerHome, SellerHome } from "@pages/Common/Home";
 import { SellerMapLab } from "@pages/Common";
 
 const App = () => {

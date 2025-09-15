@@ -2,14 +2,17 @@ import { LoginButton } from "@components/home";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
-const CustomerHome = () => {
+const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
 
     if (token) {
-      navigate("stores");
+      alert("이미 로그인이 되어 있어요.");
+      // setTimeout(() => {
+      //   navigate("lab");
+      // }, 3000);
     }
   }, []);
 
@@ -21,23 +24,25 @@ const CustomerHome = () => {
       <div className="fixed bottom-30 w-full flex flex-col max-w-[400px]">
         <LoginButton
           provider="kakao"
-          label="카카오톡으로 로그인하기"
-          color="bg-yellow-500"
+          label="[점주] 카카오톡으로 로그인하기"
+          color="bg-amber-500"
+          isCustomer={false}
         />
         <LoginButton
           provider="naver"
-          label="네이버로 로그인하기"
-          color="bg-green-500"
+          label="[점주] 네이버로 로그인하기"
+          color="bg-teal-500"
+          isCustomer={false}
         />
         <h3
           className="bg-pink-300 p-3 rounded-xl text-center cursor-pointer"
-          onClick={() => navigate("/s", { replace: true })}
+          onClick={() => navigate("/c", { replace: true })}
         >
-          점주 페이지로 이동
+          고객 페이지로 이동
         </h3>
         <h3
           className="bg-gray-300 p-3 rounded-xl text-center cursor-pointer"
-          onClick={() => navigate("/c/lab")}
+          onClick={() => navigate("/s/lab")}
         >
           실험실로 이동
         </h3>
@@ -46,4 +51,4 @@ const CustomerHome = () => {
   );
 };
 
-export default CustomerHome;
+export default Home;
