@@ -14,35 +14,57 @@
 }
 
 @layer base {
-  body {
-    font-family: "Pretendard", sans-serif;
+  html,
+  body,
+  #root {
+    height: 100%;
     margin: 0;
     padding: 0;
+  }
+
+  body {
+    font-family: "Pretendard", sans-serif;
     box-sizing: border-box;
   }
+}
 
-  h1 {
-    font-size: xx-large;
-    font-weight: 900;
-    margin: 0.5em;
-  }
+h1 {
+  font-size: xx-large;
+  font-weight: 900;
+  margin: 0.5em;
+}
 
-  h2 {
-    font-size: x-large;
-    font-weight: 800;
-    margin: 0.5em;
-  }
+h2 {
+  font-size: x-large;
+  font-weight: 800;
+  margin: 0.5em;
+}
 
-  h3 {
-    font-size: large;
-    font-weight: 700;
-    margin: 0.5em;
-  }
+h3 {
+  font-size: large;
+  font-weight: 700;
+  margin: 0.5em;
+}
 
-  .mySwiper {
-    --swiper-pagination-color: #222222; /* 초록 */
-    --swiper-pagination-bullet-inactive-color: #bfbfbf;
-    --swiper-pagination-bullet-size: 10px;
-    --swiper-pagination-bullet-inactive-opacity: 1;
-  }
+[type="checkbox"] {
+  width: 25px;
+  height: 25px;
+  accent-color: #222222;
+  appearance: none;
+  border-radius: 50%;
+  border: 1px solid #222222;
+}
+
+[type="checkbox"]:checked {
+  background-color: #222222;
+  border: no;
+}
+
+.mySwiper {
+  --swiper-pagination-color: #222222; /* 초록 */
+  --swiper-pagination-bullet-inactive-color: #bfbfbf;
+  --swiper-pagination-bullet-size: 10px;
+  --swiper-pagination-bullet-inactive-opacity: 1;
+  --swiper-pagination-progressbar-size: 8px;
+  --swiper-pagination-progressbar-bg-color: #d9d9d9;
 }

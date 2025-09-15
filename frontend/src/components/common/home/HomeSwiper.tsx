@@ -1,9 +1,9 @@
-type SwiperBaseProps = {
+type HomeSwiperProps = {
   title: string;
   img: string;
 };
 
-const SwiperBase = ({ title, img }: SwiperBaseProps) => {
+const HomeSwiper = ({ title, img }: HomeSwiperProps) => {
   return (
     <div className="flex flex-col items-center font-bold text-2xl">
       <div className="w-fit text-center mb-[31px]">
@@ -16,4 +16,4 @@ const SwiperBase = ({ title, img }: SwiperBaseProps) => {
   );
 };
 
-export default SwiperBase;
+export default HomeSwiper;

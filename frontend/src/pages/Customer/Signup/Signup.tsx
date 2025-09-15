@@ -1,6 +1,9 @@
+import { SignupSwiper } from "@components/customer/signup";
 import { SignupLab } from "@pages/Common";
 import { CreateCustomerDetail } from "@services";
 import { useState } from "react";
+import { Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 const Signup = () => {
   const [nickname, setNickname] = useState<string>("");
@@ -22,10 +25,23 @@ const Signup = () => {
   };
 
   return (
-    <div>
-      <hr className="h-[8px] bg-[#D9D9D9] border-none" />
-      <hr className="h-[8px] bg-[#222222] border-none" />
-      <form onSubmit={handleSubmit} className="p-3 gap-y-3 flex flex-col w-50">
+    <div className="h-full">
+      <Swiper
+        pagination={{ type: "progressbar" }}
+        navigation={false}
+        modules={[Pagination]}
+        className="mySwiper h-full"
+      >
+        <SwiperSlide>
+          <SignupSwiper
+            title={`서비스 이용 약관에 \n동의해주세요.`}
+            type="agree"
+          />
+        </SwiperSlide>
+        <SwiperSlide>Slide2</SwiperSlide>
+      </Swiper>
+
+      {/* <form onSubmit={handleSubmit} className="p-3 gap-y-3 flex flex-col w-50">
         <input
           placeholder="어떻게 불러드릴까요"
           value={nickname}
@@ -44,7 +60,7 @@ const Signup = () => {
         </button>
       </form>
 
-      <SignupLab />
+      <SignupLab /> */}
     </div>
   );
 };

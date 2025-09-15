@@ -1,4 +1,4 @@
-import { LoginButton, SwiperBase } from "@components/common/home";
+import { LoginButton, HomeSwiper } from "@components/common/home";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Pagination } from "swiper/modules";
@@ -29,7 +29,7 @@ const Home = () => {
       >
         {homeSwiperMap.map((slide, idx) => (
           <SwiperSlide key={idx}>
-            <SwiperBase title={slide.title} img={slide.img} />
+            <HomeSwiper title={slide.title} img={slide.img} />
           </SwiperSlide>
         ))}
       </Swiper>
