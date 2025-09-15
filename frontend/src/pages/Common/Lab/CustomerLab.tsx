@@ -1,5 +1,6 @@
 import type { PaymentConfirmType, PaymentResponseType } from "@interface";
 import type { OrderBaseType } from "@interface/common/types";
+import type { optionType } from "@interface/customer/option";
 import type {
   OrderDeleteResponseType,
   OrderDetailResponseType,
@@ -22,7 +23,6 @@ import {
   confrimPayment,
   initPayment,
 } from "@services/customer/payment";
-import type { OptionType } from "dayjs";
 import { useEffect, useState } from "react";
 
 const CustomerLab = () => {
@@ -159,16 +159,17 @@ const CustomerLab = () => {
   };
 
   // option
-  const [preferMenu, setPreferMenu] = useState<OptionType | null>(null);
-  const [preferNutrition, setPreferNutrition] = useState<OptionType | null>(
+  const [preferMenu, setPreferMenu] = useState<optionType | null>(null);
+  const [preferNutrition, setPreferNutrition] = useState<optionType | null>(
     null
   );
-  const [preferAllergy, setPreferAllergy] = useState<OptionType | null>(null);
-  const [preferTopping, setPreferTopping] = useState<OptionType | null>(null);
+  const [preferAllergy, setPreferAllergy] = useState<optionType | null>(null);
+  const [preferTopping, setPreferTopping] = useState<optionType | null>(null);
 
   const handleGetMenuOption = async () => {
     try {
       const menu = await getMenuOptionList();
+      setPreferMenu(menu);
     } catch (err: unknown) {
       console.error("get prefer menu option fail", err);
     }
@@ -176,7 +177,8 @@ const CustomerLab = () => {
 
   const handleGetNutritionOption = async () => {
     try {
-      const res = await GetNutritionOptionList();
+      const nutrition = await GetNutritionOptionList();
+      setPreferNutrition(nutrition);
     } catch (err: unknown) {
       console.error("get prefer nutrion option fail", err);
     }
@@ -184,7 +186,8 @@ const CustomerLab = () => {
 
   const handleGetAllergyOption = async () => {
     try {
-      const res = await GetAllegyOptionList();
+      const allergy = await GetAllegyOptionList();
+      setPreferAllergy(allergy);
     } catch (err: unknown) {
       console.error("get prefer allergy option fail", err);
     }
@@ -192,7 +195,8 @@ const CustomerLab = () => {
 
   const handleGetToppingOption = async () => {
     try {
-      const res = await GetToppingOptionList();
+      const topping = await GetToppingOptionList();
+      setPreferTopping(topping);
     } catch (err: unknown) {
       console.error("get prefer menu option fail", err);
     }
