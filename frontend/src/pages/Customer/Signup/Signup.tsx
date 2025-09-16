@@ -1,4 +1,5 @@
 import { SignupSwiper } from "@components/customer/signup";
+import { NutritionList } from "@constant";
 import { SignupLab } from "@pages/Common";
 import { CreateCustomerDetail } from "@services";
 import { useRef, useState } from "react";
@@ -61,6 +62,7 @@ const Signup = () => {
         <SwiperSlide>
           <SignupSwiper
             title={`영양 목표를\n선택해주세요`}
+            data={NutritionList}
             type="select"
             subTitle="내 목표 맞춤형 식사를 추천해드려요."
             onNext={() => swiperRef.current.slideNext()}

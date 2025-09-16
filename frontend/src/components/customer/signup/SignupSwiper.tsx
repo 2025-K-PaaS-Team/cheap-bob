@@ -1,6 +1,4 @@
 import { Agree, Enter, Select } from "@components/customer/signup";
-import { GetPreferMenu } from "@services";
-import { useEffect } from "react";
 
 type SignupSwiperProps = {
   title: string;
@@ -8,6 +6,7 @@ type SignupSwiperProps = {
   placeholder?: string;
   subTitle?: string;
   onNext: () => void;
+  data?: any;
 };
 
 const SignupSwiper = ({
@@ -16,9 +15,8 @@ const SignupSwiper = ({
   placeholder,
   subTitle,
   onNext,
+  data,
 }: SignupSwiperProps) => {
-
-
   return (
     <>
       <div className="relative h-full px-[20px] pt-[42px]">
@@ -41,7 +39,7 @@ const SignupSwiper = ({
           <Enter placeholder={placeholder ?? ""} onNext={onNext} />
         )}
         {/* type: select */}
-        {type === "select" && <Select onNext={onNext} />}
+        {type === "select" && <Select onNext={onNext} data={data} />}
       </div>
     </>
   );
