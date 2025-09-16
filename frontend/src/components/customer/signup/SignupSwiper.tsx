@@ -16,12 +16,14 @@ type EnterProps = BaseProps & {
   placeholder?: string;
   value: string;
   setValue: React.Dispatch<React.SetStateAction<string>>;
+  validate: (val: string) => string | null;
 };
 
 type SelectProps = BaseProps & {
   type: "select";
   data: SelectItem[];
   selectType?: string;
+  validate?: (val: string[]) => string | null;
 };
 
 type SignupSwiperProps = AgreeProps | EnterProps | SelectProps;
@@ -54,6 +56,7 @@ const SignupSwiper = (props: SignupSwiperProps) => {
             onNext={onNext}
             setValue={props.setValue}
             value={props.value}
+            validate={props.validate}
           />
         )}
 
@@ -63,6 +66,7 @@ const SignupSwiper = (props: SignupSwiperProps) => {
             onNext={onNext}
             data={props.data}
             selectType={props.selectType}
+            validate={props.validate}
           />
         )}
       </div>

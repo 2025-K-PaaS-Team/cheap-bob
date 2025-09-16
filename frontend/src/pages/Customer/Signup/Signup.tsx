@@ -48,6 +48,9 @@ const Signup = () => {
             title={`어떻게 불러드릴까요?`}
             type="enter"
             placeholder="7자 이내로 닉네임을 입력하세요"
+            validate={(val) =>
+              val.length > 7 ? "7자 이내로 닉네임을 입력해주세요" : ""
+            }
             onNext={() => swiperRef.current.slideNext()}
             value={nickname}
             setValue={setNickname}
@@ -58,6 +61,9 @@ const Signup = () => {
             title={`전화번호를 입력해주세요`}
             type="enter"
             placeholder="번호를 입력하세요"
+            validate={(val) =>
+              !/^\d{10,11}$/.test(val) ? "01011112222형식으로 입력해주세요" : ""
+            }
             onNext={() => swiperRef.current.slideNext()}
             value={phone}
             setValue={setPhone}
@@ -71,6 +77,13 @@ const Signup = () => {
             selectType="nutrition"
             subTitle="내 목표 맞춤형 식사를 추천해드려요."
             onNext={() => swiperRef.current.slideNext()}
+            validate={(selected) =>
+              selected.length === 0
+                ? "최소 1개 이상 선택해주세요"
+                : selected.length > 3
+                ? "최대 3개까지만 선택할 수 있습니다"
+                : null
+            }
           />
         </SwiperSlide>
         <SwiperSlide>

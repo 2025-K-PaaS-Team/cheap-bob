@@ -5,11 +5,19 @@ type EnterProps = {
   onNext: () => void;
   setValue: React.Dispatch<React.SetStateAction<string>>;
   value: string;
+  validate: (val: string) => string | null;
 };
-const Enter = ({ placeholder, onNext, setValue, value }: EnterProps) => {
+const Enter = ({
+  placeholder,
+  onNext,
+  setValue,
+  value,
+  validate,
+}: EnterProps) => {
   const handleSubmit = () => {
-    if (value.length > 7) {
-      alert("7자 이내로 닉네임을 입력해주세요");
+    const error = validate(value);
+    if (error) {
+      alert(error);
       return;
     }
     onNext();

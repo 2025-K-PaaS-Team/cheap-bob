@@ -6,26 +6,24 @@ type SelectProps = {
   onNext: () => void;
   data?: SelectItem[];
   selectType?: string;
+  validate?: (val: string[]) => string | null;
 };
 
-const Select = ({ onNext, data, selectType }: SelectProps) => {
+const Select = ({ onNext, data, selectType, validate }: SelectProps) => {
   const [selected, setSelected] = useState<string[]>([]);
 
   const handleClick = (key: string) => {
     if (selected.includes(key)) {
       setSelected(selected.filter((item) => item != key));
     } else {
-      if (selected.length < 3) {
-        setSelected([...selected, key]);
-      } else {
-        alert("최대 3개까지만 선택할 수 있습니다!");
-      }
+      setSelected([...selected, key]);
     }
   };
 
   const handleSubmit = () => {
-    if (selected.length === 0) {
-      alert("항목을 최소 1개 이상 선택해주세요!");
+    const error = validate?.(selected);
+    if (error) {
+      alert(error);
       return;
     }
     onNext();
