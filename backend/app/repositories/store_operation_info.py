@@ -129,7 +129,7 @@ class StoreOperationInfoRepository(BaseRepository[StoreOperationInfo]):
         if not today_info or not today_info.is_open_enabled:
             return False
         
-        current_time = datetime.now().time()
+        current_time = datetime.now(KST).time()
         return (today_info.pickup_start_time <= current_time <= today_info.pickup_end_time)
     
     def _validate_times(

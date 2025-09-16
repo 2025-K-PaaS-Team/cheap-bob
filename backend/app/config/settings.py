@@ -41,6 +41,13 @@ class Settings(BaseSettings):
     # 낙관적 Lock 재시도 횟수
     MAX_RETRY_LOCK: int
     
+    # AWS S3 설정
+    AWS_ACCESS_KEY_ID: str
+    AWS_SECRET_ACCESS_KEY: str
+    AWS_REGION: str
+    AWS_S3_BUCKET_NAME: str
+    AWS_S3_ENDPOINT_URL: str
+    
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
