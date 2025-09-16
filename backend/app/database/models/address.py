@@ -11,6 +11,8 @@ class Address(Base):
     sido = Column(String(50), nullable=False)  # 시/도
     sigungu = Column(String(50), nullable=False)  # 시/군/구
     bname = Column(String(50), nullable=False)  # 읍/면/동
+    lat = Column(String(50), nullable=False)  # 위도
+    lng = Column(String(50), nullable=False)  # 경도
     
     # Relationships
     stores = relationship("Store", back_populates="address")

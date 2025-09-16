@@ -90,7 +90,7 @@ class StoreOperationInfoRepository(BaseRepository[StoreOperationInfo]):
         return await self.get_by_pk(operation_id)
     
     async def update_current_status_by_time(self, store_id: str) -> List[StoreOperationInfo]:
-        """현재 시간 기준으로 모든 요일의 운영 상태 업데이트"""
+        """현재 날짜 운영 상태 업데이트(트리거)"""
         operation_infos = await self.get_by_store_id(store_id)
         
         now = datetime.now(KST)
@@ -129,7 +129,7 @@ class StoreOperationInfoRepository(BaseRepository[StoreOperationInfo]):
         if not today_info or not today_info.is_open_enabled:
             return False
         
-        current_time = datetime.now(KST).time()
+        current_time = datetime.now().time()
         return (today_info.pickup_start_time <= current_time <= today_info.pickup_end_time)
     
     def _validate_times(

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 from pydantic import BaseModel, Field
-from schemas.food_preferences import PreferredMenu, NutritionType, AllergyType
+from schemas.food_preferences import PreferredMenu, NutritionType, AllergyType, ToppingType
 
 
 class PreferredMenuResponse(BaseModel):
@@ -80,3 +80,29 @@ class NutritionTypeDeleteRequest(BaseModel):
 class AllergyDeleteRequest(BaseModel):
     """알레르기 삭제 요청 스키마"""
     allergy_type: AllergyType = Field(..., description="삭제할 알레르기 타입")
+
+
+class ToppingTypeResponse(BaseModel):
+    """토핑 타입 응답 스키마"""
+    id: int = Field(..., description="ID")
+    topping_type: ToppingType = Field(..., description="토핑 타입")
+    created_at: datetime = Field(..., description="생성 일자")
+    
+    model_config = {
+        "from_attributes": True
+    }
+
+
+class ToppingTypeListResponse(BaseModel):
+    """토핑 타입 목록 응답 스키마"""
+    topping_types: List[ToppingTypeResponse] = Field(..., description="토핑 타입 목록")
+
+
+class ToppingTypeCreateRequest(BaseModel):
+    """토핑 타입 생성 요청 스키마"""
+    topping_types: List[ToppingType] = Field(..., description="추가할 토핑 타입 목록")
+
+
+class ToppingTypeDeleteRequest(BaseModel):
+    """토핑 타입 삭제 요청 스키마"""
+    topping_type: ToppingType = Field(..., description="삭제할 토핑 타입")

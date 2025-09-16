@@ -55,3 +55,26 @@ class AddressRepository(BaseRepository[Address]):
                 hierarchy[addr.sido][addr.sigungu].append(addr.bname)
         
         return hierarchy
+    
+    async def create_with_coordinates(self, sido: str, sigungu: str, bname: str, lat: str, lng: str) -> Address:
+        """위도/경도 정보를 포함한 주소 생성"""
+        return await self.create(
+            sido=sido,
+            sigungu=sigungu,
+            bname=bname,
+            lat=lat,
+            lng=lng
+        )
+    
+    async def update_address_with_coordinates(self, address_id: int, 
+                                             sido: str, sigungu: str, bname: str,
+                                             lat: str, lng: str) -> Optional[Address]:
+        """주소 전체 정보와 위도/경도 업데이트"""
+        return await self.update(
+            address_id,
+            sido=sido,
+            sigungu=sigungu,
+            bname=bname,
+            lat=lat,
+            lng=lng
+        )

@@ -1,5 +1,5 @@
 from typing import Dict, List
-from schemas.food_preferences import PreferredMenu, NutritionType, AllergyType
+from schemas.food_preferences import PreferredMenu, NutritionType, AllergyType, ToppingType
 from schemas.preference_options import PreferenceOption
 
 
@@ -40,6 +40,21 @@ ALLERGY_TYPE_NAMES: Dict[AllergyType, str] = {
 }
 
 
+# 토핑 타입 이름 매핑
+TOPPING_TYPE_NAMES: Dict[ToppingType, str] = {
+    ToppingType.egg_mayo: "에그마요",
+    ToppingType.chicken_breast: "닭가슴살",
+    ToppingType.onion_flake: "어니언 후레이크",
+    ToppingType.toasted_bread: "구운 식빵",
+    ToppingType.sweet_pumpkin: "단호박",
+    ToppingType.ricotta_cheese: "리코타치즈",
+    ToppingType.shrimp: "새우",
+    ToppingType.smoked_salmon: "훈제연어",
+    ToppingType.avocado: "아보카도",
+    ToppingType.pork_belly: "우삼겹"
+}
+
+
 def get_preferred_menu_options() -> List[PreferenceOption]:
     """선호 메뉴 옵션 목록 반환"""
     return [
@@ -61,4 +76,12 @@ def get_allergy_type_options() -> List[PreferenceOption]:
     return [
         PreferenceOption(type=allergy.value, name=ALLERGY_TYPE_NAMES[allergy])
         for allergy in AllergyType
+    ]
+
+
+def get_topping_type_options() -> List[PreferenceOption]:
+    """토핑 타입 옵션 목록 반환"""
+    return [
+        PreferenceOption(type=topping.value, name=TOPPING_TYPE_NAMES[topping])
+        for topping in ToppingType
     ]

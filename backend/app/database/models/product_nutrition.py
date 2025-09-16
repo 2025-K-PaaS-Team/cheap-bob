@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 from database.session import Base
 from schemas.food_preferences import NutritionType
 
-
 class ProductNutrition(Base):
     """ 상품 영양 정보 """
     __tablename__ = "product_nutrition"

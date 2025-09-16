@@ -3,12 +3,14 @@ from fastapi import APIRouter
 from schemas.preference_options import (
     PreferredMenuOptions,
     NutritionTypeOptions,
-    AllergyTypeOptions
+    AllergyTypeOptions,
+    ToppingTypeOptions
 )
 from utils.preference_mappings import (
     get_preferred_menu_options,
     get_nutrition_type_options,
-    get_allergy_type_options
+    get_allergy_type_options,
+    get_topping_type_options
 )
 
 
@@ -43,3 +45,13 @@ async def get_allergy_type_options_list():
     """알레르기 타입 옵션 목록을 조회"""
     options = get_allergy_type_options()
     return AllergyTypeOptions(options=options)
+
+
+@router.get(
+    "/topping-types",
+    response_model=ToppingTypeOptions
+)
+async def get_topping_type_options_list():
+    """토핑 타입 옵션 목록을 조회"""
+    options = get_topping_type_options()
+    return ToppingTypeOptions(options=options)

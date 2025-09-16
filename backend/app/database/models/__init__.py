@@ -7,7 +7,7 @@ from database.models.store_product_info import StoreProductInfo
 from database.models.cart_item import CartItem
 from database.models.order_current_item import OrderCurrentItem
 from database.models.order_history_item import OrderHistoryItem
-from database.models.customer_preferences import CustomerPreferredMenu, CustomerNutritionType, CustomerAllergy
+from database.models.customer_preferences import CustomerPreferredMenu, CustomerNutritionType, CustomerAllergy, CustomerToppingType
 from database.models.customer_detail import CustomerDetail
 from database.models.address import Address
 from database.models.store_sns import StoreSNS
@@ -29,6 +29,7 @@ __all__ = [
     "CustomerPreferredMenu",
     "CustomerNutritionType",
     "CustomerAllergy",
+    "CustomerToppingType",
     "CustomerDetail",
     "Address",
     "StoreSNS",
