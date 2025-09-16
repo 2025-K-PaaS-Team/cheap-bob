@@ -1,4 +1,6 @@
-export const NutritionList = [
+export type SelectItem = { key: string; title: string; desc?: string };
+
+export const NutritionList: SelectItem[] = [
   { key: "diet", title: "다이어트", desc: "체지방 감소와 활력 증진" },
   { key: "LCHF", title: "저탄고지", desc: "식곤증 없는 안정적 에너지" },
   { key: "protein", title: "단백질 보충", desc: "근육 성장과 체력 강화" },
@@ -7,14 +9,14 @@ export const NutritionList = [
   { key: "vegetarian", title: "채식 위주", desc: "심장 건강 개선과 체중감량" },
 ];
 
-export const MenuList = [
+export const MenuList: SelectItem[] = [
   { key: "salad", title: "샐러드" },
   { key: "poke", title: "포케" },
   { key: "korean", title: "도시락" },
   { key: "sandwich", title: "샌드위치" },
 ];
 
-export const ToppingList = [
+export const ToppingList: SelectItem[] = [
   { key: "egg_mayo", title: "에그마요" },
   { key: "chicken_breast", title: "닭가슴살" },
   { key: "onion_flake", title: "어니언 후레이크" },
@@ -27,7 +29,7 @@ export const ToppingList = [
   { key: "pork_belly", title: "우삼겹" },
 ];
 
-export const AllergyList = [
+export const AllergyList: SelectItem[] = [
   { key: "seafood", title: "해산물" },
   { key: "peanut", title: "땅콩" },
   { key: "nuts", title: "견과류" },

@@ -1,5 +1,5 @@
 import { SignupSwiper } from "@components/customer/signup";
-import { NutritionList } from "@constant";
+import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
 import { SignupLab } from "@pages/Common";
 import { CreateCustomerDetail } from "@services";
 import { useRef, useState } from "react";
@@ -71,6 +71,7 @@ const Signup = () => {
         <SwiperSlide>
           <SignupSwiper
             title={`선호하는 메뉴를\n선택해주세요`}
+            data={MenuList}
             type="select"
             onNext={() => swiperRef.current.slideNext()}
           />
@@ -78,6 +79,7 @@ const Signup = () => {
         <SwiperSlide>
           <SignupSwiper
             title={`선호하는 토핑을\n선택해주세요`}
+            data={ToppingList}
             type="select"
             onNext={() => swiperRef.current.slideNext()}
           />
@@ -85,6 +87,7 @@ const Signup = () => {
         <SwiperSlide>
           <SignupSwiper
             title={`못 먹는 음식을\n선택해주세요`}
+            data={AllergyList}
             type="select"
             onNext={() => swiperRef.current.slideNext()}
           />

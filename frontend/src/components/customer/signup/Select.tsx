@@ -1,27 +1,45 @@
 import { CommonBtn } from "@components/common";
-import type { NutritionList } from "@constant";
+import type { SelectItem } from "@constant";
+import { useState } from "react";
 
 type SelectProps = {
   onNext: () => void;
-  data: typeof NutritionList;
+  data?: SelectItem[];
 };
 
 const Select = ({ onNext, data }: SelectProps) => {
+  const [selected, setSelected] = useState<string>("");
   const handleSubmit = () => {
+    if (!selected) {
+      alert("항목을 선택해주세요");
+    }
     onNext();
   };
   return (
     <>
-      <div className="flex h-full w-full justify-center items-center pb-[207px]">
-        <div className="grid grid-cols-2 gap-x-[10px]">
+      <div className="flex h-full w-full justify-center items-start pt-[92px]">
+        <div className="grid grid-cols-2 gap-[10px]">
           {data &&
-            Object.entries(data).map(([key, value]) => (
+            data.map(({ key, title, desc }) => (
               <div
                 key={key}
-                className="bg-[#717171] rounded-[5px] text-white p-3 cursor-pointer"
+                onClick={() => setSelected(key)}
+                className={`relative rounded-[5px] p-[15px] h-[90px] w-[170px] cursor-pointer
+                  ${
+                    selected === key
+                      ? "bg-[#484848] text-white"
+                      : "bg-[#717171] text-white"
+                  }`}
               >
-                <div className="font-semibold text-[15px]">{value.title}</div>
-                <div className="text-[11px]">{value.desc}</div>
+                {selected === key && (
+                  <img
+                    src="/icon/checked.svg"
+                    alt="checked"
+                    className="absolute z-10 left-1/2 -translate-x-1/2 top-6"
+                  />
+                )}
+                <div className="font-semibold text-[15px]">{title}</div>
+                {desc && <div className="text-[11px]">{desc}</div>}
               </div>
             ))}
         </div>

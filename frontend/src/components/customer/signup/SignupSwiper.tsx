@@ -1,4 +1,5 @@
 import { Agree, Enter, Select } from "@components/customer/signup";
+import type { SelectItem } from "@constant";
 
 type SignupSwiperProps = {
   title: string;
@@ -6,15 +7,15 @@ type SignupSwiperProps = {
   placeholder?: string;
   subTitle?: string;
   onNext: () => void;
-  data?: any;
+  data?: SelectItem[];
 };
 
 const SignupSwiper = ({
   title,
   type,
+  onNext,
   placeholder,
   subTitle,
-  onNext,
   data,
 }: SignupSwiperProps) => {
   return (
