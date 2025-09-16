@@ -5,7 +5,7 @@ import { useState } from "react";
 type SelectProps = {
   onNext: () => void;
   data?: SelectItem[];
-  selectType: string;
+  selectType?: string;
 };
 
 const Select = ({ onNext, data, selectType }: SelectProps) => {
@@ -26,6 +26,7 @@ const Select = ({ onNext, data, selectType }: SelectProps) => {
   const handleSubmit = () => {
     if (selected.length === 0) {
       alert("항목을 최소 1개 이상 선택해주세요!");
+      return;
     }
     onNext();
   };
@@ -52,7 +53,9 @@ const Select = ({ onNext, data, selectType }: SelectProps) => {
                   <img
                     src="/icon/checked.svg"
                     alt="checked"
-                    className="absolute z-10 left-1/2 -translate-x-1/2 top-6"
+                    className={`absolute z-10 left-1/2 -translate-x-1/2 top-6 ${
+                      selectType === "nutrition" ? "top-6" : "top-[13px]"
+                    }`}
                   />
                 )}
                 <div className="font-semibold text-[15px]">{title}</div>
@@ -67,6 +70,8 @@ const Select = ({ onNext, data, selectType }: SelectProps) => {
         label={
           selectType === "nutrition"
             ? `다음 (${selected.length}/3)`
+            : selectType === "allergy"
+            ? "랜덤팩 고르러 가기"
             : "건너뛰기"
         }
         onClick={handleSubmit}

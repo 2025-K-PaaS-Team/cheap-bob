@@ -33,7 +33,7 @@ const Signup = () => {
         navigation={false}
         modules={[Pagination]}
         className="mySwiper h-full"
-        allowTouchMove={false}
+        // allowTouchMove={false}
         onSwiper={(swiper) => (swiperRef.current = swiper)}
       >
         <SwiperSlide>
