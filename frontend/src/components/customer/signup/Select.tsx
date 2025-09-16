@@ -8,10 +8,23 @@ type SelectProps = {
 };
 
 const Select = ({ onNext, data }: SelectProps) => {
-  const [selected, setSelected] = useState<string>("");
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const handleClick = (key: string) => {
+    if (selected.includes(key)) {
+      setSelected(selected.filter((item) => item != key));
+    } else {
+      if (selected.length < 3) {
+        setSelected([...selected, key]);
+      } else {
+        alert("최대 3개까지만 선택할 수 있습니다!");
+      }
+    }
+  };
+
   const handleSubmit = () => {
-    if (!selected) {
-      alert("항목을 선택해주세요");
+    if (selected.length === 0) {
+      alert("항목을 최소 1개 이상 선택해주세요!");
     }
     onNext();
   };
@@ -23,15 +36,15 @@ const Select = ({ onNext, data }: SelectProps) => {
             data.map(({ key, title, desc }) => (
               <div
                 key={key}
-                onClick={() => setSelected(key)}
+                onClick={() => handleClick(key)}
                 className={`relative rounded-[5px] p-[15px] h-[90px] w-[170px] cursor-pointer
                   ${
-                    selected === key
+                    selected.includes(key)
                       ? "bg-[#484848] text-white"
                       : "bg-[#717171] text-white"
                   }`}
               >
-                {selected === key && (
+                {selected.includes(key) && (
                   <img
                     src="/icon/checked.svg"
                     alt="checked"
@@ -45,7 +58,7 @@ const Select = ({ onNext, data }: SelectProps) => {
         </div>
       </div>
       {/* 다음 */}
-      <CommonBtn label="다음" onClick={handleSubmit} />
+      <CommonBtn label={`다음 (${selected.length}/3)`} onClick={handleSubmit} />
     </>
   );
 };
