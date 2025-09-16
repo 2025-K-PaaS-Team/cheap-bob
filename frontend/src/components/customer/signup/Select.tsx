@@ -5,9 +5,10 @@ import { useState } from "react";
 type SelectProps = {
   onNext: () => void;
   data?: SelectItem[];
+  selectType: string;
 };
 
-const Select = ({ onNext, data }: SelectProps) => {
+const Select = ({ onNext, data, selectType }: SelectProps) => {
   const [selected, setSelected] = useState<string[]>([]);
 
   const handleClick = (key: string) => {
@@ -28,6 +29,7 @@ const Select = ({ onNext, data }: SelectProps) => {
     }
     onNext();
   };
+
   return (
     <>
       <div className="flex h-full w-full justify-center items-start pt-[92px]">
@@ -37,12 +39,14 @@ const Select = ({ onNext, data }: SelectProps) => {
               <div
                 key={key}
                 onClick={() => handleClick(key)}
-                className={`relative rounded-[5px] p-[15px] h-[90px] w-[170px] cursor-pointer
+                className={`relative rounded-[5px] p-[15px] w-[170px] cursor-pointer
                   ${
                     selected.includes(key)
                       ? "bg-[#484848] text-white"
                       : "bg-[#717171] text-white"
-                  }`}
+                  }
+                  ${selectType === "nutrition" ? "h-[90px]" : "h-[65px]"}
+                  `}
               >
                 {selected.includes(key) && (
                   <img
@@ -58,7 +62,15 @@ const Select = ({ onNext, data }: SelectProps) => {
         </div>
       </div>
       {/* 다음 */}
-      <CommonBtn label={`다음 (${selected.length}/3)`} onClick={handleSubmit} />
+
+      <CommonBtn
+        label={
+          selectType === "nutrition"
+            ? `다음 (${selected.length}/3)`
+            : "건너뛰기"
+        }
+        onClick={handleSubmit}
+      />
     </>
   );
 };

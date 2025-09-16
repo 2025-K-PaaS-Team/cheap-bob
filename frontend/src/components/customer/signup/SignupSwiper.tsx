@@ -8,6 +8,7 @@ type SignupSwiperProps = {
   subTitle?: string;
   onNext: () => void;
   data?: SelectItem[];
+  selectType?: string;
 };
 
 const SignupSwiper = ({
@@ -17,6 +18,7 @@ const SignupSwiper = ({
   placeholder,
   subTitle,
   data,
+  selectType,
 }: SignupSwiperProps) => {
   return (
     <>
@@ -40,7 +42,9 @@ const SignupSwiper = ({
           <Enter placeholder={placeholder ?? ""} onNext={onNext} />
         )}
         {/* type: select */}
-        {type === "select" && <Select onNext={onNext} data={data} />}
+        {type === "select" && (
+          <Select onNext={onNext} data={data} selectType={selectType} />
+        )}
       </div>
     </>
   );

@@ -64,6 +64,7 @@ const Signup = () => {
             title={`영양 목표를\n선택해주세요`}
             data={NutritionList}
             type="select"
+            selectType="nutrition"
             subTitle="내 목표 맞춤형 식사를 추천해드려요."
             onNext={() => swiperRef.current.slideNext()}
           />
@@ -73,6 +74,7 @@ const Signup = () => {
             title={`선호하는 메뉴를\n선택해주세요`}
             data={MenuList}
             type="select"
+            selectType="menu"
             onNext={() => swiperRef.current.slideNext()}
           />
         </SwiperSlide>
@@ -81,6 +83,7 @@ const Signup = () => {
             title={`선호하는 토핑을\n선택해주세요`}
             data={ToppingList}
             type="select"
+            selectType="topping"
             onNext={() => swiperRef.current.slideNext()}
           />
         </SwiperSlide>
@@ -89,6 +92,7 @@ const Signup = () => {
             title={`못 먹는 음식을\n선택해주세요`}
             data={AllergyList}
             type="select"
+            selectType="allergy"
             onNext={() => swiperRef.current.slideNext()}
           />
         </SwiperSlide>
