@@ -1,11 +1,13 @@
-import { CommonBtn } from "@components/common";
 import { Agree, Enter, Select } from "@components/customer/signup";
+import { GetPreferMenu } from "@services";
+import { useEffect } from "react";
 
 type SignupSwiperProps = {
   title: string;
   type: "agree" | "enter" | "select";
   placeholder?: string;
   subTitle?: string;
+  onNext: () => void;
 };
 
 const SignupSwiper = ({
@@ -13,7 +15,10 @@ const SignupSwiper = ({
   type,
   placeholder,
   subTitle,
+  onNext,
 }: SignupSwiperProps) => {
+
+
   return (
     <>
       <div className="relative h-full px-[20px] pt-[42px]">
@@ -30,12 +35,13 @@ const SignupSwiper = ({
         </div>
 
         {/* type: agree */}
-        {type === "agree" && <Agree />}
+        {type === "agree" && <Agree onNext={onNext} />}
         {/* type: enter */}
-        {type === "enter" && <Enter placeholder={placeholder ?? ""} />}
+        {type === "enter" && (
+          <Enter placeholder={placeholder ?? ""} onNext={onNext} />
+        )}
         {/* type: select */}
-        {type === "select" && <Select />}
-        <CommonBtn label="다음" />
+        {type === "select" && <Select onNext={onNext} />}
       </div>
     </>
   );
