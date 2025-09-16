@@ -1,12 +1,12 @@
 import { CommonBtn } from "@components/common";
-import { useState } from "react";
 
 type EnterProps = {
   placeholder: string;
   onNext: () => void;
+  setValue: React.Dispatch<React.SetStateAction<string>>;
+  value: string;
 };
-const Enter = ({ placeholder, onNext }: EnterProps) => {
-  const [value, setValue] = useState<string>("");
+const Enter = ({ placeholder, onNext, setValue, value }: EnterProps) => {
   const handleSubmit = () => {
     if (value.length > 7) {
       alert("7자 이내로 닉네임을 입력해주세요");

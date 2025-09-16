@@ -2,7 +2,7 @@ import { SignupSwiper } from "@components/customer/signup";
 import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
 import { SignupLab } from "@pages/Common";
 import { CreateCustomerDetail } from "@services";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
@@ -49,6 +49,8 @@ const Signup = () => {
             type="enter"
             placeholder="7자 이내로 닉네임을 입력하세요"
             onNext={() => swiperRef.current.slideNext()}
+            value={nickname}
+            setValue={setNickname}
           />
         </SwiperSlide>
         <SwiperSlide>
@@ -57,6 +59,8 @@ const Signup = () => {
             type="enter"
             placeholder="번호를 입력하세요"
             onNext={() => swiperRef.current.slideNext()}
+            value={phone}
+            setValue={setPhone}
           />
         </SwiperSlide>
         <SwiperSlide>
