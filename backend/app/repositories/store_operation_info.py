@@ -58,7 +58,7 @@ class StoreOperationInfoRepository(BaseRepository[StoreOperationInfo]):
                 )
                 created_info.append(operation_info)
             
-            await self.session.commit()
+            await self.session.flush()
             
             # 생성된 정보들 새로고침
             for info in created_info:
@@ -67,7 +67,6 @@ class StoreOperationInfoRepository(BaseRepository[StoreOperationInfo]):
             return created_info
             
         except Exception as e:
-            await self.session.rollback()
             raise e
     
     async def update_open_status(

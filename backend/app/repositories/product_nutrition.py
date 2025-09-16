@@ -81,8 +81,8 @@ class ProductNutritionRepository(BaseRepository[ProductNutrition]):
             else:
                 added_nutrition.append(existing)
         
-        # 한 번에 커밋
-        await self.session.commit()
+        # 한 번에 플러시
+        await self.session.flush()
         
         # 생성된 정보들 새로고침
         for info in added_nutrition:
@@ -101,5 +101,5 @@ class ProductNutritionRepository(BaseRepository[ProductNutrition]):
             ProductNutrition.nutrition_type == nutrition_type
         )
         result = await self.session.execute(query)
-        await self.session.commit()
+        await self.session.flush()
         return result.rowcount > 0

@@ -114,12 +114,10 @@ class StoreOperationInfoModificationRepository(BaseRepository[StoreOperationInfo
             # 수정 예약 삭제
             await self.delete(modification_id)
             
-            # 커밋
-            await self.session.commit()
+            await self.session.flush()
             return True
             
         except Exception as e:
-            await self.session.rollback()
             raise e
     
     async def apply_all_pending(self) -> List[int]:

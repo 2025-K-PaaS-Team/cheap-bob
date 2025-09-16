@@ -35,7 +35,7 @@ class CustomerPreferredMenuRepository(BaseRepository[CustomerPreferredMenu]):
             self.session.add(obj)
             created_items.append(obj)
         
-        await self.session.commit()
+        await self.session.flush()
         for obj in created_items:
             await self.session.refresh(obj)
         return created_items
@@ -48,7 +48,7 @@ class CustomerPreferredMenuRepository(BaseRepository[CustomerPreferredMenu]):
                 self.model.menu_type == menu_type
             )
         )
-        await self.session.commit()
+        await self.session.flush()
         return result.rowcount > 0
 
 
@@ -81,7 +81,7 @@ class CustomerNutritionTypeRepository(BaseRepository[CustomerNutritionType]):
             self.session.add(obj)
             created_items.append(obj)
         
-        await self.session.commit()
+        await self.session.flush()
         for obj in created_items:
             await self.session.refresh(obj)
         return created_items
@@ -94,7 +94,7 @@ class CustomerNutritionTypeRepository(BaseRepository[CustomerNutritionType]):
                 self.model.nutrition_type == nutrition_type
             )
         )
-        await self.session.commit()
+        await self.session.flush()
         return result.rowcount > 0
 
 
@@ -127,7 +127,7 @@ class CustomerAllergyRepository(BaseRepository[CustomerAllergy]):
             self.session.add(obj)
             created_items.append(obj)
         
-        await self.session.commit()
+        await self.session.flush()
         for obj in created_items:
             await self.session.refresh(obj)
         return created_items
@@ -140,7 +140,7 @@ class CustomerAllergyRepository(BaseRepository[CustomerAllergy]):
                 self.model.allergy_type == allergy_type
             )
         )
-        await self.session.commit()
+        await self.session.flush()
         return result.rowcount > 0
 
 
@@ -173,7 +173,7 @@ class CustomerToppingTypeRepository(BaseRepository[CustomerToppingType]):
             self.session.add(obj)
             created_items.append(obj)
         
-        await self.session.commit()
+        await self.session.flush()
         for obj in created_items:
             await self.session.refresh(obj)
         return created_items
@@ -186,5 +186,5 @@ class CustomerToppingTypeRepository(BaseRepository[CustomerToppingType]):
                 self.model.topping_type == topping_type
             )
         )
-        await self.session.commit()
+        await self.session.flush()
         return result.rowcount > 0

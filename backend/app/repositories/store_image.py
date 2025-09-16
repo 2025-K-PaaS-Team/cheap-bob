@@ -76,8 +76,8 @@ class StoreImageRepository(BaseRepository[StoreImage]):
                     )
                     created_images.append(additional_image)
             
-            # 트랜잭션 커밋
-            await self.session.commit()
+            # 변경사항 플러시
+            await self.session.flush()
             
             # 생성된 이미지들 새로고침
             for image in created_images:
@@ -86,7 +86,6 @@ class StoreImageRepository(BaseRepository[StoreImage]):
             return created_images
             
         except Exception as e:
-            await self.session.rollback()
             raise e
     
     async def set_as_main(self, image_id: str) -> Optional[StoreImage]:
@@ -112,8 +111,6 @@ class StoreImageRepository(BaseRepository[StoreImage]):
         
         # 변경사항을 세션에 반영
         await self.session.flush()
-        
-        await self.session.commit()
         await self.session.refresh(image)
         
         return image
