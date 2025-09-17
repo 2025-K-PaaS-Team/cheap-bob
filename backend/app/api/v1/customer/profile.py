@@ -11,7 +11,6 @@ from repositories.customer_preferences import (
     CustomerToppingTypeRepository
 )
 from schemas.customer_detail import (
-    CustomerDetailCheckResponse,
     CustomerDetailResponse,
     CustomerDetailCreate,
     CustomerDetailUpdate
@@ -61,26 +60,6 @@ AllergyRepositoryDep = Annotated[CustomerAllergyRepository, Depends(get_allergy_
 ToppingTypeRepositoryDep = Annotated[CustomerToppingTypeRepository, Depends(get_topping_type_repository)]
 
 
-@router.get(
-    "/check",
-    response_model=CustomerDetailCheckResponse,
-    responses=create_error_responses({
-        401: ["인증 정보가 없음", "토큰 만료"]
-    })
-)
-async def check_customer_detail(
-    current_user: CurrentCustomerDep,
-    customer_detail_repo: CustomerDetailRepositoryDep
-):
-    """소비자 상세 정보 존재 여부를 확인"""
-    customer_email = current_user["sub"]
-    
-    detail = await customer_detail_repo.get_by_customer(customer_email)
-    
-    return CustomerDetailCheckResponse(
-        has_detail=detail is not None,
-        detail=detail
-    )
 
 
 @router.get(

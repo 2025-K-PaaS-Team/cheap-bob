@@ -41,9 +41,3 @@ class CustomerDetailResponse(CustomerDetailBase):
     model_config = {
         "from_attributes": True
     }
-
-
-class CustomerDetailCheckResponse(BaseModel):
-    """고객 상세 정보 존재 여부 응답 스키마"""
-    has_detail: bool = Field(..., description="상세 정보 존재 여부")
-    detail: Optional[CustomerDetailResponse] = Field(None, description="고객 상세 정보 (존재하는 경우)")
