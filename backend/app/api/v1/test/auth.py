@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
 
-from api.deps import CurrentUserDep
+from api.deps.auth import CurrentUserDep
 
 router = APIRouter()
 

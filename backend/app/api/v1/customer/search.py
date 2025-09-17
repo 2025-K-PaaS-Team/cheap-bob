@@ -1,9 +1,10 @@
 from typing import Annotated, List
-from fastapi import APIRouter, HTTPException, Path, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status
 
 from utils.docs_error import create_error_responses
 
-from api.deps import CurrentCustomerDep, AsyncSessionDep
+from api.deps.auth import CurrentCustomerDep
+from api.deps.database import AsyncSessionDep
 from schemas.product import ProductsResponse, ProductInfo
 from schemas.store import StoreResponse
 from repositories.store import StoreRepository

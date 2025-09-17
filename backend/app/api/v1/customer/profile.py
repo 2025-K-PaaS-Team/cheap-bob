@@ -2,7 +2,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from utils.docs_error import create_error_responses
-from api.deps import CurrentCustomerDep, AsyncSessionDep
+from api.deps.auth import CurrentCustomerDep
+from api.deps.database import AsyncSessionDep
 from repositories.customer_detail import CustomerDetailRepository
 from repositories.customer_preferences import (
     CustomerPreferredMenuRepository,

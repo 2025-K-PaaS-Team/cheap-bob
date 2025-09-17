@@ -1,11 +1,12 @@
 from typing import Dict, Annotated
-from fastapi import APIRouter, HTTPException, Path, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status
 from datetime import datetime, timezone
 from loguru import logger
 
 from utils.docs_error import create_error_responses
 
-from api.deps import CurrentCustomerDep, AsyncSessionDep
+from api.deps.auth import CurrentCustomerDep
+from api.deps.database import AsyncSessionDep
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.cart_item import CartItemRepository
 from repositories.order_current_item import OrderCurrentItemRepository

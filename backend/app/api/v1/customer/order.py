@@ -1,12 +1,12 @@
 from typing import Annotated, List
 from fastapi import APIRouter, HTTPException, Depends, status
-from sqlalchemy import select, and_
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from datetime import datetime
 
 from utils.docs_error import create_error_responses
 
-from api.deps import CurrentCustomerDep, AsyncSessionDep
+from api.deps.auth import CurrentCustomerDep
+from api.deps.database import AsyncSessionDep
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.store_payment_info import StorePaymentInfoRepository

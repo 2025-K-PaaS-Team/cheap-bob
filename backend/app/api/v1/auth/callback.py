@@ -1,35 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, HTTPException, Query, Response, status
 from fastapi.responses import RedirectResponse
-from typing import Annotated
 
 from utils.docs_error import create_error_responses
 
-from api.deps import OAuthService, get_oauth_service, AsyncSessionDep, JWTService, get_jwt_service
-from repositories.store import StoreRepository
-from repositories.store_product_info import StoreProductInfoRepository
-from repositories.customer_detail import CustomerDetailRepository
+from api.deps.service import (
+    OAuthServiceDep,
+    JWTServiceDep
+)
+from api.deps.repository import StoreRepositoryDep, StoreProductInfoRepositoryDep, CustomerDetailRepositoryDep
+
 from config.oauth import OAuthProvider
 from config.settings import settings
 from schemas.auth import UserType
 
 router = APIRouter()
-
-
-def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
-    return StoreRepository(session)
-
-
-def get_product_repository(session: AsyncSessionDep) -> StoreProductInfoRepository:
-    return StoreProductInfoRepository(session)
-
-
-def get_customer_detail_repository(session: AsyncSessionDep) -> CustomerDetailRepository:
-    return CustomerDetailRepository(session)
-
-
-StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
-ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product_repository)]
-CustomerDetailRepositoryDep = Annotated[CustomerDetailRepository, Depends(get_customer_detail_repository)]
 
 
 @router.get("/{provider}/callback/customer",
@@ -42,8 +26,8 @@ async def customer_oauth_callback(
     provider: OAuthProvider,
     response: Response,
     customer_detail_repo: CustomerDetailRepositoryDep,
-    oauth_service: OAuthService = Depends(get_oauth_service),
-    jwt_service: JWTService = Depends(get_jwt_service),
+    oauth_service: OAuthServiceDep,
+    jwt_service: JWTServiceDep,
     code: str = Query(...),
     state: str = Query(None, description="추후 보안을 위해 넣은 파라미터, 지금은 None으로 해도 상관없음")
 ):
@@ -98,9 +82,9 @@ async def seller_oauth_callback(
     provider: OAuthProvider,
     response: Response,
     store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep,
-    oauth_service: OAuthService = Depends(get_oauth_service),
-    jwt_service: JWTService = Depends(get_jwt_service),
+    product_repo: StoreProductInfoRepositoryDep,
+    oauth_service: OAuthServiceDep,
+    jwt_service: JWTServiceDep,
     code: str = Query(...),
     state: str = Query(None, description="추후 보안을 위해 넣은 파라미터, 지금은 None으로 해도 상관없음")
 ):

@@ -2,7 +2,8 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, status
 
 from utils.docs_error import create_error_responses
-from api.deps import CurrentSellerDep, AsyncSessionDep
+from api.deps.auth import CurrentSellerDep
+from api.deps.database import AsyncSessionDep
 from repositories.store import StoreRepository
 from schemas.seller_profile import (
     StoreNameUpdateRequest,
