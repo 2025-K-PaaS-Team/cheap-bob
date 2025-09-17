@@ -1,6 +1,6 @@
 from typing import List, Optional, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 from enum import Enum
 
@@ -96,3 +96,13 @@ class StoreProductInfoRepository(BaseRepository[StoreProductInfo]):
         )
         result = await self.session.execute(query)
         return result.scalars().unique().all()
+    
+    async def count_products_by_store(self, store_id: str) -> int:
+        """가게의 상품 개수 조회"""
+        query = (
+            select(func.count())
+            .select_from(StoreProductInfo)
+            .where(StoreProductInfo.store_id == store_id)
+        )
+        result = await self.session.execute(query)
+        return result.scalar() or 0

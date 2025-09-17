@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 
@@ -14,6 +14,10 @@ class ProductNutritionRepository(BaseRepository[ProductNutrition]):
     
     def __init__(self, session: AsyncSession):
         super().__init__(ProductNutrition, session)
+    
+    async def get_by_product_id(self, product_id: str) -> List[ProductNutrition]:
+        """상품 ID로 영양 정보 목록 조회"""
+        return await self.get_many(filters={"product_id": product_id})
     
     async def get_nutrition_types_by_product(self, product_id: str) -> List[NutritionType]:
         """상품의 영양 타입 목록 조회"""
@@ -103,3 +107,33 @@ class ProductNutritionRepository(BaseRepository[ProductNutrition]):
         result = await self.session.execute(query)
         await self.session.flush()
         return result.rowcount > 0
+    
+    async def get_nutrition_types_by_products(
+        self, 
+        product_ids: List[str]
+    ) -> Dict[str, List[NutritionType]]:
+        """여러 상품의 영양 타입을 한 번에 조회"""
+        if not product_ids:
+            return {}
+        
+        query = (
+            select(ProductNutrition)
+            .where(ProductNutrition.product_id.in_(product_ids))
+        )
+        
+        result = await self.session.execute(query)
+        nutrition_infos = result.scalars().all()
+        
+        # 상품 ID별로 그룹화
+        nutrition_by_product: Dict[str, List[NutritionType]] = {}
+        for info in nutrition_infos:
+            if info.product_id not in nutrition_by_product:
+                nutrition_by_product[info.product_id] = []
+            nutrition_by_product[info.product_id].append(info.nutrition_type)
+        
+        # 영양 정보가 없는 상품은 빈 리스트로 설정
+        for product_id in product_ids:
+            if product_id not in nutrition_by_product:
+                nutrition_by_product[product_id] = []
+        
+        return nutrition_by_product
