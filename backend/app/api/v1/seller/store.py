@@ -59,34 +59,6 @@ StoreOperationRepositoryDep = Annotated[StoreOperationInfoRepository, Depends(ge
 ImageServiceDep = Annotated[ImageService, Depends(get_image_service)]
 
 
-@router.get("/check", 
-    responses=create_error_responses({
-        401: ["인증 정보가 없음", "토큰 만료"]
-    })
-)
-async def check_store_registration_(
-    current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep
-):
-    """
-    판매자 가게 회원가입 완료 상태 확인
-    """
-    seller_email = current_user["sub"]
-    
-    # 가게가 등록되어 있는지 확인
-    existing_stores = await store_repo.get_by_seller_email(seller_email)
-    
-    return {
-        "is_registered": bool(existing_stores),
-        "store_count": len(existing_stores),
-        "stores": [
-            {
-                "store_id": store.store_id,
-                "store_name": store.store_name
-            } 
-            for store in existing_stores
-        ] if existing_stores else []
-    }
 
 @router.post("/register", response_model=SellerProfileResponse, status_code=status.HTTP_201_CREATED,
     responses=create_error_responses({

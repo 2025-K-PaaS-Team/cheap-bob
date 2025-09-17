@@ -11,7 +11,6 @@ from schemas.product import (
     ProductCreateRequest,
     ProductUpdateRequest,
     ProductResponse,
-    ProductCheckResponse,
     StoreProductsResponse,
     ProductNutritionRequest
 )
@@ -292,38 +291,6 @@ async def decrease_product_stock(
             )
 
 
-
-@router.get("/check", response_model=ProductCheckResponse,
-    responses=create_error_responses({
-        401: ["인증 정보가 없음", "토큰 만료"],
-        404: "판매자의 가게를 찾을 수 없음"
-    })
-)
-async def check_store_has_products(
-    current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep
-):
-    """
-    현재 판매자의 가게에 상품이 등록되어 있는지 확인
-    """
-    # 판매자의 가게 찾기
-    stores = await store_repo.get_by_seller_email(current_user["sub"])
-    
-    if not stores:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="등록된 가게를 찾을 수 없습니다"
-        )
-    
-    # 첫 번째 가게의 상품 개수 확인 (판매자는 일반적으로 하나의 가게만 가짐)
-    store = stores[0]
-    product_count = await product_repo.count_products_by_store(store.store_id)
-    
-    return ProductCheckResponse(
-        has_products=product_count > 0,
-        product_count=product_count
-    )
 
 
 @router.get("/store/{store_id}", response_model=StoreProductsResponse,

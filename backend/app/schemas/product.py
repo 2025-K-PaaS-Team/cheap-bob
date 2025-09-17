@@ -54,12 +54,6 @@ class ProductResponse(BaseModel):
         from_attributes = True
 
 
-class ProductCheckResponse(BaseModel):
-    """상품 존재 여부 확인 응답 스키마"""
-    has_products: bool = Field(..., description="상품 존재 여부")
-    product_count: int = Field(..., description="등록된 상품 개수")
-
-
 class StoreProductsResponse(BaseModel):
     """가게의 모든 상품 목록 응답 스키마"""
     store_id: str = Field(..., description="가게 고유 ID")
