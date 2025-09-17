@@ -1,32 +1,13 @@
-from typing import Annotated, List
-from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File, Path
+from typing import List
+from fastapi import APIRouter, HTTPException, status, UploadFile, File
 from utils.docs_error import create_error_responses
 from api.deps.auth import CurrentSellerDep
-from api.deps.database import AsyncSessionDep
-from repositories.store import StoreRepository
-from repositories.store_image import StoreImageRepository
+from api.deps.repository import StoreRepositoryDep
+from api.deps.service import ImageServiceDep
 from schemas.image import StoreImagesUploadResponse, StoreImagesResponse, ImageUploadResponse
-from services.image import ImageService
 from core.exceptions import HTTPValueError
 
 router = APIRouter(prefix="/store/images", tags=["Seller-Store-Images"])
-
-
-def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
-    return StoreRepository(session)
-
-
-def get_store_image_repository(session: AsyncSessionDep) -> StoreImageRepository:
-    return StoreImageRepository(session)
-
-
-def get_image_service(session: AsyncSessionDep) -> ImageService:
-    return ImageService(session)
-
-
-StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
-StoreImageRepositoryDep = Annotated[StoreImageRepository, Depends(get_store_image_repository)]
-ImageServiceDep = Annotated[ImageService, Depends(get_image_service)]
 
 
 async def verify_store_owner(

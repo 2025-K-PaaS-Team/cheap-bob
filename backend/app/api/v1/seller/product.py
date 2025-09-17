@@ -1,13 +1,14 @@
-from typing import Annotated
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
 
 from api.deps.auth import CurrentSellerDep
-from api.deps.database import AsyncSessionDep
-from repositories.store import StoreRepository
-from repositories.store_product_info import StoreProductInfoRepository, StockUpdateResult
-from repositories.product_nutrition import ProductNutritionRepository
+from api.deps.repository import (
+    StoreRepositoryDep,
+    StoreProductInfoRepositoryDep,
+    ProductNutritionRepositoryDep
+)
+from repositories.store_product_info import StockUpdateResult
 from schemas.product import (
     ProductCreateRequest,
     ProductUpdateRequest,
@@ -21,23 +22,6 @@ from config.settings import settings
 router = APIRouter(prefix="/products", tags=["Seller-Product"])
 
 
-def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
-    return StoreRepository(session)
-
-
-def get_product_repository(session: AsyncSessionDep) -> StoreProductInfoRepository:
-    return StoreProductInfoRepository(session)
-
-
-def get_nutrition_repository(session: AsyncSessionDep) -> ProductNutritionRepository:
-    return ProductNutritionRepository(session)
-
-
-StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
-ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product_repository)]
-NutritionRepositoryDep = Annotated[ProductNutritionRepository, Depends(get_nutrition_repository)]
-
-
 @router.post("/register", response_model=ProductResponse, status_code=status.HTTP_201_CREATED,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"],
@@ -49,8 +33,8 @@ async def create_product(
     request: ProductCreateRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep,
-    nutrition_repo: NutritionRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep,
+    nutrition_repo: ProductNutritionRepositoryDep
 ):
     """
     새 상품 등록
@@ -117,8 +101,8 @@ async def update_product(
     request: ProductUpdateRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep,
-    nutrition_repo: NutritionRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep,
+    nutrition_repo: ProductNutritionRepositoryDep
 ):
     """
     상품 정보 수정
@@ -173,8 +157,8 @@ async def increase_product_stock(
     product_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep,
-    nutrition_repo: NutritionRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep,
+    nutrition_repo: ProductNutritionRepositoryDep
 ):
     """
     상품 재고 1개 증가
@@ -236,8 +220,8 @@ async def decrease_product_stock(
     product_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep,
-    nutrition_repo: NutritionRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep,
+    nutrition_repo: ProductNutritionRepositoryDep
 ):
     """
     상품 재고 1개 감소
@@ -305,8 +289,8 @@ async def get_store_products(
     store_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep,
-    nutrition_repo: NutritionRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep,
+    nutrition_repo: ProductNutritionRepositoryDep
 ):
     """
     특정 가게의 모든 상품 목록 조회
@@ -373,8 +357,8 @@ async def add_product_nutrition(
     request: ProductNutritionRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep,
-    nutrition_repo: NutritionRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep,
+    nutrition_repo: ProductNutritionRepositoryDep
 ):
     """
     상품에 영양 정보 추가
@@ -438,8 +422,8 @@ async def remove_product_nutrition(
     request: ProductNutritionRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep,
-    nutrition_repo: NutritionRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep,
+    nutrition_repo: ProductNutritionRepositoryDep
 ):
     """
     상품에서 영양 정보 삭제
@@ -495,7 +479,7 @@ async def delete_product(
     product_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep
 ):
     """
     상품 삭제(미구현) - 논의 필요

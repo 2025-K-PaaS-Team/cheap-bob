@@ -1,63 +1,22 @@
-from typing import Annotated, List
-from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File
+from typing import List
+from fastapi import APIRouter, HTTPException, status, UploadFile, File
 
 from utils.docs_error import create_error_responses
 from api.deps.auth import CurrentSellerDep
-from api.deps.database import AsyncSessionDep
-from repositories.seller import SellerRepository
-from repositories.store import StoreRepository
-from repositories.address import AddressRepository
-from repositories.store_sns import StoreSNSRepository
-from repositories.store_image import StoreImageRepository
-from repositories.store_payment_info import StorePaymentInfoRepository
-from repositories.store_operation_info import StoreOperationInfoRepository
+from api.deps.repository import (
+    StoreRepositoryDep,
+    AddressRepositoryDep,
+    StoreSNSRepositoryDep,
+    StorePaymentInfoRepositoryDep,
+    StoreOperationInfoRepositoryDep
+)
+from api.deps.service import ImageServiceDep
 from schemas.seller_profile import SellerProfileCreateRequest, SellerProfileResponse
 from schemas.image import StoreImagesUploadResponse
-from services.image import ImageService
 from utils.id_generator import generate_store_id
 from core.exceptions import HTTPValueError
 
 router = APIRouter(prefix="/store/register", tags=["Seller-Store-Register"])
-
-
-def get_seller_repository(session: AsyncSessionDep) -> SellerRepository:
-    return SellerRepository(session)
-
-
-def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
-    return StoreRepository(session)
-
-
-def get_address_repository(session: AsyncSessionDep) -> AddressRepository:
-    return AddressRepository(session)
-
-
-def get_store_sns_repository(session: AsyncSessionDep) -> StoreSNSRepository:
-    return StoreSNSRepository(session)
-
-
-def get_store_image_repository(session: AsyncSessionDep) -> StoreImageRepository:
-    return StoreImageRepository(session)
-
-def get_payment_repository(session: AsyncSessionDep) -> StorePaymentInfoRepository:
-    return StorePaymentInfoRepository(session)
-
-def get_store_operation_repository(session: AsyncSessionDep) -> StoreOperationInfoRepository:
-    return StoreOperationInfoRepository(session)
-
-
-def get_image_service(session: AsyncSessionDep) -> ImageService:
-    return ImageService(session)
-
-
-SellerRepositoryDep = Annotated[SellerRepository, Depends(get_seller_repository)]
-StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
-AddressRepositoryDep = Annotated[AddressRepository, Depends(get_address_repository)]
-StoreSNSRepositoryDep = Annotated[StoreSNSRepository, Depends(get_store_sns_repository)]
-StoreImageRepositoryDep = Annotated[StoreImageRepository, Depends(get_store_image_repository)]
-PaymentRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_payment_repository)]
-StoreOperationRepositoryDep = Annotated[StoreOperationInfoRepository, Depends(get_store_operation_repository)]
-ImageServiceDep = Annotated[ImageService, Depends(get_image_service)]
 
 
 
@@ -73,8 +32,8 @@ async def register_seller_store(
     store_repo: StoreRepositoryDep,
     address_repo: AddressRepositoryDep,
     sns_repo: StoreSNSRepositoryDep,
-    operation_repo: StoreOperationRepositoryDep,
-    payment_repo: PaymentRepositoryDep
+    operation_repo: StoreOperationInfoRepositoryDep,
+    payment_repo: StorePaymentInfoRepositoryDep
 ):
     """
     판매자 1차 가게 등록 회원가입 완료

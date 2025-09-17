@@ -1,5 +1,4 @@
-from typing import Annotated, List
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -7,9 +6,11 @@ from utils.docs_error import create_error_responses
 
 from api.deps.auth import CurrentCustomerDep
 from api.deps.database import AsyncSessionDep
-from repositories.order_current_item import OrderCurrentItemRepository
-from repositories.store_product_info import StoreProductInfoRepository
-from repositories.store_payment_info import StorePaymentInfoRepository
+from api.deps.repository import (
+    OrderCurrentItemRepositoryDep,
+    StoreProductInfoRepositoryDep,
+    StorePaymentInfoRepositoryDep
+)
 from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
 from schemas.customer_order import (
@@ -26,23 +27,6 @@ from config.settings import settings
 from utils.qr_generator import validate_qr_data
 
 router = APIRouter(prefix="/orders", tags=["Customer-Order"])
-
-
-def get_order_repository(session: AsyncSessionDep) -> OrderCurrentItemRepository:
-    return OrderCurrentItemRepository(session)
-
-
-def get_product_repository(session: AsyncSessionDep) -> StoreProductInfoRepository:
-    return StoreProductInfoRepository(session)
-
-
-def get_payment_info_repository(session: AsyncSessionDep) -> StorePaymentInfoRepository:
-    return StorePaymentInfoRepository(session)
-
-
-OrderRepositoryDep = Annotated[OrderCurrentItemRepository, Depends(get_order_repository)]
-ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product_repository)]
-PaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_payment_info_repository)]
 
 
 @router.get("", response_model=CustomerOrderListResponse,
@@ -224,9 +208,9 @@ async def delete_order(
     payment_id: str,
     request: CustomerOrderCancelRequest,
     current_user: CurrentCustomerDep,
-    order_repo: OrderRepositoryDep,
-    product_repo: ProductRepositoryDep,
-    payment_info_repo: PaymentInfoRepositoryDep,
+    order_repo: OrderCurrentItemRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep,
+    payment_info_repo: StorePaymentInfoRepositoryDep,
     session: AsyncSessionDep
 ):
     """
@@ -338,7 +322,7 @@ async def complete_pickup(
     payment_id: str,
     request: PickupCompleteRequest,
     current_user: CurrentCustomerDep,
-    order_repo: OrderRepositoryDep,
+    order_repo: OrderCurrentItemRepositoryDep,
     session: AsyncSessionDep
 ):
     """

@@ -1,13 +1,14 @@
-from typing import Annotated, List
-from fastapi import APIRouter, HTTPException, Depends, status
+from typing import List
+from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
 from api.deps.auth import CurrentSellerDep
-from api.deps.database import AsyncSessionDep
-from repositories.store import StoreRepository
-from repositories.address import AddressRepository
-from repositories.store_payment_info import StorePaymentInfoRepository
-from repositories.store_operation_info import StoreOperationInfoRepository
+from api.deps.repository import (
+    StoreRepositoryDep,
+    AddressRepositoryDep,
+    StorePaymentInfoRepositoryDep,
+    StoreOperationInfoRepositoryDep
+)
 from schemas.store_settings import (
     StoreAddressUpdateRequest,
     StorePaymentUpdateRequest,
@@ -18,28 +19,6 @@ from schemas.store_settings import (
 )
 
 router = APIRouter(prefix="/store/settings", tags=["Seller-Store-Settings"])
-
-
-def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
-    return StoreRepository(session)
-
-
-def get_address_repository(session: AsyncSessionDep) -> AddressRepository:
-    return AddressRepository(session)
-
-
-def get_payment_repository(session: AsyncSessionDep) -> StorePaymentInfoRepository:
-    return StorePaymentInfoRepository(session)
-
-
-def get_operation_repository(session: AsyncSessionDep) -> StoreOperationInfoRepository:
-    return StoreOperationInfoRepository(session)
-
-
-StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
-AddressRepositoryDep = Annotated[AddressRepository, Depends(get_address_repository)]
-PaymentRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_payment_repository)]
-OperationRepositoryDep = Annotated[StoreOperationInfoRepository, Depends(get_operation_repository)]
 
 
 async def verify_store_owner(
@@ -138,7 +117,7 @@ async def update_store_payment(
     request: StorePaymentUpdateRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    payment_repo: PaymentRepositoryDep
+    payment_repo: StorePaymentInfoRepositoryDep
 ):
     """
     결제 정보 수정
@@ -183,7 +162,7 @@ async def update_store_day_operation(
     request: StoreDayOperationUpdateRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    operation_repo: OperationRepositoryDep
+    operation_repo: StoreOperationInfoRepositoryDep
 ):
     """
     특정 요일 운영 정보 수정
@@ -258,7 +237,7 @@ async def get_store_operation(
     store_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    operation_repo: OperationRepositoryDep
+    operation_repo: StoreOperationInfoRepositoryDep
 ):
     """
     운영 정보 조회

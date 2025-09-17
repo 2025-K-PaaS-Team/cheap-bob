@@ -1,47 +1,18 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
 from api.deps.auth import CurrentCustomerDep
-from api.deps.database import AsyncSessionDep
-from schemas.customer_register import CustomerRegisterRequest, CustomerRegisterResponse
-from repositories.customer_detail import CustomerDetailRepository
-from repositories.customer_preferences import (
-    CustomerPreferredMenuRepository,
-    CustomerNutritionTypeRepository,
-    CustomerAllergyRepository,
-    CustomerToppingTypeRepository
+from api.deps.repository import (
+    CustomerDetailRepositoryDep,
+    CustomerPreferredMenuRepositoryDep,
+    CustomerNutritionTypeRepositoryDep,
+    CustomerAllergyRepositoryDep,
+    CustomerToppingTypeRepositoryDep
 )
+from schemas.customer_register import CustomerRegisterRequest, CustomerRegisterResponse
 
 
 router = APIRouter(prefix="/register", tags=["Customer-Register"])
-
-
-def get_customer_detail_repository(session: AsyncSessionDep) -> CustomerDetailRepository:
-    return CustomerDetailRepository(session)
-
-
-def get_preferred_menu_repository(session: AsyncSessionDep) -> CustomerPreferredMenuRepository:
-    return CustomerPreferredMenuRepository(session)
-
-
-def get_nutrition_type_repository(session: AsyncSessionDep) -> CustomerNutritionTypeRepository:
-    return CustomerNutritionTypeRepository(session)
-
-
-def get_allergy_repository(session: AsyncSessionDep) -> CustomerAllergyRepository:
-    return CustomerAllergyRepository(session)
-
-
-def get_topping_type_repository(session: AsyncSessionDep) -> CustomerToppingTypeRepository:
-    return CustomerToppingTypeRepository(session)
-
-
-CustomerDetailRepositoryDep = Annotated[CustomerDetailRepository, Depends(get_customer_detail_repository)]
-PreferredMenuRepositoryDep = Annotated[CustomerPreferredMenuRepository, Depends(get_preferred_menu_repository)]
-NutritionTypeRepositoryDep = Annotated[CustomerNutritionTypeRepository, Depends(get_nutrition_type_repository)]
-AllergyRepositoryDep = Annotated[CustomerAllergyRepository, Depends(get_allergy_repository)]
-ToppingTypeRepositoryDep = Annotated[CustomerToppingTypeRepository, Depends(get_topping_type_repository)]
 
 
 @router.post(
@@ -57,10 +28,10 @@ async def customer_register(
     current_user: CurrentCustomerDep,
     register_data: CustomerRegisterRequest,
     detail_repo: CustomerDetailRepositoryDep,
-    preferred_menu_repo: PreferredMenuRepositoryDep,
-    nutrition_type_repo: NutritionTypeRepositoryDep,
-    allergy_repo: AllergyRepositoryDep,
-    topping_type_repo: ToppingTypeRepositoryDep
+    preferred_menu_repo: CustomerPreferredMenuRepositoryDep,
+    nutrition_type_repo: CustomerNutritionTypeRepositoryDep,
+    allergy_repo: CustomerAllergyRepositoryDep,
+    topping_type_repo: CustomerToppingTypeRepositoryDep
 ):
     """소비자 통합 회원가입 - 상세정보, 선호메뉴, 영양타입, 알레르기, 토핑타입을 한번에 등록"""
     customer_email = current_user["sub"]

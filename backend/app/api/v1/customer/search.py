@@ -1,28 +1,14 @@
-from typing import Annotated, List
-from fastapi import APIRouter, HTTPException, Depends, status
+from typing import List
+from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
 
 from api.deps.auth import CurrentCustomerDep
-from api.deps.database import AsyncSessionDep
+from api.deps.repository import StoreRepositoryDep, StoreProductInfoRepositoryDep
 from schemas.product import ProductsResponse, ProductInfo
 from schemas.store import StoreResponse
-from repositories.store import StoreRepository
-from repositories.store_product_info import StoreProductInfoRepository
 
 router = APIRouter(prefix="/search", tags=["Customer-Search"])
-
-
-def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
-    return StoreRepository(session)
-
-
-def get_product_repository(session: AsyncSessionDep) -> StoreProductInfoRepository:
-    return StoreProductInfoRepository(session)
-
-
-StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
-ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product_repository)]
 
 
 @router.get("/stores", response_model=List[StoreResponse],
@@ -56,7 +42,7 @@ async def get_store_products(
     store_id: str,
     current_user: CurrentCustomerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep
 ):
     """
     가게 상품 조회 API

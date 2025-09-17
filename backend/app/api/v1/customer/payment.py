@@ -1,16 +1,16 @@
-from typing import Dict, Annotated
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, status
 from datetime import datetime, timezone
 from loguru import logger
 
 from utils.docs_error import create_error_responses
 
 from api.deps.auth import CurrentCustomerDep
-from api.deps.database import AsyncSessionDep
-from repositories.store_product_info import StoreProductInfoRepository
-from repositories.cart_item import CartItemRepository
-from repositories.order_current_item import OrderCurrentItemRepository
-from repositories.store_payment_info import StorePaymentInfoRepository
+from api.deps.repository import (
+    StoreProductInfoRepositoryDep,
+    CartItemRepositoryDep,
+    OrderCurrentItemRepositoryDep,
+    StorePaymentInfoRepositoryDep
+)
 from schemas.order import OrderStatus
 from schemas.payment import (
     PaymentInitRequest,
@@ -28,7 +28,7 @@ router = APIRouter(prefix="/payment", tags=["Customer-Payment"])
 async def restore_product_stock(
     product_id: str,
     quantity: int,
-    product_repo: StoreProductInfoRepository
+    product_repo: StoreProductInfoRepositoryDep
 ) -> bool:
     """
     낙관적 락을 사용하여 상품 재고를 복구합
@@ -86,26 +86,6 @@ async def restore_product_stock(
     return False
 
 
-def get_product_repository(session: AsyncSessionDep) -> StoreProductInfoRepository:
-    return StoreProductInfoRepository(session)
-
-
-def get_cart_repository(session: AsyncSessionDep) -> CartItemRepository:
-    return CartItemRepository(session)
-
-
-def get_order_repository(session: AsyncSessionDep) -> OrderCurrentItemRepository:
-    return OrderCurrentItemRepository(session)
-
-
-def get_payment_info_repository(session: AsyncSessionDep) -> StorePaymentInfoRepository:
-    return StorePaymentInfoRepository(session)
-
-
-ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product_repository)]
-CartRepositoryDep = Annotated[CartItemRepository, Depends(get_cart_repository)]
-OrderRepositoryDep = Annotated[OrderCurrentItemRepository, Depends(get_order_repository)]
-PaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_payment_info_repository)]
 
 
 @router.post("/init", response_model=PaymentInitResponse,
@@ -119,9 +99,9 @@ PaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_pay
 async def init_payment(
     request: PaymentInitRequest,
     current_user: CurrentCustomerDep,
-    product_repo: ProductRepositoryDep,
-    cart_repo: CartRepositoryDep,
-    payment_info_repo: PaymentInfoRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep,
+    cart_repo: CartItemRepositoryDep,
+    payment_info_repo: StorePaymentInfoRepositoryDep
 ):
     """
     결제 초기화 API - 상품과 수량을 확인하고 결제 세션을 생성
@@ -236,10 +216,10 @@ async def init_payment(
 async def confirm_payment(
     request: PaymentConfirmRequest,
     current_user: CurrentCustomerDep,
-    cart_repo: CartRepositoryDep,
-    order_repo: OrderRepositoryDep,
-    product_repo: ProductRepositoryDep,
-    payment_info_repo: PaymentInfoRepositoryDep
+    cart_repo: CartItemRepositoryDep,
+    order_repo: OrderCurrentItemRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep,
+    payment_info_repo: StorePaymentInfoRepositoryDep
 ):
     """
     결제 최종 확인 API - 포트원에서 결제가 성공했는지 확인
@@ -367,8 +347,8 @@ async def confirm_payment(
 async def cancel_payment(
     payment_id: str,
     current_user: CurrentCustomerDep,
-    cart_repo: CartRepositoryDep,
-    product_repo: ProductRepositoryDep
+    cart_repo: CartItemRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep
 ):
     """
     결제 취소 API - 사용자가 결제 중 취소 시 장바구니 삭제 및 재고 복구

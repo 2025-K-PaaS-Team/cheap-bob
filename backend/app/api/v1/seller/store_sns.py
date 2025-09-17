@@ -1,12 +1,10 @@
-from typing import Annotated, Optional, Literal
-from fastapi import APIRouter, HTTPException, Depends, status
+from typing import Optional, Literal
+from fastapi import APIRouter, HTTPException, status
 from pydantic import HttpUrl
 
 from utils.docs_error import create_error_responses
 from api.deps.auth import CurrentSellerDep
-from api.deps.database import AsyncSessionDep
-from repositories.store import StoreRepository
-from repositories.store_sns import StoreSNSRepository
+from api.deps.repository import StoreRepositoryDep, StoreSNSRepositoryDep
 from schemas.store_sns import (
     StoreSNSUpdateRequest,
     StoreSNSResponse
@@ -15,18 +13,6 @@ from schemas.store_sns import (
 router = APIRouter(prefix="/store/sns", tags=["Seller-Store-SNS"])
 
 SNSType = Literal["instagram", "facebook", "x", "homepage"]
-
-
-def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
-    return StoreRepository(session)
-
-
-def get_store_sns_repository(session: AsyncSessionDep) -> StoreSNSRepository:
-    return StoreSNSRepository(session)
-
-
-StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
-StoreSNSRepositoryDep = Annotated[StoreSNSRepository, Depends(get_store_sns_repository)]
 
 
 async def verify_store_owner(

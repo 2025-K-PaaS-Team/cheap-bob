@@ -1,15 +1,13 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
 from api.deps.auth import CurrentCustomerDep
-from api.deps.database import AsyncSessionDep
-from repositories.customer_detail import CustomerDetailRepository
-from repositories.customer_preferences import (
-    CustomerPreferredMenuRepository,
-    CustomerNutritionTypeRepository,
-    CustomerAllergyRepository,
-    CustomerToppingTypeRepository
+from api.deps.repository import (
+    CustomerDetailRepositoryDep,
+    CustomerPreferredMenuRepositoryDep,
+    CustomerNutritionTypeRepositoryDep,
+    CustomerAllergyRepositoryDep,
+    CustomerToppingTypeRepositoryDep
 )
 from schemas.customer_detail import (
     CustomerDetailResponse,
@@ -31,33 +29,6 @@ from schemas.customer_preferences_response import (
 )
 
 router = APIRouter(prefix="/profile", tags=["Customer-Profile"])
-
-
-def get_customer_detail_repository(session: AsyncSessionDep) -> CustomerDetailRepository:
-    return CustomerDetailRepository(session)
-
-
-def get_preferred_menu_repository(session: AsyncSessionDep) -> CustomerPreferredMenuRepository:
-    return CustomerPreferredMenuRepository(session)
-
-
-def get_nutrition_type_repository(session: AsyncSessionDep) -> CustomerNutritionTypeRepository:
-    return CustomerNutritionTypeRepository(session)
-
-
-def get_allergy_repository(session: AsyncSessionDep) -> CustomerAllergyRepository:
-    return CustomerAllergyRepository(session)
-
-
-def get_topping_type_repository(session: AsyncSessionDep) -> CustomerToppingTypeRepository:
-    return CustomerToppingTypeRepository(session)
-
-
-CustomerDetailRepositoryDep = Annotated[CustomerDetailRepository, Depends(get_customer_detail_repository)]
-PreferredMenuRepositoryDep = Annotated[CustomerPreferredMenuRepository, Depends(get_preferred_menu_repository)]
-NutritionTypeRepositoryDep = Annotated[CustomerNutritionTypeRepository, Depends(get_nutrition_type_repository)]
-AllergyRepositoryDep = Annotated[CustomerAllergyRepository, Depends(get_allergy_repository)]
-ToppingTypeRepositoryDep = Annotated[CustomerToppingTypeRepository, Depends(get_topping_type_repository)]
 
 
 
@@ -138,7 +109,7 @@ async def update_customer_detail(
 )
 async def get_preferred_menus(
     current_user: CurrentCustomerDep,
-    preferred_menu_repo: PreferredMenuRepositoryDep
+    preferred_menu_repo: CustomerPreferredMenuRepositoryDep
 ):
     """소비자의 선호 메뉴 목록을 조회"""
     customer_email = current_user["sub"]
@@ -157,7 +128,7 @@ async def get_preferred_menus(
 )
 async def create_preferred_menus(
     current_user: CurrentCustomerDep,
-    preferred_menu_repo: PreferredMenuRepositoryDep,
+    preferred_menu_repo: CustomerPreferredMenuRepositoryDep,
     menu_data: PreferredMenuCreateRequest
 ):
     """소비자의 선호 메뉴를 추가 - 여러 개를 한번에 추가할 수 있음"""
@@ -198,7 +169,7 @@ async def create_preferred_menus(
 )
 async def delete_preferred_menu(
     current_user: CurrentCustomerDep,
-    preferred_menu_repo: PreferredMenuRepositoryDep,
+    preferred_menu_repo: CustomerPreferredMenuRepositoryDep,
     menu_data: PreferredMenuDeleteRequest
 ):
     """소비자의 특정 선호 메뉴를 삭제"""
@@ -226,7 +197,7 @@ async def delete_preferred_menu(
 )
 async def get_nutrition_types(
     current_user: CurrentCustomerDep,
-    nutrition_type_repo: NutritionTypeRepositoryDep
+    nutrition_type_repo: CustomerNutritionTypeRepositoryDep
 ):
     """소비자의 영양 타입 목록을 조회"""
     customer_email = current_user["sub"]
@@ -245,7 +216,7 @@ async def get_nutrition_types(
 )
 async def create_nutrition_types(
     current_user: CurrentCustomerDep,
-    nutrition_type_repo: NutritionTypeRepositoryDep,
+    nutrition_type_repo: CustomerNutritionTypeRepositoryDep,
     type_data: NutritionTypeCreateRequest
 ):
     """소비자의 영양 타입을 추가. 여러 개를 한번에 추가할 수 있음."""
@@ -286,7 +257,7 @@ async def create_nutrition_types(
 )
 async def delete_nutrition_type(
     current_user: CurrentCustomerDep,
-    nutrition_type_repo: NutritionTypeRepositoryDep,
+    nutrition_type_repo: CustomerNutritionTypeRepositoryDep,
     type_data: NutritionTypeDeleteRequest
 ):
     """소비자의 특정 영양 타입을 삭제"""
@@ -314,7 +285,7 @@ async def delete_nutrition_type(
 )
 async def get_allergies(
     current_user: CurrentCustomerDep,
-    allergy_repo: AllergyRepositoryDep
+    allergy_repo: CustomerAllergyRepositoryDep
 ):
     """소비자의 알레르기 목록을 조회"""
     customer_email = current_user["sub"]
@@ -333,7 +304,7 @@ async def get_allergies(
 )
 async def create_allergies(
     current_user: CurrentCustomerDep,
-    allergy_repo: AllergyRepositoryDep,
+    allergy_repo: CustomerAllergyRepositoryDep,
     allergy_data: AllergyCreateRequest
 ):
     """소비자의 알레르기를 추가. 여러 개를 한번에 추가할 수 있음."""
@@ -374,7 +345,7 @@ async def create_allergies(
 )
 async def delete_allergy(
     current_user: CurrentCustomerDep,
-    allergy_repo: AllergyRepositoryDep,
+    allergy_repo: CustomerAllergyRepositoryDep,
     allergy_data: AllergyDeleteRequest
 ):
     """소비자의 특정 알레르기를 삭제"""
@@ -402,7 +373,7 @@ async def delete_allergy(
 )
 async def get_topping_types(
     current_user: CurrentCustomerDep,
-    topping_type_repo: ToppingTypeRepositoryDep
+    topping_type_repo: CustomerToppingTypeRepositoryDep
 ):
     """소비자의 토핑 타입 목록을 조회"""
     customer_email = current_user["sub"]
@@ -421,7 +392,7 @@ async def get_topping_types(
 )
 async def create_topping_types(
     current_user: CurrentCustomerDep,
-    topping_type_repo: ToppingTypeRepositoryDep,
+    topping_type_repo: CustomerToppingTypeRepositoryDep,
     type_data: ToppingTypeCreateRequest
 ):
     """소비자의 토핑 타입을 추가. 여러 개를 한번에 추가할 수 있음."""
@@ -462,7 +433,7 @@ async def create_topping_types(
 )
 async def delete_topping_type(
     current_user: CurrentCustomerDep,
-    topping_type_repo: ToppingTypeRepositoryDep,
+    topping_type_repo: CustomerToppingTypeRepositoryDep,
     type_data: ToppingTypeDeleteRequest
 ):
     """소비자의 특정 토핑 타입을 삭제"""

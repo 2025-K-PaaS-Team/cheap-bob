@@ -1,10 +1,8 @@
-from typing import Annotated
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
 from api.deps.auth import CurrentSellerDep
-from api.deps.database import AsyncSessionDep
-from repositories.store import StoreRepository
+from api.deps.repository import StoreRepositoryDep
 from schemas.seller_profile import (
     StoreNameUpdateRequest,
     StoreIntroductionUpdateRequest,
@@ -13,13 +11,6 @@ from schemas.seller_profile import (
 )
 
 router = APIRouter(prefix="/store/profile", tags=["Seller-Store-Profile"])
-
-
-def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
-    return StoreRepository(session)
-
-
-StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
 
 
 async def verify_store_owner(

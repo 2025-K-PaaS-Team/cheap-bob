@@ -1,5 +1,4 @@
-from typing import Annotated, List
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 from datetime import datetime, timezone
@@ -8,8 +7,12 @@ from utils.docs_error import create_error_responses
 
 from api.deps.auth import CurrentSellerDep
 from api.deps.database import AsyncSessionDep
-from repositories.store import StoreRepository
-from repositories.order_current_item import OrderCurrentItemRepository
+from api.deps.repository import (
+    StoreRepositoryDep,
+    OrderCurrentItemRepositoryDep,
+    StoreProductInfoRepositoryDep,
+    StorePaymentInfoRepositoryDep
+)
 from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
 from schemas.seller_order import (
@@ -22,34 +25,9 @@ from schemas.seller_order import (
 )
 from services.payment import PaymentService
 from utils.qr_generator import encode_qr_data
-
-from repositories.store_product_info import StoreProductInfoRepository
-from repositories.store_payment_info import StorePaymentInfoRepository
 from config.settings import settings
 
 router = APIRouter(prefix="/orders", tags=["Seller-Order"])
-
-
-def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
-    return StoreRepository(session)
-
-
-def get_order_repository(session: AsyncSessionDep) -> OrderCurrentItemRepository:
-    return OrderCurrentItemRepository(session)
-
-
-def get_product_repository(session: AsyncSessionDep) -> StoreProductInfoRepository:
-    return StoreProductInfoRepository(session)
-
-
-def get_payment_info_repository(session: AsyncSessionDep) -> StorePaymentInfoRepository:
-    return StorePaymentInfoRepository(session)
-
-
-StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
-OrderRepositoryDep = Annotated[OrderCurrentItemRepository, Depends(get_order_repository)]
-ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product_repository)]
-PaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_payment_info_repository)]
 
 
 @router.get("/{store_id}", response_model=OrderListResponse,
@@ -199,7 +177,7 @@ async def update_order_accept(
     payment_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    order_repo: OrderRepositoryDep,
+    order_repo: OrderCurrentItemRepositoryDep,
     session: AsyncSessionDep
 ):
     """
@@ -270,9 +248,9 @@ async def cancel_order(
     request: OrderCancelRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    order_repo: OrderRepositoryDep,
-    product_repo: ProductRepositoryDep,
-    payment_info_repo: PaymentInfoRepositoryDep,
+    order_repo: OrderCurrentItemRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep,
+    payment_info_repo: StorePaymentInfoRepositoryDep,
     session: AsyncSessionDep
 ):
     """
@@ -379,7 +357,7 @@ async def update_order_pickup_ready(
     payment_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    order_repo: OrderRepositoryDep,
+    order_repo: OrderCurrentItemRepositoryDep,
     session: AsyncSessionDep
 ):
     """
