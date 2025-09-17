@@ -45,10 +45,6 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         """주문 수락 처리"""
         return await self.update(payment_id, status=OrderStatus.accept, accepted_at=datetime.now(timezone.utc))
     
-    async def set_pickup_ready(self, payment_id: str) -> Optional[OrderCurrentItem]:
-        """픽업 준비 완료 처리"""
-        return await self.update(payment_id, status=OrderStatus.pickup, pickup_ready_at=datetime.now(timezone.utc))
-    
     async def complete_order(self, payment_id: str) -> Optional[OrderCurrentItem]:
         """픽업 완료 처리"""
         return await self.update(payment_id, status=OrderStatus.complete, completed_at=datetime.now(timezone.utc))

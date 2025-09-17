@@ -91,14 +91,14 @@ async def get_current_orders(
     session: AsyncSessionDep
 ):
     """
-    현재 진행중인 주문 조회 (reservation, accepted, pickup)
+    현재 진행중인 주문 조회 (reservation, accepted)
     """
     
-    # 사용자의 현재 진행중인 주문만 조회 (reservation, accepted, pickup)
+    # 사용자의 현재 진행중인 주문만 조회 (reservation, accepted)
     stmt = (
         select(OrderCurrentItem)
         .where(OrderCurrentItem.user_id == current_user["sub"])
-        .where(OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept, OrderStatus.pickup]))
+        .where(OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept]))
         .options(
             selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
         )
@@ -247,7 +247,7 @@ async def delete_order(
         )
     
     # 수락된 주문은 취소 불가
-    if order.status in [OrderStatus.accept, OrderStatus.pickup, OrderStatus.complete]:
+    if order.status in [OrderStatus.accept, OrderStatus.complete]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="이미 처리 중인 주문은 취소할 수 없습니다"
@@ -302,7 +302,7 @@ async def delete_order(
             if attempt == max_retries - 1:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="재고 복구 중 오류가 발생했습니다"
+                    detail=f"재고 복구 중 오류가 발생했습니다 Error : {e}"
                 )
     
     return CustomerOrderCancelResponse(
@@ -347,7 +347,7 @@ async def complete_pickup(
         )
     
     # 주문 상태 확인
-    if order.status != OrderStatus.pickup:
+    if order.status != OrderStatus.accept:
         if order.status == OrderStatus.complete:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -356,7 +356,7 @@ async def complete_pickup(
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="픽업 준비가 되지 않은 주문입니다"
+                detail="주문이 수락되지 않았습니다"
             )
     
     # QR 데이터 검증
