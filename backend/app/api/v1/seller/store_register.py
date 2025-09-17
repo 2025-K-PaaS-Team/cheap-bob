@@ -16,7 +16,7 @@ from services.image import ImageService
 from utils.id_generator import generate_store_id
 from core.exceptions import HTTPValueError
 
-router = APIRouter(prefix="/store", tags=["Seller-Store"])
+router = APIRouter(prefix="/store/register", tags=["Seller-Store-Register"])
 
 
 def get_seller_repository(session: AsyncSessionDep) -> SellerRepository:
@@ -60,7 +60,7 @@ ImageServiceDep = Annotated[ImageService, Depends(get_image_service)]
 
 
 
-@router.post("/register", response_model=SellerProfileResponse, status_code=status.HTTP_201_CREATED,
+@router.post("", response_model=SellerProfileResponse, status_code=status.HTTP_201_CREATED,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
         409: ["이미 가게가 등록된 판매자"]
@@ -188,7 +188,7 @@ async def register_seller_store(
         )
 
 # 이미지 업로드 관련 엔드포인트
-@router.post("/images/{store_id}/register", response_model=StoreImagesUploadResponse, status_code=status.HTTP_201_CREATED,
+@router.post("/images/{store_id}", response_model=StoreImagesUploadResponse, status_code=status.HTTP_201_CREATED,
     responses=create_error_responses({
         400: ["업로드할 이미지가 없음", "이미지는 한 번에 최대 5개", "지원하지 않는 파일 형식"],
         401: ["인증 정보가 없음", "토큰 만료"],

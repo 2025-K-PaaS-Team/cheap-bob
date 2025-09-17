@@ -37,7 +37,7 @@ ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product
 NutritionRepositoryDep = Annotated[ProductNutritionRepository, Depends(get_nutrition_repository)]
 
 
-@router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED,
+@router.post("/register", response_model=ProductResponse, status_code=status.HTTP_201_CREATED,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"],
         403: "가게를 수정할 수 있는 권한이 없음",

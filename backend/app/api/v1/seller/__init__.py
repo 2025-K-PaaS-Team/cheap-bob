@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from api.v1.seller import (
-    store, 
+    store_register, 
     store_profile,
     store_settings,
     store_sns,
@@ -12,7 +12,7 @@ from api.v1.seller import (
 
 router = APIRouter(prefix="/seller")
 
-router.include_router(store.router)
+router.include_router(store_register.router)
 router.include_router(store_profile.router)
 router.include_router(store_settings.router)
 router.include_router(store_sns.router)
