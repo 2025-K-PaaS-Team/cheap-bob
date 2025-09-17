@@ -12,7 +12,6 @@ from repositories.customer_preferences import (
 )
 from schemas.customer_detail import (
     CustomerDetailResponse,
-    CustomerDetailCreate,
     CustomerDetailUpdate
 )
 from schemas.customer_preferences_response import (
@@ -87,38 +86,6 @@ async def get_customer_detail(
     return detail
 
 
-@router.post(
-    "/detail",
-    response_model=CustomerDetailResponse,
-    status_code=status.HTTP_201_CREATED,
-    responses=create_error_responses({
-        400: ["이미 상세 정보가 존재함", "잘못된 입력 형식"],
-        401: ["인증 정보가 없음", "토큰 만료"],
-    })
-)
-async def create_customer_detail(
-    current_user: CurrentCustomerDep,
-    customer_detail_repo: CustomerDetailRepositoryDep,
-    detail_data: CustomerDetailCreate
-):
-    """소비자 상세 정보를 등록"""
-    customer_email = current_user["sub"]
-    
-    # 이미 존재하는지 확인
-    existing = await customer_detail_repo.exists_for_customer(customer_email)
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="이미 상세 정보가 등록되어 있습니다"
-        )
-    
-    detail = await customer_detail_repo.create_for_customer(
-        customer_email=customer_email,
-        nickname=detail_data.nickname,
-        phone_number=detail_data.phone_number
-    )
-    
-    return detail
 
 
 @router.patch(

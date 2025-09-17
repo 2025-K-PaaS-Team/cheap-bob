@@ -15,11 +15,6 @@ class CustomerDetailBase(BaseModel):
         return v
 
 
-class CustomerDetailCreate(CustomerDetailBase):
-    """고객 상세 정보 생성 스키마"""
-    pass
-
-
 class CustomerDetailUpdate(BaseModel):
     """고객 상세 정보 수정 스키마"""
     nickname: Optional[str] = Field(None, min_length=1, max_length=7, description="닉네임 (1-7자)")
