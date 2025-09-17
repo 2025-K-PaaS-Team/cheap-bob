@@ -6,7 +6,6 @@ from repositories.cart_item import CartItemRepository
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
-from repositories.order_history_item import OrderHistoryItemRepository
 from repositories.customer_preferences import (
     CustomerPreferredMenuRepository,
     CustomerNutritionTypeRepository,
@@ -30,7 +29,6 @@ __all__ = [
     "StoreProductInfoRepository",
     "OrderCurrentItemRepository",
     "StorePaymentInfoRepository",
-    "OrderHistoryItemRepository",
     "CustomerPreferredMenuRepository",
     "CustomerNutritionTypeRepository",
     "CustomerAllergyRepository",

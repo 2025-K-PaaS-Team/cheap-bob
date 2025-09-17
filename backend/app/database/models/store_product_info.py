@@ -21,5 +21,4 @@ class StoreProductInfo(Base):
     store = relationship("Store", back_populates="products")
     cart_items = relationship("CartItem", back_populates="product")
     order_current_items = relationship("OrderCurrentItem", back_populates="product")
-    order_history_items = relationship("OrderHistoryItem", back_populates="product")
     nutrition_info = relationship("ProductNutrition", back_populates="product", cascade="all, delete-orphan")
