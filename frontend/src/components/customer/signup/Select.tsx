@@ -1,17 +1,23 @@
 import { CommonBtn } from "@components/common";
 import type { SelectItem } from "@constant";
-import { useState } from "react";
 
 type SelectProps = {
   onNext: () => void;
   data?: SelectItem[];
+  selected: string[];
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
   selectType?: string;
   validate?: (val: string[]) => string | null;
 };
 
-const Select = ({ onNext, data, selectType, validate }: SelectProps) => {
-  const [selected, setSelected] = useState<string[]>([]);
-
+const Select = ({
+  onNext,
+  data,
+  selectType,
+  validate,
+  selected,
+  setSelected,
+}: SelectProps) => {
   const handleClick = (key: string) => {
     if (selected.includes(key)) {
       setSelected(selected.filter((item) => item != key));

@@ -10,6 +10,10 @@ const Signup = () => {
   const swiperRef = useRef<any>(null);
   const [nickname, setNickname] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
+  const [nutrition, setNutrition] = useState<string[]>([]);
+  const [menu, setMenu] = useState<string[]>([]);
+  const [topping, setTopping] = useState<string[]>([]);
+  const [allergy, setAllergy] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,6 +81,8 @@ const Signup = () => {
             selectType="nutrition"
             subTitle="내 목표 맞춤형 식사를 추천해드려요."
             onNext={() => swiperRef.current.slideNext()}
+            selected={nutrition}
+            setSelected={setNutrition}
             validate={(selected) =>
               selected.length === 0
                 ? "최소 1개 이상 선택해주세요"
@@ -93,6 +99,8 @@ const Signup = () => {
             type="select"
             selectType="menu"
             onNext={() => swiperRef.current.slideNext()}
+            selected={menu}
+            setSelected={setMenu}
           />
         </SwiperSlide>
         <SwiperSlide>
@@ -102,6 +110,8 @@ const Signup = () => {
             type="select"
             selectType="topping"
             onNext={() => swiperRef.current.slideNext()}
+            selected={topping}
+            setSelected={setTopping}
           />
         </SwiperSlide>
         <SwiperSlide>
@@ -111,6 +121,8 @@ const Signup = () => {
             type="select"
             selectType="allergy"
             onNext={() => swiperRef.current.slideNext()}
+            selected={allergy}
+            setSelected={setAllergy}
           />
         </SwiperSlide>
       </Swiper>

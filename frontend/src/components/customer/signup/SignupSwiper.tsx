@@ -23,6 +23,8 @@ type SelectProps = BaseProps & {
   type: "select";
   data: SelectItem[];
   selectType?: string;
+  selected: string[];
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
   validate?: (val: string[]) => string | null;
 };
 
@@ -65,6 +67,8 @@ const SignupSwiper = (props: SignupSwiperProps) => {
           <Select
             onNext={onNext}
             data={props.data}
+            selected={props.selected}
+            setSelected={props.setSelected}
             selectType={props.selectType}
             validate={props.validate}
           />
