@@ -18,7 +18,7 @@ const Layout = () => {
   return (
     <>
       <Wrapper>
-        {!notHeader && <Header />}
+        {!notHeader && <Header title="제목" />}
         <Main>
           <Outlet />
         </Main>
