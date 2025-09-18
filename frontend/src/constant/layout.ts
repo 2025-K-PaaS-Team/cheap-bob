@@ -5,6 +5,8 @@ export const layoutMap = {
     loc: false,
     heart: false,
     noti: false,
+    search: false,
+    searchPlaceholder: "",
   },
   onBoarding: {
     back: true,
@@ -12,6 +14,8 @@ export const layoutMap = {
     loc: false,
     heart: false,
     noti: false,
+    search: false,
+    searchPlaceholder: "",
   },
   Home: {
     back: false,
@@ -19,6 +23,8 @@ export const layoutMap = {
     loc: true,
     heart: true,
     noti: true,
+    search: true,
+    searchPlaceholder: "랜덤팩을 찾으시나요?",
   },
   SetLoc: {
     back: true,
@@ -26,6 +32,8 @@ export const layoutMap = {
     loc: false,
     heart: false,
     noti: false,
+    search: false,
+    searchPlaceholder: "",
   },
   Search: {
     back: true,
@@ -33,6 +41,8 @@ export const layoutMap = {
     loc: false,
     heart: false,
     noti: false,
+    search: true,
+    searchPlaceholder: "가게명, 랜덤팩명을 검색하세요",
   },
   FavStore: {
     back: true,
@@ -40,6 +50,8 @@ export const layoutMap = {
     loc: false,
     heart: false,
     noti: false,
+    search: false,
+    searchPlaceholder: "",
   },
   Noti: {
     back: true,
@@ -47,6 +59,8 @@ export const layoutMap = {
     loc: false,
     heart: false,
     noti: false,
+    search: false,
+    searchPlaceholder: "",
   },
   StoreDesc: {
     back: true,
@@ -54,6 +68,8 @@ export const layoutMap = {
     loc: false,
     heart: false,
     noti: false,
+    search: false,
+    searchPlaceholder: "",
   },
   Payment: {
     back: true,
@@ -61,6 +77,8 @@ export const layoutMap = {
     loc: false,
     heart: false,
     noti: false,
+    search: false,
+    searchPlaceholder: "",
   },
   OrderHis: {
     back: false,
@@ -68,6 +86,8 @@ export const layoutMap = {
     loc: false,
     heart: false,
     noti: true,
+    search: false,
+    searchPlaceholder: "",
   },
   My: {
     back: false,
@@ -75,5 +95,7 @@ export const layoutMap = {
     loc: false,
     heart: false,
     noti: false,
+    search: false,
+    searchPlaceholder: "",
   },
 };

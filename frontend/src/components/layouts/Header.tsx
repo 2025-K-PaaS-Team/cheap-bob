@@ -36,15 +36,17 @@ const Header = ({ layout }: HeaderProps) => {
         </div>
       </div>
       {/* search bar */}
-      <div className="border border-1 border-[#222222] flex flex-row justify-between p-[14px] rounded-[58px] m-[20px]">
-        <input
-          type="text"
-          className="focus:outline-none"
-          placeholder="랜덤팩을 찾으시나요?"
-        />
+      {myLayout.search && (
+        <div className="border border-1 border-[#222222] flex flex-row justify-between p-[14px] rounded-[58px] m-[20px]">
+          <input
+            type="text"
+            className="focus:outline-none"
+            placeholder={myLayout.searchPlaceholder}
+          />
 
-        <img src="/icon/search.svg" alt="searchIcon" />
-      </div>
+          <img src="/icon/search.svg" alt="searchIcon" />
+        </div>
+      )}
     </>
   );
 };
