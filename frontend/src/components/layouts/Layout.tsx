@@ -6,6 +6,7 @@ import {
   Header,
   SellerFooter,
 } from "@components/layouts";
+import { pathToLayoutKey } from "@utils";
 import { Outlet, useLocation } from "react-router";
 
 const Layout = () => {
@@ -18,7 +19,7 @@ const Layout = () => {
   return (
     <>
       <Wrapper>
-        {!notHeader && <Header title="제목" />}
+        {!notHeader && <Header layout={pathToLayoutKey(path)} />}
         <Main>
           <Outlet />
         </Main>

@@ -1,36 +1,41 @@
+import { layoutMap } from "@constant";
+import type { LayoutType } from "@interface";
 import { useNavigate } from "react-router";
 
 interface HeaderProps {
-  title?: string;
+  layout: LayoutType;
 }
 
-const Header = ({ title }: HeaderProps) => {
+const Header = ({ layout }: HeaderProps) => {
   const navigate = useNavigate();
   const handleClickBefore = () => {
     navigate(-1);
   };
 
-  const backType = false;
+  const myLayout = layoutMap[layout];
 
   return (
     <>
       <div className="h-[85px] pt-[40px] px-[20px] grid grid-cols-3 items-center">
-        {backType ? (
+        {myLayout.back && (
           <img
             src="/icon/before.svg"
             alt="beforeArrowIcon"
             onClick={handleClickBefore}
           />
-        ) : (
-          <img src="/icon/location.svg" alt="locationIcon" />
         )}
-
-        <div className="font-bold text-[15px] text-center">{title}</div>
+        {myLayout.loc && <img src="/icon/location.svg" alt="locationIcon" />}
+        <div className="font-bold text-[15px] text-center">
+          {myLayout.title}
+        </div>
         <div className="flex flex-row justify-end gap-x-[20px]">
-          <img src="/icon/heart.svg" alt="heartIcon" />
-          <img src="/icon/notification.svg" alt="notificationIcon" />
+          {myLayout.heart && <img src="/icon/heart.svg" alt="heartIcon" />}
+          {myLayout.noti && (
+            <img src="/icon/notification.svg" alt="notificationIcon" />
+          )}
         </div>
       </div>
+      {/* search bar */}
       <div className="border border-1 border-[#222222] flex flex-row justify-between p-[14px] rounded-[58px] m-[20px]">
         <input
           type="text"
