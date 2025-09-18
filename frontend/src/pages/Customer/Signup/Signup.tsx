@@ -1,8 +1,13 @@
 import { SignupSwiper } from "@components/customer/signup";
 import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
-import { SignupLab } from "@pages/Common";
-import { CreateCustomerDetail } from "@services";
-import { useEffect, useRef, useState } from "react";
+import {
+  CrateNutrition,
+  CreateAllergies,
+  CreateCustomerDetail,
+  CreatePreferMenu,
+  CreateTopping,
+} from "@services";
+import { useRef, useState } from "react";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
@@ -15,18 +20,26 @@ const Signup = () => {
   const [topping, setTopping] = useState<string[]>([]);
   const [allergy, setAllergy] = useState<string[]>([]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleNext = async () => {
+    const swiper = swiperRef.current;
 
-    try {
-      const res = await CreateCustomerDetail({
-        nickname,
-        phone_number: phone,
-      });
+    if (!swiper) return;
 
-      console.log("회원정보 등록 성공", res);
-    } catch (err: unknown) {
-      console.error("회원정보 등록 실패", err);
+    if (swiper.isEnd) {
+      try {
+        await CreateCustomerDetail({
+          nickname,
+          phone_number: phone,
+        });
+        await CreatePreferMenu({ menu_types: menu });
+        await CrateNutrition({ nutrition_types: nutrition });
+        await CreateAllergies({ allergy_types: allergy });
+        await CreateTopping({ topping_types: topping });
+      } catch (err: unknown) {
+        console.error("회원정보 등록 실패", err);
+      }
+    } else {
+      swiper.slideNext();
     }
   };
 
@@ -44,7 +57,7 @@ const Signup = () => {
           <SignupSwiper
             title={`서비스 이용 약관에 \n동의해주세요.`}
             type="agree"
-            onNext={() => swiperRef.current.slideNext()}
+            onNext={handleNext}
           />
         </SwiperSlide>
         <SwiperSlide>
@@ -55,7 +68,7 @@ const Signup = () => {
             validate={(val) =>
               val.length > 7 ? "7자 이내로 닉네임을 입력해주세요" : ""
             }
-            onNext={() => swiperRef.current.slideNext()}
+            onNext={handleNext}
             value={nickname}
             setValue={setNickname}
           />
@@ -68,7 +81,7 @@ const Signup = () => {
             validate={(val) =>
               !/^\d{10,11}$/.test(val) ? "01011112222형식으로 입력해주세요" : ""
             }
-            onNext={() => swiperRef.current.slideNext()}
+            onNext={handleNext}
             value={phone}
             setValue={setPhone}
           />
@@ -80,7 +93,7 @@ const Signup = () => {
             type="select"
             selectType="nutrition"
             subTitle="내 목표 맞춤형 식사를 추천해드려요."
-            onNext={() => swiperRef.current.slideNext()}
+            onNext={handleNext}
             selected={nutrition}
             setSelected={setNutrition}
             validate={(selected) =>
@@ -98,7 +111,7 @@ const Signup = () => {
             data={MenuList}
             type="select"
             selectType="menu"
-            onNext={() => swiperRef.current.slideNext()}
+            onNext={handleNext}
             selected={menu}
             setSelected={setMenu}
           />
@@ -109,7 +122,7 @@ const Signup = () => {
             data={ToppingList}
             type="select"
             selectType="topping"
-            onNext={() => swiperRef.current.slideNext()}
+            onNext={handleNext}
             selected={topping}
             setSelected={setTopping}
           />
@@ -120,33 +133,12 @@ const Signup = () => {
             data={AllergyList}
             type="select"
             selectType="allergy"
-            onNext={() => swiperRef.current.slideNext()}
+            onNext={handleNext}
             selected={allergy}
             setSelected={setAllergy}
           />
         </SwiperSlide>
       </Swiper>
-
-      {/* <form onSubmit={handleSubmit} className="p-3 gap-y-3 flex flex-col w-50">
-        <input
-          placeholder="어떻게 불러드릴까요"
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          className="border-2 border-blue-500"
-        />
-        <input
-          placeholder="번호"
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="border-2 border-blue-500"
-        />
-        <button type="submit" className="bg-blue-300">
-          제출하기
-        </button>
-      </form>
-
-      <SignupLab /> */}
     </div>
   );
 };

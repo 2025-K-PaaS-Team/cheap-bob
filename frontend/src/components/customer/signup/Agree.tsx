@@ -26,6 +26,7 @@ const Agree = ({ onNext }: AgreeProps) => {
       alert("필수 항목에 모두 동의해주세요");
       return;
     }
+    console.log("onNext");
     onNext();
   };
 
