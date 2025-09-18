@@ -25,13 +25,11 @@ const Home = () => {
         <LoginButton
           provider="kakao"
           label="[점주] 카카오톡으로 로그인하기"
-          color="bg-amber-500"
           isCustomer={false}
         />
         <LoginButton
           provider="naver"
           label="[점주] 네이버로 로그인하기"
-          color="bg-teal-500"
           isCustomer={false}
         />
         <h3
