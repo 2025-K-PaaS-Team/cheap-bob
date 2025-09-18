@@ -83,7 +83,6 @@ async def get_store_orders(
             status=order.status,
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
-            pickup_ready_at=order.pickup_ready_at,
             completed_at=order.completed_at,
             canceled_at=order.canceled_at
         )
@@ -153,7 +152,6 @@ async def get_pending_orders(
             status=order.status,
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
-            pickup_ready_at=order.pickup_ready_at,
             completed_at=order.completed_at,
             canceled_at=order.canceled_at
         )
@@ -228,7 +226,6 @@ async def update_order_accept(
         status=updated_order.status,
         reservation_at=updated_order.reservation_at,
         accepted_at=updated_order.accepted_at,
-        pickup_ready_at=updated_order.pickup_ready_at,
         completed_at=updated_order.completed_at,
         canceled_at=order.canceled_at
     )

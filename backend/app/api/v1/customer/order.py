@@ -69,7 +69,6 @@ async def get_order_history(
             status=order.status,
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
-            pickup_ready_at=order.pickup_ready_at,
             completed_at=order.completed_at,
             canceled_at=order.canceled_at
         )
@@ -122,7 +121,6 @@ async def get_current_orders(
             status=order.status,
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
-            pickup_ready_at=order.pickup_ready_at,
             completed_at=order.completed_at,
             canceled_at=order.canceled_at
         )
@@ -191,7 +189,6 @@ async def get_order_detail(
         status=order.status,
         reservation_at=order.reservation_at,
         accepted_at=order.accepted_at,
-        pickup_ready_at=order.pickup_ready_at,
         completed_at=order.completed_at
     )
     
@@ -410,7 +407,6 @@ async def complete_pickup(
         status=completed_order.status,
         reservation_at=completed_order.reservation_at,
         accepted_at=completed_order.accepted_at,
-        pickup_ready_at=completed_order.pickup_ready_at,
         completed_at=completed_order.completed_at,
         canceled_at=order.canceled_at
     )

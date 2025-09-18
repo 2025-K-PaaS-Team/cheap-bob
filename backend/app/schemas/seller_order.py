@@ -14,7 +14,6 @@ class OrderItemResponse(BaseModel):
     status: OrderStatus = Field(..., description="주문 상태")
     reservation_at: datetime = Field(..., description="예약 주문 시간")
     accepted_at: Optional[datetime] = Field(None, description="주문 수락 시간")
-    pickup_ready_at: Optional[datetime] = Field(None, description="픽업 준비 완료 시간")
     completed_at: Optional[datetime] = Field(None, description="픽업 완료 시간")
     canceled_at: Optional[datetime] = Field(None, description="주문 취소 시간")
     
