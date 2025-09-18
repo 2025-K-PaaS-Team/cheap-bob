@@ -10,11 +10,11 @@ const LoginCallback = () => {
     try {
       const res = await CheckCustomerDetail();
 
-      // if (res.has_detail) {
-      //   navigate("/");
-      // } else {
-      //   navigate("/c/signup");
-      // }
+      if (res.has_detail) {
+        navigate("/");
+      } else {
+        navigate("/c/signup");
+      }
     } catch (err: unknown) {
       console.error("err", err);
     }
