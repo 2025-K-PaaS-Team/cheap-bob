@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
+from utils.store_utils import get_store_id_by_email
 from api.deps.auth import CurrentSellerDep
 from api.deps.repository import StoreRepositoryDep
 from schemas.store import StoreDetailResponse, StoreSNSInfo
@@ -8,56 +9,9 @@ from schemas.product import ProductResponse
 from schemas.image import ImageUploadResponse
 from schemas.store_operation import StoreOperationResponse
 from schemas.store_settings import StoreAddressResponse
-from services.redis_cache import RedisCache
 from core.object_storage import object_storage
 
 router = APIRouter(prefix="/store", tags=["Seller-Store"])
-
-async def get_store_id_by_email(
-    seller_email: str,
-    store_repo: StoreRepositoryDep
-) -> tuple[str, object]:
-    """
-    seller_email로 store_id 조회 (Redis 캐싱 적용)
-    
-    Args:
-        seller_email: 현재 로그인한 판매자 이메일
-        store_repo: 가게 레포지토리
-    
-    Returns:
-        tuple: (store_id, store 객체)
-    
-    Raises:
-        HTTPException: 가게를 찾을 수 없는 경우
-    """
-    # Redis에서 캐시된 store_id 조회
-    cached_store_id = await RedisCache.get_store_id(seller_email)
-    
-    if cached_store_id:
-        # Redis에 캐시된 경우, DB에서 모든 관련 정보와 함께 store 조회
-        store = await store_repo.get_with_full_info(cached_store_id)
-        if store:
-            return cached_store_id, store
-    
-    # Redis에 없거나 DB에서 찾을 수 없는 경우, seller_email로 직접 조회
-    stores = await store_repo.get_by_seller_email(seller_email)
-    
-    if not stores:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="가게를 찾을 수 없습니다."
-        )
-    
-    # 첫 번째 가게 사용 - (현재 버전은 판매자가 하나의 가게만 가짐)
-    store = stores[0]
-    
-    # Redis에 캐싱
-    await RedisCache.set_store_id(seller_email, store.store_id)
-    
-    # 모든 관련 정보와 함께 다시 조회
-    store = await store_repo.get_with_full_info(store.store_id)
-    
-    return store.store_id, store
 
 @router.get("", response_model=StoreDetailResponse,
     responses=create_error_responses({
@@ -82,11 +36,11 @@ async def get_store_detail(
     """
     seller_email = current_user["sub"]
     
-    # seller_email로 store_id 조회 (Redis 캐싱 적용)
-    store_id, store = await get_store_id_by_email(seller_email, store_repo)
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+
+    store = await store_repo.get_with_full_info(store_id)
 
     try:
-        # store 객체를 StoreDetailResponse로 변환
         
         # 기본 정보
         store_detail = {

@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import HttpUrl
 
 from utils.docs_error import create_error_responses
+from utils.store_utils import get_store_id_by_email
 from api.deps.auth import CurrentSellerDep
 from api.deps.repository import StoreRepositoryDep, StoreSNSRepositoryDep
 from schemas.store_sns import (
@@ -15,38 +16,13 @@ router = APIRouter(prefix="/store/sns", tags=["Seller-Store-SNS"])
 SNSType = Literal["instagram", "facebook", "x", "homepage"]
 
 
-async def verify_store_owner(
-    store_id: str,
-    seller_email: str,
-    store_repo: StoreRepositoryDep
-) -> None:
-    """
-    가게 소유권 검증
-    """
-    store = await store_repo.get_by_store_id(store_id)
-    
-    if not store:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="가게를 찾을 수 없습니다."
-        )
-    
-    if store.seller_email != seller_email:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="가게 정보를 수정할 권한이 없습니다."
-        )
-
-
-@router.get("/{store_id}", response_model=StoreSNSResponse,
+@router.get("", response_model=StoreSNSResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게 정보를 조회할 권한이 없음",
         404: "가게를 찾을 수 없음"
     })
 )
 async def get_store_sns(
-    store_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
     sns_repo: StoreSNSRepositoryDep
@@ -56,7 +32,7 @@ async def get_store_sns(
     """
     seller_email = current_user["sub"]
     
-    await verify_store_owner(store_id, seller_email, store_repo)
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     try:
         sns_info = await sns_repo.get_by_store_id(store_id)
@@ -85,15 +61,13 @@ async def get_store_sns(
         )
 
 
-@router.put("/{store_id}", response_model=StoreSNSResponse,
+@router.put("", response_model=StoreSNSResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게 정보를 수정할 권한이 없음",
         404: ["가게를 찾을 수 없음", "등록된 SNS 정보를 찾을 수 없음"]
     })
 )
 async def update_store_sns(
-    store_id: str,
     request: StoreSNSUpdateRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
@@ -107,7 +81,7 @@ async def update_store_sns(
     """
     seller_email = current_user["sub"]
     
-    await verify_store_owner(store_id, seller_email, store_repo)
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     try:
         # 기존 SNS 정보 확인
@@ -150,16 +124,14 @@ async def update_store_sns(
         )
 
 
-@router.delete("/{store_id}/{sns_type}", status_code=status.HTTP_204_NO_CONTENT,
+@router.delete("/{sns_type}", status_code=status.HTTP_204_NO_CONTENT,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게 정보를 수정할 권한이 없음",
         404: ["가게를 찾을 수 없음", "등록된 SNS 정보를 찾을 수 없음"],
         422: "잘못된 SNS 유형"
     })
 )
 async def delete_store_sns_by_type(
-    store_id: str,
     sns_type: SNSType,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
@@ -173,7 +145,7 @@ async def delete_store_sns_by_type(
     """
     seller_email = current_user["sub"]
     
-    await verify_store_owner(store_id, seller_email, store_repo)
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     try:
         # 기존 SNS 정보 확인
