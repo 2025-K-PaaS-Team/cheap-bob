@@ -1,21 +1,16 @@
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy import select, and_
-from sqlalchemy.orm import selectinload
 from datetime import datetime, timezone
 
 from utils.docs_error import create_error_responses
 from utils.string_utils import parse_comma_separated_string
 
 from api.deps.auth import CurrentSellerDep
-from api.deps.database import AsyncSessionDep
 from api.deps.repository import (
     StoreRepositoryDep,
     OrderCurrentItemRepositoryDep,
     StoreProductInfoRepositoryDep,
     StorePaymentInfoRepositoryDep
 )
-from database.models.order_current_item import OrderCurrentItem
-from database.models.store_product_info import StoreProductInfo
 from schemas.order import (
     OrderItemResponse,
     OrderListResponse,
@@ -42,7 +37,7 @@ async def get_store_orders(
     store_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    session: AsyncSessionDep
+    order_repo: OrderCurrentItemRepositoryDep
 ):
     """
     가게의 주문 목록 조회
@@ -62,16 +57,7 @@ async def get_store_orders(
             detail="이 가게를 조회할 권한이 없습니다"
         )
     
-    stmt = (
-        select(OrderCurrentItem)
-        .join(StoreProductInfo, OrderCurrentItem.product_id == StoreProductInfo.product_id)
-        .where(StoreProductInfo.store_id == store_id)
-        .options(selectinload(OrderCurrentItem.product))
-        .order_by(OrderCurrentItem.reservation_at.desc())
-    )
-    
-    result = await session.execute(stmt)
-    orders = result.scalars().all()
+    orders = await order_repo.get_store_orders_with_relations(store_id)
     
     order_responses = []
     for order in orders:
@@ -111,7 +97,7 @@ async def get_pending_orders(
     store_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    session: AsyncSessionDep
+    order_repo: OrderCurrentItemRepositoryDep
 ):
     """
     처리 대기중인 주문 조회 (reservation, accepted, pickup, complete)
@@ -131,21 +117,7 @@ async def get_pending_orders(
             detail="이 가게를 조회할 권한이 없습니다"
         )
     
-    stmt = (
-        select(OrderCurrentItem)
-        .join(StoreProductInfo, OrderCurrentItem.product_id == StoreProductInfo.product_id)
-        .where(
-            and_(
-                StoreProductInfo.store_id == store_id,
-                OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept])
-            )
-        )
-        .options(selectinload(OrderCurrentItem.product))
-        .order_by(OrderCurrentItem.reservation_at)
-    )
-    
-    result = await session.execute(stmt)
-    orders = result.scalars().all()
+    orders = await order_repo.get_store_pending_orders_with_relations(store_id)
     
     order_responses = []
     for order in orders:
@@ -186,20 +158,13 @@ async def update_order_accept(
     payment_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    order_repo: OrderCurrentItemRepositoryDep,
-    session: AsyncSessionDep
+    order_repo: OrderCurrentItemRepositoryDep
 ):
     """
     주문 수락
     """
     
-    stmt = (
-        select(OrderCurrentItem)
-        .where(OrderCurrentItem.payment_id == payment_id)
-        .options(selectinload(OrderCurrentItem.product))
-    )
-    result = await session.execute(stmt)
-    order = result.scalar_one_or_none()
+    order = await order_repo.get_order_with_product_relation(payment_id)
     
     if not order:
         raise HTTPException(
@@ -263,20 +228,13 @@ async def cancel_order(
     store_repo: StoreRepositoryDep,
     order_repo: OrderCurrentItemRepositoryDep,
     product_repo: StoreProductInfoRepositoryDep,
-    payment_info_repo: StorePaymentInfoRepositoryDep,
-    session: AsyncSessionDep
+    payment_info_repo: StorePaymentInfoRepositoryDep
 ):
     """
     주문 취소 (포트원 환불 포함)
     """
     
-    stmt = (
-        select(OrderCurrentItem)
-        .where(OrderCurrentItem.payment_id == payment_id)
-        .options(selectinload(OrderCurrentItem.product))
-    )
-    result = await session.execute(stmt)
-    order = result.scalar_one_or_none()
+    order = await order_repo.get_order_with_product_relation(payment_id)
     
     if not order:
         raise HTTPException(
@@ -368,20 +326,14 @@ async def get_order_qr(
     payment_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    session: AsyncSessionDep
+    order_repo: OrderCurrentItemRepositoryDep
 ):
     """
     픽업 QR 코드 생성, 5분 유효
     """
     
     # 주문 조회
-    stmt = (
-        select(OrderCurrentItem)
-        .where(OrderCurrentItem.payment_id == payment_id)
-        .options(selectinload(OrderCurrentItem.product))
-    )
-    result = await session.execute(stmt)
-    order = result.scalar_one_or_none()
+    order = await order_repo.get_order_with_product_relation(payment_id)
     
     if not order:
         raise HTTPException(

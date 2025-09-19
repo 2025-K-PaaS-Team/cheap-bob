@@ -1,8 +1,11 @@
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_
+from sqlalchemy.orm import selectinload
 from datetime import datetime, timezone
 
 from database.models.order_current_item import OrderCurrentItem
+from database.models.store_product_info import StoreProductInfo
 from schemas.order import OrderStatus
 from repositories.base import BaseRepository
 
@@ -79,3 +82,85 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         )
         
         return None
+    
+    async def get_user_orders_with_relations(self, user_id: str) -> List[OrderCurrentItem]:
+        """사용자의 모든 주문 조회 (관련 정보 포함)"""
+        stmt = (
+            select(OrderCurrentItem)
+            .where(OrderCurrentItem.user_id == user_id)
+            .options(
+                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
+            )
+            .order_by(OrderCurrentItem.reservation_at.desc())
+        )
+        
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+    
+    async def get_user_current_orders_with_relations(self, user_id: str) -> List[OrderCurrentItem]:
+        """사용자의 현재 진행중인 주문 조회 (reservation, accepted)"""
+        stmt = (
+            select(OrderCurrentItem)
+            .where(OrderCurrentItem.user_id == user_id)
+            .where(OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept]))
+            .options(
+                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
+            )
+            .order_by(OrderCurrentItem.reservation_at.desc())
+        )
+        
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+    
+    async def get_order_with_store_relation(self, payment_id: str) -> Optional[OrderCurrentItem]:
+        """주문 상세 정보 조회 (상품 및 가게 정보 포함)"""
+        stmt = (
+            select(OrderCurrentItem)
+            .where(OrderCurrentItem.payment_id == payment_id)
+            .options(
+                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
+            )
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+    
+    async def get_order_with_product_relation(self, payment_id: str) -> Optional[OrderCurrentItem]:
+        """주문 정보 조회 (상품 정보 포함)"""
+        stmt = (
+            select(OrderCurrentItem)
+            .where(OrderCurrentItem.payment_id == payment_id)
+            .options(selectinload(OrderCurrentItem.product))
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+    
+    async def get_store_orders_with_relations(self, store_id: str) -> List[OrderCurrentItem]:
+        """가게의 모든 주문 조회 (상품 정보 포함)"""
+        stmt = (
+            select(OrderCurrentItem)
+            .join(StoreProductInfo, OrderCurrentItem.product_id == StoreProductInfo.product_id)
+            .where(StoreProductInfo.store_id == store_id)
+            .options(selectinload(OrderCurrentItem.product))
+            .order_by(OrderCurrentItem.reservation_at.desc())
+        )
+        
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+    
+    async def get_store_pending_orders_with_relations(self, store_id: str) -> List[OrderCurrentItem]:
+        """가게의 처리 대기중인 주문 조회 (reservation, accepted)"""
+        stmt = (
+            select(OrderCurrentItem)
+            .join(StoreProductInfo, OrderCurrentItem.product_id == StoreProductInfo.product_id)
+            .where(
+                and_(
+                    StoreProductInfo.store_id == store_id,
+                    OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept])
+                )
+            )
+            .options(selectinload(OrderCurrentItem.product))
+            .order_by(OrderCurrentItem.reservation_at)
+        )
+        
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
