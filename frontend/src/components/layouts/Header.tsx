@@ -35,9 +35,19 @@ const Header = ({ layout }: HeaderProps) => {
           {myLayout.title}
         </div>
         <div className="flex flex-row justify-end gap-x-[20px]">
-          {myLayout.heart && <img src="/icon/heart.svg" alt="heartIcon" />}
+          {myLayout.heart && (
+            <img
+              src="/icon/heart.svg"
+              alt="heartIcon"
+              onClick={() => navigate("/c/favorite")}
+            />
+          )}
           {myLayout.noti && (
-            <img src="/icon/notification.svg" alt="notificationIcon" />
+            <img
+              src="/icon/notification.svg"
+              alt="notificationIcon"
+              onClick={() => navigate("/c/noti")}
+            />
           )}
         </div>
       </div>
