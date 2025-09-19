@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.store import Store
 from database.models.address import Address
+from database.models.store_product_info import StoreProductInfo
 from repositories.base import BaseRepository
 
 
@@ -58,7 +59,8 @@ class StoreRepository(BaseRepository[Store]):
                 selectinload(Store.payment_info),
                 selectinload(Store.seller),
                 selectinload(Store.images),
-                selectinload(Store.operation_info)
+                selectinload(Store.operation_info),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
             )
             .where(Store.store_id == store_id)
         )
