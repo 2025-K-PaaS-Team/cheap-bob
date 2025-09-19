@@ -5,6 +5,7 @@ export { default as LoginCallback } from "./Common/LoginCallback";
 export { default as Order } from "./Customer/Order";
 export { default as Signup } from "./Customer/Signup";
 export { default as CustomerHome } from "./Customer/Home";
+export { default as Location } from "./Customer/Location";
 
 // seller
 export { default as Store } from "./Seller/Store";

@@ -24,7 +24,13 @@ const Header = ({ layout }: HeaderProps) => {
             onClick={handleClickBefore}
           />
         )}
-        {myLayout.loc && <img src="/icon/location.svg" alt="locationIcon" />}
+        {myLayout.loc && (
+          <img
+            src="/icon/location.svg"
+            alt="locationIcon"
+            onClick={() => navigate("/c/location")}
+          />
+        )}
         <div className="font-bold text-[15px] text-center">
           {myLayout.title}
         </div>

@@ -15,6 +15,7 @@ import {
   CustomerMapLab,
   CustomerHome,
   SellerHome,
+  Location,
 } from "@pages";
 import { SellerMapLab } from "@pages/Common";
 
@@ -33,6 +34,8 @@ const App = () => {
         {/* store */}
         <Route path="stores" element={<StoreList />} />
         <Route path="stores/:storeId" element={<StoreDetail />} />
+        {/* location */}
+        <Route path="location" element={<Location />} />
         {/* order */}
         <Route path="order" element={<Order />} />
         {/* mypage */}
