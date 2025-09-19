@@ -6,6 +6,7 @@ from api.deps.database import AsyncSessionDep
 from repositories.store import StoreRepository
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.customer_detail import CustomerDetailRepository
+from repositories.customer_profile import CustomerProfileRepository
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
 from repositories.cart_item import CartItemRepository
@@ -33,6 +34,10 @@ def get_store_product_info_repository(session: AsyncSessionDep) -> StoreProductI
 
 def get_customer_detail_repository(session: AsyncSessionDep) -> CustomerDetailRepository:
     return CustomerDetailRepository(session)
+
+
+def get_customer_profile_repository(session: AsyncSessionDep) -> CustomerProfileRepository:
+    return CustomerProfileRepository(session)
 
 
 def get_order_current_item_repository(session: AsyncSessionDep) -> OrderCurrentItemRepository:
@@ -90,6 +95,7 @@ def get_store_operation_info_repository(session: AsyncSessionDep) -> StoreOperat
 StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
 StoreProductInfoRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_store_product_info_repository)]
 CustomerDetailRepositoryDep = Annotated[CustomerDetailRepository, Depends(get_customer_detail_repository)]
+CustomerProfileRepositoryDep = Annotated[CustomerProfileRepository, Depends(get_customer_profile_repository)]
 OrderCurrentItemRepositoryDep = Annotated[OrderCurrentItemRepository, Depends(get_order_current_item_repository)]
 StorePaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_store_payment_info_repository)]
 CartItemRepositoryDep = Annotated[CartItemRepository, Depends(get_cart_item_repository)]

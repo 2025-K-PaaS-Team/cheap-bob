@@ -7,7 +7,8 @@ from api.deps.repository import (
     CustomerPreferredMenuRepositoryDep,
     CustomerNutritionTypeRepositoryDep,
     CustomerAllergyRepositoryDep,
-    CustomerToppingTypeRepositoryDep
+    CustomerToppingTypeRepositoryDep,
+    CustomerProfileRepositoryDep
 )
 from schemas.customer_detail import (
     CustomerDetailResponse,
@@ -28,9 +29,28 @@ from schemas.customer_preferences_response import (
     ToppingTypeDeleteRequest
 )
 
+from schemas.customer_profile import CustomerProfileResponse
+
 router = APIRouter(prefix="/profile", tags=["Customer-Profile"])
 
 
+@router.get(
+    "",
+    response_model=CustomerProfileResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"]
+    })
+)
+async def get_customer_profile_all(
+    current_user: CurrentCustomerDep,
+    profile_repo: CustomerProfileRepositoryDep
+):
+    """소비자의 모든 프로필 정보를 조회"""
+    customer_email = current_user["sub"]
+    
+    profile_data = await profile_repo.get_all_profile_data(customer_email)
+    
+    return CustomerProfileResponse(**profile_data)
 
 
 @router.get(

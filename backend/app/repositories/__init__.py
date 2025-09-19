@@ -13,6 +13,7 @@ from repositories.customer_preferences import (
     CustomerToppingTypeRepository
 )
 from repositories.customer_detail import CustomerDetailRepository
+from repositories.customer_profile import CustomerProfileRepository
 from repositories.address import AddressRepository
 from repositories.store_sns import StoreSNSRepository
 from repositories.store_image import StoreImageRepository
@@ -34,6 +35,7 @@ __all__ = [
     "CustomerAllergyRepository",
     "CustomerToppingTypeRepository",
     "CustomerDetailRepository",
+    "CustomerProfileRepository",
     "AddressRepository",
     "StoreSNSRepository",
     "StoreImageRepository",
