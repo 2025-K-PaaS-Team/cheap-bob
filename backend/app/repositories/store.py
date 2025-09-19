@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict
-from sqlalchemy import select, and_, or_
+from sqlalchemy import select, and_, update as sql_update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -78,83 +78,20 @@ class StoreRepository(BaseRepository[Store]):
             load_relations=["address"]
         )
     
-    async def get_by_area(
-        self, 
-        sido: Optional[str] = None,
-        sigungu: Optional[str] = None,
-        bname: Optional[str] = None
-    ) -> List[Store]:
-        """지역별 가게 조회"""
-        query = (
-            select(Store)
-            .join(Address, Store.address_id == Address.address_id)
-            .options(selectinload(Store.address))
-        )
-        
-        conditions = []
-        if sido:
-            conditions.append(Address.sido == sido)
-        if sigungu:
-            conditions.append(Address.sigungu == sigungu)
-        if bname:
-            conditions.append(Address.bname == bname)
-        
-        if conditions:
-            query = query.where(and_(*conditions))
-        
-        query = query.order_by(Store.store_name)
-        result = await self.session.execute(query)
-        return result.scalars().all()
-    
-    async def update_address(self, store_id: str, address_id: int) -> Optional[Store]:
-        """가게의 주소 정보 업데이트"""
-        return await self.update(store_id, address_id=address_id)
-    
-    async def update_store_info(
-        self, 
-        store_id: str,
-        store_introduction: Optional[str] = None,
-        store_phone: Optional[str] = None,
-        store_postal_code: Optional[str] = None,
-        store_address: Optional[str] = None,
-        store_detail_address: Optional[str] = None,
-        address_id: Optional[int] = None
-    ) -> Optional[Store]:
-        """가게 정보 업데이트"""
-        update_data = {}
-        
-        if store_introduction is not None:
-            update_data["store_introduction"] = store_introduction
-        if store_phone is not None:
-            update_data["store_phone"] = store_phone
-        if store_postal_code is not None:
-            update_data["store_postal_code"] = store_postal_code
-        if store_address is not None:
-            update_data["store_address"] = store_address
-        if store_detail_address is not None:
-            update_data["store_detail_address"] = store_detail_address
-        if address_id is not None:
-            update_data["address_id"] = address_id
-        
-        if update_data:
-            return await self.update(store_id, **update_data)
-        return await self.get_by_store_id(store_id)
-    
     async def update_store_and_address_atomic(
         self,
         store_id: str,
-        postal_code: Optional[str] = None,
-        address: Optional[str] = None,
-        detail_address: Optional[str] = None,
-        sido: Optional[str] = None,
-        sigungu: Optional[str] = None,
-        bname: Optional[str] = None,
-        lat: Optional[str] = None,
-        lng: Optional[str] = None
-    ) -> Optional[Store]:
+        postal_code: str,
+        address: str,
+        detail_address: str,
+        sido: str,
+        sigungu: str,
+        bname: str,
+        lat: str,
+        lng: str
+    ) -> Store:
         """가게와 주소 정보를 업데이트"""
-        from sqlalchemy import update as sql_update
-        from database.models.address import Address
+        
         
         # 1. 현재 가게 정보를 address와 함께 조회
         query = (
@@ -209,23 +146,23 @@ class StoreRepository(BaseRepository[Store]):
         store_id: str,
         store_name: str,
         seller_email: str,
-        store_introduction: Optional[str] = None,
-        store_phone: Optional[str] = None,
-        store_postal_code: Optional[str] = None,
-        store_address: Optional[str] = None,
-        store_detail_address: Optional[str] = None,
+        store_introduction: str,
+        store_phone: str,
+        store_postal_code: str,
+        store_address: str,
+        store_detail_address: str,
         # Address info
-        sido: str = None,
-        sigungu: str = None,
-        bname: str = None,
-        lat: str = None,
-        lng: str = None,
+        sido: str,
+        sigungu: str,
+        bname: str,
+        lat: str,
+        lng: str,
         # SNS info (optional)
-        sns_info: Optional[Dict[str, Optional[str]]] = None,
+        sns_info: Optional[Dict[str, Optional[str]]],
         # Operation times
-        operation_times: Optional[List[Dict]] = None,
+        operation_times: List[Dict],
         # Payment info
-        payment_info: Optional[Dict[str, str]] = None
+        payment_info: Dict[str, str]
     ) -> Store:
         """가게와 모든 관련 정보를 한 번에 생성"""
         
