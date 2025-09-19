@@ -91,7 +91,7 @@ export const layoutMap = {
   },
   My: {
     back: false,
-    title: "",
+    title: "마이페이지",
     loc: false,
     heart: false,
     noti: false,
