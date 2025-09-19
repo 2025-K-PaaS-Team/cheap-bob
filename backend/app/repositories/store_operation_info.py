@@ -1,5 +1,6 @@
 from typing import List, Optional, Dict
 from datetime import time, datetime, timezone, timedelta
+from sqlalchemy import update as sql_update, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.store_operation_info import StoreOperationInfo
@@ -152,3 +153,52 @@ class StoreOperationInfoRepository(BaseRepository[StoreOperationInfo]):
             return False
         
         return True
+    
+    async def update_and_return_by_store_and_day(
+        self,
+        store_id: str,
+        day_of_week: int,
+        is_open_enabled: Optional[bool] = None,
+        open_time: Optional[time] = None,
+        close_time: Optional[time] = None,
+        pickup_start_time: Optional[time] = None,
+        pickup_end_time: Optional[time] = None
+    ) -> Optional[StoreOperationInfo]:
+        """특정 가게의 특정 요일 운영 정보를 업데이트하고 결과 반환"""
+        
+        # 업데이트할 값들 준비
+        update_values = {}
+        if is_open_enabled is not None:
+            update_values["is_open_enabled"] = is_open_enabled
+        if open_time is not None:
+            update_values["open_time"] = open_time
+        if close_time is not None:
+            update_values["close_time"] = close_time
+        if pickup_start_time is not None:
+            update_values["pickup_start_time"] = pickup_start_time
+        if pickup_end_time is not None:
+            update_values["pickup_end_time"] = pickup_end_time
+        
+        if not update_values:
+            # 업데이트할 값이 없으면 현재 데이터만 조회해서 반환
+            return await self.get_by_store_and_day(store_id, day_of_week)
+        
+        # UPDATE 실행 후 RETURNING 사용
+        query = (
+            sql_update(StoreOperationInfo)
+            .where(
+                (StoreOperationInfo.store_id == store_id) & 
+                (StoreOperationInfo.day_of_week == day_of_week)
+            )
+            .values(**update_values)
+            .returning(StoreOperationInfo)
+        )
+        
+        result = await self.session.execute(query)
+        updated_info = result.scalar_one_or_none()
+        
+        if updated_info:
+            await self.session.flush()
+            return updated_info
+        else:
+            return None

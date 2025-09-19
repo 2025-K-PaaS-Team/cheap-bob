@@ -136,3 +136,67 @@ class StoreRepository(BaseRepository[Store]):
         if update_data:
             return await self.update(store_id, **update_data)
         return await self.get_by_store_id(store_id)
+    
+    async def update_store_and_address_atomic(
+        self,
+        store_id: str,
+        postal_code: Optional[str] = None,
+        address: Optional[str] = None,
+        detail_address: Optional[str] = None,
+        sido: Optional[str] = None,
+        sigungu: Optional[str] = None,
+        bname: Optional[str] = None,
+        lat: Optional[str] = None,
+        lng: Optional[str] = None
+    ) -> Optional[Store]:
+        """가게와 주소 정보를 업데이트"""
+        from sqlalchemy import update as sql_update
+        from database.models.address import Address
+        
+        # 1. 현재 가게 정보를 address와 함께 조회
+        query = (
+            select(Store)
+            .options(selectinload(Store.address))
+            .where(Store.store_id == store_id)
+        )
+        result = await self.session.execute(query)
+        store = result.scalar_one_or_none()
+        
+        if not store:
+            return None
+        
+        # 2. address_id가 있으면 주소 업데이트
+        if store.address_id and all([sido, sigungu, bname, lat, lng]):
+            await self.session.execute(
+                sql_update(Address)
+                .where(Address.address_id == store.address_id)
+                .values(
+                    sido=sido,
+                    sigungu=sigungu,
+                    bname=bname,
+                    lat=lat,
+                    lng=lng
+                )
+            )
+        
+        # 3. 가게 정보 업데이트
+        store_update_values = {}
+        if postal_code is not None:
+            store_update_values["store_postal_code"] = postal_code
+        if address is not None:
+            store_update_values["store_address"] = address
+        if detail_address is not None:
+            store_update_values["store_detail_address"] = detail_address
+        
+        if store_update_values:
+            await self.session.execute(
+                sql_update(Store)
+                .where(Store.store_id == store_id)
+                .values(**store_update_values)
+            )
+        
+        # 4. 변경사항 플러시 및 갱신된 객체 반환
+        await self.session.flush()
+        await self.session.refresh(store)
+        
+        return store
