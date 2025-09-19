@@ -84,30 +84,27 @@ async def update_store_sns(
     store_id = await get_store_id_by_email(seller_email, store_repo)
     
     try:
-        # 기존 SNS 정보 확인
-        existing_sns = await sns_repo.get_by_store_id(store_id)
-        if not existing_sns:
+        # 업데이트
+        update_kwargs = {}
+        if request.instagram is not None:
+            update_kwargs["instagram"] = str(request.instagram) if request.instagram else None
+        if request.facebook is not None:
+            update_kwargs["facebook"] = str(request.facebook) if request.facebook else None
+        if request.x is not None:
+            update_kwargs["x"] = str(request.x) if request.x else None
+        if request.homepage is not None:
+            update_kwargs["homepage"] = str(request.homepage) if request.homepage else None
+            
+        updated_sns = await sns_repo.update_and_return(
+            store_id=store_id,
+            **update_kwargs
+        )
+        
+        if not updated_sns:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="등록된 SNS 정보를 찾을 수 없습니다. 먼저 POST 메서드로 등록해주세요."
             )
-        
-        # 업데이트할 데이터 준비
-        update_data = {}
-        if request.instagram is not None:
-            update_data["instagram"] = str(request.instagram) if request.instagram else None
-        if request.facebook is not None:
-            update_data["facebook"] = str(request.facebook) if request.facebook else None
-        if request.x is not None:
-            update_data["x"] = str(request.x) if request.x else None
-        if request.homepage is not None:
-            update_data["homepage"] = str(request.homepage) if request.homepage else None
-        
-        # SNS 정보 업데이트
-        await sns_repo.update_where({"store_id":store_id}, **update_data)
-        
-        # 업데이트된 정보 조회
-        updated_sns = await sns_repo.get_by_store_id(store_id)
         
         return StoreSNSResponse(
             store_id=store_id,
@@ -148,17 +145,19 @@ async def delete_store_sns_by_type(
     store_id = await get_store_id_by_email(seller_email, store_repo)
     
     try:
-        # 기존 SNS 정보 확인
-        existing_sns = await sns_repo.get_by_store_id(store_id)
-        if not existing_sns:
+        # 업데이트
+        update_kwargs = {sns_type: None}
+        
+        updated_sns = await sns_repo.update_and_return(
+            store_id=store_id,
+            **update_kwargs
+        )
+        
+        if not updated_sns:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="등록된 SNS 정보를 찾을 수 없습니다."
             )
-        
-        # 해당 SNS 타입의 URL을 None으로 설정
-        update_data = {sns_type: None}
-        await sns_repo.update_where({"store_id":store_id}, **update_data)
         
     except Exception as e:
         raise HTTPException(

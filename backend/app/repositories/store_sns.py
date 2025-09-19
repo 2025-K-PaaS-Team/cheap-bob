@@ -1,6 +1,6 @@
 from typing import Optional, Dict, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update as sql_update
 from sqlalchemy.orm import selectinload
 
 from database.models.store_sns import StoreSNS
@@ -79,3 +79,44 @@ class StoreSNSRepository(BaseRepository[StoreSNS]):
         if sns_info:
             return await self.delete(sns_info.sns_id)
         return False
+    
+    async def update_and_return(
+        self,
+        store_id: str,
+        instagram: Optional[str] = None,
+        facebook: Optional[str] = None,
+        x: Optional[str] = None,
+        homepage: Optional[str] = None
+    ) -> Optional[StoreSNS]:
+        """SNS 정보를 업데이트하고 결과 반환"""
+
+        update_values = {}
+        if instagram is not None:
+            update_values["instagram"] = instagram
+        if facebook is not None:
+            update_values["facebook"] = facebook
+        if x is not None:
+            update_values["x"] = x
+        if homepage is not None:
+            update_values["homepage"] = homepage
+        
+        if not update_values:
+            # 업데이트할 값이 없으면 현재 데이터만 조회해서 반환
+            return await self.get_by_store_id(store_id)
+        
+        # UPDATE 실행 후 RETURNING 사용
+        query = (
+            sql_update(StoreSNS)
+            .where(StoreSNS.store_id == store_id)
+            .values(**update_values)
+            .returning(StoreSNS)
+        )
+        
+        result = await self.session.execute(query)
+        updated_sns = result.scalar_one_or_none()
+        
+        if updated_sns:
+            await self.session.flush()
+            return updated_sns
+        else:
+            return None
