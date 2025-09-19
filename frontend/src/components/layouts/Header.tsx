@@ -17,25 +17,29 @@ const Header = ({ layout }: HeaderProps) => {
   return (
     <>
       <div className="h-[85px] pt-[15px] px-[20px] grid grid-cols-3 items-center">
+        {/* left */}
         {myLayout.back ? (
           <img
             src="/icon/before.svg"
             alt="beforeArrowIcon"
             onClick={handleClickBefore}
           />
-        ) : (
-          <div></div>
-        )}
-        {myLayout.loc && (
+        ) : myLayout.loc ? (
           <img
             src="/icon/location.svg"
             alt="locationIcon"
             onClick={() => navigate("/c/location")}
           />
+        ) : (
+          <div />
         )}
+
+        {/* center */}
         <div className="font-bold text-[15px] text-center">
           {myLayout.title}
         </div>
+
+        {/* right */}
         <div className="flex flex-row justify-end gap-x-[20px]">
           {myLayout.heart && (
             <img
