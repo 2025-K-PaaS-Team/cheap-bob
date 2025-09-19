@@ -4,6 +4,7 @@ from sqlalchemy.orm import selectinload
 from datetime import datetime, timezone
 
 from utils.docs_error import create_error_responses
+from utils.string_utils import parse_comma_separated_string
 
 from api.deps.auth import CurrentSellerDep
 from api.deps.database import AsyncSessionDep
@@ -15,13 +16,13 @@ from api.deps.repository import (
 )
 from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
-from schemas.seller_order import (
+from schemas.order import (
     OrderItemResponse,
     OrderListResponse,
     OrderCancelRequest,
     OrderCancelResponse,
     OrderStatus,
-    PickupQRResponse
+    SellerPickupQRResponse
 )
 from services.payment import PaymentService
 from utils.qr_generator import encode_qr_data
@@ -84,7 +85,12 @@ async def get_store_orders(
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             completed_at=order.completed_at,
-            canceled_at=order.canceled_at
+            canceled_at=order.canceled_at,
+            cancel_reason=order.cancel_reason,
+            preferred_menus=parse_comma_separated_string(order.preferred_menus),
+            nutrition_types=parse_comma_separated_string(order.nutrition_types),
+            allergies=parse_comma_separated_string(order.allergies),
+            topping_types=parse_comma_separated_string(order.topping_types)
         )
         order_responses.append(order_response)
     
@@ -153,7 +159,12 @@ async def get_pending_orders(
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             completed_at=order.completed_at,
-            canceled_at=order.canceled_at
+            canceled_at=order.canceled_at,
+            cancel_reason=order.cancel_reason,
+            preferred_menus=parse_comma_separated_string(order.preferred_menus),
+            nutrition_types=parse_comma_separated_string(order.nutrition_types),
+            allergies=parse_comma_separated_string(order.allergies),
+            topping_types=parse_comma_separated_string(order.topping_types)
         )
         order_responses.append(order_response)
     
@@ -227,7 +238,12 @@ async def update_order_accept(
         reservation_at=updated_order.reservation_at,
         accepted_at=updated_order.accepted_at,
         completed_at=updated_order.completed_at,
-        canceled_at=order.canceled_at
+        canceled_at=order.canceled_at,
+        cancel_reason=updated_order.cancel_reason,
+        preferred_menus=parse_comma_separated_string(updated_order.preferred_menus),
+        nutrition_types=parse_comma_separated_string(updated_order.nutrition_types),
+        allergies=parse_comma_separated_string(updated_order.allergies),
+        topping_types=parse_comma_separated_string(updated_order.topping_types)
     )
 
 
@@ -303,7 +319,7 @@ async def cancel_order(
             detail=refund_result.get("error", "환불 처리 중 오류가 발생했습니다")
         )
     
-    quantity = await order_repo.cancel_order(payment_id)
+    quantity = await order_repo.cancel_order(payment_id, cancel_reason=request.reason)
     
     # 재고 복구
     max_retries = settings.MAX_RETRY_LOCK
@@ -336,13 +352,11 @@ async def cancel_order(
     
     return OrderCancelResponse(
         payment_id=payment_id,
-        status="cancelled",
-        message="주문이 성공적으로 취소되었습니다",
         refunded_amount=order.price
     )
 
 
-@router.get("/{payment_id}/qr", response_model=PickupQRResponse,
+@router.get("/{payment_id}/qr", response_model=SellerPickupQRResponse,
     responses=create_error_responses({
         400:"픽업 준비가 되지 않은 주문",
         401:["인증 정보가 없음", "토큰 만료"],
@@ -398,7 +412,7 @@ async def get_order_qr(
         product_id=order.product_id
     )
     
-    return PickupQRResponse(
+    return SellerPickupQRResponse(
         payment_id=payment_id,
         qr_data=qr_data,
         created_at=created_at

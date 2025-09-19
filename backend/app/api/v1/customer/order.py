@@ -1,9 +1,10 @@
+from typing import List
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from utils.docs_error import create_error_responses
-
+from utils.string_utils import parse_comma_separated_string
 from api.deps.auth import CurrentCustomerDep
 from api.deps.database import AsyncSessionDep
 from api.deps.repository import (
@@ -13,13 +14,12 @@ from api.deps.repository import (
 )
 from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
-from schemas.customer_order import (
-    CustomerOrderItemResponse,
-    CustomerOrderListResponse,
-    CustomerOrderDetailResponse,
-    CustomerOrderCancelRequest,
-    CustomerOrderCancelResponse,
-    PickupCompleteRequest
+from schemas.order import (
+    OrderItemResponse,
+    OrderListResponse,
+    OrderCancelRequest,
+    OrderCancelResponse,
+    CustomerPickupCompleteRequest
 )
 from schemas.order import OrderStatus
 from services.payment import PaymentService
@@ -29,7 +29,7 @@ from utils.qr_generator import validate_qr_data
 router = APIRouter(prefix="/orders", tags=["Customer-Order"])
 
 
-@router.get("", response_model=CustomerOrderListResponse,
+@router.get("", response_model=OrderListResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"]
     })
@@ -58,7 +58,7 @@ async def get_order_history(
     # response 포맷으로 변환
     order_responses = []
     for order in orders:
-        order_response = CustomerOrderItemResponse(
+        order_response = OrderItemResponse(
             payment_id=order.payment_id,
             product_id=order.product_id,
             product_name=order.product.product_name,
@@ -70,17 +70,22 @@ async def get_order_history(
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             completed_at=order.completed_at,
-            canceled_at=order.canceled_at
+            canceled_at=order.canceled_at,
+            cancel_reason=order.cancel_reason,
+            preferred_menus=parse_comma_separated_string(order.preferred_menus),
+            nutrition_types=parse_comma_separated_string(order.nutrition_types),
+            allergies=parse_comma_separated_string(order.allergies),
+            topping_types=parse_comma_separated_string(order.topping_types)
         )
         order_responses.append(order_response)
     
-    return CustomerOrderListResponse(
+    return OrderListResponse(
         orders=order_responses,
         total=len(order_responses)
     )
 
 
-@router.get("/current", response_model=CustomerOrderListResponse,
+@router.get("/current", response_model=OrderListResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"]
     })
@@ -110,7 +115,7 @@ async def get_current_orders(
     # response 포맷으로 변환
     order_responses = []
     for order in orders:
-        order_response = CustomerOrderItemResponse(
+        order_response = OrderItemResponse(
             payment_id=order.payment_id,
             product_id=order.product_id,
             product_name=order.product.product_name,
@@ -122,17 +127,22 @@ async def get_current_orders(
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
             completed_at=order.completed_at,
-            canceled_at=order.canceled_at
+            canceled_at=order.canceled_at,
+            cancel_reason=order.cancel_reason,
+            preferred_menus=parse_comma_separated_string(order.preferred_menus),
+            nutrition_types=parse_comma_separated_string(order.nutrition_types),
+            allergies=parse_comma_separated_string(order.allergies),
+            topping_types=parse_comma_separated_string(order.topping_types)
         )
         order_responses.append(order_response)
     
-    return CustomerOrderListResponse(
+    return OrderListResponse(
         orders=order_responses,
         total=len(order_responses)
     )
 
 
-@router.get("/{payment_id}", response_model=CustomerOrderDetailResponse,
+@router.get("/{payment_id}", response_model=OrderItemResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"],
         403:"주문을 확인할 권한이 없음",
@@ -153,7 +163,7 @@ async def get_order_detail(
         select(OrderCurrentItem)
         .where(OrderCurrentItem.payment_id == payment_id)
         .options(
-            selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
+            selectinload(StoreProductInfo.store)
         )
     )
     result = await session.execute(stmt)
@@ -172,11 +182,7 @@ async def get_order_detail(
             detail="이 주문을 조회할 권한이 없습니다"
         )
     
-    # 단가와 할인율 계산
-    unit_price = order.product.price
-    discount_rate = order.product.sale
-    
-    return CustomerOrderDetailResponse(
+    return OrderItemResponse(
         payment_id=order.payment_id,
         product_id=order.product_id,
         product_name=order.product.product_name,
@@ -184,15 +190,19 @@ async def get_order_detail(
         store_name=order.product.store.store_name,
         quantity=order.quantity,
         price=order.price,
-        unit_price=unit_price,
-        discount_rate=discount_rate,
         status=order.status,
         reservation_at=order.reservation_at,
         accepted_at=order.accepted_at,
-        completed_at=order.completed_at
+        completed_at=order.completed_at,
+        canceled_at=order.canceled_at,
+        cancel_reason=order.cancel_reason,
+        preferred_menus=parse_comma_separated_string(order.preferred_menus),
+        nutrition_types=parse_comma_separated_string(order.nutrition_types),
+        allergies=parse_comma_separated_string(order.allergies),
+        topping_types=parse_comma_separated_string(order.topping_types)
     )
     
-@router.delete("/{payment_id}", response_model=CustomerOrderCancelResponse,
+@router.delete("/{payment_id}", response_model=OrderCancelResponse,
     responses=create_error_responses({
         400: ["이미 취소된 주문", "이미 승인된 주문"],
         401:["인증 정보가 없음", "토큰 만료"],
@@ -203,7 +213,7 @@ async def get_order_detail(
 )
 async def delete_order(
     payment_id: str,
-    request: CustomerOrderCancelRequest,
+    request: OrderCancelRequest,
     current_user: CurrentCustomerDep,
     order_repo: OrderCurrentItemRepositoryDep,
     product_repo: StoreProductInfoRepositoryDep,
@@ -267,7 +277,7 @@ async def delete_order(
         )
     
     # 주문 취소 처리
-    quantity = await order_repo.cancel_order(payment_id)
+    quantity = await order_repo.cancel_order(payment_id, cancel_reason=request.reason)
     
     # 낙관적 락을 사용하여 재고 복구
     max_retries = settings.MAX_RETRY_LOCK
@@ -302,13 +312,13 @@ async def delete_order(
                     detail=f"재고 복구 중 오류가 발생했습니다 Error : {e}"
                 )
     
-    return CustomerOrderCancelResponse(
+    return OrderCancelResponse(
         payment_id=payment_id,
         refunded_amount=order.price
     )
 
 
-@router.patch("/{payment_id}/pickup-complete", response_model=CustomerOrderItemResponse,
+@router.patch("/{payment_id}/pickup-complete", response_model=OrderItemResponse,
     responses=create_error_responses({
         400:["유효하지 않은 QR 코드", "권한이 없는 사용자", "이미 픽업 완료"],
         401:["인증 정보가 없음", "토큰 만료"],
@@ -317,7 +327,7 @@ async def delete_order(
 )
 async def complete_pickup(
     payment_id: str,
-    request: PickupCompleteRequest,
+    request: CustomerPickupCompleteRequest,
     current_user: CurrentCustomerDep,
     order_repo: OrderCurrentItemRepositoryDep,
     session: AsyncSessionDep
@@ -396,7 +406,7 @@ async def complete_pickup(
     # 주문 상태를 완료로 변경
     completed_order = await order_repo.complete_order(payment_id)
     
-    return CustomerOrderItemResponse(
+    return OrderItemResponse(
         payment_id=completed_order.payment_id,
         product_id=completed_order.product_id,
         product_name=order.product.product_name,
@@ -408,5 +418,10 @@ async def complete_pickup(
         reservation_at=completed_order.reservation_at,
         accepted_at=completed_order.accepted_at,
         completed_at=completed_order.completed_at,
-        canceled_at=order.canceled_at
+        canceled_at=order.canceled_at,
+        cancel_reason=completed_order.cancel_reason,
+        preferred_menus=parse_comma_separated_string(completed_order.preferred_menus),
+        nutrition_types=parse_comma_separated_string(completed_order.nutrition_types),
+        allergies=parse_comma_separated_string(completed_order.allergies),
+        topping_types=parse_comma_separated_string(completed_order.topping_types)
     )
