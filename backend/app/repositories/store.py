@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict
 from sqlalchemy import select, and_, update as sql_update
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.store import Store
@@ -239,3 +239,21 @@ class StoreRepository(BaseRepository[Store]):
         except Exception as e:
             # 트랜잭션 롤백은 상위에서 처리
             raise e
+    
+    async def get_stores_with_products(self) -> List[Store]:
+        """상품이 있는 가게들을 모든 관련 정보와 함께 조회"""
+        query = (
+            select(Store)
+            .join(Store.products)  # INNER JOIN으로 상품이 있는 가게만 필터링
+            .options(
+                selectinload(Store.address),
+                selectinload(Store.sns_info),
+                selectinload(Store.operation_info),
+                selectinload(Store.images),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
+            )
+            .order_by(Store.created_at.desc())
+            .distinct()  # 중복 제거
+        )
+        result = await self.session.execute(query)
+        return result.scalars().unique().all()

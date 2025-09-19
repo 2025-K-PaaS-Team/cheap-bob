@@ -6,15 +6,13 @@ from utils.docs_error import create_error_responses
 from api.deps.auth import CurrentCustomerDep
 from api.deps.repository import (
     StoreRepositoryDep, 
-    StoreProductInfoRepositoryDep,
-    StoreSNSRepositoryDep,
-    StoreOperationInfoRepositoryDep,
-    ProductNutritionRepositoryDep
+    StoreProductInfoRepositoryDep
 )
-from api.deps.service import ImageServiceDep
 from schemas.product import ProductsResponse, ProductResponse
 from schemas.store import StoreDetailResponse
 from schemas.store_operation import StoreOperationResponse
+from schemas.image import ImageUploadResponse
+from core.object_storage import object_storage
 
 router = APIRouter(prefix="/search", tags=["Customer-Search"])
 
@@ -26,12 +24,7 @@ router = APIRouter(prefix="/search", tags=["Customer-Search"])
 )
 async def get_stores(
     current_user: CurrentCustomerDep,
-    store_repo: StoreRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep,
-    sns_repo: StoreSNSRepositoryDep,
-    operation_repo: StoreOperationInfoRepositoryDep,
-    image_service: ImageServiceDep,
-    nutrition_repo: ProductNutritionRepositoryDep
+    store_repo: StoreRepositoryDep
 ):
     """
     가게 및 상품 정보 조회 API
@@ -40,10 +33,7 @@ async def get_stores(
     상품이 없는 가게는 조회 결과에서 제외
     """
     
-    stores = await store_repo.get_many(
-        order_by=["-created_at"],
-        load_relations=["address"]
-    )
+    stores = await store_repo.get_stores_with_products()
     
     if not stores:
         return []
@@ -51,12 +41,6 @@ async def get_stores(
     result = []
     
     for store in stores:
-        products = await product_repo.get_by_store_id(store.store_id)
-        
-        # 상품이 없는 가게는 건너뛰기
-        if not products:
-            continue
-            
         # 가게 기본 정보
         store_data = {
             "store_id": store.store_id,
@@ -67,9 +51,10 @@ async def get_stores(
             "created_at": store.created_at
         }
         
+        # 상품 정보 변환
         product_responses = []
-        for product in products:
-            nutrition_types = await nutrition_repo.get_nutrition_types_by_product(product.product_id)
+        for product in store.products:
+            nutrition_types = [info.nutrition_type for info in product.nutrition_info] if product.nutrition_info else []
             
             product_responses.append(
                 ProductResponse(
@@ -85,7 +70,6 @@ async def get_stores(
                     nutrition_types=nutrition_types
                 )
             )
-        
         store_data["products"] = product_responses
         
         # 주소 정보
@@ -102,23 +86,32 @@ async def get_stores(
         }
         
         # SNS 정보
-        sns = await sns_repo.get_by_store_id(store.store_id)
-        if sns:
+        if store.sns_info:
             store_data["sns"] = {
-                "instagram": sns.instagram,
-                "facebook": sns.facebook,
-                "x": sns.x,
-                "homepage": sns.homepage
+                "instagram": store.sns_info.instagram,
+                "facebook": store.sns_info.facebook,
+                "x": store.sns_info.x,
+                "homepage": store.sns_info.homepage
             }
         
         # 운영 시간 정보
-        operations = await operation_repo.get_by_store_id(store.store_id)
         store_data["operation_times"] = [
-            StoreOperationResponse.model_validate(op) for op in operations
+            StoreOperationResponse.model_validate(op) for op in store.operation_info
         ]
         
-        # 이미지 정보
-        store_data["images"] = await image_service.get_store_images(store.store_id)
+        # 이미지 정보 변환
+        image_responses = []
+        for img in store.images:
+            image_url = object_storage.get_file_url(img.image_id)
+            image_responses.append(
+                ImageUploadResponse(
+                    image_id=img.image_id,
+                    image_url=image_url,
+                    is_main=img.is_main,
+                    display_order=img.display_order
+                )
+            )
+        store_data["images"] = image_responses
         
         result.append(StoreDetailResponse(**store_data))
     
@@ -135,8 +128,7 @@ async def get_store_products(
     store_id: str,
     current_user: CurrentCustomerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep,
-    nutrition_repo: ProductNutritionRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep
 ):
     """
     가게 상품 조회 API
@@ -152,11 +144,11 @@ async def get_store_products(
             detail="가게를 찾을 수 없습니다"
         )
     
-    products = await product_repo.get_by_store_id(store_id)
+    products = await product_repo.get_by_store_with_nutrition(store_id)
     
     product_list = []
     for product in products:
-        nutrition_types = await nutrition_repo.get_nutrition_types_by_product(product.product_id)
+        nutrition_types = [info.nutrition_type for info in product.nutrition_info] if product.nutrition_info else []
         
         product_list.append(
             ProductResponse(
