@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
-
+from utils.store_utils import get_store_id_by_email
 from api.deps.auth import CurrentSellerDep
 from api.deps.repository import (
     StoreRepositoryDep,
@@ -13,19 +13,17 @@ from schemas.product import (
     ProductCreateRequest,
     ProductUpdateRequest,
     ProductResponse,
-    StoreProductsResponse,
     ProductNutritionRequest
 )
 from utils.id_generator import generate_product_id
 from config.settings import settings
 
-router = APIRouter(prefix="/products", tags=["Seller-Product"])
+router = APIRouter(prefix="/store/products", tags=["Seller-Product"])
 
 
 @router.post("/register", response_model=ProductResponse, status_code=status.HTTP_201_CREATED,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"],
-        403: "가게를 수정할 수 있는 권한이 없음",
         404:"등록된 가게를 찾을 수 없음"
     })  
 )
@@ -33,54 +31,29 @@ async def create_product(
     request: ProductCreateRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep,
-    nutrition_repo: ProductNutritionRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep
 ):
     """
     새 상품 등록
     """
     
-    # 가게 소유권 확인
-    store = await store_repo.get_by_store_id(request.store_id)
+    seller_email = current_user["sub"]
     
-    if not store:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="가게를 찾을 수 없습니다"
-        )
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 가게에 상품을 등록할 권한이 없습니다"
-        )
+    product_id = generate_product_id()
     
-    # 상품 데이터 생성
-    product_data = {
-        "product_id": generate_product_id(),
-        "store_id": request.store_id,
-        "product_name": request.product_name,
-        "description": request.description,
-        "initial_stock": request.initial_stock,
-        "current_stock": request.initial_stock,  # 초기에는 동일
-        "price": request.price,
-        "sale": request.sale,
-        "version": 1
-    }
-    
-    product = await product_repo.create(**product_data)
-    
-    # 영양 정보 추가
-    if request.nutrition_types:
-        await nutrition_repo.add_multiple_nutrition_to_product(
-            product_id=product.product_id,
-            nutrition_types=request.nutrition_types
-        )
-    
-    # 영양 타입 목록 조회
-    nutrition_types = await nutrition_repo.get_nutrition_types_by_product(product.product_id)
-    
-    # 응답 생성
+    product, nutrition_types = await product_repo.create_product_with_nutrition(
+        product_id=product_id,
+        store_id=store_id,
+        product_name=request.product_name,
+        description=request.description,
+        initial_stock=request.initial_stock,
+        price=request.price,
+        sale=request.sale,
+        nutrition_types=request.nutrition_types
+    )
+
     response_data = {
         **product.__dict__,
         "nutrition_types": nutrition_types
@@ -92,7 +65,6 @@ async def create_product(
 @router.put("/{product_id}", response_model=ProductResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"],
-        403: "가게를 수정할 수 있는 권한이 없음",
         404:"등록된 가게를 찾을 수 없음"
     })              
 )
@@ -107,6 +79,10 @@ async def update_product(
     """
     상품 정보 수정
     """
+    
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     # 상품 조회
     product = await product_repo.get_by_product_id(product_id)
     
@@ -114,15 +90,6 @@ async def update_product(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="상품을 찾을 수 없습니다"
-        )
-    
-    # 가게 소유권 확인
-    store = await store_repo.get_by_store_id(product.store_id)
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 상품을 수정할 권한이 없습니다"
         )
     
     # 업데이트할 데이터만 추출
@@ -148,7 +115,6 @@ async def update_product(
 @router.patch("/{product_id}/stock/up", response_model=ProductResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "이 상품의 재고를 수정할 권한이 없음",
         404: "상품을 찾을 수 없음",
         409: "재고 업데이트 중 충돌이 발생"
     })
@@ -163,6 +129,11 @@ async def increase_product_stock(
     """
     상품 재고 1개 증가
     """
+    
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
     # 상품 조회
     product = await product_repo.get_by_product_id(product_id)
     
@@ -170,15 +141,6 @@ async def increase_product_stock(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="상품을 찾을 수 없습니다"
-        )
-    
-    # 가게 소유권 확인
-    store = await store_repo.get_by_store_id(product.store_id)
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 상품의 재고를 수정할 권한이 없습니다"
         )
     
     # 재고 증가 (낙관적 락 사용, 최대 재시도 횟수까지)
@@ -211,7 +173,6 @@ async def increase_product_stock(
 @router.patch("/{product_id}/stock/down", response_model=ProductResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "이 상품의 재고를 수정할 권한이 없음",
         404: "상품을 찾을 수 없음",
         409: ["남은 재고가 없음", "재고 업데이트 중 충돌이 발생"]
     })
@@ -226,6 +187,11 @@ async def decrease_product_stock(
     """
     상품 재고 1개 감소
     """
+    
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
     # 상품 조회
     product = await product_repo.get_by_product_id(product_id)
     
@@ -233,15 +199,6 @@ async def decrease_product_stock(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="상품을 찾을 수 없습니다"
-        )
-    
-    # 가게 소유권 확인
-    store = await store_repo.get_by_store_id(product.store_id)
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 상품의 재고를 수정할 권한이 없습니다"
         )
     
     # 재고 감소 (낙관적 락 사용, 최대 재시도 횟수까지)
@@ -276,78 +233,9 @@ async def decrease_product_stock(
             )
 
 
-
-
-@router.get("/store/{store_id}", response_model=StoreProductsResponse,
-    responses=create_error_responses({
-        401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게를 조회할 권한이 없음",
-        404: "가게를 찾을 수 없음"
-    })
-)
-async def get_store_products(
-    store_id: str,
-    current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep,
-    nutrition_repo: ProductNutritionRepositoryDep
-):
-    """
-    특정 가게의 모든 상품 목록 조회
-    """
-    # 가게 확인 및 소유권 검사
-    store = await store_repo.get_by_store_id(store_id)
-    
-    if not store:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="가게를 찾을 수 없습니다"
-        )
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 가게의 상품을 조회할 권한이 없습니다"
-        )
-    
-    # 가게의 모든 상품 조회
-    products = await product_repo.get_by_store_id(store_id)
-    
-    if not products:
-        return StoreProductsResponse(
-            store_id=store.store_id,
-            store_name=store.store_name,
-            products=[]
-        )
-    
-    # 모든 상품 ID 추출
-    product_ids = [product.product_id for product in products]
-    
-    # 모든 상품의 영양 정보를 한 번에 조회
-    nutrition_by_product = await nutrition_repo.get_nutrition_types_by_products(product_ids)
-    
-    # 각 상품에 대한 응답 생성
-    product_responses = []
-    for product in products:
-        nutrition_types = nutrition_by_product.get(product.product_id, [])
-        
-        response_data = {
-            **product.__dict__,
-            "nutrition_types": nutrition_types
-        }
-        product_responses.append(ProductResponse.model_validate(response_data))
-    
-    return StoreProductsResponse(
-        store_id=store.store_id,
-        store_name=store.store_name,
-        products=product_responses
-    )
-
-
 @router.post("/{product_id}/nutrition", response_model=ProductResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "이 상품의 영양 정보를 수정할 권한이 없음",
         404: "상품을 찾을 수 없음",
         400: "이미 존재하는 영양 타입이 있음"
     })
@@ -363,6 +251,11 @@ async def add_product_nutrition(
     """
     상품에 영양 정보 추가
     """
+    
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
     # 상품 조회
     product = await product_repo.get_by_product_id(product_id)
     
@@ -372,34 +265,17 @@ async def add_product_nutrition(
             detail="상품을 찾을 수 없습니다"
         )
     
-    # 가게 소유권 확인
-    store = await store_repo.get_by_store_id(product.store_id)
+    updated_nutrition, duplicates = await nutrition_repo.add_nutrition_with_validation(
+        product_id=product_id,
+        nutrition_types=request.nutrition_types
+    )
     
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 상품의 영양 정보를 수정할 권한이 없습니다"
-        )
-    
-    # 기존 영양 정보 조회
-    existing_nutrition = await nutrition_repo.get_nutrition_types_by_product(product_id)
-    
-    # 중복 체크
-    duplicates = [nt for nt in request.nutrition_types if nt in existing_nutrition]
+    # 중복이 있으면 에러 발생
     if duplicates:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"이미 존재하는 영양 타입: {', '.join([d.value for d in duplicates])}"
         )
-    
-    # 영양 정보 추가
-    await nutrition_repo.add_multiple_nutrition_to_product(
-        product_id=product_id,
-        nutrition_types=request.nutrition_types
-    )
-    
-    # 업데이트된 영양 정보 조회
-    updated_nutrition = await nutrition_repo.get_nutrition_types_by_product(product_id)
     
     # 응답 생성
     response_data = {
@@ -413,7 +289,6 @@ async def add_product_nutrition(
 @router.delete("/{product_id}/nutrition", response_model=ProductResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "이 상품의 영양 정보를 수정할 권한이 없음",
         404: ["상품을 찾을 수 없음", "삭제할 영양 정보를 찾을 수 없음"]
     })
 )
@@ -428,6 +303,11 @@ async def remove_product_nutrition(
     """
     상품에서 영양 정보 삭제
     """
+    
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
     # 상품 조회
     product = await product_repo.get_by_product_id(product_id)
     
@@ -435,15 +315,6 @@ async def remove_product_nutrition(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="상품을 찾을 수 없습니다"
-        )
-    
-    # 가게 소유권 확인
-    store = await store_repo.get_by_store_id(product.store_id)
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 상품의 영양 정보를 수정할 권한이 없습니다"
         )
     
     # 각 영양 타입 삭제
@@ -486,23 +357,3 @@ async def delete_product(
     """
     
     pass
-
-    # # 상품 조회
-    # product = await product_repo.get_by_product_id(product_id)
-    
-    # if not product:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail="상품을 찾을 수 없습니다"
-    #     )
-    
-    # # 가게 소유권 확인
-    # store = await store_repo.get_by_store_id(product.store_id)
-    
-    # if store.seller_email != current_user["sub"]:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="이 상품을 삭제할 권한이 없습니다"
-    #     )
-    
-    # await product_repo.delete(product_id)

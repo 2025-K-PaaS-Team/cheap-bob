@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 
@@ -137,3 +137,60 @@ class ProductNutritionRepository(BaseRepository[ProductNutrition]):
                 nutrition_by_product[product_id] = []
         
         return nutrition_by_product
+    
+    async def add_nutrition_with_validation(
+        self,
+        product_id: str,
+        nutrition_types: List[NutritionType]
+    ) -> Tuple[List[NutritionType], List[NutritionType]]:
+        """영양 정보 추가 (중복 체크 포함, DB 호출 1번)
+        
+        Returns:
+            Tuple[업데이트된 전체 영양 타입 리스트, 중복된 영양 타입 리스트]
+        """
+        try:
+            # 1. 기존 영양 정보 조회
+            query = (
+                select(ProductNutrition)
+                .where(ProductNutrition.product_id == product_id)
+            )
+            result = await self.session.execute(query)
+            existing_nutritions = result.scalars().all()
+            
+            # 기존 영양 타입 집합
+            existing_types = {n.nutrition_type for n in existing_nutritions}
+            
+            # 2. 중복 체크
+            duplicates = [nt for nt in nutrition_types if nt in existing_types]
+            
+            # 중복이 있으면 즉시 반환 (DB 변경 없이)
+            if duplicates:
+                return list(existing_types), duplicates
+            
+            # 3. 새로운 영양 정보 추가
+            new_nutritions = []
+            for nutrition_type in nutrition_types:
+                if nutrition_type not in existing_types:
+                    nutrition = ProductNutrition(
+                        product_id=product_id,
+                        nutrition_type=nutrition_type
+                    )
+                    self.session.add(nutrition)
+                    new_nutritions.append(nutrition)
+            
+            # 4. 변경사항 플러시
+            if new_nutritions:
+                await self.session.flush()
+                
+                # 새로 추가된 정보들 새로고침
+                for nutrition in new_nutritions:
+                    await self.session.refresh(nutrition)
+            
+            # 5. 업데이트된 전체 영양 타입 리스트 반환
+            all_nutrition_types = list(existing_types) + [n.nutrition_type for n in new_nutritions]
+            
+            return all_nutrition_types, []
+            
+        except Exception as e:
+            # 트랜잭션 롤백은 상위에서 처리
+            raise e

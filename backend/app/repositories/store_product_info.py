@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
@@ -106,3 +106,53 @@ class StoreProductInfoRepository(BaseRepository[StoreProductInfo]):
         )
         result = await self.session.execute(query)
         return result.scalar() or 0
+    
+    async def create_product_with_nutrition(
+        self,
+        product_id: str,
+        store_id: str,
+        product_name: str,
+        description: str,
+        initial_stock: int,
+        price: int,
+        sale: Optional[int] = None,
+        nutrition_types: Optional[List[str]] = None
+    ) -> Tuple[StoreProductInfo, List[str]]:
+        """상품과 영양 정보를 한 번에 생성"""
+        try:
+            # 1. 상품 생성
+            product = StoreProductInfo(
+                product_id=product_id,
+                store_id=store_id,
+                product_name=product_name,
+                description=description,
+                initial_stock=initial_stock,
+                current_stock=initial_stock,  # 초기에는 동일
+                price=price,
+                sale=sale,
+                version=1
+            )
+            self.session.add(product)
+            
+            # 2. 영양 정보 생성
+            created_nutrition_types = []
+            if nutrition_types:
+                for nutrition_type in nutrition_types:
+                    nutrition = ProductNutrition(
+                        product_id=product_id,
+                        nutrition_type=nutrition_type
+                    )
+                    self.session.add(nutrition)
+                    created_nutrition_types.append(nutrition_type)
+            
+            # 3. 모든 변경사항 커밋
+            await self.session.flush()
+            
+            # 4. 상품 객체 새로고침 (영양 정보 포함)
+            await self.session.refresh(product, ["nutrition_info"])
+            
+            return product, created_nutrition_types
+            
+        except Exception as e:
+            # 트랜잭션 롤백은 상위에서 처리
+            raise e

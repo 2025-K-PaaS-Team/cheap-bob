@@ -6,7 +6,6 @@ from schemas.food_preferences import NutritionType
 
 class ProductCreateRequest(BaseModel):
     """상품 생성 요청 스키마"""
-    store_id: str = Field(..., description="가게 고유 ID")
     product_name: str = Field(..., description="상품 이름", min_length=1, max_length=255)
     description: str = Field(..., description="상품 설명", max_length=1000)
     initial_stock: int = Field(..., description="초기 재고 수량", ge=0)
@@ -44,13 +43,6 @@ class ProductsResponse(BaseModel):
     store_id: str = Field(..., description="가게 고유 ID")
     store_name: str = Field(..., description="가게 이름")
     products: list[ProductResponse] = Field(default_factory=list, description="상품 정보")
-
-class StoreProductsResponse(BaseModel):
-    """가게의 모든 상품 목록 응답 스키마"""
-    store_id: str = Field(..., description="가게 고유 ID")
-    store_name: str = Field(..., description="가게 이름")
-    products: List[ProductResponse] = Field(default_factory=list, description="상품 목록")
-
 
 class ProductNutritionRequest(BaseModel):
     """상품 영양 정보 추가/삭제 요청 스키마"""
