@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, status, UploadFile, File
 from utils.docs_error import create_error_responses
+from utils.store_utils import get_store_id_by_email
 from api.deps.auth import CurrentSellerDep
 from api.deps.repository import StoreRepositoryDep
 from api.deps.service import ImageServiceDep
@@ -8,29 +9,6 @@ from schemas.image import StoreImagesUploadResponse, StoreImagesResponse, ImageU
 from core.exceptions import HTTPValueError
 
 router = APIRouter(prefix="/store/images", tags=["Seller-Store-Images"])
-
-
-async def verify_store_owner(
-    store_id: str,
-    seller_email: str,
-    store_repo: StoreRepositoryDep
-) -> None:
-    """
-    가게 소유권 검증
-    """
-    store = await store_repo.get_by_store_id(store_id)
-    
-    if not store:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="가게를 찾을 수 없습니다."
-        )
-    
-    if store.seller_email != seller_email:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="가게 이미지를 관리할 권한이 없습니다."
-        )
 
 
 async def validate_image_files(files: List[UploadFile]) -> List[tuple]:
@@ -65,17 +43,15 @@ async def validate_image_files(files: List[UploadFile]) -> List[tuple]:
     return validated_files
 
 
-@router.post("/{store_id}", response_model=StoreImagesUploadResponse,
+@router.post("", response_model=StoreImagesUploadResponse,
     responses=create_error_responses({
         400: ["업로드할 이미지가 없음", "이미지는 한 번에 최대 5개", "지원하지 않는 파일 형식"],
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게 이미지를 업로드할 권한이 없음",
         404: "가게를 찾을 수 없음",
         413: "파일 크기가 너무 큼"
     })
 )
 async def add_store_images(
-    store_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
     image_service: ImageServiceDep,
@@ -92,7 +68,7 @@ async def add_store_images(
     """
     seller_email = current_user["sub"]
     
-    await verify_store_owner(store_id, seller_email, store_repo)
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     if not files:
         raise HTTPException(
@@ -135,13 +111,14 @@ async def add_store_images(
             await file.close()
 
 
-@router.get("/{store_id}", response_model=StoreImagesResponse,
+@router.get("", response_model=StoreImagesResponse,
     responses=create_error_responses({
         404: "가게를 찾을 수 없음"
     })
 )
 async def get_store_images(
-    store_id: str,
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
     image_service: ImageServiceDep
 ):
     """
@@ -150,6 +127,10 @@ async def get_store_images(
     가게의 모든 이미지를 조회합니다.
     인증 없이 조회 가능합니다.
     """
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
     try:
         images = await image_service.get_store_images(store_id)
         
@@ -166,16 +147,14 @@ async def get_store_images(
         )
 
 
-@router.delete("/{store_id}/{image_id:path}", status_code=status.HTTP_204_NO_CONTENT,
+@router.delete("/{image_id:path}", status_code=status.HTTP_204_NO_CONTENT,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게 이미지를 삭제할 권한이 없음",
         404: "이미지를 찾을 수 없음",
         409: "대표 이미지는 삭제할 수 없음"
     })
 )
 async def delete_store_image(
-    store_id: str,
     image_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
@@ -189,7 +168,7 @@ async def delete_store_image(
     """
     seller_email = current_user["sub"]
     
-    await verify_store_owner(store_id, seller_email, store_repo)
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     try:
         success = await image_service.delete_store_image(
@@ -216,15 +195,13 @@ async def delete_store_image(
         )
 
 
-@router.put("/{store_id}/main/{image_id:path}", response_model=ImageUploadResponse,
+@router.put("/main/{image_id:path}", response_model=ImageUploadResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게 이미지를 변경할 권한이 없음",
         404: ["이미지를 찾을 수 없음", "가게를 찾을 수 없음"]
     })
 )
 async def change_main_image(
-    store_id: str,
     image_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
@@ -237,7 +214,7 @@ async def change_main_image(
     """
     seller_email = current_user["sub"]
     
-    await verify_store_owner(store_id, seller_email, store_repo)
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     try:
         result = await image_service.change_main_image(
