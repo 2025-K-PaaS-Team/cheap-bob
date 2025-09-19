@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
-from utils.store_auth import verify_store_owner
 from api.deps.auth import CurrentSellerDep
 from api.deps.repository import (
     StoreRepositoryDep,
