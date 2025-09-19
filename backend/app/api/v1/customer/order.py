@@ -119,7 +119,6 @@ async def get_current_orders(
 @router.get("/{payment_id}", response_model=OrderItemResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"],
-        403:"주문을 확인할 권한이 없음",
         404: "주문을 찾을 수 없음"
     })            
 )
@@ -139,13 +138,6 @@ async def get_order_detail(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="주문을 찾을 수 없습니다"
-        )
-    
-    # 사용자 검증
-    if order.user_id != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 주문을 조회할 권한이 없습니다"
         )
     
     return OrderItemResponse(
@@ -168,16 +160,15 @@ async def get_order_detail(
         topping_types=parse_comma_separated_string(order.topping_types)
     )
     
-@router.delete("/{payment_id}", response_model=OrderCancelResponse,
+@router.delete("/{payment_id}/cancel", response_model=OrderCancelResponse,
     responses=create_error_responses({
         400: ["이미 취소된 주문", "이미 승인된 주문"],
         401:["인증 정보가 없음", "토큰 만료"],
-        403:"주문을 확인할 권한이 없음",
         404:"상품을 찾을 수 없음",
         409: "동시성 충돌 발생"
     })               
 )
-async def delete_order(
+async def cancel_order(
     payment_id: str,
     request: OrderCancelRequest,
     current_user: CurrentCustomerDep,
@@ -196,13 +187,6 @@ async def delete_order(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="주문을 찾을 수 없습니다"
-        )
-    
-    # 사용자 검증
-    if order.user_id != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 주문을 취소할 권한이 없습니다"
         )
     
     # 이미 취소된 주문인지 확인

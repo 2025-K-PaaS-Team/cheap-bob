@@ -186,7 +186,7 @@ async def update_order_accept(
     )
 
 
-@router.post("/{payment_id}/cancel", response_model=OrderCancelResponse,
+@router.delete("/{payment_id}/cancel", response_model=OrderCancelResponse,
     responses=create_error_responses({
         400:"이미 취소한 주문",
         401:["인증 정보가 없음", "토큰 만료"],
