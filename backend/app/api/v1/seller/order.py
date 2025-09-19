@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, status
 from datetime import datetime, timezone
 
+from utils.qr_generator import encode_qr_data
 from utils.docs_error import create_error_responses
+from utils.store_utils import get_store_id_by_email
 from utils.string_utils import parse_comma_separated_string
 
 from api.deps.auth import CurrentSellerDep
@@ -20,16 +22,14 @@ from schemas.order import (
     SellerPickupQRResponse
 )
 from services.payment import PaymentService
-from utils.qr_generator import encode_qr_data
 from config.settings import settings
 
-router = APIRouter(prefix="/orders", tags=["Seller-Order"])
+router = APIRouter(prefix="/store/orders", tags=["Seller-Order"])
 
 
-@router.get("/{store_id}", response_model=OrderListResponse,
+@router.get("", response_model=OrderListResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"],
-        403: "가게를 수정할 수 있는 권한이 없음",
         404:"등록된 가게를 찾을 수 없음"
     })          
 )
@@ -43,19 +43,9 @@ async def get_store_orders(
     가게의 주문 목록 조회
     """
     
-    store = await store_repo.get_by_store_id(store_id)
+    seller_email = current_user["sub"]
     
-    if not store:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="가게를 찾을 수 없습니다"
-        )
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 가게를 조회할 권한이 없습니다"
-        )
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     orders = await order_repo.get_store_orders_with_relations(store_id)
     
@@ -86,10 +76,9 @@ async def get_store_orders(
     )
 
 
-@router.get("/{store_id}/pending", response_model=OrderListResponse,
+@router.get("/pending", response_model=OrderListResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"],
-        403: "가게를 수정할 수 있는 권한이 없음",
         404:"등록된 가게를 찾을 수 없음"
     })                 
 )
@@ -100,22 +89,12 @@ async def get_pending_orders(
     order_repo: OrderCurrentItemRepositoryDep
 ):
     """
-    처리 대기중인 주문 조회 (reservation, accepted, pickup, complete)
+    처리 대기중인 주문 조회 (reservation, accepted, complete)
     """
     
-    store = await store_repo.get_by_store_id(store_id)
+    seller_email = current_user["sub"]
     
-    if not store:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="등록된 가게가 없습니다"
-        )
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 가게를 조회할 권한이 없습니다"
-        )
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     orders = await order_repo.get_store_pending_orders_with_relations(store_id)
     
@@ -150,7 +129,6 @@ async def get_pending_orders(
     responses=create_error_responses({
         400:"이미 처리한 주문",
         401:["인증 정보가 없음", "토큰 만료"],
-        403: "가게를 수정할 수 있는 권한이 없음",
         404:"등록된 가게를 찾을 수 없음"
     })                   
 )
@@ -164,20 +142,16 @@ async def update_order_accept(
     주문 수락
     """
     
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
     order = await order_repo.get_order_with_product_relation(payment_id)
     
     if not order:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="주문을 찾을 수 없습니다"
-        )
-    
-    store = await store_repo.get_by_store_id(order.product.store_id)
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 주문을 처리할 권한이 없습니다"
         )
     
     if order.status != OrderStatus.reservation:
@@ -216,7 +190,6 @@ async def update_order_accept(
     responses=create_error_responses({
         400:"이미 취소한 주문",
         401:["인증 정보가 없음", "토큰 만료"],
-        403: "가게를 수정할 수 있는 권한이 없음",
         404:"등록된 가게를 찾을 수 없음",
         409:"재고 복구 중, 충돌 발생"
     })                    
@@ -234,20 +207,16 @@ async def cancel_order(
     주문 취소 (포트원 환불 포함)
     """
     
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
     order = await order_repo.get_order_with_product_relation(payment_id)
     
     if not order:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="주문을 찾을 수 없습니다"
-        )
-    
-    store = await store_repo.get_by_store_id(order.product.store_id)
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 주문을 취소할 권한이 없습니다"
         )
     
     if order.status == OrderStatus.cancel:
@@ -257,7 +226,7 @@ async def cancel_order(
         )
     
     # 가게의 결제 정보 조회
-    payment_info = await payment_info_repo.get_by_store_id(store.store_id)
+    payment_info = await payment_info_repo.get_by_store_id(store_id)
     if not payment_info or not payment_info.portone_secret_key:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -318,7 +287,6 @@ async def cancel_order(
     responses=create_error_responses({
         400:"픽업 준비가 되지 않은 주문",
         401:["인증 정보가 없음", "토큰 만료"],
-        403:"가게를 수정할 수 있는 권한이 없음",
         404:"주문을 찾을 수 없음"
     })            
 )
@@ -332,6 +300,10 @@ async def get_order_qr(
     픽업 QR 코드 생성, 5분 유효
     """
     
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
     # 주문 조회
     order = await order_repo.get_order_with_product_relation(payment_id)
     
@@ -339,15 +311,6 @@ async def get_order_qr(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="주문을 찾을 수 없습니다"
-        )
-    
-    # 가게 권한 확인
-    store = await store_repo.get_by_store_id(order.product.store_id)
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 주문의 QR 코드를 조회할 권한이 없습니다"
         )
     
     # 주문 상태 확인
