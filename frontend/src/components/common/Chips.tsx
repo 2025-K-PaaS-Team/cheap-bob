@@ -8,8 +8,8 @@ interface ChipsProps {
 
 const Chips = ({ chips, selected, setSelected }: ChipsProps) => {
   return (
-    <div className="flex flex-wrap px-[20px]">
-      <div className="flex flex-wrap gap-[4px] items-center w-max">
+    <div className="flex flex-wrap">
+      <div className="flex flex-wrap gap-[4px] items-center w-max mb-[20px]">
         {chips.map((chip, idx) => (
           <div
             className={`${
