@@ -49,12 +49,13 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         """픽업 완료 처리"""
         return await self.update(payment_id, status=OrderStatus.complete, completed_at=datetime.now(timezone.utc))
 
-    async def cancel_order(self, payment_id: str) -> int:
+    async def cancel_order(self, payment_id: str, cancel_reason: Optional[str] = None) -> int:
         """주문 취소 처리"""
         canceled_item = await self.update(
             payment_id,
             status=OrderStatus.cancel,
-            canceled_at=datetime.now(timezone.utc)
+            canceled_at=datetime.now(timezone.utc),
+            cancel_reason=cancel_reason
         )
         if canceled_item:
             return canceled_item.quantity
