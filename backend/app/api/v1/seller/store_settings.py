@@ -189,7 +189,6 @@ async def update_store_day_operation(
 @router.get("/operation", response_model=List[StoreOperationResponse],
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게 정보를 조회할 권한이 없음",
         404: "가게를 찾을 수 없음"
     })
 )
