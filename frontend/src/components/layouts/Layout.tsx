@@ -12,7 +12,7 @@ import { Outlet, useLocation } from "react-router";
 const Layout = () => {
   const location = useLocation();
   const path = location.pathname;
-  const isCustomer = path.startsWith("c");
+  const isCustomer = path.startsWith("/c");
   const notFooter = path === "/c" || path === "/c/signup";
   const notHeader = path === "/c";
 
