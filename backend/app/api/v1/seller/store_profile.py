@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
+from utils.store_utils import get_store_id_by_email
 from api.deps.auth import CurrentSellerDep
 from api.deps.repository import StoreRepositoryDep
 from schemas.seller_profile import (
@@ -13,38 +14,13 @@ from schemas.seller_profile import (
 router = APIRouter(prefix="/store/profile", tags=["Seller-Store-Profile"])
 
 
-async def verify_store_owner(
-    store_id: str,
-    seller_email: str,
-    store_repo: StoreRepositoryDep
-) -> None:
-    """
-    가게 소유권 검증
-    """
-    store = await store_repo.get_by_store_id(store_id)
-    
-    if not store:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="가게를 찾을 수 없습니다."
-        )
-    
-    if store.seller_email != seller_email:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="가게 정보를 수정할 권한이 없습니다."
-        )
-
-
-@router.put("/{store_id}/name", response_model=StoreProfileResponse,
+@router.put("/name", response_model=StoreProfileResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게 정보를 수정할 권한이 없음",
         404: "가게를 찾을 수 없음"
     })
 )
 async def update_store_name(
-    store_id: str,
     request: StoreNameUpdateRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep
@@ -54,7 +30,7 @@ async def update_store_name(
     """
     seller_email = current_user["sub"]
     
-    await verify_store_owner(store_id, seller_email, store_repo)
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     try:
         # 이름 업데이트
@@ -77,15 +53,13 @@ async def update_store_name(
         )
 
 
-@router.put("/{store_id}/introduction", response_model=StoreProfileResponse,
+@router.put("/introduction", response_model=StoreProfileResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게 정보를 수정할 권한이 없음",
         404: "가게를 찾을 수 없음"
     })
 )
 async def update_store_introduction(
-    store_id: str,
     request: StoreIntroductionUpdateRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep
@@ -95,7 +69,7 @@ async def update_store_introduction(
     """
     seller_email = current_user["sub"]
     
-    await verify_store_owner(store_id, seller_email, store_repo)
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     try:
         # 설명 업데이트
@@ -118,16 +92,14 @@ async def update_store_introduction(
         )
 
 
-@router.put("/{store_id}/phone", response_model=StoreProfileResponse,
+@router.put("/phone", response_model=StoreProfileResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게 정보를 수정할 권한이 없음",
         404: "가게를 찾을 수 없음",
         422: "유효하지 않은 전화번호 형식"
     })
 )
 async def update_store_phone(
-    store_id: str,
     request: StorePhoneUpdateRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep
@@ -137,7 +109,7 @@ async def update_store_phone(
     """
     seller_email = current_user["sub"]
     
-    await verify_store_owner(store_id, seller_email, store_repo)
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     try:
         # 전화번호 업데이트
