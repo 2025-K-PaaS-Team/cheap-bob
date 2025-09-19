@@ -8,5 +8,6 @@ export const pathToLayoutKey = (path: string): LayoutType => {
   if (path === "/c/favorite") return "FavStore";
   if (path === "/c/noti") return "Noti";
   if (path === "/c/my") return "My";
+  if (path === "/c/order") return "Order";
   return "default";
 };

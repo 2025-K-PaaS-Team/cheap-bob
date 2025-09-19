@@ -17,12 +17,14 @@ const Header = ({ layout }: HeaderProps) => {
   return (
     <>
       <div className="h-[85px] pt-[15px] px-[20px] grid grid-cols-3 items-center">
-        {myLayout.back && (
+        {myLayout.back ? (
           <img
             src="/icon/before.svg"
             alt="beforeArrowIcon"
             onClick={handleClickBefore}
           />
+        ) : (
+          <div></div>
         )}
         {myLayout.loc && (
           <img

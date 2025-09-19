@@ -80,7 +80,7 @@ export const layoutMap = {
     search: false,
     searchPlaceholder: "",
   },
-  OrderHis: {
+  Order: {
     back: false,
     title: "주문 현황",
     loc: false,
