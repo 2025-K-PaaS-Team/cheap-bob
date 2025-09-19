@@ -5,7 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.store import Store
 from database.models.address import Address
+from database.models.store_sns import StoreSNS
 from database.models.store_product_info import StoreProductInfo
+from database.models.store_payment_info import StorePaymentInfo
+from database.models.store_operation_info import StoreOperationInfo
 from repositories.base import BaseRepository
 
 
@@ -200,3 +203,102 @@ class StoreRepository(BaseRepository[Store]):
         await self.session.refresh(store)
         
         return store
+    
+    async def create_store_with_full_info(
+        self,
+        store_id: str,
+        store_name: str,
+        seller_email: str,
+        store_introduction: Optional[str] = None,
+        store_phone: Optional[str] = None,
+        store_postal_code: Optional[str] = None,
+        store_address: Optional[str] = None,
+        store_detail_address: Optional[str] = None,
+        # Address info
+        sido: str = None,
+        sigungu: str = None,
+        bname: str = None,
+        lat: str = None,
+        lng: str = None,
+        # SNS info (optional)
+        sns_info: Optional[Dict[str, Optional[str]]] = None,
+        # Operation times
+        operation_times: Optional[List[Dict]] = None,
+        # Payment info
+        payment_info: Optional[Dict[str, str]] = None
+    ) -> Store:
+        """가게와 모든 관련 정보를 한 번에 생성"""
+        
+        try:
+            # 1. Address 생성
+            new_address = Address(
+                sido=sido,
+                sigungu=sigungu,
+                bname=bname,
+                lat=lat,
+                lng=lng
+            )
+            self.session.add(new_address)
+            await self.session.flush()  # address_id 생성을 위해 flush
+            
+            # 2. Store 생성
+            store = Store(
+                store_id=store_id,
+                store_name=store_name,
+                seller_email=seller_email,
+                store_introduction=store_introduction,
+                store_phone=store_phone,
+                store_postal_code=store_postal_code,
+                store_address=store_address,
+                store_detail_address=store_detail_address,
+                address_id=new_address.address_id
+            )
+            self.session.add(store)
+            
+            # 3. SNS 정보 생성 (optional)
+            if sns_info:
+                sns = StoreSNS(
+                    store_id=store_id,
+                    instagram=sns_info.get("instagram"),
+                    facebook=sns_info.get("facebook"),
+                    x=sns_info.get("x"),
+                    homepage=sns_info.get("homepage")
+                )
+                self.session.add(sns)
+            
+            # 4. Operation 정보 생성
+            if operation_times:
+                for op_time in operation_times:
+                    operation = StoreOperationInfo(
+                        store_id=store_id,
+                        day_of_week=op_time['day_of_week'],
+                        open_time=op_time['open_time'],
+                        close_time=op_time['close_time'],
+                        pickup_start_time=op_time['pickup_start_time'],
+                        pickup_end_time=op_time['pickup_end_time'],
+                        is_open_enabled=op_time['is_open_enabled'],
+                        is_currently_open=False
+                    )
+                    self.session.add(operation)
+            
+            # 5. Payment 정보 생성
+            if payment_info:
+                payment = StorePaymentInfo(
+                    store_id=store_id,
+                    portone_store_id=payment_info.get("portone_store_id"),
+                    portone_channel_id=payment_info.get("portone_channel_id"),
+                    portone_secret_key=payment_info.get("portone_secret_key")
+                )
+                self.session.add(payment)
+            
+            # 모든 변경사항 커밋
+            await self.session.flush()
+            
+            # Store 객체 새로고침
+            await self.session.refresh(store, ["address", "sns_info", "payment_info", "operation_info"])
+            
+            return store
+            
+        except Exception as e:
+            # 트랜잭션 롤백은 상위에서 처리
+            raise e

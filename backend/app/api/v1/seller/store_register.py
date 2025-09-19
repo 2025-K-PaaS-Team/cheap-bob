@@ -2,14 +2,9 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status, UploadFile, File
 
 from utils.docs_error import create_error_responses
+from utils.store_utils import get_store_id_by_email
 from api.deps.auth import CurrentSellerDep
-from api.deps.repository import (
-    StoreRepositoryDep,
-    AddressRepositoryDep,
-    StoreSNSRepositoryDep,
-    StorePaymentInfoRepositoryDep,
-    StoreOperationInfoRepositoryDep
-)
+from api.deps.repository import StoreRepositoryDep
 from api.deps.service import ImageServiceDep
 from schemas.seller_profile import SellerProfileCreateRequest, SellerProfileResponse
 from schemas.image import StoreImagesUploadResponse
@@ -29,11 +24,7 @@ router = APIRouter(prefix="/store/register", tags=["Seller-Store-Register"])
 async def register_seller_store(
     request: SellerProfileCreateRequest,
     current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep,
-    address_repo: AddressRepositoryDep,
-    sns_repo: StoreSNSRepositoryDep,
-    operation_repo: StoreOperationInfoRepositoryDep,
-    payment_repo: StorePaymentInfoRepositoryDep
+    store_repo: StoreRepositoryDep
 ):
     """
     판매자 1차 가게 등록 회원가입 완료
@@ -58,50 +49,19 @@ async def register_seller_store(
         )
     
     try:
-        # 1. 주소 정보 생성 또는 조회
-        existing_address = await address_repo.find_by_full_address(
-            request.address_info.sido,
-            request.address_info.sigungu,
-            request.address_info.bname
-        )
-        
-        if existing_address:
-            address_id = existing_address.address_id
-        else:
-            new_address = await address_repo.create_with_coordinates(
-                sido=request.address_info.sido,
-                sigungu=request.address_info.sigungu,
-                bname=request.address_info.bname,
-                lat=request.address_info.lat,
-                lng=request.address_info.lng
-            )
-            address_id = new_address.address_id
-        
-        # 2. 가게 생성
         store_id = generate_store_id()
-        store = await store_repo.create(
-            store_id=store_id,
-            store_name=request.store_name,
-            seller_email=seller_email,
-            store_introduction=request.store_introduction,
-            store_phone=request.store_phone,
-            store_postal_code=request.address_info.postal_code,
-            store_address=request.address_info.address,
-            store_detail_address=request.address_info.detail_address,
-            address_id=address_id
-        )
         
-        # 3. SNS 정보 생성
+        # SNS 정보
+        sns_info = None
         if request.sns_info:
-            await sns_repo.create_or_update(
-                store_id=store_id,
-                instagram=str(request.sns_info.instagram) if request.sns_info.instagram else None,
-                facebook=str(request.sns_info.facebook) if request.sns_info.facebook else None,
-                x=str(request.sns_info.x) if request.sns_info.x else None,
-                homepage=str(request.sns_info.homepage) if request.sns_info.homepage else None
-            )
+            sns_info = {
+                "instagram": str(request.sns_info.instagram) if request.sns_info.instagram else None,
+                "facebook": str(request.sns_info.facebook) if request.sns_info.facebook else None,
+                "x": str(request.sns_info.x) if request.sns_info.x else None,
+                "homepage": str(request.sns_info.homepage) if request.sns_info.homepage else None
+            }
         
-        # 4. 운영 정보 등록
+        # 운영 정보
         operation_times_dict = [
             {
                 'day_of_week': op_time.day_of_week,
@@ -114,19 +74,34 @@ async def register_seller_store(
             for op_time in request.operation_times
         ]
         
-        await operation_repo.create_initial_operation_info(
-            store_id=store_id,
-            operation_times=operation_times_dict
-        )
-        
-        # 5. 결제 정보 등록
+        # 결제 정보
         payment_data = {
-            "store_id": store_id,
             "portone_store_id": request.payment_info.portone_store_id,
             "portone_channel_id": request.payment_info.portone_channel_id,
             "portone_secret_key": request.payment_info.portone_secret_key
         }
-        await payment_repo.create(**payment_data)
+        
+        # 통합 생성
+        store = await store_repo.create_store_with_full_info(
+            store_id=store_id,
+            store_name=request.store_name,
+            seller_email=seller_email,
+            store_introduction=request.store_introduction,
+            store_phone=request.store_phone,
+            store_postal_code=request.address_info.postal_code,
+            store_address=request.address_info.address,
+            store_detail_address=request.address_info.detail_address,
+            # Address info
+            sido=request.address_info.sido,
+            sigungu=request.address_info.sigungu,
+            bname=request.address_info.bname,
+            lat=request.address_info.lat,
+            lng=request.address_info.lng,
+            # Optional info
+            sns_info=sns_info,
+            operation_times=operation_times_dict,
+            payment_info=payment_data
+        )
         
         # 성공 응답
         return SellerProfileResponse(
@@ -148,11 +123,10 @@ async def register_seller_store(
         )
 
 # 이미지 업로드 관련 엔드포인트
-@router.post("/images/{store_id}", response_model=StoreImagesUploadResponse, status_code=status.HTTP_201_CREATED,
+@router.post("/images", response_model=StoreImagesUploadResponse, status_code=status.HTTP_201_CREATED,
     responses=create_error_responses({
         400: ["업로드할 이미지가 없음", "이미지는 한 번에 최대 5개", "지원하지 않는 파일 형식"],
         401: ["인증 정보가 없음", "토큰 만료"],
-        403: "가게 이미지를 업로드할 권한이 없음",
         404: "가게를 찾을 수 없음",
         409: "이미 등록된 이미지가 있음",
         413: "파일 크기가 너무 큼"
@@ -162,6 +136,7 @@ async def register_store_images(
     store_id: str,
     current_user: CurrentSellerDep,
     image_service: ImageServiceDep,
+    store_repo: StoreRepositoryDep,
     files: List[UploadFile] = File(..., description="업로드할 이미지 파일들 (첫 번째가 대표 이미지) / 한 번에 이미지 최대 5개 / jpeg, jpg, png, webp타입 가능 / 최대 10MB")
 ):
     """
@@ -173,6 +148,9 @@ async def register_store_images(
     지원 형식: JPG, JPEG, PNG, WEBP
     최대 크기: 10MB
     """
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
     
     if not files:
         raise HTTPException(
