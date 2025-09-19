@@ -89,7 +89,7 @@ async def get_pending_orders(
     order_repo: OrderCurrentItemRepositoryDep
 ):
     """
-    처리 대기중인 주문 조회 (reservation, accepted, complete)
+    처리 대기중인 주문 조회 (reservation, accepted)
     """
     
     seller_email = current_user["sub"]
