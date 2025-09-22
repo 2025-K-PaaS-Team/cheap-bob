@@ -63,6 +63,52 @@ async def create_product(
     return ProductResponse.model_validate(response_data)
 
 
+@router.get("/{product_id}", response_model=ProductResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: "상품을 찾을 수 없음"
+    })
+)
+async def get_product(
+    product_id: str,
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep
+):
+    """
+    상품 상세 정보 조회
+    """
+    
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    product = await product_repo.get_with_nutrition_info(product_id)
+    
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="상품을 찾을 수 없습니다"
+        )
+    
+    # 상품이 현재 판매자의 가게에 속하는지 확인
+    if product.store_id != store_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="상품을 찾을 수 없습니다"
+        )
+    
+    nutrition_types = [n.nutrition_type for n in product.nutrition_info] if product.nutrition_info else []
+    
+    response_data = {
+        **product.__dict__,
+        "current_stock": product.current_stock,
+        "nutrition_types": nutrition_types
+    }
+    
+    return ProductResponse.model_validate(response_data)
+
+
 @router.put("/{product_id}", response_model=ProductResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"],
