@@ -133,7 +133,6 @@ async def register_seller_store(
     })
 )
 async def register_store_images(
-    store_id: str,
     current_user: CurrentSellerDep,
     image_service: ImageServiceDep,
     store_repo: StoreRepositoryDep,
