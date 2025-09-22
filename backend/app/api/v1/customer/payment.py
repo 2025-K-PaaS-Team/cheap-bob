@@ -99,10 +99,13 @@ async def init_payment(
             detail=f"재고가 부족합니다. 현재 재고: {product.current_stock}개"
         )
     
-    # 총 금액 계산
-    total_amount = product.price * request.quantity
-    if product.sale:
-        total_amount = int(total_amount * (100 - product.sale) / 100)
+    original_price = product.price * request.quantity
+    sale_percent = product.sale
+    
+    total_amount = original_price
+    if sale_percent:
+        discounted = original_price * (100 - sale_percent) / 100
+        total_amount = ((int(discounted) + 99) // 100) * 100
     
     # 결제 ID 생성
     payment_id = generate_payment_id()
@@ -132,7 +135,8 @@ async def init_payment(
         "product_id": request.product_id,
         "user_id": current_user["sub"],
         "quantity": request.quantity,
-        "price": total_amount
+        "price": original_price,
+        "sale": sale_percent 
     }
     
     await cart_repo.create(**cart_data)
@@ -244,6 +248,7 @@ async def confirm_payment(
             "user_id": cart_item.user_id,
             "quantity": cart_item.quantity,
             "price": cart_item.price,
+            "sale": cart_item.sale,
             "status": OrderStatus.reservation,
             "reservation_at": datetime.now(timezone.utc)
         }
