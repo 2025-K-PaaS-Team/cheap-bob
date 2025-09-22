@@ -6,7 +6,6 @@ from repositories.cart_item import CartItemRepository
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
-from repositories.order_history_item import OrderHistoryItemRepository
 from repositories.customer_preferences import (
     CustomerPreferredMenuRepository,
     CustomerNutritionTypeRepository,
@@ -14,6 +13,7 @@ from repositories.customer_preferences import (
     CustomerToppingTypeRepository
 )
 from repositories.customer_detail import CustomerDetailRepository
+from repositories.customer_profile import CustomerProfileRepository
 from repositories.address import AddressRepository
 from repositories.store_sns import StoreSNSRepository
 from repositories.store_image import StoreImageRepository
@@ -30,12 +30,12 @@ __all__ = [
     "StoreProductInfoRepository",
     "OrderCurrentItemRepository",
     "StorePaymentInfoRepository",
-    "OrderHistoryItemRepository",
     "CustomerPreferredMenuRepository",
     "CustomerNutritionTypeRepository",
     "CustomerAllergyRepository",
     "CustomerToppingTypeRepository",
     "CustomerDetailRepository",
+    "CustomerProfileRepository",
     "AddressRepository",
     "StoreSNSRepository",
     "StoreImageRepository",

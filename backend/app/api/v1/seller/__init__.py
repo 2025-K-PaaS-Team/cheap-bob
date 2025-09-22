@@ -1,9 +1,23 @@
 from fastapi import APIRouter
 
-from api.v1.seller import store, product, order
+from api.v1.seller import (
+    store_register, 
+    store_profile,
+    store_settings,
+    store_sns,
+    store_images,
+    store,
+    product, 
+    order
+)
 
 router = APIRouter(prefix="/seller")
 
+router.include_router(store_register.router)
+router.include_router(store_profile.router)
+router.include_router(store_settings.router)
+router.include_router(store_sns.router)
+router.include_router(store_images.router)
 router.include_router(store.router)
 router.include_router(product.router)
 router.include_router(order.router)

@@ -68,7 +68,7 @@ class AddressRepository(BaseRepository[Address]):
     
     async def update_address_with_coordinates(self, address_id: int, 
                                              sido: str, sigungu: str, bname: str,
-                                             lat: str, lng: str) -> Optional[Address]:
+                                             lat: str, lng: str) -> Address:
         """주소 전체 정보와 위도/경도 업데이트"""
         return await self.update(
             address_id,

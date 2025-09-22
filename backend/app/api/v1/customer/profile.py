@@ -1,19 +1,17 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
-from api.deps import CurrentCustomerDep, AsyncSessionDep
-from repositories.customer_detail import CustomerDetailRepository
-from repositories.customer_preferences import (
-    CustomerPreferredMenuRepository,
-    CustomerNutritionTypeRepository,
-    CustomerAllergyRepository,
-    CustomerToppingTypeRepository
+from api.deps.auth import CurrentCustomerDep
+from api.deps.repository import (
+    CustomerDetailRepositoryDep,
+    CustomerPreferredMenuRepositoryDep,
+    CustomerNutritionTypeRepositoryDep,
+    CustomerAllergyRepositoryDep,
+    CustomerToppingTypeRepositoryDep,
+    CustomerProfileRepositoryDep
 )
 from schemas.customer_detail import (
-    CustomerDetailCheckResponse,
     CustomerDetailResponse,
-    CustomerDetailCreate,
     CustomerDetailUpdate
 )
 from schemas.customer_preferences_response import (
@@ -31,56 +29,28 @@ from schemas.customer_preferences_response import (
     ToppingTypeDeleteRequest
 )
 
+from schemas.customer_profile import CustomerProfileResponse
+
 router = APIRouter(prefix="/profile", tags=["Customer-Profile"])
 
 
-def get_customer_detail_repository(session: AsyncSessionDep) -> CustomerDetailRepository:
-    return CustomerDetailRepository(session)
-
-
-def get_preferred_menu_repository(session: AsyncSessionDep) -> CustomerPreferredMenuRepository:
-    return CustomerPreferredMenuRepository(session)
-
-
-def get_nutrition_type_repository(session: AsyncSessionDep) -> CustomerNutritionTypeRepository:
-    return CustomerNutritionTypeRepository(session)
-
-
-def get_allergy_repository(session: AsyncSessionDep) -> CustomerAllergyRepository:
-    return CustomerAllergyRepository(session)
-
-
-def get_topping_type_repository(session: AsyncSessionDep) -> CustomerToppingTypeRepository:
-    return CustomerToppingTypeRepository(session)
-
-
-CustomerDetailRepositoryDep = Annotated[CustomerDetailRepository, Depends(get_customer_detail_repository)]
-PreferredMenuRepositoryDep = Annotated[CustomerPreferredMenuRepository, Depends(get_preferred_menu_repository)]
-NutritionTypeRepositoryDep = Annotated[CustomerNutritionTypeRepository, Depends(get_nutrition_type_repository)]
-AllergyRepositoryDep = Annotated[CustomerAllergyRepository, Depends(get_allergy_repository)]
-ToppingTypeRepositoryDep = Annotated[CustomerToppingTypeRepository, Depends(get_topping_type_repository)]
-
-
 @router.get(
-    "/check",
-    response_model=CustomerDetailCheckResponse,
+    "",
+    response_model=CustomerProfileResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"]
     })
 )
-async def check_customer_detail(
+async def get_customer_profile_all(
     current_user: CurrentCustomerDep,
-    customer_detail_repo: CustomerDetailRepositoryDep
+    profile_repo: CustomerProfileRepositoryDep
 ):
-    """소비자 상세 정보 존재 여부를 확인"""
+    """소비자의 모든 프로필 정보를 조회"""
     customer_email = current_user["sub"]
     
-    detail = await customer_detail_repo.get_by_customer(customer_email)
+    profile_data = await profile_repo.get_all_profile_data(customer_email)
     
-    return CustomerDetailCheckResponse(
-        has_detail=detail is not None,
-        detail=detail
-    )
+    return CustomerProfileResponse(**profile_data)
 
 
 @router.get(
@@ -108,38 +78,6 @@ async def get_customer_detail(
     return detail
 
 
-@router.post(
-    "/detail",
-    response_model=CustomerDetailResponse,
-    status_code=status.HTTP_201_CREATED,
-    responses=create_error_responses({
-        400: ["이미 상세 정보가 존재함", "잘못된 입력 형식"],
-        401: ["인증 정보가 없음", "토큰 만료"],
-    })
-)
-async def create_customer_detail(
-    current_user: CurrentCustomerDep,
-    customer_detail_repo: CustomerDetailRepositoryDep,
-    detail_data: CustomerDetailCreate
-):
-    """소비자 상세 정보를 등록"""
-    customer_email = current_user["sub"]
-    
-    # 이미 존재하는지 확인
-    existing = await customer_detail_repo.exists_for_customer(customer_email)
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="이미 상세 정보가 등록되어 있습니다"
-        )
-    
-    detail = await customer_detail_repo.create_for_customer(
-        customer_email=customer_email,
-        nickname=detail_data.nickname,
-        phone_number=detail_data.phone_number
-    )
-    
-    return detail
 
 
 @router.patch(
@@ -191,7 +129,7 @@ async def update_customer_detail(
 )
 async def get_preferred_menus(
     current_user: CurrentCustomerDep,
-    preferred_menu_repo: PreferredMenuRepositoryDep
+    preferred_menu_repo: CustomerPreferredMenuRepositoryDep
 ):
     """소비자의 선호 메뉴 목록을 조회"""
     customer_email = current_user["sub"]
@@ -210,7 +148,7 @@ async def get_preferred_menus(
 )
 async def create_preferred_menus(
     current_user: CurrentCustomerDep,
-    preferred_menu_repo: PreferredMenuRepositoryDep,
+    preferred_menu_repo: CustomerPreferredMenuRepositoryDep,
     menu_data: PreferredMenuCreateRequest
 ):
     """소비자의 선호 메뉴를 추가 - 여러 개를 한번에 추가할 수 있음"""
@@ -251,7 +189,7 @@ async def create_preferred_menus(
 )
 async def delete_preferred_menu(
     current_user: CurrentCustomerDep,
-    preferred_menu_repo: PreferredMenuRepositoryDep,
+    preferred_menu_repo: CustomerPreferredMenuRepositoryDep,
     menu_data: PreferredMenuDeleteRequest
 ):
     """소비자의 특정 선호 메뉴를 삭제"""
@@ -279,7 +217,7 @@ async def delete_preferred_menu(
 )
 async def get_nutrition_types(
     current_user: CurrentCustomerDep,
-    nutrition_type_repo: NutritionTypeRepositoryDep
+    nutrition_type_repo: CustomerNutritionTypeRepositoryDep
 ):
     """소비자의 영양 타입 목록을 조회"""
     customer_email = current_user["sub"]
@@ -298,7 +236,7 @@ async def get_nutrition_types(
 )
 async def create_nutrition_types(
     current_user: CurrentCustomerDep,
-    nutrition_type_repo: NutritionTypeRepositoryDep,
+    nutrition_type_repo: CustomerNutritionTypeRepositoryDep,
     type_data: NutritionTypeCreateRequest
 ):
     """소비자의 영양 타입을 추가. 여러 개를 한번에 추가할 수 있음."""
@@ -339,7 +277,7 @@ async def create_nutrition_types(
 )
 async def delete_nutrition_type(
     current_user: CurrentCustomerDep,
-    nutrition_type_repo: NutritionTypeRepositoryDep,
+    nutrition_type_repo: CustomerNutritionTypeRepositoryDep,
     type_data: NutritionTypeDeleteRequest
 ):
     """소비자의 특정 영양 타입을 삭제"""
@@ -367,7 +305,7 @@ async def delete_nutrition_type(
 )
 async def get_allergies(
     current_user: CurrentCustomerDep,
-    allergy_repo: AllergyRepositoryDep
+    allergy_repo: CustomerAllergyRepositoryDep
 ):
     """소비자의 알레르기 목록을 조회"""
     customer_email = current_user["sub"]
@@ -386,7 +324,7 @@ async def get_allergies(
 )
 async def create_allergies(
     current_user: CurrentCustomerDep,
-    allergy_repo: AllergyRepositoryDep,
+    allergy_repo: CustomerAllergyRepositoryDep,
     allergy_data: AllergyCreateRequest
 ):
     """소비자의 알레르기를 추가. 여러 개를 한번에 추가할 수 있음."""
@@ -427,7 +365,7 @@ async def create_allergies(
 )
 async def delete_allergy(
     current_user: CurrentCustomerDep,
-    allergy_repo: AllergyRepositoryDep,
+    allergy_repo: CustomerAllergyRepositoryDep,
     allergy_data: AllergyDeleteRequest
 ):
     """소비자의 특정 알레르기를 삭제"""
@@ -455,7 +393,7 @@ async def delete_allergy(
 )
 async def get_topping_types(
     current_user: CurrentCustomerDep,
-    topping_type_repo: ToppingTypeRepositoryDep
+    topping_type_repo: CustomerToppingTypeRepositoryDep
 ):
     """소비자의 토핑 타입 목록을 조회"""
     customer_email = current_user["sub"]
@@ -474,7 +412,7 @@ async def get_topping_types(
 )
 async def create_topping_types(
     current_user: CurrentCustomerDep,
-    topping_type_repo: ToppingTypeRepositoryDep,
+    topping_type_repo: CustomerToppingTypeRepositoryDep,
     type_data: ToppingTypeCreateRequest
 ):
     """소비자의 토핑 타입을 추가. 여러 개를 한번에 추가할 수 있음."""
@@ -515,7 +453,7 @@ async def create_topping_types(
 )
 async def delete_topping_type(
     current_user: CurrentCustomerDep,
-    topping_type_repo: ToppingTypeRepositoryDep,
+    topping_type_repo: CustomerToppingTypeRepositoryDep,
     type_data: ToppingTypeDeleteRequest
 ):
     """소비자의 특정 토핑 타입을 삭제"""

@@ -1,10 +1,14 @@
 from typing import List, Optional, Dict
-from sqlalchemy import select, and_, or_
-from sqlalchemy.orm import selectinload
+from sqlalchemy import select, and_, update as sql_update
+from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.store import Store
 from database.models.address import Address
+from database.models.store_sns import StoreSNS
+from database.models.store_product_info import StoreProductInfo
+from database.models.store_payment_info import StorePaymentInfo
+from database.models.store_operation_info import StoreOperationInfo
 from repositories.base import BaseRepository
 
 
@@ -58,7 +62,8 @@ class StoreRepository(BaseRepository[Store]):
                 selectinload(Store.payment_info),
                 selectinload(Store.seller),
                 selectinload(Store.images),
-                selectinload(Store.operation_info)
+                selectinload(Store.operation_info),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
             )
             .where(Store.store_id == store_id)
         )
@@ -73,64 +78,182 @@ class StoreRepository(BaseRepository[Store]):
             load_relations=["address"]
         )
     
-    async def get_by_area(
-        self, 
-        sido: Optional[str] = None,
-        sigungu: Optional[str] = None,
-        bname: Optional[str] = None
-    ) -> List[Store]:
-        """지역별 가게 조회"""
+    async def update_store_and_address_atomic(
+        self,
+        store_id: str,
+        postal_code: str,
+        address: str,
+        detail_address: str,
+        sido: str,
+        sigungu: str,
+        bname: str,
+        lat: str,
+        lng: str
+    ) -> Store:
+        """가게와 주소 정보를 업데이트"""
+        
+        
+        # 1. 현재 가게 정보를 address와 함께 조회
         query = (
             select(Store)
-            .join(Address, Store.address_id == Address.address_id)
             .options(selectinload(Store.address))
+            .where(Store.store_id == store_id)
         )
-        
-        conditions = []
-        if sido:
-            conditions.append(Address.sido == sido)
-        if sigungu:
-            conditions.append(Address.sigungu == sigungu)
-        if bname:
-            conditions.append(Address.bname == bname)
-        
-        if conditions:
-            query = query.where(and_(*conditions))
-        
-        query = query.order_by(Store.store_name)
         result = await self.session.execute(query)
-        return result.scalars().all()
+        store = result.scalar_one_or_none()
+        
+        if not store:
+            return None
+        
+        # 2. address_id가 있으면 주소 업데이트
+        if store.address_id and all([sido, sigungu, bname, lat, lng]):
+            await self.session.execute(
+                sql_update(Address)
+                .where(Address.address_id == store.address_id)
+                .values(
+                    sido=sido,
+                    sigungu=sigungu,
+                    bname=bname,
+                    lat=lat,
+                    lng=lng
+                )
+            )
+        
+        # 3. 가게 정보 업데이트
+        store_update_values = {}
+        if postal_code is not None:
+            store_update_values["store_postal_code"] = postal_code
+        if address is not None:
+            store_update_values["store_address"] = address
+        if detail_address is not None:
+            store_update_values["store_detail_address"] = detail_address
+        
+        if store_update_values:
+            await self.session.execute(
+                sql_update(Store)
+                .where(Store.store_id == store_id)
+                .values(**store_update_values)
+            )
+        
+        # 4. 변경사항 플러시 및 갱신된 객체 반환
+        await self.session.flush()
+        await self.session.refresh(store)
+        
+        return store
     
-    async def update_address(self, store_id: str, address_id: int) -> Optional[Store]:
-        """가게의 주소 정보 업데이트"""
-        return await self.update(store_id, address_id=address_id)
-    
-    async def update_store_info(
-        self, 
+    async def create_store_with_full_info(
+        self,
         store_id: str,
-        store_introduction: Optional[str] = None,
-        store_phone: Optional[str] = None,
-        store_postal_code: Optional[str] = None,
-        store_address: Optional[str] = None,
-        store_detail_address: Optional[str] = None,
-        address_id: Optional[int] = None
-    ) -> Optional[Store]:
-        """가게 정보 업데이트"""
-        update_data = {}
+        store_name: str,
+        seller_email: str,
+        store_introduction: str,
+        store_phone: str,
+        store_postal_code: str,
+        store_address: str,
+        store_detail_address: str,
+        # Address info
+        sido: str,
+        sigungu: str,
+        bname: str,
+        lat: str,
+        lng: str,
+        # SNS info (optional)
+        sns_info: Optional[Dict[str, Optional[str]]],
+        # Operation times
+        operation_times: List[Dict],
+        # Payment info
+        payment_info: Dict[str, str]
+    ) -> Store:
+        """가게와 모든 관련 정보를 한 번에 생성"""
         
-        if store_introduction is not None:
-            update_data["store_introduction"] = store_introduction
-        if store_phone is not None:
-            update_data["store_phone"] = store_phone
-        if store_postal_code is not None:
-            update_data["store_postal_code"] = store_postal_code
-        if store_address is not None:
-            update_data["store_address"] = store_address
-        if store_detail_address is not None:
-            update_data["store_detail_address"] = store_detail_address
-        if address_id is not None:
-            update_data["address_id"] = address_id
-        
-        if update_data:
-            return await self.update(store_id, **update_data)
-        return await self.get_by_store_id(store_id)
+        try:
+            # 1. Address 생성
+            new_address = Address(
+                sido=sido,
+                sigungu=sigungu,
+                bname=bname,
+                lat=lat,
+                lng=lng
+            )
+            self.session.add(new_address)
+            await self.session.flush()  # address_id 생성을 위해 flush
+            
+            # 2. Store 생성
+            store = Store(
+                store_id=store_id,
+                store_name=store_name,
+                seller_email=seller_email,
+                store_introduction=store_introduction,
+                store_phone=store_phone,
+                store_postal_code=store_postal_code,
+                store_address=store_address,
+                store_detail_address=store_detail_address,
+                address_id=new_address.address_id
+            )
+            self.session.add(store)
+            
+            # 3. SNS 정보 생성 (optional)
+            if sns_info:
+                sns = StoreSNS(
+                    store_id=store_id,
+                    instagram=sns_info.get("instagram"),
+                    facebook=sns_info.get("facebook"),
+                    x=sns_info.get("x"),
+                    homepage=sns_info.get("homepage")
+                )
+                self.session.add(sns)
+            
+            # 4. Operation 정보 생성
+            if operation_times:
+                for op_time in operation_times:
+                    operation = StoreOperationInfo(
+                        store_id=store_id,
+                        day_of_week=op_time['day_of_week'],
+                        open_time=op_time['open_time'],
+                        close_time=op_time['close_time'],
+                        pickup_start_time=op_time['pickup_start_time'],
+                        pickup_end_time=op_time['pickup_end_time'],
+                        is_open_enabled=op_time['is_open_enabled'],
+                        is_currently_open=False
+                    )
+                    self.session.add(operation)
+            
+            # 5. Payment 정보 생성
+            if payment_info:
+                payment = StorePaymentInfo(
+                    store_id=store_id,
+                    portone_store_id=payment_info.get("portone_store_id"),
+                    portone_channel_id=payment_info.get("portone_channel_id"),
+                    portone_secret_key=payment_info.get("portone_secret_key")
+                )
+                self.session.add(payment)
+            
+            # 모든 변경사항 커밋
+            await self.session.flush()
+            
+            # Store 객체 새로고침
+            await self.session.refresh(store, ["address", "sns_info", "payment_info", "operation_info"])
+            
+            return store
+            
+        except Exception as e:
+            # 트랜잭션 롤백은 상위에서 처리
+            raise e
+    
+    async def get_stores_with_products(self) -> List[Store]:
+        """상품이 있는 가게들을 모든 관련 정보와 함께 조회"""
+        query = (
+            select(Store)
+            .join(Store.products)  # INNER JOIN으로 상품이 있는 가게만 필터링
+            .options(
+                selectinload(Store.address),
+                selectinload(Store.sns_info),
+                selectinload(Store.operation_info),
+                selectinload(Store.images),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
+            )
+            .order_by(Store.created_at.desc())
+            .distinct()  # 중복 제거
+        )
+        result = await self.session.execute(query)
+        return result.scalars().unique().all()

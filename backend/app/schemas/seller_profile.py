@@ -1,6 +1,6 @@
 from typing import List, Optional
 from datetime import time
-from pydantic import BaseModel, Field, field_validator, HttpUrl
+from pydantic import BaseModel, Field, field_validator, HttpUrl, model_validator
 
 
 class StoreSNSInfo(BaseModel):
@@ -27,41 +27,44 @@ class StoreOperationTime(BaseModel):
     """요일별 운영 시간"""
     day_of_week: int = Field(..., ge=0, le=6, description="요일 (0: 월요일, 6: 일요일)")
     open_time: time = Field(default=time(1, 0), description="오픈 시간")
-    close_time: time = Field(default=time(2, 0), description="마감 시간") 
-    pickup_start_time: time = Field(default=time(3, 0), description="픽업 시작 시간")
-    pickup_end_time: time = Field(default=time(4, 0), description="픽업 종료 시간")
+    pickup_start_time: time = Field(default=time(2, 0), description="픽업 시작 시간")
+    pickup_end_time: time = Field(default=time(3, 0), description="픽업 종료 시간")
+    close_time: time = Field(default=time(4, 0), description="마감 시간")
     is_open_enabled: bool = Field(..., description="해당 요일 운영 여부")
     
-    @field_validator('open_time', 'close_time', 'pickup_start_time', 'pickup_end_time')
-    @classmethod
-    def validate_times(cls, v, info):
-        values = info.data
-        
-        # 모든 시간이 입력된 경우에만 검증
-        if all(key in values for key in ['open_time', 'close_time', 'pickup_start_time', 'pickup_end_time']):
-            open_time = values.get('open_time')
-            close_time = values.get('close_time')
-            pickup_start = values.get('pickup_start_time')
-            pickup_end = values.get('pickup_end_time')
+    @model_validator(mode='after')
+    def validate_times(self):
+        if self.is_open_enabled:
+            # 활성화 시 모든 시간이 필요
+            if not all([self.open_time, self.close_time, 
+                       self.pickup_start_time, self.pickup_end_time]):
+                missing_fields = []
+                if not self.open_time: missing_fields.append('open_time')
+                if not self.close_time: missing_fields.append('close_time')
+                if not self.pickup_start_time: missing_fields.append('pickup_start_time')
+                if not self.pickup_end_time: missing_fields.append('pickup_end_time')
+                
+                raise ValueError(f"운영 활성화 시 다음 필드가 필요합니다: {', '.join(missing_fields)}")
             
-            # 오픈 시간 < 마감 시간
-            if open_time and close_time and open_time >= close_time:
+            # 시간 유효성 검증
+            if self.open_time >= self.close_time:
                 raise ValueError("오픈 시간은 마감 시간보다 이전이어야 합니다.")
             
-            # 픽업 시작 >= 오픈 시간 AND 픽업 시작 < 마감 시간
-            if pickup_start and open_time and close_time:
-                if pickup_start < open_time or pickup_start >= close_time:
-                    raise ValueError("픽업 시작 시간은 오픈 시간 이후, 마감 시간 이전이어야 합니다.")
+            if self.pickup_start_time < self.open_time or self.pickup_start_time >= self.close_time:
+                raise ValueError("픽업 시작 시간은 오픈 시간 이후, 마감 시간 이전이어야 합니다.")
             
-            # 픽업 종료 > 픽업 시작 AND 픽업 종료 <= 마감 시간
-            if pickup_end and pickup_start and close_time:
-                if pickup_end <= pickup_start:
-                    raise ValueError("픽업 종료 시간은 픽업 시작 시간보다 이후여야 합니다.")
-                if pickup_end > close_time:
-                    raise ValueError("픽업 종료 시간은 마감 시간 이전이어야 합니다.")
+            if self.pickup_end_time <= self.pickup_start_time:
+                raise ValueError("픽업 종료 시간은 픽업 시작 시간보다 이후여야 합니다.")
+            
+            if self.pickup_end_time > self.close_time:
+                raise ValueError("픽업 종료 시간은 마감 시간 이전이어야 합니다.")
         
-        return v
+        return self
 
+class StorePaymentInfoCreateRequest(BaseModel):
+    portone_store_id: str = Field(..., description="포트원 가게 ID")
+    portone_channel_id: str = Field(..., description="포트원 채널 ID")
+    portone_secret_key: str = Field(..., description="포트원 시크릿 키")
 
 class SellerProfileCreateRequest(BaseModel):
     """판매자 회원가입 요청"""
@@ -78,6 +81,9 @@ class SellerProfileCreateRequest(BaseModel):
     
     # 운영 정보
     operation_times: List[StoreOperationTime] = Field(..., description="요일별 운영 시간", min_items=7, max_items=7)
+    
+    # 결제 정보
+    payment_info: StorePaymentInfoCreateRequest = Field(..., description="결제 정보")
     
     @field_validator('operation_times')
     @classmethod
@@ -99,6 +105,32 @@ class SellerProfileResponse(BaseModel):
     store_id: str = Field(..., description="생성된 가게 ID")
     store_name: str = Field(..., description="매장 이름")
     message: str = Field(default="판매자 회원가입이 완료되었습니다.", description="응답 메시지")
+    
+    class Config:
+        from_attributes = True
+
+
+class StoreNameUpdateRequest(BaseModel):
+    """매장 이름 수정 요청"""
+    store_name: str = Field(..., description="매장 이름", min_length=1, max_length=20)
+
+
+class StoreIntroductionUpdateRequest(BaseModel):
+    """매장 설명 수정 요청"""
+    store_introduction: str = Field(..., description="매장 소개", min_length=1)
+
+
+class StorePhoneUpdateRequest(BaseModel):
+    """매장 전화번호 수정 요청"""
+    store_phone: str = Field(..., description="매장 전화번호")
+
+
+class StoreProfileResponse(BaseModel):
+    """가게 기본 정보 응답"""
+    store_id: str = Field(..., description="가게 ID")
+    store_name: str = Field(..., description="매장 이름")
+    store_introduction: str = Field(..., description="매장 소개")
+    store_phone: str = Field(..., description="매장 전화번호")
     
     class Config:
         from_attributes = True

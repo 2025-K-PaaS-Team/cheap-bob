@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     DB_NAME: str
     
+    # Redis 정보
+    REDIS_HOST: str
+    REDIS_PORT: int
+    REDIS_DB: int
+    
     #Oauth2.0 정보
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
@@ -55,6 +60,10 @@ class Settings(BaseSettings):
     @property
     def SYNC_DATABASE_URL(self) -> str:
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    
+    @property
+    def REDIS_URL(self) -> str:
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
 
 settings = Settings()
