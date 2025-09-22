@@ -99,10 +99,13 @@ async def init_payment(
     original_price = product.price * request.quantity
     sale_percent = product.sale
     
-    total_amount = original_price
-    if sale_percent:
-        discounted = original_price * (100 - sale_percent) / 100
-        total_amount = ((int(discounted) + 99) // 100) * 100
+    if product.sale:
+        discounted = product.price * (100 - product.sale) / 100
+        round_price = ((discounted + 99) // 100) * 100
+        total_amount = round_price * request.quantity
+        
+    else:
+        total_amount = product.price * request.quantity 
     
     # 결제 ID 생성
     payment_id = generate_payment_id()
@@ -133,7 +136,8 @@ async def init_payment(
         "user_id": current_user["sub"],
         "quantity": request.quantity,
         "price": original_price,
-        "sale": sale_percent 
+        "sale": sale_percent,
+        "total_amount": total_amount
     }
     
     await cart_repo.create(**cart_data)
@@ -153,6 +157,9 @@ async def init_payment(
         payment_id=payment_id,
         channel_id=test_channel_id,
         store_id=test_store_id,
+        quantity=request.quantity,
+        price=product.price,
+        sale=product.sale,
         total_amount=total_amount
     )
 
@@ -216,6 +223,7 @@ async def confirm_payment(
             "quantity": cart_item.quantity,
             "price": cart_item.price,
             "sale": cart_item.sale,
+            "total_amount": cart_item.total_amount,
             "status": OrderStatus.reservation,
             "reservation_at": datetime.now(timezone.utc)
         }

@@ -18,6 +18,7 @@ class OrderItemResponse(BaseModel):
     quantity: int = Field(..., description="구매 수량")
     price: int = Field(..., description="원가 (원)")
     sale: Optional[int] = Field(None, description="세일 퍼센트")
+    total_amount: int = Field(..., description="총 결제 금액")
     status: OrderStatus = Field(..., description="주문 상태")
     reservation_at: datetime = Field(..., description="예약 주문 시간")
     accepted_at: Optional[datetime] = Field(None, description="주문 수락 시간")
@@ -42,7 +43,10 @@ class OrderCancelRequest(BaseModel):
 
 class OrderCancelResponse(BaseModel):
     payment_id: str = Field(..., description="결제 고유 ID")
-    refunded_amount: int = Field(..., description="환불 금액")
+    quantity: int = Field(..., description="구매 수량")
+    price: int = Field(..., description="원가 (원)")
+    sale: Optional[int] = Field(None, description="세일 퍼센트")
+    total_amount: int = Field(..., description="총 결제 금액")
     
 
 class CustomerPickupCompleteRequest(BaseModel):

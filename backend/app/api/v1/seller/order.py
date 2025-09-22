@@ -60,6 +60,7 @@ async def get_store_orders(
             quantity=order.quantity,
             price=order.price,
             sale=order.sale,
+            total_amount=order.total_amount,
             status=order.status,
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
@@ -112,6 +113,7 @@ async def get_current_orders(
             quantity=order.quantity,
             price=order.price,
             sale=order.sale,
+            total_amount=order.total_amount,
             status=order.status,
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
@@ -182,6 +184,7 @@ async def update_order_accept(
         quantity=updated_order.quantity,
         price=updated_order.price,
         sale=updated_order.sale,
+        total_amount=order.total_amount,
         status=updated_order.status,
         reservation_at=updated_order.reservation_at,
         accepted_at=updated_order.accepted_at,
@@ -270,14 +273,12 @@ async def cancel_order(
                 detail="재고 복구 중 충돌이 발생했습니다. 다시 시도해주세요."
             )
     
-    refunded_amount = order.price
-    if order.sale:
-        discounted = order.price * (100 - order.sale) / 100
-        refunded_amount = ((int(discounted) + 99) // 100) * 100
-    
     return OrderCancelResponse(
         payment_id=payment_id,
-        refunded_amount=refunded_amount
+        quantity=order.quantity,
+        price=order.price,
+        sale=order.sale,
+        total_amount=order.total_amount,
     )
 
 

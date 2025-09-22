@@ -148,7 +148,7 @@ async def register_store_images(
     최대 크기: 10MB
     """
     seller_email = current_user["sub"]
-    
+
     store_id = await get_store_id_by_email(seller_email, store_repo)
     
     if not files:

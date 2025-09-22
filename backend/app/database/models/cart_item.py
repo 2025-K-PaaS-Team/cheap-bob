@@ -14,6 +14,7 @@ class CartItem(Base):
     quantity = Column(Integer, nullable=False) # 구매 수량
     price = Column(Integer, nullable=False)  # 원가 (원)
     sale = Column(Integer)  # 세일 퍼센트, nullable
+    total_amount = Column(Integer, nullable=False)  # 최종 금액
     created_at = Column(DateTime(timezone=True), server_default=func.now()) # 구매 시간
     
     # Relationships

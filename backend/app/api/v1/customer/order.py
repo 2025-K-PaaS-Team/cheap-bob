@@ -52,6 +52,7 @@ async def get_order_history(
             quantity=order.quantity,
             price=order.price,
             sale=order.sale,
+            total_amount=order.total_amount,
             status=order.status,
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
@@ -99,6 +100,7 @@ async def get_current_orders(
             quantity=order.quantity,
             price=order.price,
             sale=order.sale,
+            total_amount=order.total_amount,
             status=order.status,
             reservation_at=order.reservation_at,
             accepted_at=order.accepted_at,
@@ -151,6 +153,7 @@ async def get_order_detail(
         quantity=order.quantity,
         price=order.price,
         sale=order.sale,
+        total_amount=order.total_amount,
         status=order.status,
         reservation_at=order.reservation_at,
         accepted_at=order.accepted_at,
@@ -240,7 +243,10 @@ async def cancel_order(
     
     return OrderCancelResponse(
         payment_id=payment_id,
-        refunded_amount=order.price
+        quantity=order.quantity,
+        price=order.price,
+        sale=order.sale,
+        total_amount=order.total_amount,
     )
 
 
@@ -332,6 +338,7 @@ async def complete_pickup(
         quantity=completed_order.quantity,
         price=completed_order.price,
         sale=order.sale,
+        total_amount=order.total_amount,
         status=completed_order.status,
         reservation_at=completed_order.reservation_at,
         accepted_at=completed_order.accepted_at,
