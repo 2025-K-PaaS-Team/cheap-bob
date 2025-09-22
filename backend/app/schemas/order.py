@@ -57,3 +57,20 @@ class SellerPickupQRResponse(BaseModel):
     payment_id: str = Field(..., description="결제 고유 ID")
     qr_data: str = Field(..., description="QR 코드 데이터")
     created_at: datetime = Field(..., description="QR 생성 시간")
+
+
+class DashboardStockItem(BaseModel):
+    product_id: str = Field(..., description="상품 고유 ID")
+    product_name: str = Field(..., description="상품 이름")
+    current_stock: int = Field(..., description="현재 남아있는 재고 수량")
+    initial_stock: int = Field(..., description="설정된 최초 재고 수량")
+    purchased_stock: int = Field(..., description="현재까지 구매된 수량 (수락 전 + 수락 + 완료 - 취소)")
+    adjustment_stock: int = Field(..., description="관리자가 설정한 총 재고 수량")
+    
+    class Config:
+        from_attributes = True
+        
+
+class DashboardResponse(BaseModel):
+    items: List[DashboardStockItem] = Field(default_factory=list, description="상품별 재고 현황")
+    total_items: int = Field(..., description="전체 상품 수")
