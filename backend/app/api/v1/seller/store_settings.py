@@ -119,6 +119,51 @@ async def update_store_payment(
             detail=f"결제 정보 수정 중 오류가 발생했습니다: {str(e)}"
         )
 
+
+@router.get("/operation", response_model=List[StoreOperationResponse],
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: "가게를 찾을 수 없음"
+    })
+)
+async def get_store_operation(
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    operation_repo: StoreOperationInfoRepositoryDep
+):
+    """
+    운영 정보 조회
+    
+    모든 요일의 운영 정보를 조회합니다.
+    """
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    try:
+        operation_infos = await operation_repo.get_by_store_id(store_id)
+        
+        return [
+            StoreOperationResponse(
+                day_of_week=info.day_of_week,
+                open_time=info.open_time,
+                close_time=info.close_time,
+                pickup_start_time=info.pickup_start_time,
+                pickup_end_time=info.pickup_end_time,
+                is_open_enabled=info.is_open_enabled
+            )
+            for info in sorted(operation_infos, key=lambda x: x.day_of_week)
+        ]
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"운영 정보 조회 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
 @router.patch("/operation/day/{day_of_week}", response_model=StoreOperationResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
@@ -183,48 +228,4 @@ async def update_store_day_operation(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"운영 정보 수정 중 오류가 발생했습니다: {str(e)}"
-        )
-
-
-@router.get("/operation", response_model=List[StoreOperationResponse],
-    responses=create_error_responses({
-        401: ["인증 정보가 없음", "토큰 만료"],
-        404: "가게를 찾을 수 없음"
-    })
-)
-async def get_store_operation(
-    current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep,
-    operation_repo: StoreOperationInfoRepositoryDep
-):
-    """
-    운영 정보 조회
-    
-    모든 요일의 운영 정보를 조회합니다.
-    """
-    seller_email = current_user["sub"]
-    
-    store_id = await get_store_id_by_email(seller_email, store_repo)
-    
-    try:
-        operation_infos = await operation_repo.get_by_store_id(store_id)
-        
-        return [
-            StoreOperationResponse(
-                day_of_week=info.day_of_week,
-                open_time=info.open_time,
-                close_time=info.close_time,
-                pickup_start_time=info.pickup_start_time,
-                pickup_end_time=info.pickup_end_time,
-                is_open_enabled=info.is_open_enabled
-            )
-            for info in sorted(operation_infos, key=lambda x: x.day_of_week)
-        ]
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"운영 정보 조회 중 오류가 발생했습니다: {str(e)}"
         )
