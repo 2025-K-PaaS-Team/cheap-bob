@@ -56,6 +56,7 @@ async def create_product(
 
     response_data = {
         **product.__dict__,
+        "current_stock": product.current_stock,
         "nutrition_types": nutrition_types
     }
     
@@ -96,16 +97,16 @@ async def update_product(
     update_data = request.model_dump(exclude_unset=True)
     
     if update_data:
-        updated_product = await product_repo.update(product_id, **update_data)
-    else:
-        updated_product = product
-    
-    # 영양 타입 목록 조회
-    nutrition_types = await nutrition_repo.get_nutrition_types_by_product(product_id)
+        await product_repo.update(product_id, **update_data)
+
+    updated_product = await product_repo.get_with_nutrition_info(product_id)
+
+    nutrition_types = [n.nutrition_type for n in updated_product.nutrition_info] if updated_product.nutrition_info else []
     
     # 응답 생성
     response_data = {
         **updated_product.__dict__,
+        "current_stock": updated_product.current_stock,
         "nutrition_types": nutrition_types
     }
     
@@ -143,21 +144,20 @@ async def increase_product_stock(
             detail="상품을 찾을 수 없습니다"
         )
     
-    # 재고 증가 (낙관적 락 사용, 최대 재시도 횟수까지)
+    # 재고 증가
     max_retries = settings.MAX_RETRY_LOCK
     for attempt in range(max_retries):
-        result = await product_repo.restore_stock(product_id, 1)
+        result = await product_repo.adjust_admin_stock(product_id, 1)  # 1개 증가
         
         if result == StockUpdateResult.SUCCESS:
-            # 업데이트된 상품 조회
-            updated_product = await product_repo.get_by_product_id(product_id)
+            updated_product = await product_repo.get_with_nutrition_info(product_id)
             
-            # 영양 타입 목록 조회
-            nutrition_types = await nutrition_repo.get_nutrition_types_by_product(product_id)
+            nutrition_types = [n.nutrition_type for n in updated_product.nutrition_info] if updated_product.nutrition_info else []
             
             # 응답 생성
             response_data = {
                 **updated_product.__dict__,
+                "current_stock": product.current_stock,
                 "nutrition_types": nutrition_types
             }
             
@@ -201,21 +201,20 @@ async def decrease_product_stock(
             detail="상품을 찾을 수 없습니다"
         )
     
-    # 재고 감소 (낙관적 락 사용, 최대 재시도 횟수까지)
+    # 재고 감소
     max_retries = settings.MAX_RETRY_LOCK
     for attempt in range(max_retries):
-        result = await product_repo.decrease_stock(product_id, 1)
+        result = await product_repo.adjust_admin_stock(product_id, -1)  # 1개 감소
         
         if result == StockUpdateResult.SUCCESS:
-            # 업데이트된 상품 조회
-            updated_product = await product_repo.get_by_product_id(product_id)
+            updated_product = await product_repo.get_with_nutrition_info(product_id)
             
-            # 영양 타입 목록 조회
-            nutrition_types = await nutrition_repo.get_nutrition_types_by_product(product_id)
+            nutrition_types = [n.nutrition_type for n in updated_product.nutrition_info] if updated_product.nutrition_info else []
             
             # 응답 생성
             response_data = {
                 **updated_product.__dict__,
+                "current_stock": product.current_stock,
                 "nutrition_types": nutrition_types
             }
             
@@ -223,7 +222,7 @@ async def decrease_product_stock(
         elif result == StockUpdateResult.INSUFFICIENT_STOCK:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="남은 재고가 없습니다."
+                detail="재고를 더 이상 감소시킬 수 없습니다. 전체 재고가 부족합니다."
             )
         
         if attempt == max_retries - 1:
@@ -280,6 +279,7 @@ async def add_product_nutrition(
     # 응답 생성
     response_data = {
         **product.__dict__,
+        "current_stock": product.current_stock,
         "nutrition_types": updated_nutrition
     }
     
@@ -339,6 +339,7 @@ async def remove_product_nutrition(
     # 응답 생성
     response_data = {
         **product.__dict__,
+        "current_stock": product.current_stock,
         "nutrition_types": updated_nutrition
     }
     

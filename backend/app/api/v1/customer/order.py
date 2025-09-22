@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
@@ -9,6 +8,7 @@ from api.deps.repository import (
     StoreProductInfoRepositoryDep,
     StorePaymentInfoRepositoryDep
 )
+from repositories.store_product_info import StockUpdateResult
 from schemas.order import (
     OrderItemResponse,
     OrderListResponse,
@@ -221,39 +221,19 @@ async def cancel_order(
     
     # 주문 취소 처리
     quantity = await order_repo.cancel_order(payment_id, cancel_reason=request.reason)
-    
-    # 낙관적 락을 사용하여 재고 복구
+ 
     max_retries = settings.MAX_RETRY_LOCK
     for attempt in range(max_retries):
-        try:
-            # 최신 상품 정보 조회
-            current_product = await product_repo.get_by_product_id(order.product_id)
-            
-            # 낙관적 락을 사용한 재고 업데이트
-            success = await product_repo.update_lock(
-                order.product_id,
-                conditions={"version": current_product.version},
-                current_stock=current_product.current_stock + quantity,
-                version=current_product.version + 1
+        result = await product_repo.adjust_purchased_stock(order.product_id, -quantity)
+        
+        if result == StockUpdateResult.SUCCESS:
+            break
+        
+        if attempt == max_retries - 1:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="재고 복구 중 충돌이 발생했습니다. 다시 시도해주세요."
             )
-            
-            if success:
-                break
-            
-            if attempt == max_retries - 1:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="재고 복구 중 충돌이 발생했습니다. 다시 시도해주세요."
-                )
-                
-        except HTTPException:
-            raise
-        except Exception as e:
-            if attempt == max_retries - 1:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"재고 복구 중 오류가 발생했습니다 Error : {e}"
-                )
     
     return OrderCancelResponse(
         payment_id=payment_id,
