@@ -71,7 +71,7 @@ async def get_order_history(
     )
 
 
-@router.get("/current", response_model=OrderListResponse,
+@router.get("/today", response_model=OrderListResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"]
     })
@@ -81,10 +81,10 @@ async def get_current_orders(
     order_repo: OrderCurrentItemRepositoryDep
 ):
     """
-    현재 진행중인 주문 조회 (reservation, accepted)
+    당일 주문 조회
     """
     
-    # 사용자의 현재 진행중인 주문만 조회 (reservation, accepted)
+    # 당일 주문 조회
     orders = await order_repo.get_user_current_orders_with_relations(current_user["sub"])
     
     # response 포맷으로 변환

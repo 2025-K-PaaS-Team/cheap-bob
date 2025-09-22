@@ -79,27 +79,27 @@ async def get_store_orders(
     )
 
 
-@router.get("/pending", response_model=OrderListResponse,
+@router.get("/today", response_model=OrderListResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"],
         404:"등록된 가게를 찾을 수 없음"
     })                 
 )
-async def get_pending_orders(
+async def get_current_orders(
     store_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
     order_repo: OrderCurrentItemRepositoryDep
 ):
     """
-    처리 대기중인 주문 조회 (reservation, accepted)
+    당일 주문 조회
     """
     
     seller_email = current_user["sub"]
     
     store_id = await get_store_id_by_email(seller_email, store_repo)
     
-    orders = await order_repo.get_store_pending_orders_with_relations(store_id)
+    orders = await order_repo.get_store_current_orders_with_relations(store_id)
     
     order_responses = []
     for order in orders:

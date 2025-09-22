@@ -98,11 +98,10 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         return result.scalars().all()
     
     async def get_user_current_orders_with_relations(self, user_id: str) -> List[OrderCurrentItem]:
-        """사용자의 현재 진행중인 주문 조회 (reservation, accepted)"""
+        """사용자의 당일 주문 조회"""
         stmt = (
             select(OrderCurrentItem)
             .where(OrderCurrentItem.user_id == user_id)
-            .where(OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept]))
             .options(
                 selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
             )
@@ -147,17 +146,12 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         result = await self.session.execute(stmt)
         return result.scalars().all()
     
-    async def get_store_pending_orders_with_relations(self, store_id: str) -> List[OrderCurrentItem]:
-        """가게의 처리 대기중인 주문 조회 (reservation, accepted)"""
+    async def get_store_current_orders_with_relations(self, store_id: str) -> List[OrderCurrentItem]:
+        """가게의 당일 주문 조회"""
         stmt = (
             select(OrderCurrentItem)
             .join(StoreProductInfo, OrderCurrentItem.product_id == StoreProductInfo.product_id)
-            .where(
-                and_(
-                    StoreProductInfo.store_id == store_id,
-                    OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept])
-                )
-            )
+            .where(StoreProductInfo.store_id == store_id)
             .options(selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store))
             .order_by(OrderCurrentItem.reservation_at)
         )
