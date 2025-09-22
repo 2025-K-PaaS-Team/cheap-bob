@@ -129,7 +129,7 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         stmt = (
             select(OrderCurrentItem)
             .where(OrderCurrentItem.payment_id == payment_id)
-            .options(selectinload(OrderCurrentItem.product))
+            .options(selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store))
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
@@ -140,7 +140,7 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
             select(OrderCurrentItem)
             .join(StoreProductInfo, OrderCurrentItem.product_id == StoreProductInfo.product_id)
             .where(StoreProductInfo.store_id == store_id)
-            .options(selectinload(OrderCurrentItem.product))
+            .options(selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store))
             .order_by(OrderCurrentItem.reservation_at.desc())
         )
         
@@ -158,7 +158,7 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
                     OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept])
                 )
             )
-            .options(selectinload(OrderCurrentItem.product))
+            .options(selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store))
             .order_by(OrderCurrentItem.reservation_at)
         )
         

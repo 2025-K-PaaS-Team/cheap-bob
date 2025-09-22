@@ -12,7 +12,8 @@ class CartItem(Base):
     product_id = Column(String(255), ForeignKey("store_product_info.product_id"), nullable=False) # 상품 고유 ID
     user_id = Column(String(255), nullable=False)  #  유저 고유 ID
     quantity = Column(Integer, nullable=False) # 구매 수량
-    price = Column(Integer, nullable=False)  # 최종 가격 (원)
+    price = Column(Integer, nullable=False)  # 원가 (원)
+    sale = Column(Integer)  # 세일 퍼센트, nullable
     created_at = Column(DateTime(timezone=True), server_default=func.now()) # 구매 시간
     
     # Relationships
