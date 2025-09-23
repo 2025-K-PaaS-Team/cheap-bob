@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     REDIS_PORT: int
     REDIS_DB: int
     
+    # MongoDB 정보
+    MONGODB_HOST: str
+    MONGODB_PORT: int
+    MONGODB_USER: str
+    MONGODB_PASSWORD: str
+    MONGODB_NAME: str
+    
     #Oauth2.0 정보
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
@@ -64,6 +71,10 @@ class Settings(BaseSettings):
     @property
     def REDIS_URL(self) -> str:
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
+    
+    @property
+    def MONGODB_URL(self) -> str:
+        return f"mongodb://{self.MONGODB_USER}:{self.MONGODB_PASSWORD}@{self.MONGODB_HOST}:{self.MONGODB_PORT}/{self.MONGODB_NAME}?authSource=admin"
 
 
 settings = Settings()
