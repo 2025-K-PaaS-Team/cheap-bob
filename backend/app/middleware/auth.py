@@ -12,6 +12,7 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         self.exclude_paths = [
             "/api/v1/auth/",
             "/api/v1/common/",
+            "/api/v1/test/",
             "/docs",
             "/redoc",
             "/openapi.json",
