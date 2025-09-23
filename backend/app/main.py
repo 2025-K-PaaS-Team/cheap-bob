@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -5,11 +6,23 @@ from api.v1.api import api_router
 from config.settings import settings
 from middleware.auth import JWTAuthMiddleware
 from services.auth.jwt import JWTService
+from database.mongodb_session import init_mongodb, close_mongodb
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    await init_mongodb()
+    yield
+    # Shutdown
+    await close_mongodb()
+
 
 app = FastAPI(
     title="CheapBob API",
     version="0.1.0",
-    debug=settings.DEBUG
+    debug=settings.DEBUG,
+    lifespan=lifespan
 )
 
 # JWT 인증 미들웨어 추가
