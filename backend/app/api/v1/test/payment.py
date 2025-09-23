@@ -71,7 +71,6 @@ async def restore_product_stock(
 )
 async def init_payment(
     request: PaymentInitRequest,
-    current_user: CurrentCustomerDep,
     product_repo: StoreProductInfoRepositoryDep,
     cart_repo: CartItemRepositoryDep,
     payment_info_repo: StorePaymentInfoRepositoryDep
@@ -133,7 +132,7 @@ async def init_payment(
     cart_data = {
         "payment_id": payment_id,
         "product_id": request.product_id,
-        "user_id": current_user["sub"],
+        "user_id": "test12345",
         "quantity": request.quantity,
         "price": original_price,
         "sale": sale_percent,
@@ -175,7 +174,6 @@ async def init_payment(
 )
 async def confirm_payment(
     request: PaymentConfirmRequest,
-    current_user: CurrentCustomerDep,
     cart_repo: CartItemRepositoryDep,
     order_repo: OrderCurrentItemRepositoryDep,
     product_repo: StoreProductInfoRepositoryDep
@@ -194,13 +192,6 @@ async def confirm_payment(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="결제 정보를 찾을 수 없습니다"
-            )
-        
-        # 사용자 검증
-        if cart_item.user_id != current_user["sub"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="결제에 대한 권한이 없습니다"
             )
         
         # 상품 정보 조회하여 store_id 획득
