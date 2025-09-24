@@ -8,7 +8,8 @@ from api.deps.repository import (
     StoreProductInfoRepositoryDep,
     CartItemRepositoryDep,
     OrderCurrentItemRepositoryDep,
-    StorePaymentInfoRepositoryDep
+    StorePaymentInfoRepositoryDep,
+    CustomerProfileRepositoryDep
 )
 from repositories.store_product_info import StockUpdateResult
 from schemas.order import OrderStatus
@@ -19,6 +20,7 @@ from schemas.payment import (
     PaymentResponse
 )
 from utils.id_generator import generate_payment_id
+from utils.string_utils import join_values
 from config.settings import settings
 
 router = APIRouter(prefix="/payment")
@@ -73,7 +75,8 @@ async def init_payment(
     request: PaymentInitRequest,
     product_repo: StoreProductInfoRepositoryDep,
     cart_repo: CartItemRepositoryDep,
-    payment_info_repo: StorePaymentInfoRepositoryDep
+    payment_info_repo: StorePaymentInfoRepositoryDep,
+    current_user: CurrentCustomerDep
 ):
     """
     테스트용 결제 초기화 API - 상품과 수량을 확인하고 결제 세션을 생성
@@ -132,7 +135,7 @@ async def init_payment(
     cart_data = {
         "payment_id": payment_id,
         "product_id": request.product_id,
-        "customer_id": "test12345",
+        "customer_id": current_user["sub"],
         "quantity": request.quantity,
         "price": original_price,
         "sale": sale_percent,
@@ -176,7 +179,9 @@ async def confirm_payment(
     request: PaymentConfirmRequest,
     cart_repo: CartItemRepositoryDep,
     order_repo: OrderCurrentItemRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep,
+    current_user: CurrentCustomerDep,
+    profile_repo: CustomerProfileRepositoryDep
 ):
     """
     테스트용 결제 최종 확인 API - 포트원 검증 없이 항상 성공으로 처리
@@ -206,6 +211,8 @@ async def confirm_payment(
         logger.info(f"테스트 결제 검증 성공 - payment_id: {request.payment_id}")
         logger.info(f"테스트 결제 정보 - 소비자 ID: {cart_item.customer_id}, 상품 ID: {cart_item.product_id}, 금액: {cart_item.price}")
         
+        profile_data = await profile_repo.get_all_profile_data(current_user["sub"])
+        
         # 주문 생성
         order_data = {
             "payment_id": cart_item.payment_id,
@@ -216,7 +223,11 @@ async def confirm_payment(
             "sale": cart_item.sale,
             "total_amount": cart_item.total_amount,
             "status": OrderStatus.reservation,
-            "reservation_at": datetime.now(timezone.utc)
+            "reservation_at": datetime.now(timezone.utc),
+            "preferred_menus": join_values(profile_data["preferred_menus"], "menu_type"),
+            "nutrition_types": join_values(profile_data["nutrition_types"], "nutrition_type"),
+            "allergies": join_values(profile_data["allergies"], "allergy_type"),
+            "topping_types": join_values(profile_data["topping_types"], "topping_type")
         }
         
         await order_repo.create(**order_data)

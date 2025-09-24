@@ -12,3 +12,18 @@ def parse_comma_separated_string(value: str) -> Optional[List[str]]:
     if not value or not value.strip():
         return None
     return [item.strip() for item in value.split(",") if item.strip()]
+
+def join_values(objs, attr: str) -> str | None:
+    """객체 리스트에서 특정 속성을 꺼내 ,로 join"""
+    if not objs:
+        return None
+    values = []
+    for obj in objs:
+        v = getattr(obj, attr, None)
+        if v is None:
+            continue
+        if hasattr(v, "value"):  # Enum인 경우
+            values.append(str(v.value))
+        else:
+            values.append(str(v))
+    return ",".join(values)
