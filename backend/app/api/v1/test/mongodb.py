@@ -1,10 +1,8 @@
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from database.mongodb_session import get_mongodb
 from repositories.order_history_item import OrderHistoryItemRepository
 from database.mongodb_models.order_history_item import OrderHistoryItem
 
@@ -59,8 +57,7 @@ order_history_repo = OrderHistoryItemRepository()
 
 @router.post("", response_model=OrderHistoryResponse, summary="주문 히스토리 생성")
 async def create_order_history(
-    request: CreateOrderHistoryRequest,
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    request: CreateOrderHistoryRequest
 ):
     """테스트용 주문 히스토리 생성"""
     try:
@@ -112,8 +109,7 @@ async def create_order_history(
 
 @router.get("/payment/{payment_id}", response_model=OrderHistoryResponse, summary="결제 ID로 조회")
 async def get_order_history_by_payment_id(
-    payment_id: str,
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    payment_id: str
 ):
     """결제 ID로 주문 히스토리 조회"""
     order_history = await order_history_repo.get_by_payment_id(payment_id)
@@ -147,8 +143,7 @@ async def get_order_history_by_payment_id(
 
 @router.get("/product/{product_id}", response_model=OrderHistoryResponse, summary="상품 ID로 조회")
 async def get_order_history_by_payment_id(
-    product_id: str,
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    product_id: str
 ):
     """상품 ID로 주문 히스토리 조회"""
     order_history = await order_history_repo.get_by_product_id(product_id)
@@ -185,8 +180,7 @@ async def get_customer_order_history(
     customer_id: str,
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-    limit: int = 10,
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    limit: int = 10
 ):
     """특정 사용자의 주문 히스토리 조회"""
     histories = await order_history_repo.get_customer_history(
@@ -225,8 +219,7 @@ async def get_customer_order_history(
 
 @router.get("/statistics/daily", summary="일별 주문 통계")
 async def get_daily_statistics(
-    date: datetime,
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    date: datetime
 ):
     """특정 날짜의 주문 통계 조회"""
     summary = await order_history_repo.get_daily_summary(date)
@@ -236,8 +229,7 @@ async def get_daily_statistics(
 @router.get("/statistics/monthly/{year}/{month}", summary="월별 주문 통계")
 async def get_monthly_statistics(
     year: int,
-    month: int,
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    month: int
 ):
     """월별 주문 통계 조회"""
     if month < 1 or month > 12:
@@ -249,8 +241,7 @@ async def get_monthly_statistics(
 
 @router.post("/bulk-archive", summary="주문 일괄 아카이브")
 async def bulk_archive_orders(
-    orders: List[CreateOrderHistoryRequest],
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    orders: List[CreateOrderHistoryRequest]
 ):
     """여러 주문을 일괄적으로 아카이브"""
     orders_data = [order.model_dump() for order in orders]
@@ -263,8 +254,7 @@ async def bulk_archive_orders(
 async def search_by_preferences(
     preferred_menus: Optional[str] = None,
     nutrition_types: Optional[str] = None,
-    allergies: Optional[str] = None,
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    allergies: Optional[str] = None
 ):
     """선호도 기준으로 주문 히스토리 검색"""
     # 콤마로 구분된 문자열을 리스트로 변환
@@ -307,8 +297,7 @@ async def search_by_preferences(
 
 @router.post("/test-data/generate", summary="테스트 데이터 생성")
 async def generate_test_data(
-    count: int = 10,
-    db: AsyncIOMotorDatabase = Depends(get_mongodb)
+    count: int = 10
 ):
     """테스트용 더미 데이터 생성"""
     if count > 100:
