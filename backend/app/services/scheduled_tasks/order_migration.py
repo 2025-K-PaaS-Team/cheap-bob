@@ -24,7 +24,8 @@ class OrderMigrationTask:
                 current_order_repo = OrderCurrentItemRepository(session)
                 history_order_repo = OrderHistoryItemRepository()
                 
-                all_current_orders = await current_order_repo.delete_all_and_return()
+                # 먼저 관계 정보를 포함하여 모든 주문을 조회
+                all_current_orders = await current_order_repo.get_all_orders_with_relations()
                 
                 if not all_current_orders:
                     logger.info("마이그레이션할 주문이 없습니다")
@@ -34,8 +35,13 @@ class OrderMigrationTask:
                 for order in all_current_orders:
                     order_dict = {
                         "payment_id": order.payment_id,
+                        "customer_id": order.customer_id,
+                        "customer_nickname": order.customer.detail.nickname,
+                        "customer_phone_number": order.customer.detail.phone_number,
                         "product_id": order.product_id,
-                        "user_id": order.user_id,
+                        "product_name": order.product.product_name,
+                        "store_id": order.product.store_id,
+                        "store_name": order.product.store.store_name,
                         "quantity": order.quantity,
                         "price": order.price,
                         "sale": order.sale,
@@ -53,7 +59,11 @@ class OrderMigrationTask:
                     }
                     orders_data.append(order_dict)
                 
+                # 데이터 저장 후 삭제
                 archived_count = await history_order_repo.bulk_archive_orders(orders_data)
+                
+                # 저장이 성공한 후에만 삭제
+                await current_order_repo.delete_all_items()
                 
                 elapsed_time = (datetime.now(timezone.utc) - start_time).total_seconds()
                 logger.info(
