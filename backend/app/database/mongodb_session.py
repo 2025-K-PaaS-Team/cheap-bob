@@ -1,6 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from beanie import init_beanie
-from typing import AsyncGenerator
 
 from config.settings import settings
 from database.mongodb_models import OrderHistoryItem
@@ -37,11 +36,3 @@ async def init_mongodb():
 async def close_mongodb():
     """MongoDB 종료 (앱 종료 시 호출)"""
     await mongodb.disconnect()
-    
-
-async def get_mongodb() -> AsyncGenerator[AsyncIOMotorDatabase, None]:
-    """MongoDB 데이터베이스 의존성 주입"""
-    try:
-        yield mongodb.database
-    finally:
-        pass
