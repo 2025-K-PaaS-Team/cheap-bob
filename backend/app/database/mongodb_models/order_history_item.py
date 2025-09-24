@@ -10,8 +10,8 @@ class OrderHistoryItem(Document):
     
     payment_id: str = Field(..., description="결제 고유 ID")
     customer_id: str = Field(..., description="소비자 고유 ID")
-    customer_name: str = Field(..., description="소비자 이름")
-    customer_phon_number: str = Field(..., description="소비자 핸드폰 번호")
+    customer_nickname: str = Field(..., description="소비자 이름")
+    customer_phone_number: str = Field(..., description="소비자 핸드폰 번호")
     product_id: str = Field(..., description="상품 고유 ID")
     product_name: str = Field(..., description="상품 고유 ID")
     store_id: str = Field(..., description="가게 고유 ID")
