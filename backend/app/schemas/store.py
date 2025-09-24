@@ -41,3 +41,12 @@ class StoreDetailResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+class StoreDetailResponseForCustomer(StoreDetailResponse):
+    """고객용 가게 상세 정보 (즐겨찾기 정보 포함)"""
+    is_favorite: bool = Field(False, description="즐겨찾기 등록 여부")
+    
+class StoreFavoriteStateResponse(BaseModel):
+    """고객 즐겨찾기 추가/삭제 성공 메시지"""
+    message: str = Field(..., description="즐겨찾기 추가/삭제 성공 메시지")
