@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict
-from sqlalchemy import select, and_, update as sql_update
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy import select, and_, or_, update as sql_update
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.store import Store
@@ -254,6 +254,96 @@ class StoreRepository(BaseRepository[Store]):
             )
             .order_by(Store.created_at.desc())
             .distinct()  # 중복 제거
+        )
+        result = await self.session.execute(query)
+        return result.scalars().unique().all()
+    
+    async def search_by_location(
+        self,
+        sido: str,
+        sigungu: str,
+        bname: str
+    ) -> List[Store]:
+        """위치로만 가게 검색"""
+        query = (
+            select(Store)
+            .join(Store.address)
+            .where(
+                and_(
+                    Address.sido == sido,
+                    Address.sigungu == sigungu,
+                    Address.bname == bname
+                )
+            )
+            .options(
+                selectinload(Store.address),
+                selectinload(Store.sns_info),
+                selectinload(Store.operation_info),
+                selectinload(Store.images),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
+            )
+            .order_by(Store.store_name)
+            .distinct()
+        )
+        result = await self.session.execute(query)
+        return result.scalars().unique().all()
+    
+    async def search_by_location_and_name(
+        self, 
+        sido: str,
+        sigungu: str, 
+        bname: str,
+        search_name: str
+    ) -> List[Store]:
+        """주소와 이름으로 가게/상품 검색"""
+        query = (
+            select(Store)
+            .join(Store.address)
+            .outerjoin(Store.products) 
+            .where(
+                and_(
+                    Address.sido == sido,
+                    Address.sigungu == sigungu,
+                    Address.bname == bname,
+                    or_(
+                        Store.store_name.like(f"%{search_name}%"),
+                        StoreProductInfo.product_name.like(f"%{search_name}%")
+                    )
+                )
+            )
+            .options(
+                selectinload(Store.address),
+                selectinload(Store.sns_info),
+                selectinload(Store.operation_info),
+                selectinload(Store.images),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
+            )
+            .order_by(Store.store_name)
+            .distinct()
+        )
+        result = await self.session.execute(query)
+        return result.scalars().unique().all()
+    
+    async def search_by_name(self, search_name: str) -> List[Store]:
+        """이름으로 가게/상품 검색"""
+        query = (
+            select(Store)
+            .outerjoin(Store.products)
+            .where(
+                or_(
+                    Store.store_name.like(f"%{search_name}%"),
+                    StoreProductInfo.product_name.like(f"%{search_name}%")
+                )
+            )
+            .options(
+                selectinload(Store.address),
+                selectinload(Store.sns_info),
+                selectinload(Store.operation_info),
+                selectinload(Store.images),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
+            )
+            .order_by(Store.store_name)
+            .distinct()
         )
         result = await self.session.execute(query)
         return result.scalars().unique().all()
