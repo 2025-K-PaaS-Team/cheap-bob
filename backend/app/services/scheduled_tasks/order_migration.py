@@ -111,7 +111,7 @@ scheduled_task = {
     "func": OrderMigrationTask.migrate_current_orders_to_history,
     "trigger": "cron",
     "trigger_args": {
-        "hour": 15,
+        "hour": 4,
         "minute": 0,
     },
     "job_id": "migrate_daily_orders",
