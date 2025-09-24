@@ -12,7 +12,7 @@ class OrderCurrentItem(Base):
     
     payment_id = Column(String(255), primary_key=True) # 구매 고유 ID
     product_id = Column(String(255), ForeignKey("store_product_info.product_id"), nullable=False) # 상품 고유 ID  
-    user_id = Column(String(255), nullable=False)  # 유저 고유 ID
+    customer_id = Column(String(255), ForeignKey("customers.email"), nullable=False)  # 소비자 고유 ID (customer email)
     quantity = Column(Integer, nullable=False) # 구매 수량
     price = Column(Integer, nullable=False)  # 원가 (원)
     sale = Column(Integer)  # 세일 퍼센트, nullable
@@ -32,3 +32,4 @@ class OrderCurrentItem(Base):
     
     # Relationships
     product = relationship("StoreProductInfo", back_populates="order_current_items")
+    customer = relationship("Customer", foreign_keys=[customer_id])

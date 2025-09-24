@@ -8,9 +8,14 @@ from database.mongodb_models.base import Document
 class OrderHistoryItem(Document):
     """오래된 주문 히스토리"""
     
-    payment_id: str = Field(..., description="구매 고유 ID")
+    payment_id: str = Field(..., description="결제 고유 ID")
+    customer_id: str = Field(..., description="소비자 고유 ID")
+    customer_name: str = Field(..., description="소비자 이름")
+    customer_phon_number: str = Field(..., description="소비자 핸드폰 번호")
     product_id: str = Field(..., description="상품 고유 ID")
-    user_id: str = Field(..., description="유저 고유 ID")
+    product_name: str = Field(..., description="상품 고유 ID")
+    store_id: str = Field(..., description="가게 고유 ID")
+    store_name: str = Field(..., description="가게 이름")
     quantity: int = Field(..., description="구매 수량")
     price: int = Field(..., description="원가 (원)")
     sale: Optional[int] = Field(None, description="세일 퍼센트")
@@ -33,7 +38,8 @@ class OrderHistoryItem(Document):
     class Settings:
         name = "order_history_items"
         indexes = [
-            [("user_id", 1)],
+            [("customer_id", 1)],
             [("product_id", 1)],
+            [("store_id", 1)],
             [("reservation_at", -1)],
         ]
