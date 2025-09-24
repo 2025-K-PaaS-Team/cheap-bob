@@ -2,14 +2,13 @@ from fastapi import APIRouter, HTTPException, status
 from datetime import datetime, timezone
 from loguru import logger
 
-from utils.docs_error import create_error_responses
-
 from api.deps.auth import CurrentCustomerDep
 from api.deps.repository import (
     StoreProductInfoRepositoryDep,
     CartItemRepositoryDep,
     OrderCurrentItemRepositoryDep,
-    StorePaymentInfoRepositoryDep
+    StorePaymentInfoRepositoryDep,
+    CustomerProfileRepositoryDep
 )
 from repositories.store_product_info import StockUpdateResult
 from schemas.order import OrderStatus
@@ -20,7 +19,9 @@ from schemas.payment import (
     PaymentResponse
 )
 from services.payment import PaymentService
+from utils.docs_error import create_error_responses
 from utils.id_generator import generate_payment_id
+from utils.string_utils import join_values
 from config.settings import settings
 
 router = APIRouter(prefix="/payment", tags=["Customer-Payment"])
@@ -183,7 +184,8 @@ async def confirm_payment(
     cart_repo: CartItemRepositoryDep,
     order_repo: OrderCurrentItemRepositoryDep,
     product_repo: StoreProductInfoRepositoryDep,
-    payment_info_repo: StorePaymentInfoRepositoryDep
+    payment_info_repo: StorePaymentInfoRepositoryDep,
+    profile_repo: CustomerProfileRepositoryDep
 ):
     """
     결제 최종 확인 API - 포트원에서 결제가 성공했는지 확인
@@ -245,6 +247,8 @@ async def confirm_payment(
             result["payment_info"]['amount']
         ))
         
+        profile_data = await profile_repo.get_all_profile_data(current_user["sub"])
+        
         # 주문 생성
         order_data = {
             "payment_id": cart_item.payment_id,
@@ -255,7 +259,11 @@ async def confirm_payment(
             "sale": cart_item.sale,
             "total_amount" : cart_item.total_amount,
             "status": OrderStatus.reservation,
-            "reservation_at": datetime.now(timezone.utc)
+            "reservation_at": datetime.now(timezone.utc),
+            "preferred_menus": join_values(profile_data["preferred_menus"], "menu_type"),
+            "nutrition_types": join_values(profile_data["nutrition_types"], "nutrition_type"),
+            "allergies": join_values(profile_data["allergies"], "allergy_type"),
+            "topping_types": join_values(profile_data["topping_types"], "topping_type")
         }
         
         await order_repo.create(**order_data)
