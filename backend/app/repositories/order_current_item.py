@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
+from database.models.customer import Customer
 from schemas.order import OrderStatus
 from repositories.base import BaseRepository
 
@@ -27,10 +28,10 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
             load_relations=["product"]
         )
     
-    async def get_by_user_id(self, user_id: str) -> List[OrderCurrentItem]:
+    async def get_by_customer_id(self, customer_id: str) -> List[OrderCurrentItem]:
         """사용자의 현재 주문 목록 조회"""
         return await self.get_many(
-            filters={"user_id": user_id},
+            filters={"customer_id": customer_id},
             order_by=["-order_time"]
         )
     
@@ -68,13 +69,27 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         deleted_items = await self.delete_all_and_return()
         return deleted_items
     
+    async def get_all_orders_with_relations(self) -> List[OrderCurrentItem]:
+        """모든 주문 조회 (관계 포함) - 마이그레이션용"""
+        stmt = (
+            select(OrderCurrentItem)
+            .options(
+                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store),
+                selectinload(OrderCurrentItem.customer).selectinload(Customer.detail)
+            )
+            .order_by(OrderCurrentItem.reservation_at)
+        )
+        
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+    
     async def migrate_from_current_orders(self, cart_item: dict) -> None:
         """장바구니에서 주문으로 마이그레이션"""
         
         await self.create(
             payment_id=cart_item["payment_id"],
             product_id=cart_item["product_id"],
-            user_id=cart_item["user_id"],
+            customer_id=cart_item["customer_id"],
             quantity=cart_item["quantity"],
             price=cart_item["price"],
             status=OrderStatus.reservation,
@@ -83,13 +98,14 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         
         return None
     
-    async def get_user_orders_with_relations(self, user_id: str) -> List[OrderCurrentItem]:
-        """사용자의 모든 주문 조회 (관련 정보 포함)"""
+    async def get_customer_orders_with_relations(self, customer_id: str) -> List[OrderCurrentItem]:
+        """소비자의 모든 주문 조회 (관련 정보 포함)"""
         stmt = (
             select(OrderCurrentItem)
-            .where(OrderCurrentItem.user_id == user_id)
+            .where(OrderCurrentItem.customer_id == customer_id)
             .options(
-                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
+                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store),
+                selectinload(OrderCurrentItem.customer).selectinload(Customer.detail)
             )
             .order_by(OrderCurrentItem.reservation_at.desc())
         )
@@ -97,13 +113,14 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         result = await self.session.execute(stmt)
         return result.scalars().all()
     
-    async def get_user_current_orders_with_relations(self, user_id: str) -> List[OrderCurrentItem]:
-        """사용자의 당일 주문 조회"""
+    async def get_customer_current_orders_with_relations(self, customer_id: str) -> List[OrderCurrentItem]:
+        """소비자의 당일 주문 조회"""
         stmt = (
             select(OrderCurrentItem)
-            .where(OrderCurrentItem.user_id == user_id)
+            .where(OrderCurrentItem.customer_id == customer_id)
             .options(
-                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
+                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store),
+                selectinload(OrderCurrentItem.customer).selectinload(Customer.detail)
             )
             .order_by(OrderCurrentItem.reservation_at.desc())
         )
@@ -117,7 +134,8 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
             select(OrderCurrentItem)
             .where(OrderCurrentItem.payment_id == payment_id)
             .options(
-                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store)
+                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store),
+                selectinload(OrderCurrentItem.customer).selectinload(Customer.detail)
             )
         )
         result = await self.session.execute(stmt)
@@ -128,7 +146,10 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         stmt = (
             select(OrderCurrentItem)
             .where(OrderCurrentItem.payment_id == payment_id)
-            .options(selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store))
+            .options(
+                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store),
+                selectinload(OrderCurrentItem.customer).selectinload(Customer.detail)
+            )
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
@@ -139,7 +160,10 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
             select(OrderCurrentItem)
             .join(StoreProductInfo, OrderCurrentItem.product_id == StoreProductInfo.product_id)
             .where(StoreProductInfo.store_id == store_id)
-            .options(selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store))
+            .options(
+                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store),
+                selectinload(OrderCurrentItem.customer).selectinload(Customer.detail)
+            )
             .order_by(OrderCurrentItem.reservation_at.desc())
         )
         
@@ -152,7 +176,10 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
             select(OrderCurrentItem)
             .join(StoreProductInfo, OrderCurrentItem.product_id == StoreProductInfo.product_id)
             .where(StoreProductInfo.store_id == store_id)
-            .options(selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store))
+            .options(
+                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store),
+                selectinload(OrderCurrentItem.customer).selectinload(Customer.detail)
+            )
             .order_by(OrderCurrentItem.reservation_at)
         )
         

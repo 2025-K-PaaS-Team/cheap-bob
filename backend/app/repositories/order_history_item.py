@@ -15,8 +15,13 @@ class OrderHistoryItemRepository(BaseMongoRepository[OrderHistoryItem]):
         """현재 주문 데이터로부터 히스토리 생성"""
         history_item = OrderHistoryItem(
             payment_id=order_data.get("payment_id"),
+            customer_id=order_data.get("customer_id"),
+            customer_nickname=order_data.get("customer_nickname"),
+            customer_phone_number=order_data.get("customer_phone_number"),
             product_id=order_data.get("product_id"),
-            user_id=order_data.get("user_id"),
+            product_name=order_data.get("product_name"),
+            store_id=order_data.get("store_id"),
+            store_name=order_data.get("store_name"),
             quantity=order_data.get("quantity"),
             price=order_data.get("price"),
             sale=order_data.get("sale"),
@@ -42,8 +47,13 @@ class OrderHistoryItemRepository(BaseMongoRepository[OrderHistoryItem]):
         for order in orders_data:
             history_item = OrderHistoryItem(
                 payment_id=order.get("payment_id"),
+                customer_id=order.get("customer_id"),
+                customer_nickname=order.get("customer_nickname"),
+                customer_phone_number=order.get("customer_phone_number"),
                 product_id=order.get("product_id"),
-                user_id=order.get("user_id"),
+                product_name=order.get("product_name"),
+                store_id=order.get("store_id"),
+                store_name=order.get("store_name"),
                 quantity=order.get("quantity"),
                 price=order.get("price"),
                 sale=order.get("sale"),
@@ -74,15 +84,19 @@ class OrderHistoryItemRepository(BaseMongoRepository[OrderHistoryItem]):
         """상품 ID로 조회"""
         return await self.get_one(product_id=product_id)
     
-    async def get_user_history(
+    async def get_by_store_id(self, store_id: str) -> Optional[OrderHistoryItem]:
+        """가게 ID로 조회"""
+        return await self.get_one(store_id=store_id)
+    
+    async def get_customer_history(
         self,
-        user_id: str,
+        customer_id: str,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         limit: int = 100
     ) -> List[OrderHistoryItem]:
         """사용자의 주문 히스토리 조회"""
-        filters = {"user_id": user_id}
+        filters = {"customer_id": customer_id}
         
         if start_date or end_date:
             date_filter = {}
