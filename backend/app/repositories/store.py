@@ -9,6 +9,7 @@ from database.models.store_sns import StoreSNS
 from database.models.store_product_info import StoreProductInfo
 from database.models.store_payment_info import StorePaymentInfo
 from database.models.store_operation_info import StoreOperationInfo
+from database.models.customer_favorite import CustomerFavorite
 from repositories.base import BaseRepository
 
 
@@ -33,13 +34,6 @@ class StoreRepository(BaseRepository[Store]):
         return await self.get_many(
             order_by=["-created_at"],
             load_relations=["seller", "address", "payment_info", "products", "sns_info", "images", "operation_info"]
-        )
-    
-    async def search_by_name(self, keyword: str) -> List[Store]:
-        """가게 이름으로 검색"""
-        return await self.get_many(
-            filters={"store_name": {"like": keyword}},
-            order_by=["store_name"]
         )
     
     async def get_with_address(self, store_id: str) -> Optional[Store]:
@@ -258,6 +252,30 @@ class StoreRepository(BaseRepository[Store]):
         result = await self.session.execute(query)
         return result.scalars().unique().all()
     
+    async def get_stores_with_products_and_favorites(self, customer_email: str) -> List[tuple[Store, bool]]:
+        """상품이 있는 가게들과 즐겨찾기 여부를 함께 조회"""
+        subquery = (
+            select(CustomerFavorite.store_id)
+            .where(CustomerFavorite.customer_email == customer_email)
+            .subquery()
+        )
+        
+        query = (
+            select(Store, Store.store_id.in_(subquery))
+            .join(Store.products)  # INNER JOIN으로 상품이 있는 가게만 필터링
+            .options(
+                selectinload(Store.address),
+                selectinload(Store.sns_info),
+                selectinload(Store.operation_info),
+                selectinload(Store.images),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
+            )
+            .order_by(Store.created_at.desc())
+            .distinct()  # 중복 제거
+        )
+        result = await self.session.execute(query)
+        return result.unique().all()
+    
     async def search_by_location(
         self,
         sido: str,
@@ -287,6 +305,43 @@ class StoreRepository(BaseRepository[Store]):
         )
         result = await self.session.execute(query)
         return result.scalars().unique().all()
+    
+    async def search_by_location_with_favorites(
+        self,
+        sido: str,
+        sigungu: str,
+        bname: str,
+        customer_email: str
+    ) -> List[tuple[Store, bool]]:
+        """위치로 가게 검색 (즐겨찾기 정보 포함)"""
+        subquery = (
+            select(CustomerFavorite.store_id)
+            .where(CustomerFavorite.customer_email == customer_email)
+            .subquery()
+        )
+        
+        query = (
+            select(Store, Store.store_id.in_(subquery))
+            .join(Store.address)
+            .where(
+                and_(
+                    Address.sido == sido,
+                    Address.sigungu == sigungu,
+                    Address.bname == bname
+                )
+            )
+            .options(
+                selectinload(Store.address),
+                selectinload(Store.sns_info),
+                selectinload(Store.operation_info),
+                selectinload(Store.images),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
+            )
+            .order_by(Store.store_name)
+            .distinct()
+        )
+        result = await self.session.execute(query)
+        return result.unique().all()
     
     async def search_by_location_and_name(
         self, 
@@ -324,6 +379,49 @@ class StoreRepository(BaseRepository[Store]):
         result = await self.session.execute(query)
         return result.scalars().unique().all()
     
+    async def search_by_location_and_name_with_favorites(
+        self, 
+        sido: str,
+        sigungu: str, 
+        bname: str,
+        search_name: str,
+        customer_email: str
+    ) -> List[tuple[Store, bool]]:
+        """주소와 이름으로 가게/상품 검색 (즐겨찾기 정보 포함)"""
+        subquery = (
+            select(CustomerFavorite.store_id)
+            .where(CustomerFavorite.customer_email == customer_email)
+            .subquery()
+        )
+        
+        query = (
+            select(Store, Store.store_id.in_(subquery))
+            .join(Store.address)
+            .outerjoin(Store.products) 
+            .where(
+                and_(
+                    Address.sido == sido,
+                    Address.sigungu == sigungu,
+                    Address.bname == bname,
+                    or_(
+                        Store.store_name.like(f"%{search_name}%"),
+                        StoreProductInfo.product_name.like(f"%{search_name}%")
+                    )
+                )
+            )
+            .options(
+                selectinload(Store.address),
+                selectinload(Store.sns_info),
+                selectinload(Store.operation_info),
+                selectinload(Store.images),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
+            )
+            .order_by(Store.store_name)
+            .distinct()
+        )
+        result = await self.session.execute(query)
+        return result.unique().all()
+    
     async def search_by_name(self, search_name: str) -> List[Store]:
         """이름으로 가게/상품 검색"""
         query = (
@@ -344,6 +442,54 @@ class StoreRepository(BaseRepository[Store]):
             )
             .order_by(Store.store_name)
             .distinct()
+        )
+        result = await self.session.execute(query)
+        return result.scalars().unique().all()
+    
+    async def search_by_name_with_favorites(self, search_name: str, customer_email: str) -> List[tuple[Store, bool]]:
+        """이름으로 가게/상품 검색 (즐겨찾기 정보 포함)"""
+        subquery = (
+            select(CustomerFavorite.store_id)
+            .where(CustomerFavorite.customer_email == customer_email)
+            .subquery()
+        )
+        
+        query = (
+            select(Store, Store.store_id.in_(subquery))
+            .outerjoin(Store.products)
+            .where(
+                or_(
+                    Store.store_name.like(f"%{search_name}%"),
+                    StoreProductInfo.product_name.like(f"%{search_name}%")
+                )
+            )
+            .options(
+                selectinload(Store.address),
+                selectinload(Store.sns_info),
+                selectinload(Store.operation_info),
+                selectinload(Store.images),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
+            )
+            .order_by(Store.store_name)
+            .distinct()
+        )
+        result = await self.session.execute(query)
+        return result.unique().all()
+    
+    async def get_favorite_stores_with_full_info(self, customer_email: str) -> List[Store]:
+        """고객이 즐겨찾기한 가게들을 모든 관련 정보와 함께 조회"""
+        query = (
+            select(Store)
+            .join(CustomerFavorite, Store.store_id == CustomerFavorite.store_id)
+            .where(CustomerFavorite.customer_email == customer_email)
+            .options(
+                selectinload(Store.address),
+                selectinload(Store.sns_info),
+                selectinload(Store.operation_info),
+                selectinload(Store.images),
+                selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info)
+            )
+            .order_by(Store.store_name)
         )
         result = await self.session.execute(query)
         return result.scalars().unique().all()
