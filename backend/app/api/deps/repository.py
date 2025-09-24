@@ -22,6 +22,7 @@ from repositories.seller import SellerRepository
 from repositories.address import AddressRepository
 from repositories.store_sns import StoreSNSRepository
 from repositories.store_operation_info import StoreOperationInfoRepository
+from repositories.customer_favorite import CustomerFavoriteRepository
 
 
 def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
@@ -92,6 +93,10 @@ def get_store_operation_info_repository(session: AsyncSessionDep) -> StoreOperat
     return StoreOperationInfoRepository(session)
 
 
+def get_customer_favorite_repository(session: AsyncSessionDep) -> CustomerFavoriteRepository:
+    return CustomerFavoriteRepository(session)
+
+
 StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
 StoreProductInfoRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_store_product_info_repository)]
 CustomerDetailRepositoryDep = Annotated[CustomerDetailRepository, Depends(get_customer_detail_repository)]
@@ -109,3 +114,4 @@ SellerRepositoryDep = Annotated[SellerRepository, Depends(get_seller_repository)
 AddressRepositoryDep = Annotated[AddressRepository, Depends(get_address_repository)]
 StoreSNSRepositoryDep = Annotated[StoreSNSRepository, Depends(get_store_sns_repository)]
 StoreOperationInfoRepositoryDep = Annotated[StoreOperationInfoRepository, Depends(get_store_operation_info_repository)]
+CustomerFavoriteRepositoryDep = Annotated[CustomerFavoriteRepository, Depends(get_customer_favorite_repository)]

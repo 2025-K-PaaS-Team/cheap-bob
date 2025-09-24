@@ -17,3 +17,4 @@ class Customer(Base):
     nutrition_types = relationship("CustomerNutritionType", back_populates="customer", cascade="all, delete-orphan")
     allergies = relationship("CustomerAllergy", back_populates="customer", cascade="all, delete-orphan")
     topping_types = relationship("CustomerToppingType", back_populates="customer", cascade="all, delete-orphan")
+    favorites = relationship("CustomerFavorite", back_populates="customer", cascade="all, delete-orphan")

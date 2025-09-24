@@ -32,3 +32,4 @@ class Store(Base):
     sns_info = relationship("StoreSNS", back_populates="store", uselist=False)
     images = relationship("StoreImage", back_populates="store", cascade="all, delete-orphan")
     operation_info = relationship("StoreOperationInfo", back_populates="store", cascade="all, delete-orphan")
+    favorited_by = relationship("CustomerFavorite", back_populates="store", cascade="all, delete-orphan")
