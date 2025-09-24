@@ -10,8 +10,10 @@ from api.deps.auth import CurrentSellerDep
 from api.deps.repository import (
     StoreRepositoryDep,
     OrderCurrentItemRepositoryDep,
+    OrderHistoryItemRepositoryDep,
     StoreProductInfoRepositoryDep,
-    StorePaymentInfoRepositoryDep
+    StorePaymentInfoRepositoryDep,
+    CustomerDetailRepositoryDep
 )
 from repositories.store_product_info import StockUpdateResult
 from schemas.order import (
@@ -39,22 +41,34 @@ router = APIRouter(prefix="/store/orders", tags=["Seller-Order"])
 async def get_store_orders(
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    order_repo: OrderCurrentItemRepositoryDep
+    order_repo: OrderCurrentItemRepositoryDep,
+    history_repo: OrderHistoryItemRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep,
+    customer_detail_repo: CustomerDetailRepositoryDep
 ):
     """
-    가게의 주문 목록 조회
+    가게의 주문 목록 조회 (당일 + 과거)
     """
     
     seller_email = current_user["sub"]
     
     store_id = await get_store_id_by_email(seller_email, store_repo)
     
-    orders = await order_repo.get_store_orders_with_relations(store_id)
+    # 당일 주문 조회
+    current_orders = await order_repo.get_store_orders_with_relations(store_id)
+    
+    # 과거 주문 조회
+    history_orders = await history_repo.get_store_history(store_id)
     
     order_responses = []
-    for order in orders:
+    
+    # 당일 주문 처리
+    for order in current_orders:
         order_response = OrderItemResponse(
             payment_id=order.payment_id,
+            customer_id=order.customer_id,
+            customer_nickname=order.customer.detail.nickname,
+            customer_phone_number=order.customer.detail.phone_number,
             product_id=order.product_id,
             product_name=order.product.product_name,
             store_id=order.product.store_id,
@@ -73,6 +87,35 @@ async def get_store_orders(
             nutrition_types=parse_comma_separated_string(order.nutrition_types),
             allergies=parse_comma_separated_string(order.allergies),
             topping_types=parse_comma_separated_string(order.topping_types)
+        )
+        order_responses.append(order_response)
+    
+    # 과거 주문 처리
+    for history_order in history_orders:
+        
+        order_response = OrderItemResponse(
+            payment_id=history_order.payment_id,
+            customer_id=history_order.customer_id,
+            customer_nickname=history_order.customer_nickname,
+            customer_phone_number=history_order.customer_phone_number,
+            product_id=history_order.product_id,
+            product_name=history_order.product_name,
+            store_id=store_id,
+            store_name=history_order.store_name,
+            quantity=history_order.quantity,
+            price=history_order.price,
+            sale=history_order.sale,
+            total_amount=history_order.total_amount,
+            status=history_order.status,
+            reservation_at=history_order.reservation_at,
+            accepted_at=history_order.accepted_at,
+            completed_at=history_order.completed_at,
+            canceled_at=history_order.canceled_at,
+            cancel_reason=history_order.cancel_reason,
+            preferred_menus=parse_comma_separated_string(history_order.preferred_menus),
+            nutrition_types=parse_comma_separated_string(history_order.nutrition_types),
+            allergies=parse_comma_separated_string(history_order.allergies),
+            topping_types=parse_comma_separated_string(history_order.topping_types)
         )
         order_responses.append(order_response)
     
@@ -108,6 +151,9 @@ async def get_current_orders(
     for order in orders:
         order_response = OrderItemResponse(
             payment_id=order.payment_id,
+            customer_id=order.customer_id,
+            customer_nickname=order.customer.detail.nickname,
+            customer_phone_number=order.customer.detail.phone_number,
             product_id=order.product_id,
             product_name=order.product.product_name,
             store_id=order.product.store_id,
@@ -179,6 +225,9 @@ async def update_order_accept(
     # response 포맷으로 변환
     return OrderItemResponse(
         payment_id=updated_order.payment_id,
+        customer_id=order.customer_id,
+        customer_nickname=order.customer.detail.nickname,
+        customer_phone_number=order.customer.detail.phone_number,
         product_id=updated_order.product_id,
         product_name=order.product.product_name,
         store_id=order.product.store_id,
@@ -323,7 +372,7 @@ async def get_order_qr(
     
     # JWT 기반 QR 코드 생성
     qr_data, created_at = encode_qr_data(
-        user_id=order.user_id,
+        customer_id=order.customer_id,
         payment_id=payment_id,
         product_id=order.product_id
     )
