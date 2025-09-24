@@ -133,7 +133,7 @@ async def init_payment(
     cart_data = {
         "payment_id": payment_id,
         "product_id": request.product_id,
-        "user_id": current_user["sub"],
+        "customer_id": current_user["sub"],
         "quantity": request.quantity,
         "price": product.price,
         "sale": product.sale,
@@ -203,7 +203,7 @@ async def confirm_payment(
             )
         
         # 사용자 검증
-        if cart_item.user_id != current_user["sub"]:
+        if cart_item.customer_id != current_user["sub"]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="결제에 대한 권한이 없습니다"
@@ -239,7 +239,7 @@ async def confirm_payment(
             )
         
         logger.info("유저 ID({}) / 결제({}) / 상품({}) / 금액({})".format(
-            cart_item.user_id,
+            cart_item.customer_id,
             result["payment_info"]['payment_method'],
             result["payment_info"]['good_name'],
             result["payment_info"]['amount']
@@ -249,7 +249,7 @@ async def confirm_payment(
         order_data = {
             "payment_id": cart_item.payment_id,
             "product_id": cart_item.product_id,
-            "user_id": cart_item.user_id,
+            "customer_id": cart_item.customer_id,
             "quantity": cart_item.quantity,
             "price": cart_item.price,
             "sale": cart_item.sale,

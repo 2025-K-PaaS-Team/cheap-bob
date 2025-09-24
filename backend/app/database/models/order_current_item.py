@@ -24,7 +24,7 @@ class OrderCurrentItem(Base):
     canceled_at = Column(DateTime(timezone=True))  # 주문 취소 시간
     cancel_reason = Column(String(500), nullable=True)  # 취소 사유
     
-    # User preference fields
+    # Customer preference fields
     preferred_menus = Column(String(500), nullable=True)  # 유저의 선호 메뉴 (콤마로 구분)
     nutrition_types = Column(String(500), nullable=True)  # 식품 영양 타입 (콤마로 구분) 
     allergies = Column(String(500), nullable=True)  # 알레르기/제약조건 (콤마로 구분)

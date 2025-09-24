@@ -132,7 +132,7 @@ async def init_payment(
     cart_data = {
         "payment_id": payment_id,
         "product_id": request.product_id,
-        "user_id": "test12345",
+        "customer_id": "test12345",
         "quantity": request.quantity,
         "price": original_price,
         "sale": sale_percent,
@@ -204,13 +204,13 @@ async def confirm_payment(
         
         # 테스트용 결제 검증 - 항상 성공으로 처리
         logger.info(f"테스트 결제 검증 성공 - payment_id: {request.payment_id}")
-        logger.info(f"테스트 결제 정보 - 유저 ID: {cart_item.user_id}, 상품 ID: {cart_item.product_id}, 금액: {cart_item.price}")
+        logger.info(f"테스트 결제 정보 - 소비자 ID: {cart_item.customer_id}, 상품 ID: {cart_item.product_id}, 금액: {cart_item.price}")
         
         # 주문 생성
         order_data = {
             "payment_id": cart_item.payment_id,
             "product_id": cart_item.product_id,
-            "user_id": cart_item.user_id,
+            "customer_id": cart_item.customer_id,
             "quantity": cart_item.quantity,
             "price": cart_item.price,
             "sale": cart_item.sale,

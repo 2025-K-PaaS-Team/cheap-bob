@@ -18,7 +18,7 @@ router = APIRouter(
 class CreateOrderHistoryRequest(BaseModel):
     payment_id: str = Field(..., description="구매 고유 ID")
     product_id: str = Field(..., description="상품 고유 ID")
-    user_id: str = Field(..., description="유저 고유 ID")
+    customer_id: str = Field(..., description="유저 고유 ID")
     quantity: int = Field(..., description="구매 수량")
     price: int = Field(..., description="원가 (원)")
     sale: Optional[int] = Field(None, description="세일 퍼센트")
@@ -34,7 +34,7 @@ class OrderHistoryResponse(BaseModel):
     id: str
     payment_id: str
     product_id: str
-    user_id: str
+    customer_id: str
     quantity: int
     price: int
     sale: Optional[int]
@@ -68,7 +68,7 @@ async def create_order_history(
         order_history = OrderHistoryItem(
             payment_id=request.payment_id,
             product_id=request.product_id,
-            user_id=request.user_id,
+            customer_id=request.customer_id,
             quantity=request.quantity,
             price=request.price,
             sale=request.sale,
@@ -88,7 +88,7 @@ async def create_order_history(
             id=str(saved_item.id),
             payment_id=saved_item.payment_id,
             product_id=saved_item.product_id,
-            user_id=saved_item.user_id,
+            customer_id=saved_item.customer_id,
             quantity=saved_item.quantity,
             price=saved_item.price,
             sale=saved_item.sale,
@@ -125,7 +125,7 @@ async def get_order_history_by_payment_id(
         id=str(order_history.id),
         payment_id=order_history.payment_id,
         product_id=order_history.product_id,
-        user_id=order_history.user_id,
+        customer_id=order_history.customer_id,
         quantity=order_history.quantity,
         price=order_history.price,
         sale=order_history.sale,
@@ -160,7 +160,7 @@ async def get_order_history_by_payment_id(
         id=str(order_history.id),
         payment_id=order_history.payment_id,
         product_id=order_history.product_id,
-        user_id=order_history.user_id,
+        customer_id=order_history.customer_id,
         quantity=order_history.quantity,
         price=order_history.price,
         sale=order_history.sale,
@@ -180,17 +180,17 @@ async def get_order_history_by_payment_id(
     )
 
 
-@router.get("/user/{user_id}", response_model=List[OrderHistoryResponse], summary="사용자 주문 히스토리")
-async def get_user_order_history(
-    user_id: str,
+@router.get("/customer/{customer_id}", response_model=List[OrderHistoryResponse], summary="사용자 주문 히스토리")
+async def get_customer_order_history(
+    customer_id: str,
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     limit: int = 10,
     db: AsyncIOMotorDatabase = Depends(get_mongodb)
 ):
     """특정 사용자의 주문 히스토리 조회"""
-    histories = await order_history_repo.get_user_history(
-        user_id=user_id,
+    histories = await order_history_repo.get_customer_history(
+        customer_id=customer_id,
         start_date=start_date,
         end_date=end_date,
         limit=limit
@@ -201,7 +201,7 @@ async def get_user_order_history(
             id=str(history.id),
             payment_id=history.payment_id,
             product_id=history.product_id,
-            user_id=history.user_id,
+            customer_id=history.customer_id,
             quantity=history.quantity,
             price=history.price,
             sale=history.sale,
@@ -283,7 +283,7 @@ async def search_by_preferences(
             id=str(history.id),
             payment_id=history.payment_id,
             product_id=history.product_id,
-            user_id=history.user_id,
+            customer_id=history.customer_id,
             quantity=history.quantity,
             price=history.price,
             sale=history.sale,
@@ -320,7 +320,7 @@ async def generate_test_data(
         order_history = OrderHistoryItem(
             payment_id=f"PAY_{datetime.now().timestamp()}_{i}",
             product_id=f"PROD_{i % 5}",  # 5개 상품으로 순환
-            user_id=f"USER_{i % 3}",  # 3명의 사용자로 순환
+            customer_id=f"Customer_{i % 3}",  # 3명의 사용자로 순환
             quantity=(i % 3) + 1,
             price=10000 + (i * 1000),
             sale=10 if i % 2 == 0 else None,
