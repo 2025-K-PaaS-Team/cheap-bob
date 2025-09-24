@@ -13,6 +13,7 @@ from schemas.store import StoreDetailResponse
 from schemas.store_operation import StoreOperationResponse
 from schemas.image import ImageUploadResponse
 from core.object_storage import object_storage
+from services.redis_cache import SearchHistoryCache
 
 router = APIRouter(prefix="/search", tags=["Customer-Search"])
 
@@ -220,6 +221,8 @@ async def search_stores_by_name(
     
     stores = await store_repo.search_by_name(search_name)
     
+    await SearchHistoryCache.add_search_name(current_user["sub"], search_name)
+    
     if not stores:
         return []
     
@@ -252,6 +255,8 @@ async def search_stores_by_location_name(
         bname=bname,
         search_name=search_name
     )
+    
+    await SearchHistoryCache.add_search_name(current_user["sub"], search_name)
     
     if not stores:
         return []
