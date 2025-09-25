@@ -142,6 +142,10 @@ async def update_product(
     # 업데이트할 데이터만 추출
     update_data = request.model_dump(exclude_unset=True)
     
+    # sale이 0이면 None으로 변경
+    if 'sale' in update_data and update_data['sale'] == 0:
+        update_data['sale'] = None
+    
     if update_data:
         await product_repo.update(product_id, **update_data)
 

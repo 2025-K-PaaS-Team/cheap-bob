@@ -10,7 +10,7 @@ class ProductCreateRequest(BaseModel):
     description: str = Field(..., description="상품 설명", max_length=1000)
     initial_stock: int = Field(..., description="초기 재고 수량", ge=0)
     price: int = Field(..., description="상품 가격 (원 단위)", gt=0)
-    sale: Optional[int] = Field(None, description="세일 퍼센트 (0-100)", ge=0, le=100)
+    sale: Optional[int] = Field(None, description="세일 퍼센트 (1-100)", ge=1, le=100)
     nutrition_types: List[NutritionType] = Field(default_factory=list, description="영양 타입 목록")
 
 
@@ -19,7 +19,7 @@ class ProductUpdateRequest(BaseModel):
     product_name: Optional[str] = Field(None, description="상품 이름", min_length=1, max_length=255)
     description: Optional[str] = Field(None, description="상품 설명", max_length=1000)
     price: Optional[int] = Field(None, description="상품 가격 (원 단위)", gt=0)
-    sale: Optional[int] = Field(None, description="세일 퍼센트 (0-100)", ge=0, le=100)
+    sale: Optional[int] = Field(None, description="세일 퍼센트 (0-100) / 0이면 None으로 세일 삭제", ge=0, le=100)
 
 
 class ProductResponse(BaseModel):
