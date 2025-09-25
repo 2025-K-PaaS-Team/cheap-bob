@@ -396,15 +396,15 @@ async def remove_product_nutrition(
     return ProductResponse.model_validate(response_data)
 
 
-@router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_product(
-    product_id: str,
-    current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep
-):
-    """
-    상품 삭제(미구현) - 논의 필요
-    """
-    
-    pass
+# @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+# async def delete_product(
+#     product_id: str,
+#     current_user: CurrentSellerDep,
+#     store_repo: StoreRepositoryDep,
+#     product_repo: StoreProductInfoRepositoryDep
+# ):
+#     """
+#     상품 삭제(미구현) - 논의 필요
+#     """
+#     
+#     pass

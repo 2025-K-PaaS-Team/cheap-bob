@@ -12,8 +12,7 @@ from api.deps.repository import (
     OrderCurrentItemRepositoryDep,
     OrderHistoryItemRepositoryDep,
     StoreProductInfoRepositoryDep,
-    StorePaymentInfoRepositoryDep,
-    CustomerDetailRepositoryDep
+    StorePaymentInfoRepositoryDep
 )
 from repositories.store_product_info import StockUpdateResult
 from schemas.order import (
@@ -42,9 +41,7 @@ async def get_store_orders(
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
     order_repo: OrderCurrentItemRepositoryDep,
-    history_repo: OrderHistoryItemRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep,
-    customer_detail_repo: CustomerDetailRepositoryDep
+    history_repo: OrderHistoryItemRepositoryDep
 ):
     """
     가게의 주문 목록 조회 (당일 + 과거)
@@ -131,7 +128,7 @@ async def get_store_orders(
         404:"등록된 가게를 찾을 수 없음"
     })                 
 )
-async def get_current_orders(
+async def get_order_today(
     store_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,

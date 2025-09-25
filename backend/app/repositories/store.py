@@ -4,7 +4,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.store import Store
-from database.models.address import Address
+from database.models.store_address import StoreAddress
 from database.models.store_sns import StoreSNS
 from database.models.store_product_info import StoreProductInfo
 from database.models.store_payment_info import StorePaymentInfo
@@ -102,8 +102,8 @@ class StoreRepository(BaseRepository[Store]):
         # 2. address_id가 있으면 주소 업데이트
         if store.address_id and all([sido, sigungu, bname, lat, lng]):
             await self.session.execute(
-                sql_update(Address)
-                .where(Address.address_id == store.address_id)
+                sql_update(StoreAddress)
+                .where(StoreAddress.address_id == store.address_id)
                 .values(
                     sido=sido,
                     sigungu=sigungu,
@@ -162,7 +162,7 @@ class StoreRepository(BaseRepository[Store]):
         
         try:
             # 1. Address 생성
-            new_address = Address(
+            new_address = StoreAddress(
                 sido=sido,
                 sigungu=sigungu,
                 bname=bname,
@@ -288,9 +288,9 @@ class StoreRepository(BaseRepository[Store]):
             .join(Store.address)
             .where(
                 and_(
-                    Address.sido == sido,
-                    Address.sigungu == sigungu,
-                    Address.bname == bname
+                    StoreAddress.sido == sido,
+                    StoreAddress.sigungu == sigungu,
+                    StoreAddress.bname == bname
                 )
             )
             .options(
@@ -325,9 +325,9 @@ class StoreRepository(BaseRepository[Store]):
             .join(Store.address)
             .where(
                 and_(
-                    Address.sido == sido,
-                    Address.sigungu == sigungu,
-                    Address.bname == bname
+                    StoreAddress.sido == sido,
+                    StoreAddress.sigungu == sigungu,
+                    StoreAddress.bname == bname
                 )
             )
             .options(
@@ -357,9 +357,9 @@ class StoreRepository(BaseRepository[Store]):
             .outerjoin(Store.products) 
             .where(
                 and_(
-                    Address.sido == sido,
-                    Address.sigungu == sigungu,
-                    Address.bname == bname,
+                    StoreAddress.sido == sido,
+                    StoreAddress.sigungu == sigungu,
+                    StoreAddress.bname == bname,
                     or_(
                         Store.store_name.like(f"%{search_name}%"),
                         StoreProductInfo.product_name.like(f"%{search_name}%")
@@ -400,9 +400,9 @@ class StoreRepository(BaseRepository[Store]):
             .outerjoin(Store.products) 
             .where(
                 and_(
-                    Address.sido == sido,
-                    Address.sigungu == sigungu,
-                    Address.bname == bname,
+                    StoreAddress.sido == sido,
+                    StoreAddress.sigungu == sigungu,
+                    StoreAddress.bname == bname,
                     or_(
                         Store.store_name.like(f"%{search_name}%"),
                         StoreProductInfo.product_name.like(f"%{search_name}%")

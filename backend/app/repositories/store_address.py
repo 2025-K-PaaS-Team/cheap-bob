@@ -1,22 +1,21 @@
 from typing import List, Optional, Dict
-from sqlalchemy import select, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models.address import Address
+from database.models.store_address import StoreAddress
 from repositories.base import BaseRepository
 
 
-class AddressRepository(BaseRepository[Address]):
+class StoreAddressRepository(BaseRepository[StoreAddress]):
     """주소 정보 Repository"""
     
     def __init__(self, session: AsyncSession):
-        super().__init__(Address, session)
+        super().__init__(StoreAddress, session)
     
-    async def get_by_address_id(self, address_id: int) -> Optional[Address]:
+    async def get_by_address_id(self, address_id: int) -> Optional[StoreAddress]:
         """주소 ID로 조회"""
         return await self.get_by_pk(address_id)
     
-    async def find_by_full_address(self, sido: str, sigungu: str, bname: str) -> Optional[Address]:
+    async def find_by_full_address(self, sido: str, sigungu: str, bname: str) -> Optional[StoreAddress]:
         """전체 주소 정보로 조회"""
         return await self.get_one(
             sido=sido,
@@ -24,14 +23,14 @@ class AddressRepository(BaseRepository[Address]):
             bname=bname
         )
     
-    async def get_by_sido(self, sido: str) -> List[Address]:
+    async def get_by_sido(self, sido: str) -> List[StoreAddress]:
         """시/도로 검색"""
         return await self.get_many(
             filters={"sido": sido},
             order_by=["sigungu", "bname"]
         )
     
-    async def get_by_sigungu(self, sido: str, sigungu: str) -> List[Address]:
+    async def get_by_sigungu(self, sido: str, sigungu: str) -> List[StoreAddress]:
         """시/도와 시/군/구로 검색"""
         return await self.get_many(
             filters={
@@ -56,7 +55,7 @@ class AddressRepository(BaseRepository[Address]):
         
         return hierarchy
     
-    async def create_with_coordinates(self, sido: str, sigungu: str, bname: str, lat: str, lng: str) -> Address:
+    async def create_with_coordinates(self, sido: str, sigungu: str, bname: str, lat: str, lng: str) -> StoreAddress:
         """위도/경도 정보를 포함한 주소 생성"""
         return await self.create(
             sido=sido,
@@ -68,7 +67,7 @@ class AddressRepository(BaseRepository[Address]):
     
     async def update_address_with_coordinates(self, address_id: int, 
                                              sido: str, sigungu: str, bname: str,
-                                             lat: str, lng: str) -> Address:
+                                             lat: str, lng: str) -> StoreAddress:
         """주소 전체 정보와 위도/경도 업데이트"""
         return await self.update(
             address_id,

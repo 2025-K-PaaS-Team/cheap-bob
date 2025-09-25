@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
+from utils.qr_generator import validate_qr_data
 from utils.docs_error import create_error_responses
 from utils.string_utils import parse_comma_separated_string
 from api.deps.auth import CurrentCustomerDep
@@ -11,16 +12,17 @@ from api.deps.repository import (
 )
 from repositories.store_product_info import StockUpdateResult
 from schemas.order import (
+    OrderStatus,
     OrderItemResponse,
     OrderListResponse,
     OrderCancelRequest,
     OrderCancelResponse,
     CustomerPickupCompleteRequest
+    
 )
-from schemas.order import OrderStatus
 from services.payment import PaymentService
 from config.settings import settings
-from utils.qr_generator import validate_qr_data
+
 
 router = APIRouter(prefix="/orders", tags=["Customer-Order"])
 
@@ -116,7 +118,7 @@ async def get_order_history(
         401:["인증 정보가 없음", "토큰 만료"]
     })
 )
-async def get_current_orders(
+async def get_order_today(
     current_user: CurrentCustomerDep,
     order_repo: OrderCurrentItemRepositoryDep
 ):
@@ -210,92 +212,9 @@ async def get_order_detail(
         allergies=parse_comma_separated_string(order.allergies),
         topping_types=parse_comma_separated_string(order.topping_types)
     )
-    
-@router.delete("/{payment_id}/cancel", response_model=OrderCancelResponse,
-    responses=create_error_responses({
-        400: ["이미 취소된 주문", "이미 승인된 주문"],
-        401:["인증 정보가 없음", "토큰 만료"],
-        404:"상품을 찾을 수 없음",
-        409: "동시성 충돌 발생"
-    })               
-)
-async def cancel_order(
-    payment_id: str,
-    request: OrderCancelRequest,
-    current_user: CurrentCustomerDep,
-    order_repo: OrderCurrentItemRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep,
-    payment_info_repo: StorePaymentInfoRepositoryDep
-):
-    """
-    주문 취소 (포트원 환불 포함)
-    """
-    
-    # 주문 조회 (with product info)
-    order = await order_repo.get_order_with_product_relation(payment_id)
-    
-    if not order:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="주문을 찾을 수 없습니다"
-        )
-    
-    # 이미 취소된 주문인지 확인
-    if order.status == OrderStatus.cancel:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="이미 취소된 주문입니다"
-        )
-    
-    # 수락된 주문은 취소 불가
-    if order.status in [OrderStatus.accept, OrderStatus.complete]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="이미 처리 중인 주문은 취소할 수 없습니다"
-        )
-    
-    # 가게의 결제 정보 조회
-    payment_info = await payment_info_repo.get_by_store_id(order.product.store_id)
-    
-    # 포트원 환불 처리
-    refund_result = await PaymentService.process_refund(
-        payment_id=payment_id,
-        secret_key=payment_info.portone_secret_key,
-        reason=request.reason
-    )
-    
-    if not refund_result.get("success"):
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=refund_result.get("error", "환불 처리 중 오류가 발생했습니다")
-        )
-    
-    # 주문 취소 처리
-    quantity = await order_repo.cancel_order(payment_id, cancel_reason=request.reason)
- 
-    max_retries = settings.MAX_RETRY_LOCK
-    for attempt in range(max_retries):
-        result = await product_repo.adjust_purchased_stock(order.product_id, -quantity)
-        
-        if result == StockUpdateResult.SUCCESS:
-            break
-        
-        if attempt == max_retries - 1:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="재고 복구 중 충돌이 발생했습니다. 다시 시도해주세요."
-            )
-    
-    return OrderCancelResponse(
-        payment_id=payment_id,
-        quantity=order.quantity,
-        price=order.price,
-        sale=order.sale,
-        total_amount=order.total_amount,
-    )
 
 
-@router.patch("/{payment_id}/pickup-complete", response_model=OrderItemResponse,
+@router.patch("/{payment_id}/complete", response_model=OrderItemResponse,
     responses=create_error_responses({
         400:["유효하지 않은 QR 코드", "권한이 없는 소비자", "이미 픽업 완료"],
         401:["인증 정보가 없음", "토큰 만료"],
@@ -398,4 +317,88 @@ async def complete_pickup(
         nutrition_types=parse_comma_separated_string(completed_order.nutrition_types),
         allergies=parse_comma_separated_string(completed_order.allergies),
         topping_types=parse_comma_separated_string(completed_order.topping_types)
+    )
+    
+    
+@router.delete("/{payment_id}/cancel", response_model=OrderCancelResponse,
+    responses=create_error_responses({
+        400: ["이미 취소된 주문", "이미 승인된 주문"],
+        401:["인증 정보가 없음", "토큰 만료"],
+        404:"상품을 찾을 수 없음",
+        409: "동시성 충돌 발생"
+    })               
+)
+async def cancel_order(
+    payment_id: str,
+    request: OrderCancelRequest,
+    current_user: CurrentCustomerDep,
+    order_repo: OrderCurrentItemRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep,
+    payment_info_repo: StorePaymentInfoRepositoryDep
+):
+    """
+    주문 취소 (포트원 환불 포함)
+    """
+    
+    # 주문 조회 (with product info)
+    order = await order_repo.get_order_with_product_relation(payment_id)
+    
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="주문을 찾을 수 없습니다"
+        )
+    
+    # 이미 취소된 주문인지 확인
+    if order.status == OrderStatus.cancel:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="이미 취소된 주문입니다"
+        )
+    
+    # 수락된 주문은 취소 불가
+    if order.status in [OrderStatus.accept, OrderStatus.complete]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="이미 처리 중인 주문은 취소할 수 없습니다"
+        )
+    
+    # 가게의 결제 정보 조회
+    payment_info = await payment_info_repo.get_by_store_id(order.product.store_id)
+    
+    # 포트원 환불 처리
+    refund_result = await PaymentService.process_refund(
+        payment_id=payment_id,
+        secret_key=payment_info.portone_secret_key,
+        reason=request.reason
+    )
+    
+    if not refund_result.get("success"):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=refund_result.get("error", "환불 처리 중 오류가 발생했습니다")
+        )
+    
+    # 주문 취소 처리
+    quantity = await order_repo.cancel_order(payment_id, cancel_reason=request.reason)
+ 
+    max_retries = settings.MAX_RETRY_LOCK
+    for attempt in range(max_retries):
+        result = await product_repo.adjust_purchased_stock(order.product_id, -quantity)
+        
+        if result == StockUpdateResult.SUCCESS:
+            break
+        
+        if attempt == max_retries - 1:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="재고 복구 중 충돌이 발생했습니다. 다시 시도해주세요."
+            )
+    
+    return OrderCancelResponse(
+        payment_id=payment_id,
+        quantity=order.quantity,
+        price=order.price,
+        sale=order.sale,
+        total_amount=order.total_amount,
     )
