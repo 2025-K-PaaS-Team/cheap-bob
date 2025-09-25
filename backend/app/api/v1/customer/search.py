@@ -31,8 +31,9 @@ async def get_stores(
     상품이 등록된 가게들의 상세 정보(주소, SNS, 운영시간, 이미지, 상품)를 조회
     상품이 없는 가게는 조회 결과에서 제외
     """
+    customer_email = current_user["sub"]
     
-    store_results = await store_repo.get_stores_with_products_and_favorites(current_user["sub"])
+    store_results = await store_repo.get_stores_with_products_and_favorites(customer_email)
     
     if not store_results:
         return []
@@ -111,12 +112,13 @@ async def search_stores_by_location(
     
     지정된 주소(시/도, 시/군/구, 읍/면/동)에 위치한 모든 가게들을 조회
     """
+    customer_email = current_user["sub"]
     
     store_results = await store_repo.search_by_location_with_favorites(
         sido=sido,
         sigungu=sigungu,
         bname=bname,
-        customer_email=current_user["sub"]
+        customer_email=customer_email
     )
     
     if not store_results:
@@ -140,10 +142,11 @@ async def search_stores_by_name(
     
     검색어가 가게 이름이나 상품 이름에 포함된 가게들을 조회
     """
+    customer_email = current_user["sub"]
     
-    store_results = await store_repo.search_by_name_with_favorites(search_name, current_user["sub"])
+    store_results = await store_repo.search_by_name_with_favorites(search_name, customer_email)
     
-    await SearchHistoryCache.add_search_name(current_user["sub"], search_name)
+    await SearchHistoryCache.add_search_name(customer_email, search_name)
     
     if not store_results:
         return []
@@ -170,16 +173,17 @@ async def search_stores_by_location_name(
     지정된 주소(시/도, 시/군/구, 읍/면/동)에 위치하고 
     검색어가 가게 이름 또는 상품 이름에 포함된 가게들을 조회
     """
+    customer_email = current_user["sub"]
     
     store_results = await store_repo.search_by_location_and_name_with_favorites(
         sido=sido,
         sigungu=sigungu,
         bname=bname,
         search_name=search_name,
-        customer_email=current_user["sub"]
+        customer_email=customer_email
     )
     
-    await SearchHistoryCache.add_search_name(current_user["sub"], search_name)
+    await SearchHistoryCache.add_search_name(customer_email, search_name)
     
     if not store_results:
         return []

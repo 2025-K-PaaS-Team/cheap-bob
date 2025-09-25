@@ -84,6 +84,8 @@ async def init_payment(
     """
     결제 초기화 API - 상품과 수량을 확인하고 결제 세션을 생성
     """
+    customer_email = current_user["sub"]
+    
     # 상품 조회
     product = await product_repo.get_by_product_id(request.product_id)
     
@@ -134,7 +136,7 @@ async def init_payment(
     cart_data = {
         "payment_id": payment_id,
         "product_id": request.product_id,
-        "customer_id": current_user["sub"],
+        "customer_id": customer_email,
         "quantity": request.quantity,
         "price": product.price,
         "sale": product.sale,
@@ -190,6 +192,8 @@ async def confirm_payment(
     """
     결제 최종 확인 API - 포트원에서 결제가 성공했는지 확인
     """
+    customer_email = current_user["sub"]
+    
     cart_item = None
     product = None
     payment_info = None
@@ -204,8 +208,8 @@ async def confirm_payment(
                 detail="결제 정보를 찾을 수 없습니다"
             )
         
-        # 사용자 검증
-        if cart_item.customer_id != current_user["sub"]:
+        # 소비자 검증
+        if cart_item.customer_id != customer_email:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="결제에 대한 권한이 없습니다"
@@ -247,7 +251,7 @@ async def confirm_payment(
             result["payment_info"]['amount']
         ))
         
-        profile_data = await profile_repo.get_all_profile_data(current_user["sub"])
+        profile_data = await profile_repo.get_all_profile_data(customer_email)
         
         # 주문 생성
         order_data = {

@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import APIRouter, status, HTTPException
 from urllib.parse import unquote
 
@@ -21,10 +20,11 @@ async def get_search_history(
     """
     검색 히스토리 조회 API
     
-    사용자의 최근 검색어 목록을 조회 (최대 5개)
+    소비자의 최근 검색어 목록을 조회 (최대 5개)
     """
+    customer_email = current_user["sub"]
     
-    history = await SearchHistoryCache.get_search_history(current_user["sub"])
+    history = await SearchHistoryCache.get_search_history(customer_email)
     
     return SearchHistoryResponse(
         search_names=history,
@@ -43,10 +43,12 @@ async def clear_search_history(
     """
     검색 히스토리 삭제 API
     
-    사용자의 모든 검색 히스토리를 삭제
+    소비자의 모든 검색 히스토리를 삭제
     """
     
-    await SearchHistoryCache.clear_search_history(current_user["sub"])
+    customer_email = current_user["sub"]
+    
+    await SearchHistoryCache.clear_search_history(customer_email)
     
     return None
 
@@ -64,14 +66,15 @@ async def remove_search_name(
     """
     특정 검색어 삭제 API
     
-    검색 히스토리에서 특정 검색어만 삭제
+    소비자의 검색 히스토리에서 특정 검색어만 삭제
     """
+    customer_email = current_user["sub"]
     
     # URL 디코딩
     decoded_search_name = unquote(search_name)
     
     removed = await SearchHistoryCache.remove_search_name(
-        current_user["sub"], 
+        customer_email, 
         decoded_search_name
     )
     

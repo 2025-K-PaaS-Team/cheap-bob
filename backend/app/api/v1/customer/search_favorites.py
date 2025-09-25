@@ -28,8 +28,9 @@ async def get_favorite_stores(
     
     고객이 즐겨찾기한 모든 가게들의 상세 정보를 조회
     """
+    customer_email = current_user["sub"]
     
-    stores = await store_repo.get_favorite_stores_with_full_info(current_user["sub"])
+    stores = await store_repo.get_favorite_stores_with_full_info(customer_email)
     
     if not stores:
         return []
@@ -55,6 +56,7 @@ async def add_favorite_store(
     
     특정 가게를 고객의 즐겨찾기에 추가
     """
+    customer_email = current_user["sub"]
     
     # 가게 존재 확인
     store = await store_repo.get_by_store_id(store_id)
@@ -65,7 +67,7 @@ async def add_favorite_store(
         )
     
     # 이미 즐겨찾기인지 확인
-    existing = await favorite_repo.get_by_customer_and_store(current_user["sub"], store_id)
+    existing = await favorite_repo.get_by_customer_and_store(customer_email, store_id)
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -73,7 +75,7 @@ async def add_favorite_store(
         )
     
     # 즐겨찾기 추가
-    await favorite_repo.create_for_customer(current_user["sub"], store_id)
+    await favorite_repo.create_for_customer(customer_email, store_id)
     
     return StoreFavoriteStateResponse(message="즐겨찾기에 추가되었습니다")
 
@@ -94,9 +96,10 @@ async def remove_favorite_store(
     
     고객의 즐겨찾기에서 특정 가게를 삭제
     """
+    customer_email = current_user["sub"]
     
     # 즐겨찾기 삭제
-    deleted = await favorite_repo.delete_for_customer(current_user["sub"], store_id)
+    deleted = await favorite_repo.delete_for_customer(customer_email, store_id)
     
     if not deleted:
         raise HTTPException(

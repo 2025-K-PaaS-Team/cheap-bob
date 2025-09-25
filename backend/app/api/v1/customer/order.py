@@ -38,12 +38,13 @@ async def get_order_history(
     """
     주문 내역 조회 - 모든 주문 조회 (당일 + 과거)
     """
+    customer_email = current_user["sub"]
     
     # 당일 주문 조회
-    current_orders = await order_repo.get_customer_orders_with_relations(current_user["sub"])
+    current_orders = await order_repo.get_customer_orders_with_relations(customer_email)
     
     # 과거 주문 조회
-    history_orders = await history_repo.get_customer_history(current_user["sub"])
+    history_orders = await history_repo.get_customer_history(customer_email)
     
     order_responses = []
     
@@ -122,9 +123,10 @@ async def get_current_orders(
     """
     당일 주문 조회
     """
+    customer_email = current_user["sub"]
     
     # 당일 주문 조회
-    orders = await order_repo.get_customer_current_orders_with_relations(current_user["sub"])
+    orders = await order_repo.get_customer_current_orders_with_relations(customer_email)
     
     order_responses = []
     for order in orders:
@@ -295,7 +297,7 @@ async def cancel_order(
 
 @router.patch("/{payment_id}/pickup-complete", response_model=OrderItemResponse,
     responses=create_error_responses({
-        400:["유효하지 않은 QR 코드", "권한이 없는 사용자", "이미 픽업 완료"],
+        400:["유효하지 않은 QR 코드", "권한이 없는 소비자", "이미 픽업 완료"],
         401:["인증 정보가 없음", "토큰 만료"],
         404:["주문을 찾을 수 없음", "QR 코드를 찾을 수 없음"]
     })               
@@ -309,6 +311,7 @@ async def complete_pickup(
     """
     픽업 완료 처리 (QR 코드 검증)
     """
+    customer_email = current_user["sub"]
     
     # 주문 조회
     order = await order_repo.get_order_with_store_relation(payment_id)
@@ -335,7 +338,7 @@ async def complete_pickup(
     # QR 데이터 검증
     is_valid, qr_data, error_msg = validate_qr_data(
         request.qr_data,
-        current_user["sub"]
+        customer_email
     )
     
     if not is_valid:
@@ -345,14 +348,14 @@ async def complete_pickup(
         )
     
     # 세 가지 유저 ID 검증
-    # 1. JWT의 유저 ID: current_user["sub"]
+    # 1. JWT의 유저 ID: customer_email
     # 2. QR의 유저 ID: qr_data["customer_id"]
     # 3. 주문의 유저 ID: order.customer_id
     
-    if not (current_user["sub"] == qr_data["customer_id"] == order.customer_id):
+    if not (customer_email == qr_data["customer_id"] == order.customer_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="권한이 없는 사용자입니다"
+            detail="권한이 없는 소비자입니다"
         )
     
     # 결제 ID 검증

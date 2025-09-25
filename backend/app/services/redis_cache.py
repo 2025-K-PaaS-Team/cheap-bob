@@ -88,7 +88,7 @@ class SearchHistoryCache:
     @staticmethod
     async def get_search_history(customer_email: str) -> List[str]:
         """
-        사용자의 검색 히스토리 조회
+        소비자의 검색 히스토리 조회
         
         Args:
             customer_email: 사용자 이메일
@@ -106,7 +106,7 @@ class SearchHistoryCache:
     @staticmethod
     async def clear_search_history(customer_email: str) -> None:
         """
-        사용자의 검색 히스토리 삭제
+        소비자의 검색 히스토리 삭제
         
         Args:
             customer_email: 사용자 이메일
@@ -118,7 +118,7 @@ class SearchHistoryCache:
     @staticmethod
     async def remove_search_name(customer_email: str, search_name: str) -> bool:
         """
-        사용자의 검색 히스토리에서 특정 검색어 삭제
+        소비자의 검색 히스토리에서 특정 검색어 삭제
         
         Args:
             customer_email: 사용자 이메일

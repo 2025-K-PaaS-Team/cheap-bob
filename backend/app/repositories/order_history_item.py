@@ -95,7 +95,7 @@ class OrderHistoryItemRepository(BaseMongoRepository[OrderHistoryItem]):
         end_date: Optional[datetime] = None,
         limit: int = 100
     ) -> List[OrderHistoryItem]:
-        """사용자의 주문 히스토리 조회"""
+        """소비자의 주문 히스토리 조회"""
         filters = {"customer_id": customer_id}
         
         if start_date or end_date:
