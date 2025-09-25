@@ -8,7 +8,7 @@ from database.models.cart_item import CartItem
 from database.models.order_current_item import OrderCurrentItem
 from database.models.customer_preferences import CustomerPreferredMenu, CustomerNutritionType, CustomerAllergy, CustomerToppingType
 from database.models.customer_detail import CustomerDetail
-from database.models.address import Address
+from database.models.store_address import StoreAddress
 from database.models.store_sns import StoreSNS
 from database.models.store_image import StoreImage
 from database.models.store_operation_info import StoreOperationInfo

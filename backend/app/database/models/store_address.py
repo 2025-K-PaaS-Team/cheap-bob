@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from database.session import Base
 
 
-class Address(Base):
+class StoreAddress(Base):
     """ 주소 정보 (시/도, 시/군/구, 읍/면/동) """
     __tablename__ = "addresses"
     

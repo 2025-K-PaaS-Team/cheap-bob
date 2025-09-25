@@ -19,7 +19,7 @@ from repositories.customer_preferences import (
 )
 from repositories.store_image import StoreImageRepository
 from repositories.seller import SellerRepository
-from repositories.address import AddressRepository
+from repositories.store_address import StoreAddressRepository
 from repositories.store_sns import StoreSNSRepository
 from repositories.store_operation_info import StoreOperationInfoRepository
 from repositories.customer_favorite import CustomerFavoriteRepository
@@ -82,8 +82,8 @@ def get_seller_repository(session: AsyncSessionDep) -> SellerRepository:
     return SellerRepository(session)
 
 
-def get_address_repository(session: AsyncSessionDep) -> AddressRepository:
-    return AddressRepository(session)
+def get_address_repository(session: AsyncSessionDep) -> StoreAddressRepository:
+    return StoreAddressRepository(session)
 
 
 def get_store_sns_repository(session: AsyncSessionDep) -> StoreSNSRepository:
@@ -116,7 +116,7 @@ CustomerAllergyRepositoryDep = Annotated[CustomerAllergyRepository, Depends(get_
 CustomerToppingTypeRepositoryDep = Annotated[CustomerToppingTypeRepository, Depends(get_customer_topping_type_repository)]
 StoreImageRepositoryDep = Annotated[StoreImageRepository, Depends(get_store_image_repository)]
 SellerRepositoryDep = Annotated[SellerRepository, Depends(get_seller_repository)]
-AddressRepositoryDep = Annotated[AddressRepository, Depends(get_address_repository)]
+StoreAddressRepositoryDep = Annotated[StoreAddressRepository, Depends(get_address_repository)]
 StoreSNSRepositoryDep = Annotated[StoreSNSRepository, Depends(get_store_sns_repository)]
 StoreOperationInfoRepositoryDep = Annotated[StoreOperationInfoRepository, Depends(get_store_operation_info_repository)]
 CustomerFavoriteRepositoryDep = Annotated[CustomerFavoriteRepository, Depends(get_customer_favorite_repository)]
