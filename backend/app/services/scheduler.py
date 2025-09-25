@@ -6,6 +6,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from services.scheduled_tasks.order_migration import scheduled_task as order_migration_task
+from services.scheduled_tasks.inventory_reset import scheduled_task as inventory_reset_task
 
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,8 @@ class SchedulerService:
         self.scheduler = AsyncIOScheduler()
         self.is_running = False
         self.scheduled_tasks: List[Dict[str, Any]] = [
-            order_migration_task
+            order_migration_task,
+            inventory_reset_task
         ]
     
     def start(self):
