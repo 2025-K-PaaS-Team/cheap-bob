@@ -9,7 +9,7 @@ class CustomerDetailRepository(BaseRepository[CustomerDetail]):
         super().__init__(CustomerDetail, session)
     
     async def get_by_customer(self, customer_email: str) -> Optional[CustomerDetail]:
-        """고객 이메일로 상세 정보 조회"""
+        """소비자 이메일로 상세 정보 조회"""
         return await self.get_by_pk(customer_email)
     
     async def create_for_customer(
@@ -18,7 +18,7 @@ class CustomerDetailRepository(BaseRepository[CustomerDetail]):
         nickname: str, 
         phone_number: str
     ) -> CustomerDetail:
-        """고객 상세 정보 생성"""
+        """소비자 상세 정보 생성"""
         return await self.create(
             customer_email=customer_email,
             nickname=nickname,
@@ -30,7 +30,7 @@ class CustomerDetailRepository(BaseRepository[CustomerDetail]):
         customer_email: str,
         **kwargs
     ) -> Optional[CustomerDetail]:
-        """고객 상세 정보 업데이트"""
+        """소비자 상세 정보 업데이트"""
         return await self.update(customer_email, **kwargs)
     
     async def update_nickname(
@@ -50,9 +50,9 @@ class CustomerDetailRepository(BaseRepository[CustomerDetail]):
         return await self.update(customer_email, phone_number=phone_number)
     
     async def exists_for_customer(self, customer_email: str) -> bool:
-        """고객 상세 정보 존재 여부 확인"""
+        """소비자 상세 정보 존재 여부 확인"""
         return await self.exists(customer_email=customer_email)
     
     async def delete_for_customer(self, customer_email: str) -> bool:
-        """고객 상세 정보 삭제"""
+        """소비자 상세 정보 삭제"""
         return await self.delete(customer_email)

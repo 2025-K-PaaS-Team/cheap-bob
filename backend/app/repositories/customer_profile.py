@@ -11,7 +11,7 @@ class CustomerProfileRepository:
         self.session = session
     
     async def get_all_profile_data(self, customer_email: str) -> Dict[str, Any]:
-        """고객의 모든 프로필 데이터를 조회"""
+        """소비자의 모든 프로필 데이터를 조회"""
 
         stmt = (
             select(Customer)

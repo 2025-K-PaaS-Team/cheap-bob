@@ -16,7 +16,7 @@ class CartItemRepository(BaseRepository[CartItem]):
         return await self.get_by_pk(payment_id)
     
     async def get_by_cutomer_id(self, customer_id: str) -> List[CartItem]:
-        """사용자 ID로 장바구니 조회"""
+        """소비자 ID로 장바구니 조회"""
         return await self.get_many(
             filters={"customer_id": customer_id},
             order_by=["-created_at"],

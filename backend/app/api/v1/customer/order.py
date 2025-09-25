@@ -347,10 +347,10 @@ async def complete_pickup(
             detail=error_msg
         )
     
-    # 세 가지 유저 ID 검증
-    # 1. JWT의 유저 ID: customer_email
-    # 2. QR의 유저 ID: qr_data["customer_id"]
-    # 3. 주문의 유저 ID: order.customer_id
+    # 세 가지 소비자 ID 검증
+    # 1. JWT의 소비자 ID: customer_email
+    # 2. QR의 소비자 ID: qr_data["customer_id"]
+    # 3. 주문의 소비자 ID: order.customer_id
     
     if not (customer_email == qr_data["customer_id"] == order.customer_id):
         raise HTTPException(

@@ -244,7 +244,7 @@ async def confirm_payment(
                 detail="결제 검증에 실패했습니다"
             )
         
-        logger.info("유저 ID({}) / 결제({}) / 상품({}) / 금액({})".format(
+        logger.info("소비자 ID({}) / 결제({}) / 상품({}) / 금액({})".format(
             cart_item.customer_id,
             result["payment_info"]['payment_method'],
             result["payment_info"]['good_name'],

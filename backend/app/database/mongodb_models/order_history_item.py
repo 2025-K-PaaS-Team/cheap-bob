@@ -30,7 +30,7 @@ class OrderHistoryItem(Document):
     canceled_at: Optional[datetime] = Field(None, description="주문 취소 시간")
     cancel_reason: Optional[str] = Field(None, max_length=500, description="취소 사유")
     
-    preferred_menus: Optional[str] = Field(None, max_length=500, description="유저의 선호 메뉴 (콤마로 구분)")
+    preferred_menus: Optional[str] = Field(None, max_length=500, description="소비자의 선호 메뉴 (콤마로 구분)")
     nutrition_types: Optional[str] = Field(None, max_length=500, description="식품 영양 타입 (콤마로 구분)")
     allergies: Optional[str] = Field(None, max_length=500, description="알레르기/제약조건 (콤마로 구분)")
     topping_types: Optional[str] = Field(None, max_length=500, description="선호 토핑 (콤마로 구분)")

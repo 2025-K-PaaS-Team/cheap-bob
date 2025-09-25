@@ -43,7 +43,7 @@ class StoreProductInfoRepository(BaseRepository[StoreProductInfo]):
         )
     
     async def adjust_purchased_stock(self, product_id: str, quantity: int) -> StockUpdateResult:
-        """유저가 상품을 사고/환불 할 때 업데이트"""
+        """소비자가 상품을 사고/환불 할 때 업데이트"""
         product = await self.get_by_pk(product_id)
         if quantity < 0 and product.current_stock < quantity:
             return StockUpdateResult.INSUFFICIENT_STOCK

@@ -12,7 +12,7 @@ class StoreProductInfo(Base):
     product_name = Column(String(255), nullable=False) # 상품 이름
     description = Column(String(1000)) # 상품 설명
     initial_stock = Column(Integer, nullable=False) # 상품 설정 수량
-    purchased_quantity = Column(Integer, nullable=False, default=0) # 유저가 구매한 수량
+    purchased_quantity = Column(Integer, nullable=False, default=0) # 소비자가 구매한 수량
     admin_adjustment = Column(Integer, nullable=False, default=0) # 판매자가 조절한 수량
     price = Column(Integer, nullable=False)  # 원 단위
     sale = Column(Integer)  # 세일 퍼센트, nullable

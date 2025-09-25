@@ -28,7 +28,7 @@ class OrderItemResponse(BaseModel):
     completed_at: Optional[datetime] = Field(None, description="픽업 완료 시간")
     canceled_at: Optional[datetime] = Field(None, description="주문 취소 시간")
     cancel_reason: Optional[str] = Field(None, description="취소 사유")
-    preferred_menus: Optional[List[str]] = Field(default=None, description="유저의 선호 메뉴")
+    preferred_menus: Optional[List[str]] = Field(default=None, description="소비자의 선호 메뉴")
     nutrition_types: Optional[List[str]] = Field(default=None, description="식품 영양 타입")
     allergies: Optional[List[str]] = Field(default=None, description="알레르기/제약조건")
     topping_types: Optional[List[str]] = Field(default=None, description="선호 토핑")
