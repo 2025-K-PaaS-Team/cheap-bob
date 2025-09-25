@@ -5,7 +5,7 @@ from database.session import Base
 
 class StoreAddress(Base):
     """ 주소 정보 (시/도, 시/군/구, 읍/면/동) """
-    __tablename__ = "addresses"
+    __tablename__ = "store_addresses"
     
     address_id = Column(Integer, primary_key=True, autoincrement=True)
     sido = Column(String(50), nullable=False)  # 시/도

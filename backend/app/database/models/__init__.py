@@ -30,7 +30,7 @@ __all__ = [
     "CustomerAllergy",
     "CustomerToppingType",
     "CustomerDetail",
-    "Address",
+    "StoreAddress",
     "StoreSNS",
     "StoreImage",
     "StoreOperationInfo",

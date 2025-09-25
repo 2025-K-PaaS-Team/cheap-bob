@@ -20,7 +20,7 @@ class Store(Base):
     store_detail_address = Column(String(255), nullable=True)  # 매장 상세 주소
     
     # 주소 정보 외래키
-    address_id = Column(Integer, ForeignKey("addresses.address_id"), nullable=True)
+    address_id = Column(Integer, ForeignKey("store_addresses.address_id"), nullable=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())  # 가게 생성 시간
     
@@ -28,7 +28,7 @@ class Store(Base):
     seller = relationship("Seller", backref="stores")
     payment_info = relationship("StorePaymentInfo", back_populates="store", uselist=False)
     products = relationship("StoreProductInfo", back_populates="store")
-    address = relationship("Address", back_populates="stores")
+    address = relationship("StoreAddress", back_populates="stores")
     sns_info = relationship("StoreSNS", back_populates="store", uselist=False)
     images = relationship("StoreImage", back_populates="store", cascade="all, delete-orphan")
     operation_info = relationship("StoreOperationInfo", back_populates="store", cascade="all, delete-orphan")
