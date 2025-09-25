@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, status, UploadFile, File
 
+from utils.id_generator import generate_store_id
 from utils.docs_error import create_error_responses
 from utils.store_utils import get_store_id_by_email
 from api.deps.auth import CurrentSellerDep
@@ -8,7 +9,6 @@ from api.deps.repository import StoreRepositoryDep
 from api.deps.service import ImageServiceDep
 from schemas.seller_profile import SellerProfileCreateRequest, SellerProfileResponse
 from schemas.image import StoreImagesUploadResponse
-from utils.id_generator import generate_store_id
 from core.exceptions import HTTPValueError
 
 router = APIRouter(prefix="/store/register", tags=["Seller-Store-Register"])
