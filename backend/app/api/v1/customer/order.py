@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
+from utils.qr_generator import validate_qr_data
 from utils.docs_error import create_error_responses
 from utils.string_utils import parse_comma_separated_string
 from api.deps.auth import CurrentCustomerDep
@@ -11,16 +12,17 @@ from api.deps.repository import (
 )
 from repositories.store_product_info import StockUpdateResult
 from schemas.order import (
+    OrderStatus,
     OrderItemResponse,
     OrderListResponse,
     OrderCancelRequest,
     OrderCancelResponse,
     CustomerPickupCompleteRequest
+    
 )
-from schemas.order import OrderStatus
 from services.payment import PaymentService
 from config.settings import settings
-from utils.qr_generator import validate_qr_data
+
 
 router = APIRouter(prefix="/orders", tags=["Customer-Order"])
 
@@ -116,7 +118,7 @@ async def get_order_history(
         401:["인증 정보가 없음", "토큰 만료"]
     })
 )
-async def get_current_orders(
+async def get_order_today(
     current_user: CurrentCustomerDep,
     order_repo: OrderCurrentItemRepositoryDep
 ):
@@ -295,7 +297,7 @@ async def cancel_order(
     )
 
 
-@router.patch("/{payment_id}/pickup-complete", response_model=OrderItemResponse,
+@router.patch("/{payment_id}/complete", response_model=OrderItemResponse,
     responses=create_error_responses({
         400:["유효하지 않은 QR 코드", "권한이 없는 소비자", "이미 픽업 완료"],
         401:["인증 정보가 없음", "토큰 만료"],
