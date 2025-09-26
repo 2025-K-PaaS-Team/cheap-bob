@@ -50,3 +50,9 @@ class StoreDetailResponseForCustomer(StoreDetailResponse):
 class StoreFavoriteStateResponse(BaseModel):
     """고객 즐겨찾기 추가/삭제 성공 메시지"""
     message: str = Field(..., description="즐겨찾기 추가/삭제 성공 메시지")
+    
+class StoreCloseStateResponse(BaseModel):
+    """가게 마감 성공 메시지"""
+    success: bool = Field(..., description="가게 마감 성공 상태")
+    message: str = Field(..., description="가게 마감 성공 메시지")
+    refunded_orders: int = Field(..., description="환불된 주문 건 수")
