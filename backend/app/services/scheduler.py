@@ -7,6 +7,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from services.scheduled_tasks.order_migration import scheduled_task as order_migration_task
 from services.scheduled_tasks.inventory_reset import scheduled_task as inventory_reset_task
+from services.scheduled_tasks.uncompleted_order_refund import scheduled_task as uncompleted_order_refund_task
 
 
 logger = logging.getLogger(__name__)
@@ -20,8 +21,9 @@ class SchedulerService:
         self.scheduler = AsyncIOScheduler()
         self.is_running = False
         self.scheduled_tasks: List[Dict[str, Any]] = [
+            uncompleted_order_refund_task,
+            inventory_reset_task,
             order_migration_task,
-            inventory_reset_task
         ]
     
     def start(self):
