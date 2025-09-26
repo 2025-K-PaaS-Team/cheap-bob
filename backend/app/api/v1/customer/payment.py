@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from loguru import logger
 
 from api.deps.auth import CurrentCustomerDep
@@ -8,7 +8,8 @@ from api.deps.repository import (
     CartItemRepositoryDep,
     OrderCurrentItemRepositoryDep,
     StorePaymentInfoRepositoryDep,
-    CustomerProfileRepositoryDep
+    CustomerProfileRepositoryDep,
+    StoreOperationInfoRepositoryDep
 )
 from repositories.store_product_info import StockUpdateResult
 from schemas.order import OrderStatus
@@ -23,6 +24,9 @@ from utils.docs_error import create_error_responses
 from utils.id_generator import generate_payment_id
 from utils.string_utils import join_values
 from config.settings import settings
+
+# KST 타임존 설정
+KST = timezone(timedelta(hours=9))
 
 router = APIRouter(prefix="/payment", tags=["Customer-Payment"])
 
@@ -68,7 +72,7 @@ async def restore_product_stock(
 
 @router.post("/init", response_model=PaymentInitResponse,
     responses=create_error_responses({
-        400: "재고가 없음",
+        400: ["재고가 없음", "가게가 현재 영업 중이 아님", "픽업 시간이 종료됨"],
         401:["인증 정보가 없음", "토큰 만료"],
         404:"상품을 찾을 수 없음",
         409: "동시성 충돌 발생"
@@ -79,7 +83,8 @@ async def init_payment(
     current_user: CurrentCustomerDep,
     product_repo: StoreProductInfoRepositoryDep,
     cart_repo: CartItemRepositoryDep,
-    payment_info_repo: StorePaymentInfoRepositoryDep
+    payment_info_repo: StorePaymentInfoRepositoryDep,
+    operation_repo: StoreOperationInfoRepositoryDep
 ):
     """
     결제 초기화 API - 상품과 수량을 확인하고 결제 세션을 생성
@@ -93,6 +98,29 @@ async def init_payment(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="상품을 찾을 수 없습니다"
+        )
+    
+    # 가게 운영 상태 체크
+    today_operation = await operation_repo.get_today_operation_info(product.store_id)
+    
+    if not today_operation:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="가게가 오늘은 영업하지 않습니다"
+        )
+    
+    if not today_operation.is_currently_open:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="가게가 현재 영업 중이 아닙니다"
+        )
+    
+    current_time = datetime.now(KST).time()
+    
+    if current_time > today_operation.pickup_end_time:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"픽업 시간이 종료되었습니다. 픽업 종료 시간: {today_operation.pickup_end_time.strftime('%H:%M')}"
         )
     
     # 재고 확인
