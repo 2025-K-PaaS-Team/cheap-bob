@@ -103,8 +103,7 @@ async def update_store_payment(
         await payment_repo.update_portone_info(
             store_id=store_id,
             portone_store_id=request.portone_store_id,
-            portone_channel_id=request.portone_channel_id,
-            portone_secret_key=request.portone_secret_key
+            portone_channel_id=request.portone_channel_id
         )
         
         return StorePaymentResponse(

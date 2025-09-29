@@ -19,7 +19,6 @@ class StorePaymentUpdateRequest(BaseModel):
     """결제 정보 수정 요청"""
     portone_store_id: str = Field(..., description="포트원 가게 ID")
     portone_channel_id: str = Field(..., description="포트원 채널 ID")
-    portone_secret_key: str = Field(..., description="포트원 시크릿 키")
 
 
 class StoreDayOperationUpdateRequest(BaseModel):
