@@ -95,7 +95,7 @@ scheduled_task = {
     "trigger": "cron",
     "trigger_args": {
         "hour": 4,
-        "minute": 20,
+        "minute": 30,
     },
     "job_id": "update_store_operation_status",
     "job_name": "가게 운영 상태 업데이트",
