@@ -8,6 +8,7 @@ from apscheduler.triggers.cron import CronTrigger
 from services.scheduled_tasks.order_migration import scheduled_task as order_migration_task
 from services.scheduled_tasks.inventory_reset import scheduled_task as inventory_reset_task
 from services.scheduled_tasks.uncompleted_order_refund import scheduled_task as uncompleted_order_refund_task
+from services.scheduled_tasks.store_operation_status_update import scheduled_task as store_operation_status_update_task
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ class SchedulerService:
             uncompleted_order_refund_task,
             inventory_reset_task,
             order_migration_task,
+            store_operation_status_update_task
         ]
     
     def start(self):
