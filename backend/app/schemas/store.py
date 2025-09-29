@@ -50,6 +50,12 @@ class StoreDetailResponseForCustomer(StoreDetailResponse):
 class StoreFavoriteStateResponse(BaseModel):
     """고객 즐겨찾기 추가/삭제 성공 메시지"""
     message: str = Field(..., description="즐겨찾기 추가/삭제 성공 메시지")
+
+
+class PaginatedStoreResponse(BaseModel):
+    """페이지네이션이 적용된 가게 목록 응답"""
+    stores: List[StoreDetailResponseForCustomer] = Field(..., description="가게 목록")
+    is_end: bool = Field(..., description="마지막 페이지 여부")
     
 class StoreCloseStateResponse(BaseModel):
     """가게 마감 성공 메시지"""
