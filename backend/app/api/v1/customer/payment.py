@@ -198,6 +198,45 @@ async def init_payment(
         total_amount=total_amount
     )
 
+@router.delete("/init/{payment_id}", status_code=status.HTTP_204_NO_CONTENT,
+    responses=create_error_responses({
+        400: ["이미 취소된 주문", "이미 승인된 주문"],
+        401:["인증 정보가 없음", "토큰 만료"],
+        404:"상품을 찾을 수 없음",
+        409: "동시성 충돌 발생"
+    })               
+)
+async def cancel_init_order(
+    payment_id: str,
+    current_user: CurrentCustomerDep,
+    cart_repo: CartItemRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep
+):
+    """
+    주문 중 이탈 했을 때 - 재고 복구 API (포트원 환불 X)
+    """
+    
+    # 주문 조회 (with Cart item)
+    order = await cart_repo.get_by_pk(payment_id)
+    
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="주문을 찾을 수 없습니다"
+        )
+ 
+    max_retries = settings.MAX_RETRY_LOCK
+    for attempt in range(max_retries):
+        result = await product_repo.adjust_purchased_stock(order.product_id, -order.quantity)
+        
+        if result == StockUpdateResult.SUCCESS:
+            break
+        
+        if attempt == max_retries - 1:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="재고 복구 중 충돌이 발생했습니다. 다시 시도해주세요."
+            )
 
 @router.post("/confirm", response_model=PaymentResponse,
     responses=create_error_responses({
