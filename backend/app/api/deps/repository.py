@@ -20,6 +20,7 @@ from repositories.store_image import StoreImageRepository
 from repositories.store_address import StoreAddressRepository
 from repositories.store_sns import StoreSNSRepository
 from repositories.store_operation_info import StoreOperationInfoRepository
+from repositories.store_operation_info_modification import StoreOperationInfoModificationRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.product_nutrition import ProductNutritionRepository
@@ -88,6 +89,10 @@ def get_store_operation_info_repository(session: AsyncSessionDep) -> StoreOperat
     return StoreOperationInfoRepository(session)
 
 
+def get_store_operation_info_modification_repository(session: AsyncSessionDep) -> StoreOperationInfoModificationRepository:
+    return StoreOperationInfoModificationRepository(session)
+
+
 def get_product_nutrition_repository(session: AsyncSessionDep) -> ProductNutritionRepository:
     return ProductNutritionRepository(session)
 
@@ -126,6 +131,7 @@ StorePaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(ge
 StoreAddressRepositoryDep = Annotated[StoreAddressRepository, Depends(get_store_address_repository)]
 StoreSNSRepositoryDep = Annotated[StoreSNSRepository, Depends(get_store_sns_repository)]
 StoreOperationInfoRepositoryDep = Annotated[StoreOperationInfoRepository, Depends(get_store_operation_info_repository)]
+StoreOperationInfoModificationRepositoryDep = Annotated[StoreOperationInfoModificationRepository, Depends(get_store_operation_info_modification_repository)]
 StoreProductInfoRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_store_product_info_repository)]
 ProductNutritionRepositoryDep = Annotated[ProductNutritionRepository, Depends(get_product_nutrition_repository)]
 # 주문
