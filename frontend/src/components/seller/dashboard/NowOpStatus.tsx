@@ -1,4 +1,4 @@
-const NowStatus = () => {
+const NowOpStatus = () => {
   return (
     <div className="mx-[20px] flex flex-col gap-y-[3px] mt-[7px] bg-[#3A3A3A] rounded-[8px] py-[25px] px-[19px] text-white">
       <div className="text-[24px]">
@@ -10,4 +10,4 @@ const NowStatus = () => {
   );
 };
 
-export default NowStatus;
+export default NowOpStatus;
