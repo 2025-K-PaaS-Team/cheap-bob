@@ -25,7 +25,11 @@ const ChangeStoreName = ({}) => {
       />
 
       {/* 다음 */}
-      <CommonBtn label="다음" onClick={handleSubmit} />
+      <CommonBtn
+        label="다음"
+        onClick={handleSubmit}
+        className="bg-black text-white"
+      />
     </div>
   );
 };
