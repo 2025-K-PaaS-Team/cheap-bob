@@ -100,7 +100,7 @@ const App = () => {
           element={<ChangePackageNutrition />}
         />
         <Route path="change/package/price" element={<ChangePackagePrice />} />
-        <Route path="change/package/quantity" element={<ChangePackageNum />} />
+        <Route path="change/package/num" element={<ChangePackageNum />} />
 
         {/* store page -- need to delete after refactoring */}
         <Route path="store" element={<Store />} />
