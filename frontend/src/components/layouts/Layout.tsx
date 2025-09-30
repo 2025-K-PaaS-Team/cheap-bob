@@ -20,7 +20,7 @@ const Layout = () => {
     path.startsWith("/s/change") ||
     path === "/s" ||
     path.startsWith("/s/signup");
-  const notHeader = path === "/c";
+  const notHeader = path === "/c" || path.startsWith("/s/signup");
 
   return (
     <>
