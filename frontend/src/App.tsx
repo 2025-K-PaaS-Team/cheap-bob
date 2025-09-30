@@ -20,7 +20,6 @@ import {
   Noti,
   Dashboard,
 } from "@pages";
-import { SellerMapLab } from "@pages/Common";
 import {
   ChangeStoreAddr,
   ChangeStoreDesc,
@@ -81,7 +80,6 @@ const App = () => {
         <Route path="store" element={<Store />} />
         {/* lab */}
         <Route path="lab" element={<SellerLab />} />
-        <Route path="lab/map" element={<SellerMapLab />} />
       </Route>
 
       {/* 루트 접근시 고객 홈으로 */}
