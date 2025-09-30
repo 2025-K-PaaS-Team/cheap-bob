@@ -1,10 +1,10 @@
 type BtnProps = {
   label: string;
-  notBottom: boolean;
+  notBottom?: boolean;
   onClick: () => void;
 };
 
-const CommonBtn = ({ label, onClick, notBottom }: BtnProps) => {
+const CommonBtn = ({ label, onClick, notBottom = false }: BtnProps) => {
   return (
     <button
       onClick={onClick}
