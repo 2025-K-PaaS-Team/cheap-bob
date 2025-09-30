@@ -23,6 +23,12 @@ import {
 import {
   ChangeOperationInfo,
   ChangeOperationTime,
+  ChangePackageDesc,
+  ChangePackageInfo,
+  ChangePackageName,
+  ChangePackageNum,
+  ChangePackageNutrition,
+  ChangePackagePrice,
   ChangePickupTime,
   ChangeStoreAddr,
   ChangeStoreDesc,
@@ -85,6 +91,16 @@ const App = () => {
           element={<ChangeOperationTime />}
         />
         <Route path="change/operation/pu-time" element={<ChangePickupTime />} />
+        {/* change package info */}
+        <Route path="change/package" element={<ChangePackageInfo />} />
+        <Route path="change/package/name" element={<ChangePackageName />} />
+        <Route path="change/package/desc" element={<ChangePackageDesc />} />
+        <Route
+          path="change/package/nutrition"
+          element={<ChangePackageNutrition />}
+        />
+        <Route path="change/package/price" element={<ChangePackagePrice />} />
+        <Route path="change/package/quantity" element={<ChangePackageNum />} />
 
         {/* store page -- need to delete after refactoring */}
         <Route path="store" element={<Store />} />
