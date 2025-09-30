@@ -240,7 +240,7 @@ async def cancel_init_order(
 
 @router.post("/confirm", response_model=PaymentResponse,
     responses=create_error_responses({
-        400: "결제 검증에 실패",
+        400: ["결제 검증에 실패", "픽업 시간 마감"],
         401:["인증 정보가 없음", "토큰 만료"],
         403: "결제 권한이 없음",
         404:["결제 정보를 찾을 수 없음", "상품 정보를 찾을 수 없음"],
@@ -254,7 +254,8 @@ async def confirm_payment(
     order_repo: OrderCurrentItemRepositoryDep,
     product_repo: StoreProductInfoRepositoryDep,
     payment_info_repo: StorePaymentInfoRepositoryDep,
-    profile_repo: CustomerProfileRepositoryDep
+    profile_repo: CustomerProfileRepositoryDep,
+    operation_repo: StoreOperationInfoRepositoryDep
 ):
     """
     결제 최종 확인 API - 포트원에서 결제가 성공했는지 확인
@@ -297,6 +298,23 @@ async def confirm_payment(
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="가게의 결제 설정이 완료되지 않았습니다"
+            )
+        
+        # 픽업 시간 체크
+        today_operation = await operation_repo.get_today_operation_info(product.store_id)
+        
+        if not today_operation:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="가게가 오늘은 영업하지 않습니다"
+            )
+        
+        current_time = datetime.now(KST).time()
+        
+        if current_time > today_operation.pickup_end_time:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"픽업 시간이 종료되었습니다. 픽업 종료 시간: {today_operation.pickup_end_time.strftime('%H:%M')}"
             )
         
         # PaymentService를 통해 결제 검증
