@@ -28,7 +28,12 @@ const StoreManage = () => {
       {/* 판매 패키지 */}
       <div className="flex flex-row text-bold justify-between h-[59px] items-center">
         <div className="font-bold">판매 패키지</div>
-        <div className="text-black/80">패키지 정보 변경 &gt;</div>
+        <div
+          className="text-black/80"
+          onClick={() => navigate("/s/change/package")}
+        >
+          패키지 정보 변경 &gt;
+        </div>
       </div>
     </div>
   );

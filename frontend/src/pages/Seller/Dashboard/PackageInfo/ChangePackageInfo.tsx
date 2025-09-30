@@ -3,11 +3,11 @@ import { useNavigate } from "react-router";
 const ChangePackageInfo = () => {
   const navigate = useNavigate();
   const items = [
-    { label: "매장 이름 변경", to: "/s/change/store/name" },
-    { label: "매장 소개 변경", to: "/s/change/store/desc" },
-    { label: "매장 연락처 변경", to: "/s/change/store/num" },
-    { label: "매장 주소 변경", to: "/s/change/store/addr" },
-    { label: "이미지 등록 및 변경", to: "/s/change/store/img" },
+    { label: "패키지 이름 변경", to: "/s/change/package/name" },
+    { label: "패키지 소개 변경", to: "/s/change/package/desc" },
+    { label: "영양목표 변경", to: "/s/change/package/nutrition" },
+    { label: "패키지 가격 변경", to: "/s/change/package/price" },
+    { label: "판매 기본값 변경", to: "/s/change/package/num" },
   ];
 
   return (
