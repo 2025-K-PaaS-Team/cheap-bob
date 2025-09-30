@@ -13,6 +13,7 @@ export { default as Favorite } from "./Customer/Favorite";
 export { default as Store } from "./Seller/Store";
 export { default as OrderManage } from "./Seller/Order";
 export { default as SellerHome } from "./Seller/Home";
+export { default as Dashboard } from "./Seller/Dashboard";
 
 // lab
 export { default as Map } from "./Common/Lab/CustomerMapLab";

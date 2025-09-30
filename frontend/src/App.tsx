@@ -18,6 +18,7 @@ import {
   Location,
   Favorite,
   Noti,
+  Dashboard,
 } from "@pages";
 import { SellerMapLab } from "@pages/Common";
 
@@ -56,6 +57,8 @@ const App = () => {
       <Route path="/s" element={<Layout />}>
         {/* home */}
         <Route index element={<SellerHome />} />
+        {/* dashboard */}
+        <Route path="dashboard" element={<Dashboard />} />
         {/* order */}
         <Route path="order" element={<OrderManage />} />
         {/* store */}

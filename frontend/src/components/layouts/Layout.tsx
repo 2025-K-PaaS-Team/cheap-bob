@@ -8,6 +8,7 @@ import {
 } from "@components/layouts";
 import { pathToLayoutKey } from "@utils";
 import { Outlet, useLocation } from "react-router";
+import SellerHeader from "./SellerHeader";
 
 const Layout = () => {
   const location = useLocation();
@@ -19,7 +20,12 @@ const Layout = () => {
   return (
     <>
       <Wrapper>
-        {!notHeader && <Header layout={pathToLayoutKey(path)} />}
+        {!notHeader &&
+          (isCustomer ? (
+            <Header layout={pathToLayoutKey(path)} />
+          ) : (
+            <SellerHeader layout={pathToLayoutKey(path)} />
+          ))}
         <Main>
           <Outlet />
         </Main>
