@@ -93,12 +93,12 @@ const PostalCode = () => {
       {/* postal code */}
       <div className="flex flex-row gap-x-[10px] h-[37px]">
         <input
-          className="bg-[#D9D9D9] text-[16px] w-full"
+          className="bg-[#D9D9D9] text-[16px] w-full p-3"
           id="postCode"
           value={postCode}
         />
         <button
-          className="bg-[#D9D9D9] text-[16px] w-[150px]"
+          className="bg-[#D9D9D9] text-[16px] w-[180px] px-3"
           onClick={() => openPostalCode()}
         >
           우편 번호 찾기
@@ -106,13 +106,13 @@ const PostalCode = () => {
       </div>
       {/* road address */}
       <input
-        className="bg-[#D9D9D9] text-[16px] w-full h-[37px]"
+        className="bg-[#D9D9D9] text-[16px] w-full h-[37px] p-3"
         id="roadAddr"
         value={roadAddr}
       />
       {/* detail address */}
       <input
-        className="bg-[#D9D9D9] text-[16px] w-full h-[37px]"
+        className="bg-[#D9D9D9] text-[16px] w-full h-[37px] p-3"
         id="detailAddr"
         value={detailAddr}
         onChange={(e) => setDetailAddr(e.target.value)}
