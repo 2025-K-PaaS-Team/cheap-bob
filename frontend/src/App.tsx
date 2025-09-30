@@ -57,11 +57,11 @@ const App = () => {
       <Route path="/s" element={<Layout />}>
         {/* home */}
         <Route index element={<SellerHome />} />
-        {/* dashboard */}
+        {/* dashboard = store management */}
         <Route path="dashboard" element={<Dashboard />} />
-        {/* order */}
+        {/* order management */}
         <Route path="order" element={<OrderManage />} />
-        {/* store */}
+        {/* store page -- need to delete after refactoring */}
         <Route path="store" element={<Store />} />
         {/* lab */}
         <Route path="lab" element={<SellerLab />} />

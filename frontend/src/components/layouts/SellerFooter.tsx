@@ -9,11 +9,22 @@ const SellerFooter = () => {
     return null;
   }
 
+  const items = [
+    { label: "주문 관리", to: "order" },
+    { label: "매장 관리", to: "dashboard" },
+    { label: "정산 관리", to: "billing" },
+  ];
+
   return (
-    <div className="grid grid-cols-4 items-center text-center p-4">
-      <FooterItem img={"/icon/search.svg"} label={"주문 관리"} to={"order"} />
-      <FooterItem img={"/icon/search.svg"} label={"매장 관리"} to={"store"} />
-      <FooterItem img={"/icon/search.svg"} label={"정산 관리"} to={"/"} />
+    <div className="grid grid-cols-3 items-center text-center p-4 bg-[#D9D9D9] h-[68px]">
+      {items.map((item) => (
+        <FooterItem
+          key={item.to}
+          label={item.label}
+          to={item.to}
+          className={path.includes(item.to) ? "font-bold" : "font-normal"}
+        />
+      ))}
     </div>
   );
 };
