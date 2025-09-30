@@ -68,7 +68,7 @@ const Agree = ({ onNext }: AgreeProps) => {
         </div>
       </div>
       {/* 다음 */}
-      <CommonBtn label="다음" onClick={handleSubmit} />
+      <CommonBtn label="다음" onClick={handleSubmit} notBottom={false} />
     </div>
   );
 };
