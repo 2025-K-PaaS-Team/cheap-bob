@@ -19,6 +19,7 @@ import {
   Favorite,
   Noti,
   Dashboard,
+  SellerSignup,
 } from "@pages";
 import {
   ChangeOperationInfo,
@@ -76,6 +77,8 @@ const App = () => {
       <Route path="/s" element={<Layout />}>
         {/* home */}
         <Route index element={<SellerHome />} />
+        {/* signup */}
+        <Route path="signup" element={<SellerSignup />} />
         {/* dashboard = store management */}
         <Route path="dashboard" element={<Dashboard />}></Route>
         {/* order management */}
