@@ -12,8 +12,8 @@ const ChangeStoreInfo = () => {
 
   return (
     <div className="mx-[35px]">
-      {items.map((item) => (
-        <div>
+      {items.map((item, idx) => (
+        <div key={idx}>
           <div
             className="text-[16px] py-[20px] border-b-[1px] border-black/10"
             onClick={() => navigate(item.to)}
