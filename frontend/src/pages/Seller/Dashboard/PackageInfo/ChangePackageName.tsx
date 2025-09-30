@@ -24,9 +24,9 @@ const ChangePackageName = ({}) => {
         onChange={(e) => setValue(e.target.value)}
       />
 
-      {/* 다음 */}
+      {/* save */}
       <CommonBtn
-        label="다음"
+        label="저장"
         onClick={handleSubmit}
         className="bg-black text-white"
       />
