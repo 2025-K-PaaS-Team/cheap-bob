@@ -68,7 +68,7 @@ const ChangeOperationTime = () => {
         {/* list content */}
         <div className="flex flex-col items-center">
           {daysOfWeek.map((day) => (
-            <div className="grid grid-cols-8 w-full items-center">
+            <div className="grid grid-cols-8 w-full items-center" key={day.idx}>
               {/* 1 col */}
               <div className="font-bold text-[14px] h-[40px] flex items-center justify-center">
                 {day.label}

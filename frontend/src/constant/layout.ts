@@ -113,4 +113,8 @@ export const sellerLayoutMap = {
     back: true,
     title: "매장 정보 변경",
   },
+  changeOperationInfo: {
+    back: true,
+    title: "운영 정보 변경",
+  },
 };
