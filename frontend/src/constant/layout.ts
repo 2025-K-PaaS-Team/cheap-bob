@@ -117,4 +117,8 @@ export const sellerLayoutMap = {
     back: true,
     title: "운영 정보 변경",
   },
+  changePackageInfo: {
+    back: true,
+    title: "패키지 정보 변경",
+  },
 };

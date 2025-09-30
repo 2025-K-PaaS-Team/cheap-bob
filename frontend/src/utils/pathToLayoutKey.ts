@@ -16,5 +16,6 @@ export const pathToLayoutKey = (path: string): LayoutType => {
 export const pathToSellerLayoutKey = (path: string): SellerLayoutType => {
   if (path.startsWith("/s/change/store")) return "changeStoreInfo";
   if (path.startsWith("/s/change/operation")) return "changeOperationInfo";
+  if (path.startsWith("/s/change/package")) return "changePackageInfo";
   return "default";
 };
