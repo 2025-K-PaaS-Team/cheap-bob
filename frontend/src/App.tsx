@@ -21,6 +21,9 @@ import {
   Dashboard,
 } from "@pages";
 import {
+  ChangeOperationInfo,
+  ChangeOperationTime,
+  ChangePickupTime,
   ChangeStoreAddr,
   ChangeStoreDesc,
   ChangeStoreImg,
@@ -75,6 +78,13 @@ const App = () => {
         <Route path="change/store/num" element={<ChangeStoreNum />} />
         <Route path="change/store/addr" element={<ChangeStoreAddr />} />
         <Route path="change/store/img" element={<ChangeStoreImg />} />
+        {/* change operation info */}
+        <Route path="change/operation" element={<ChangeOperationInfo />} />
+        <Route
+          path="change/operation/op-time"
+          element={<ChangeOperationTime />}
+        />
+        <Route path="change/operation/pu-time" element={<ChangePickupTime />} />
 
         {/* store page -- need to delete after refactoring */}
         <Route path="store" element={<Store />} />
