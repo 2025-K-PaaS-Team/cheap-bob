@@ -4,10 +4,15 @@ export { default as StoreList } from "./Customer/StoreList";
 export { default as LoginCallback } from "./Common/LoginCallback";
 export { default as Order } from "./Customer/Order";
 export { default as Signup } from "./Customer/Signup";
+export { default as CustomerHome } from "./Customer/Home";
+export { default as Location } from "./Customer/Location";
+export { default as Noti } from "./Customer/Noti";
+export { default as Favorite } from "./Customer/Favorite";
 
 // seller
 export { default as Store } from "./Seller/Store";
 export { default as OrderManage } from "./Seller/Order";
+export { default as SellerHome } from "./Seller/Home";
 
 // lab
 export { default as Map } from "./Common/Lab/CustomerMapLab";

@@ -1,8 +1,8 @@
-import { LoginButton } from "@components/home";
+import { LoginButton } from "@components/common/home";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
-const SellerHome = () => {
+const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,13 +25,11 @@ const SellerHome = () => {
         <LoginButton
           provider="kakao"
           label="[점주] 카카오톡으로 로그인하기"
-          color="bg-amber-500"
           isCustomer={false}
         />
         <LoginButton
           provider="naver"
           label="[점주] 네이버로 로그인하기"
-          color="bg-teal-500"
           isCustomer={false}
         />
         <h3
@@ -51,4 +49,4 @@ const SellerHome = () => {
   );
 };
 
-export default SellerHome;
+export default Home;
