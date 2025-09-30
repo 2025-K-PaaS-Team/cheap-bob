@@ -6,7 +6,7 @@ import {
   Header,
   SellerFooter,
 } from "@components/layouts";
-import { pathToLayoutKey } from "@utils";
+import { pathToLayoutKey, pathToSellerLayoutKey } from "@utils";
 import { Outlet, useLocation } from "react-router";
 import SellerHeader from "./SellerHeader";
 
@@ -24,7 +24,7 @@ const Layout = () => {
           (isCustomer ? (
             <Header layout={pathToLayoutKey(path)} />
           ) : (
-            <SellerHeader layout={pathToLayoutKey(path)} />
+            <SellerHeader layout={pathToSellerLayoutKey(path)} />
           ))}
         <Main>
           <Outlet />

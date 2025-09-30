@@ -1,4 +1,4 @@
-import type { LayoutType } from "@interface";
+import type { LayoutType, SellerLayoutType } from "@interface";
 
 export const pathToLayoutKey = (path: string): LayoutType => {
   if (path === "/c") return "Home";
@@ -10,5 +10,10 @@ export const pathToLayoutKey = (path: string): LayoutType => {
   if (path === "/c/my") return "My";
   if (path === "/c/order") return "Order";
   if (path === "/c/location") return "SetLoc";
+  return "default";
+};
+
+export const pathToSellerLayoutKey = (path: string): SellerLayoutType => {
+  if (path.startsWith("/s/change/store")) return "changeStoreInfo";
   return "default";
 };

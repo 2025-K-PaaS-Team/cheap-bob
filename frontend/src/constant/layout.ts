@@ -99,3 +99,18 @@ export const layoutMap = {
     searchPlaceholder: "",
   },
 };
+
+export const sellerLayoutMap = {
+  default: {
+    back: false,
+    title: "",
+  },
+  back: {
+    back: true,
+    title: "",
+  },
+  changeStoreInfo: {
+    back: true,
+    title: "매장 정보 변경",
+  },
+};

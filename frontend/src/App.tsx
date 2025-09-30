@@ -71,11 +71,11 @@ const App = () => {
         <Route path="order" element={<OrderManage />} />
         {/* change store info */}
         <Route path="change/store" element={<ChangeStoreInfo />} />
-        <Route path="change/store-name" element={<ChangeStoreName />} />
-        <Route path="change/store-desc" element={<ChangeStoreDesc />} />
-        <Route path="change/store-num" element={<ChangeStoreNum />} />
-        <Route path="change/store-addr" element={<ChangeStoreAddr />} />
-        <Route path="change/store-img" element={<ChangeStoreImg />} />
+        <Route path="change/store/name" element={<ChangeStoreName />} />
+        <Route path="change/store/desc" element={<ChangeStoreDesc />} />
+        <Route path="change/store/num" element={<ChangeStoreNum />} />
+        <Route path="change/store/addr" element={<ChangeStoreAddr />} />
+        <Route path="change/store/img" element={<ChangeStoreImg />} />
 
         {/* store page -- need to delete after refactoring */}
         <Route path="store" element={<Store />} />
