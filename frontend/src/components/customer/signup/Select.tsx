@@ -1,4 +1,4 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, SelectedGrid } from "@components/common";
 import type { SelectItem } from "@constant";
 
 type SelectProps = {
@@ -38,35 +38,14 @@ const Select = ({
   return (
     <>
       <div className="flex h-full w-full justify-center items-start pt-[92px]">
-        <div className="grid grid-cols-2 gap-[10px]">
-          {data &&
-            data.map(({ key, title, desc }) => (
-              <div
-                key={key}
-                onClick={() => handleClick(key)}
-                className={`relative rounded-[5px] p-[15px] w-[170px] cursor-pointer
-                  ${
-                    selected.includes(key)
-                      ? "bg-[#484848] text-white"
-                      : "bg-[#717171] text-white"
-                  }
-                  ${selectType === "nutrition" ? "h-[90px]" : "h-[65px]"}
-                  `}
-              >
-                {selected.includes(key) && (
-                  <img
-                    src="/icon/checked.svg"
-                    alt="checked"
-                    className={`absolute z-10 left-1/2 -translate-x-1/2 top-6 ${
-                      selectType === "nutrition" ? "top-6" : "top-[13px]"
-                    }`}
-                  />
-                )}
-                <div className="font-semibold text-[15px]">{title}</div>
-                {desc && <div className="text-[11px]">{desc}</div>}
-              </div>
-            ))}
-        </div>
+        {data && (
+          <SelectedGrid
+            data={data}
+            selected={selected}
+            selectType={selectType}
+            onClick={handleClick}
+          />
+        )}
       </div>
       {/* 다음 */}
 

@@ -1,68 +1,41 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, SelectedGrid } from "@components/common";
+import { NutritionList } from "@constant";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
 const ChangePackageNutrition = () => {
-  const [value, setValue] = useState<string>("");
   const navigate = useNavigate();
   const handleSubmit = () => {
     navigate(-1);
   };
 
+  const [nutrition, setNutrition] = useState<string[]>([]);
+  const handleClick = (key: string) => {
+    if (nutrition.includes(key)) {
+      setNutrition(nutrition.filter((item) => item != key));
+    } else {
+      setNutrition([...nutrition, key]);
+    }
+  };
+
   return (
     <div className="mt-[80px] px-[20px] w-full">
       {/* question */}
-      <div className="text-[24px]">
-        변경할 <span className="font-bold">매장 연락처</span>를 <br /> 입력해
-        주세요.
-      </div>
-      {/* input box */}
-      <div className="mt-[40px] gap-y-[11px]">
-        <div className="text-[16px]">매장 전화번호 (*필수)</div>
-        <input
-          className="w-full h-[46px] text-center bg-[#D9D9D9] text-[16px]"
-          placeholder="매장 전화번호를 입력해 주세요"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
+      <div className="text-[24px]">패키지의 특징은 무엇인가요?</div>
+      <div className="text-[14px] mb-[36px]">
+        최대 3개까지 선택할 수 있어요.
       </div>
 
-      {/* other sns */}
-      <div className="mt-[39px] flex flex-col gap-y-[11px]">
-        <div className="text-[20px]">다른 SNS도 있나요?</div>
-        <div className="flex flex-row">
-          <div className="text-[14px] w-[97px] flex items-center">홈페이지</div>
-          <input
-            className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-row">
-          <div className="text-[14px] w-[97px] flex items-center">
-            인스타그램
-          </div>
-          <input
-            className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-row">
-          <div className="text-[14px] w-[97px] flex items-center">
-            X (Twitter)
-          </div>
-          <input
-            className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* 다음 */}
+      {/* nutrition list */}
+      <SelectedGrid
+        data={NutritionList}
+        selected={nutrition}
+        selectType="nutrition"
+        onClick={handleClick}
+      />
+      {/* save */}
       <CommonBtn
-        label="다음"
+        label="저장"
         onClick={handleSubmit}
         className="bg-black text-white"
       />
