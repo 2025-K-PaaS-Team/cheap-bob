@@ -1,8 +1,8 @@
 const Dashboard = () => {
   return (
-    <div className="flex w-full flex-col px-[20px]">
+    <div className="flex w-full flex-col">
       {/* now operating status */}
-      <div className="flex flex-col gap-y-[3px] mt-[7px] bg-[#3A3A3A] rounded-[8px] py-[25px] px-[19px] text-white">
+      <div className="mx-[20px] flex flex-col gap-y-[3px] mt-[7px] bg-[#3A3A3A] rounded-[8px] py-[25px] px-[19px] text-white">
         <div className="text-[24px]">
           지금은 <span className="font-bold">운영중</span> 입니다.
         </div>
@@ -11,7 +11,7 @@ const Dashboard = () => {
       </div>
 
       {/* remaining package quantity */}
-      <div className="flex flex-col mt-[7px] bg-[#D9D9D9] rounded-[8px] py-[23px] px-[19px] text-black">
+      <div className="mx-[20px] flex flex-col mt-[7px] bg-[#D9D9D9] rounded-[8px] py-[23px] px-[19px] text-black">
         <div className="text-[24px] mb-[7px]">
           현재 패키지 잔여 수량은 <br /> <span className="font-bold">2개</span>{" "}
           입니다.
@@ -39,6 +39,28 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* border */}
+      <hr className="bg-black/20 h-[1px] border-0 mt-[50px] mb-[33px]" />
+
+      {/* my store info */}
+      <div className="flex flex-col gap-y-[11px] mx-[20px]">
+        {/* 나의 매장 */}
+        <div className="flex flex-row text-bold justify-between h-[59px] items-center">
+          <div className="font-bold">나의 매장</div>
+          <div className="text-black/80">매장 정보 변경 &gt;</div>
+        </div>
+        {/* 운영 시간 */}
+        <div className="flex flex-row text-bold justify-between h-[59px] items-center">
+          <div className="font-bold">운영 시간</div>
+          <div className="text-black/80">운영 정보 변경 &gt;</div>
+        </div>
+        {/* 판매 패키ㅣ */}
+        <div className="flex flex-row text-bold justify-between h-[59px] items-center">
+          <div className="font-bold">판매 패키지</div>
+          <div className="text-black/80">패키지 정보 변경 &gt;</div>
         </div>
       </div>
     </div>
