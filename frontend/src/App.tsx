@@ -67,6 +67,9 @@ const App = () => {
         <Route path="lab" element={<CustomerLab />} />
         <Route path="lab/map" element={<CustomerMapLab />} />
         <Route path="qr" element={<QrLab />} />
+
+        {/* customer fallback */}
+        <Route path="*" element={<Navigate to="/c" replace />} />
       </Route>
 
       {/* seller side */}
@@ -106,12 +109,13 @@ const App = () => {
         <Route path="store" element={<Store />} />
         {/* lab */}
         <Route path="lab" element={<SellerLab />} />
+
+        {/* seller fallback */}
+        <Route path="*" element={<Navigate to="/s" replace />} />
       </Route>
 
-      {/* 루트 접근시 고객 홈으로 */}
-      <Route path="/" element={<Navigate to="/c" replace />} />
-      {/* fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* global fallback */}
+      <Route path="*" element={<Navigate to="/c" replace />} />
     </Routes>
   );
 };
