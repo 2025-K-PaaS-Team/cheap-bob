@@ -94,9 +94,18 @@ export type GetQrCodeType = QrBaseType & {
   created_at: TimeStamp;
 };
 
+export type CoorBaseType = {
+  lng: string;
+  lat: string
+}
+
 export type MapBaseType = {
-  road_address: string;
-  building_name: string;
+  postal_code: any;
+  address: string;
+  detail_address: string;
+  sido: string;
+  sigungu: string;
+  bname: string;
   lng: string;
   lat: string;
 };

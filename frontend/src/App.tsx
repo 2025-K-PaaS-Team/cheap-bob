@@ -18,8 +18,25 @@ import {
   Location,
   Favorite,
   Noti,
+  Dashboard,
 } from "@pages";
-import { SellerMapLab } from "@pages/Common";
+import {
+  ChangeOperationInfo,
+  ChangeOperationTime,
+  ChangePackageDesc,
+  ChangePackageInfo,
+  ChangePackageName,
+  ChangePackageNum,
+  ChangePackageNutrition,
+  ChangePackagePrice,
+  ChangePickupTime,
+  ChangeStoreAddr,
+  ChangeStoreDesc,
+  ChangeStoreImg,
+  ChangeStoreInfo,
+  ChangeStoreName,
+  ChangeStoreNum,
+} from "@pages/Seller/Dashboard";
 
 const App = () => {
   return (
@@ -50,25 +67,55 @@ const App = () => {
         <Route path="lab" element={<CustomerLab />} />
         <Route path="lab/map" element={<CustomerMapLab />} />
         <Route path="qr" element={<QrLab />} />
+
+        {/* customer fallback */}
+        <Route path="*" element={<Navigate to="/c" replace />} />
       </Route>
 
       {/* seller side */}
       <Route path="/s" element={<Layout />}>
         {/* home */}
         <Route index element={<SellerHome />} />
-        {/* order */}
+        {/* dashboard = store management */}
+        <Route path="dashboard" element={<Dashboard />}></Route>
+        {/* order management */}
         <Route path="order" element={<OrderManage />} />
-        {/* store */}
+        {/* change store info */}
+        <Route path="change/store" element={<ChangeStoreInfo />} />
+        <Route path="change/store/name" element={<ChangeStoreName />} />
+        <Route path="change/store/desc" element={<ChangeStoreDesc />} />
+        <Route path="change/store/num" element={<ChangeStoreNum />} />
+        <Route path="change/store/addr" element={<ChangeStoreAddr />} />
+        <Route path="change/store/img" element={<ChangeStoreImg />} />
+        {/* change operation info */}
+        <Route path="change/operation" element={<ChangeOperationInfo />} />
+        <Route
+          path="change/operation/op-time"
+          element={<ChangeOperationTime />}
+        />
+        <Route path="change/operation/pu-time" element={<ChangePickupTime />} />
+        {/* change package info */}
+        <Route path="change/package" element={<ChangePackageInfo />} />
+        <Route path="change/package/name" element={<ChangePackageName />} />
+        <Route path="change/package/desc" element={<ChangePackageDesc />} />
+        <Route
+          path="change/package/nutrition"
+          element={<ChangePackageNutrition />}
+        />
+        <Route path="change/package/price" element={<ChangePackagePrice />} />
+        <Route path="change/package/num" element={<ChangePackageNum />} />
+
+        {/* store page -- need to delete after refactoring */}
         <Route path="store" element={<Store />} />
         {/* lab */}
         <Route path="lab" element={<SellerLab />} />
-        <Route path="lab/map" element={<SellerMapLab />} />
+
+        {/* seller fallback */}
+        <Route path="*" element={<Navigate to="/s" replace />} />
       </Route>
 
-      {/* 루트 접근시 고객 홈으로 */}
-      <Route path="/" element={<Navigate to="/c" replace />} />
-      {/* fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* global fallback */}
+      <Route path="*" element={<Navigate to="/c" replace />} />
     </Routes>
   );
 };

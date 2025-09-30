@@ -6,20 +6,27 @@ import {
   Header,
   SellerFooter,
 } from "@components/layouts";
-import { pathToLayoutKey } from "@utils";
+import { pathToLayoutKey, pathToSellerLayoutKey } from "@utils";
 import { Outlet, useLocation } from "react-router";
+import SellerHeader from "./SellerHeader";
 
 const Layout = () => {
   const location = useLocation();
   const path = location.pathname;
   const isCustomer = path.startsWith("/c");
-  const notFooter = path === "/c" || path === "/c/signup";
+  const notFooter =
+    path === "/c" || path === "/c/signup" || path.startsWith("/s/change");
   const notHeader = path === "/c";
 
   return (
     <>
       <Wrapper>
-        {!notHeader && <Header layout={pathToLayoutKey(path)} />}
+        {!notHeader &&
+          (isCustomer ? (
+            <Header layout={pathToLayoutKey(path)} />
+          ) : (
+            <SellerHeader layout={pathToSellerLayoutKey(path)} />
+          ))}
         <Main>
           <Outlet />
         </Main>
