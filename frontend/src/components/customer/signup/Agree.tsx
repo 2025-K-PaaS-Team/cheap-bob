@@ -2,7 +2,7 @@ import { CommonBtn } from "@components/common";
 import { useState } from "react";
 
 type AgreeProps = {
-  onNext: () => void;
+  onNext?: () => void;
 };
 
 const Agree = ({ onNext }: AgreeProps) => {
@@ -22,11 +22,11 @@ const Agree = ({ onNext }: AgreeProps) => {
   };
 
   const handleSubmit = () => {
+    if (!onNext) return;
     if (!allAgree) {
       alert("필수 항목에 모두 동의해주세요");
       return;
     }
-    console.log("onNext");
     onNext();
   };
 
@@ -68,7 +68,7 @@ const Agree = ({ onNext }: AgreeProps) => {
         </div>
       </div>
       {/* 다음 */}
-      <CommonBtn label="다음" onClick={handleSubmit} />
+      {onNext && <CommonBtn label="다음" onClick={handleSubmit} />}
     </div>
   );
 };

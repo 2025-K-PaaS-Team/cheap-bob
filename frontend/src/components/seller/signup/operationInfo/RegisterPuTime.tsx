@@ -1,14 +1,12 @@
-import { CommonBtn } from "@components/common";
-import { useNavigate } from "react-router";
-
-const ChangePickupTime = () => {
-  const navigate = useNavigate();
-  const handleSubmit = () => {
-    navigate(-1);
-  };
-
+const RegisterPuTime = () => {
   return (
-    <div className="flex flex-col gap-y-[10px] mx-[20px]">
+    <div className="relative flex h-full mx-[20px] flex-col mt-[69px] gap-y-[11px]">
+      <div className="text-[16px]">2/4</div>
+      <div className="text-[24px]">
+        할인팩
+        <span className="font-bold">픽업 시간</span>을 <br /> 설정해주세요.
+      </div>
+
       {/* pickup time */}
       <div className="text-[14px] font-bold">픽업 시간</div>
       <div className="text-[14px]">
@@ -52,20 +50,8 @@ const ChangePickupTime = () => {
           있습니다.
         </div>
       </div>
-
-      {/* notice */}
-      <div className="absolute bottom-30 w-[350px] left-1/2 -translate-x-1/2 bg-[#d9d9d9] rounded-[8px] h-[57px] px-[10px] flex items-center">
-        변경시 다음 영업일부터 적용됩니다.
-      </div>
-
-      {/* btn */}
-      <CommonBtn
-        label="다음"
-        onClick={handleSubmit}
-        className="bg-black text-white"
-      />
     </div>
   );
 };
 
-export default ChangePickupTime;
+export default RegisterPuTime;

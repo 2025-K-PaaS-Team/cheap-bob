@@ -1,13 +1,7 @@
-import { CommonBtn } from "@components/common";
 import { useState } from "react";
-import { useNavigate } from "react-router";
 
 const RegisterName = () => {
   const [value, setValue] = useState<string>("");
-  const navigate = useNavigate();
-  const handleSubmit = () => {
-    navigate(-1);
-  };
 
   return (
     <div className="mx-[20px] mt-[69px] flex flex-col gap-y-[11px]">
@@ -23,13 +17,6 @@ const RegisterName = () => {
         placeholder="매장 이름을 입력해 주세요"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-      />
-
-      {/* 다음 */}
-      <CommonBtn
-        label="다음"
-        onClick={handleSubmit}
-        className="bg-black text-white"
       />
     </div>
   );
