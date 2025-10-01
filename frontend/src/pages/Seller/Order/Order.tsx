@@ -1,4 +1,4 @@
-import { Now, StatusBar } from "@components/seller/order";
+import { Now, OrderList, StatusBar } from "@components/seller/order";
 
 const Order = () => {
   return (
@@ -11,6 +11,8 @@ const Order = () => {
         <div>n건의 주문 내역이 있습니다.</div>
         <div>주문 시간 순▽</div>
       </div>
+
+      <OrderList />
     </>
   );
 };
