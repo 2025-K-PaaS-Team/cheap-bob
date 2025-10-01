@@ -32,6 +32,7 @@ const ChangePickupTime = () => {
         </div>
       </div>
 
+      {/* after time */}
       <div className="text-[14px] font-bold mt-[40px]">픽업 마감 시간</div>
       <div className="text-[14px]">픽업을 마감할 시간을 입력해 주세요.</div>
       <div className="text-center w-full justify-center">
