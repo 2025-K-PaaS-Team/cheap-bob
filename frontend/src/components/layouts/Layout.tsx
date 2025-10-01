@@ -19,7 +19,8 @@ const Layout = () => {
     path === "/c/signup" ||
     path.startsWith("/s/change") ||
     path === "/s" ||
-    path.startsWith("/s/signup");
+    path.startsWith("/s/signup") ||
+    path.startsWith("/s/billing/");
   const notHeader = path === "/c" || path.startsWith("/s/signup");
 
   return (
