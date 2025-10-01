@@ -1,12 +1,15 @@
-import { ConfirmSetting, SuccessSetting } from "@components/seller/signup";
 import {
+  Agree,
+  ConfirmSetting,
+  RegisterAddr,
   RegisterDesc,
   RegisterName,
-  RegisterAddr,
   RegisterNum,
-} from "@pages/Seller";
+  SuccessSetting,
+} from "@components/seller/signup";
 
 export const pages = [
+  Agree,
   RegisterName,
   RegisterDesc,
   RegisterAddr,
