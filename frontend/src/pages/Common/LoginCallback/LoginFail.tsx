@@ -1,0 +1,26 @@
+import { CommonBtn } from "@components/common";
+import { useNavigate } from "react-router";
+
+const LoginFail = () => {
+  const navigate = useNavigate();
+  return (
+    <div className="flex flex-col h-full items-center justify-center text-center">
+      <img src="/icon/error.svg" alt="errorIcon" className="w-15 mb-5" />
+      <div className="text-[24px] font-bold">로그인에 실패했어요</div>
+      <div className="text-[16px]">
+        점주와 고객 계정은 중복 가입이 불가능합니다.
+        <br />
+        로그인할 계정을 선택해주세요.
+      </div>
+      <CommonBtn
+        label="점주 로그인하기"
+        onClick={() => navigate("/s")}
+        notBottom
+        className="absolute bottom-30 left-1/2 -translate-x-1/2"
+      />
+      <CommonBtn label="고객 로그인하기" onClick={() => navigate("/c")} />
+    </div>
+  );
+};
+
+export default LoginFail;

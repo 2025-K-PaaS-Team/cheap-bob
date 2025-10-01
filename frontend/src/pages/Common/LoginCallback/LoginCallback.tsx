@@ -1,4 +1,3 @@
-import { CheckCustomerDetail } from "@services";
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
@@ -6,17 +5,15 @@ const LoginCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const handleCheckCustomerDetail = async () => {
+  const handleCheckConflict = async () => {
     try {
-      const res = await CheckCustomerDetail();
-
-      if (res.has_detail) {
-        navigate("/");
-      } else {
-        navigate("/c/signup");
+      const conflict = searchParams.get("conflict");
+      alert(conflict);
+      if (conflict == "1") {
+        navigate("/auth/fail");
       }
     } catch (err: unknown) {
-      console.error("err", err);
+      console.warn(err);
     }
   };
 
@@ -24,7 +21,7 @@ const LoginCallback = () => {
     const token = searchParams.get("token");
     if (token) {
       localStorage.setItem("accessToken", token);
-      handleCheckCustomerDetail();
+      handleCheckConflict();
     } else {
       navigate("/auth/success");
     }

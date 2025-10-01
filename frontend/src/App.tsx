@@ -20,6 +20,7 @@ import {
   Noti,
   Dashboard,
   SellerSignup,
+  LoginFail,
 } from "@pages";
 import {
   ChangeOperationInfo,
@@ -44,6 +45,8 @@ const App = () => {
     <Routes>
       {/* login callback */}
       <Route path="/auth/success" element={<LoginCallback />} />
+      {/* login 409 failed */}
+      <Route path="/auth/fail" element={<LoginFail />} />
 
       {/* customer side */}
       <Route path="/c" element={<Layout />}>

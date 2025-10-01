@@ -2,6 +2,7 @@ export { default as My } from "./Customer/My";
 export { default as StoreDetail } from "./Customer/StoreDetail";
 export { default as StoreList } from "./Customer/StoreList";
 export { default as LoginCallback } from "./Common/LoginCallback";
+export { default as LoginFail } from "./Common/LoginCallback/LoginFail";
 export { default as Order } from "./Customer/Order";
 export { default as Signup } from "./Customer/Signup";
 export { default as CustomerHome } from "./Customer/Home";
