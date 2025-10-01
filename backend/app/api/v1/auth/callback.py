@@ -129,14 +129,14 @@ async def seller_oauth_callback(
 ):
     """Seller OAuth 로그인 콜백"""
     try:
-        token_response = await oauth_service.authenticate(
+        token_response, conflict = await oauth_service.authenticate(
             provider=provider,
             code=code,
             user_type=UserType.SELLER
         )
         
         # JWT 토큰을 디코드하여 판매자 이메일 추출
-        decoded_token, conflict = jwt_service.decode_access_token(token_response.access_token)
+        decoded_token = jwt_service.decode_access_token(token_response.access_token)
         email = decoded_token["sub"]
         
         if conflict:

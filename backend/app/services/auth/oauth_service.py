@@ -26,7 +26,7 @@ class OAuthService:
         provider: OAuthProvider,
         code: str,
         user_type: UserType
-    ) -> TokenResponse:
+    ) -> Tuple[TokenResponse, bool]:
         # OAuth 클라이언트 생성
         oauth_client = OAuthClientFactory.create(provider)
         
