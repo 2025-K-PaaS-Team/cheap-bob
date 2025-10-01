@@ -1,6 +1,12 @@
-import { LoginButton } from "@components/common/home";
+import { HomeSwiper, LoginButton } from "@components/common/home";
+import { homeSwiperMap } from "@constant";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import { Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -9,41 +15,42 @@ const Home = () => {
     const token = localStorage.getItem("accessToken");
 
     if (token) {
-      alert("이미 로그인이 되어 있어요.");
-      // setTimeout(() => {
-      //   navigate("lab");
-      // }, 3000);
+      navigate("/s/dashboard");
     }
   }, []);
 
   return (
-    <div className="flex justify-center">
-      {/* title */}
-      <h1 className="flex">저렴한끼</h1>
+    <div className="flex justify-center w-full">
+      {/* swiper */}
+      <Swiper
+        pagination={{ clickable: true }}
+        modules={[Pagination]}
+        className="mySwiper items-center flex h-[460px] mt-[119px]"
+      >
+        {homeSwiperMap.map((slide, idx) => (
+          <SwiperSlide key={idx}>
+            <HomeSwiper title={slide.title} img={slide.img} />
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
-      <div className="fixed bottom-30 w-full flex flex-col max-w-[400px]">
+      {/* login button */}
+      <div className="fixed bottom-[38px] flex flex-col gap-y-[10px]">
         <LoginButton
           provider="kakao"
-          label="[점주] 카카오톡으로 로그인하기"
+          label="카카오로 계속하기"
           isCustomer={false}
         />
         <LoginButton
           provider="naver"
-          label="[점주] 네이버로 로그인하기"
+          label="네이버로 계속하기"
           isCustomer={false}
         />
-        <h3
-          className="bg-pink-300 p-3 rounded-xl text-center cursor-pointer"
-          onClick={() => navigate("/c", { replace: true })}
-        >
-          고객 페이지로 이동
-        </h3>
-        <h3
-          className="bg-gray-300 p-3 rounded-xl text-center cursor-pointer"
-          onClick={() => navigate("/s/lab")}
-        >
-          실험실로 이동
-        </h3>
+        <LoginButton
+          provider="google"
+          label="구글로 계속하기"
+          isCustomer={false}
+        />
       </div>
     </div>
   );
