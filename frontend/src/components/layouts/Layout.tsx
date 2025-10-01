@@ -12,7 +12,7 @@ import SellerHeader from "./SellerHeader";
 
 const Layout = () => {
   const location = useLocation();
-  const path = location.pathname;
+  const path = location.pathname.toLowerCase();
   const isCustomer = path.startsWith("/c");
   const notFooter =
     path === "/c" ||
