@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Tuple
 
 from fastapi import HTTPException, status
 
@@ -43,14 +43,20 @@ class OAuthService:
         else:
             return await self._handle_seller_login(oauth_user.email)
     
-    async def _handle_customer_login(self, email: str) -> TokenResponse:
+    async def _handle_customer_login(self, email: str) -> Tuple[TokenResponse, bool]:
         # Seller로 이미 가입되어 있는지 체크
         seller_exists = await self.seller_repository.exists_by_email(email)
         if seller_exists:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="이미 판매자로 존재하는 회원입니다."
+            # 이미 판매자로 가입, 충돌 발생
+            access_token = self.jwt_service.create_user_token(
+                email=email,
+                user_type=UserType.SELLER.value
             )
+            return TokenResponse(access_token=access_token, user_type=UserType.SELLER), True
+            # raise HTTPException(
+            #     status_code=status.HTTP_409_CONFLICT,
+            #     detail="이미 판매자로 존재하는 회원입니다."
+            # )
         
         # Customer로 가입되어 있는지 체크
         customer_exists = await self.customer_repository.exists_by_email(email)
@@ -65,19 +71,22 @@ class OAuthService:
             user_type=UserType.CUSTOMER.value
         )
         
-        return TokenResponse(
-            access_token=access_token,
-            user_type=UserType.CUSTOMER
-        )
+        return TokenResponse(access_token=access_token, user_type=UserType.CUSTOMER), False
     
-    async def _handle_seller_login(self, email: str) -> TokenResponse:
+    async def _handle_seller_login(self, email: str) -> Tuple[TokenResponse, bool]:
         # Customer로 이미 가입되어 있는지 체크
         customer_exists = await self.customer_repository.exists_by_email(email)
         if customer_exists:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="이미 소비자로 존재하는 회원입니다."
+            # 이미 소비자로 가입, 충돌 발생
+            access_token = self.jwt_service.create_user_token(
+                email=email,
+                user_type=UserType.CUSTOMER.value
             )
+            return TokenResponse(access_token=access_token, user_type=UserType.CUSTOMER), True
+            # raise HTTPException(
+            #     status_code=status.HTTP_409_CONFLICT,
+            #     detail="이미 소비자로 존재하는 회원입니다."
+            # )
         
         # Seller로 가입되어 있는지 체크
         seller_exists = await self.seller_repository.exists_by_email(email)
@@ -92,7 +101,4 @@ class OAuthService:
             user_type=UserType.SELLER.value
         )
         
-        return TokenResponse(
-            access_token=access_token,
-            user_type=UserType.SELLER
-        )
+        return TokenResponse(access_token=access_token,user_type=UserType.SELLER), False
