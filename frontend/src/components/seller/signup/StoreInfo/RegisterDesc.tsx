@@ -1,7 +1,7 @@
 import { CommonBtn } from "@components/common";
 import { useRef, useState } from "react";
 
-const RegisterName = () => {
+const RegisterDesc = () => {
   const [value, setValue] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -82,4 +82,4 @@ const RegisterName = () => {
   );
 };
 
-export default RegisterName;
+export default RegisterDesc;

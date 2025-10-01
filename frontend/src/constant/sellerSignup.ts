@@ -1,3 +1,3 @@
-import { RegisterDesc, RegisterName } from "@pages/Seller";
+import { RegisterDesc, RegisterName, RegisterAddr } from "@pages/Seller";
 
-export const pages = [RegisterName, RegisterDesc];
+export const pages = [RegisterName, RegisterDesc, RegisterAddr];
