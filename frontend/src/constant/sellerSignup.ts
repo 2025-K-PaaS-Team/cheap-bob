@@ -22,5 +22,5 @@ export const pages = [
   RegisterOpTime,
   RegisterPuTime,
   ConfirmOp,
-  ConfirmSetting,
+  SuccessSetting,
 ];
