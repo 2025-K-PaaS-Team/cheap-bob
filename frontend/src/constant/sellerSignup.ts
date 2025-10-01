@@ -1,10 +1,13 @@
 import {
   Agree,
+  ConfirmOp,
   ConfirmSetting,
   RegisterAddr,
   RegisterDesc,
   RegisterName,
   RegisterNum,
+  RegisterOpTime,
+  RegisterPuTime,
   SuccessSetting,
 } from "@components/seller/signup";
 
@@ -16,4 +19,8 @@ export const pages = [
   RegisterNum,
   ConfirmSetting,
   SuccessSetting,
+  RegisterOpTime,
+  RegisterPuTime,
+  ConfirmOp,
+  ConfirmSetting,
 ];
