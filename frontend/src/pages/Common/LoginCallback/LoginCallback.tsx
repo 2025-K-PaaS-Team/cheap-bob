@@ -8,7 +8,6 @@ const LoginCallback = () => {
   const handleCheckConflict = async () => {
     try {
       const conflict = searchParams.get("conflict");
-      alert(conflict);
       if (conflict == "1") {
         navigate("/auth/fail");
       }
