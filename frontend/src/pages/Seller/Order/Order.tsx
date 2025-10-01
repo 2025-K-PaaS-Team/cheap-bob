@@ -1,9 +1,10 @@
-import { Now } from "@components/seller/order";
+import { Now, StatusBar } from "@components/seller/order";
 
 const Order = () => {
   return (
     <>
       <Now />
+      <StatusBar />
     </>
   );
 };
