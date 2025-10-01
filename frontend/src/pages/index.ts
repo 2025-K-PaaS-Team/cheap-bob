@@ -16,6 +16,7 @@ export { default as OrderManage } from "./Seller/Order";
 export { default as SellerHome } from "./Seller/Home";
 export { default as Dashboard } from "./Seller/Dashboard";
 export { default as SellerSignup } from "./Seller//Signup";
+export * from "./Seller/Billing";
 
 // lab
 export { default as Map } from "./Common/Lab/CustomerMapLab";
