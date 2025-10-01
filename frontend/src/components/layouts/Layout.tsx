@@ -15,8 +15,12 @@ const Layout = () => {
   const path = location.pathname;
   const isCustomer = path.startsWith("/c");
   const notFooter =
-    path === "/c" || path === "/c/signup" || path.startsWith("/s/change");
-  const notHeader = path === "/c";
+    path === "/c" ||
+    path === "/c/signup" ||
+    path.startsWith("/s/change") ||
+    path === "/s" ||
+    path.startsWith("/s/signup");
+  const notHeader = path === "/c" || path.startsWith("/s/signup");
 
   return (
     <>

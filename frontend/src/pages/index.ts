@@ -2,6 +2,7 @@ export { default as My } from "./Customer/My";
 export { default as StoreDetail } from "./Customer/StoreDetail";
 export { default as StoreList } from "./Customer/StoreList";
 export { default as LoginCallback } from "./Common/LoginCallback";
+export { default as LoginFail } from "./Common/LoginCallback/LoginFail";
 export { default as Order } from "./Customer/Order";
 export { default as Signup } from "./Customer/Signup";
 export { default as CustomerHome } from "./Customer/Home";
@@ -14,6 +15,7 @@ export { default as Store } from "./Seller/Store";
 export { default as OrderManage } from "./Seller/Order";
 export { default as SellerHome } from "./Seller/Home";
 export { default as Dashboard } from "./Seller/Dashboard";
+export { default as SellerSignup } from "./Seller//Signup";
 
 // lab
 export { default as Map } from "./Common/Lab/CustomerMapLab";

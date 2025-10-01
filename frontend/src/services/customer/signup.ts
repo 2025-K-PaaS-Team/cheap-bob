@@ -1,7 +1,6 @@
 import type {
   AllergieDeleteType,
   AllergiesBaseType,
-  CheckCustomerDetailType,
   CustomerDetailBaseType,
   CustomerDetailType,
   MenuBaseType,
@@ -16,14 +15,6 @@ import type {
   ToppingDeleteType,
 } from "@interface";
 import { customerProfileApi } from "@services/client";
-
-// GET: check customer detail(2-step user info)
-export const CheckCustomerDetail =
-  async (): Promise<CheckCustomerDetailType> => {
-    const { data } = await customerProfileApi.get("/check");
-
-    return data;
-  };
 
 // POST: create customer detail
 export const CreateCustomerDetail = async (
