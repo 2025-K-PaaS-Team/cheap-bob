@@ -19,7 +19,7 @@ ENV PYTHONPATH="/backend/app:${PYTHONPATH}"
 COPY pyproject.toml uv.lock ./
 
 # Install Python dependencies
-RUN uv sync
+RUN uv sync --frozen
 
 # Copy entrypoint script first and set permissions
 COPY entrypoint.sh /backend/
