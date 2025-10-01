@@ -1,2 +1,2 @@
 export { default } from "./Signup";
-export * from "./StoreInfo";
+export * from "../../../components/seller/signup/StoreInfo";
