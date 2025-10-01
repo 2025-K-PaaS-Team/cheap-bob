@@ -61,8 +61,7 @@ async def get_seller_register(
 
 @router.get("/{provider}/callback/customer",
     responses=create_error_responses({         
-        400:"Oauth 로그인 에러가 발생",
-        409:"이미 판매자로 존재하는 회원"
+        400:"Oauth 로그인 에러가 발생"
     })   
 )
 async def customer_oauth_callback(
@@ -114,8 +113,7 @@ async def customer_oauth_callback(
 
 @router.get("/{provider}/callback/seller",
     responses=create_error_responses({         
-        400:"Oauth 로그인 에러가 발생",
-        409:"이미 소비자로 존재하는 회원"
+        400:"Oauth 로그인 에러가 발생"
     })
 )
 async def seller_oauth_callback(
