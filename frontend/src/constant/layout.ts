@@ -121,4 +121,12 @@ export const sellerLayoutMap = {
     back: true,
     title: "패키지 정보 변경",
   },
+  billingHistory: {
+    back: true,
+    title: "정산 내역 확인",
+  },
+  billingChange: {
+    back: true,
+    title: "정산 정보 변경",
+  },
 };

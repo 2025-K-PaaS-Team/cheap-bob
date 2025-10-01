@@ -39,6 +39,7 @@ import {
   ChangeStoreName,
   ChangeStoreNum,
 } from "@pages/Seller/Dashboard";
+import { BillingChange, BillingHistory, BillingInfo } from "@pages/Seller";
 
 const App = () => {
   return (
@@ -110,6 +111,11 @@ const App = () => {
         />
         <Route path="change/package/price" element={<ChangePackagePrice />} />
         <Route path="change/package/num" element={<ChangePackageNum />} />
+
+        {/* billing management */}
+        <Route path="billing" element={<BillingInfo />} />
+        <Route path="billing/history" element={<BillingHistory />} />
+        <Route path="billing/change" element={<BillingChange />} />
 
         {/* store page -- need to delete after refactoring */}
         <Route path="store" element={<Store />} />

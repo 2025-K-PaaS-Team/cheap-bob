@@ -1,7 +1,9 @@
+import { Now } from "@components/seller/order";
+
 const Order = () => {
   return (
     <>
-      <div>This is Order</div>
+      <Now />
     </>
   );
 };
