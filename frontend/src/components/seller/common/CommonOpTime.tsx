@@ -1,5 +1,5 @@
 import type { OperationTimeType } from "@interface";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface OpProps {
   form: OperationTimeType[];
@@ -18,27 +18,30 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     { label: "일", idx: 6 },
   ];
 
-  const handleClickDays = (idx: number) => {
-    setOpDay((prev) => {
-      const newOpDay = prev.includes(idx)
-        ? prev.filter((day) => day !== idx)
-        : [...prev, idx].sort((a, b) => a - b);
-      const newForm = newOpDay.map((day) => {
-        const exist = form.find((f) => f.day_of_week === day);
-        return (
-          exist || {
-            day_of_week: day,
-            open_time: "",
-            pickup_start_time: "",
-            pickup_end_time: "",
-            close_time: "",
-            is_open_enabled: true,
-          }
-        );
-      });
-      setForm(newForm);
-      return newOpDay;
+  useEffect(() => {
+    // opDay 바뀔 때마다 form을 새로 계산
+    const newForm = opDay.map((day) => {
+      const exist = form.find((f) => f.day_of_week === day);
+      return (
+        exist || {
+          day_of_week: day,
+          open_time: "",
+          pickup_start_time: "",
+          pickup_end_time: "",
+          close_time: "",
+          is_open_enabled: true,
+        }
+      );
     });
+    setForm(newForm);
+  }, [opDay]);
+
+  const handleClickDays = (idx: number) => {
+    setOpDay((prev) =>
+      prev.includes(idx)
+        ? prev.filter((day) => day !== idx)
+        : [...prev, idx].sort((a, b) => a - b)
+    );
   };
 
   return (
@@ -111,8 +114,13 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                 const targetDay = form.find(
                   (f) => f.day_of_week === dayOfWeek
                 )!;
-                const [curOpenH, curOpenM] = targetDay.open_time.split(":");
-                const [curCloseH, curCloseM] = targetDay.close_time.split(":");
+                const [curOpenH = "00", curOpenM = "00"] = targetDay.open_time
+                  ? targetDay.open_time.split(":")
+                  : ["00", "00"];
+                const [curCloseH = "23", curCloseM = "59"] =
+                  targetDay.close_time
+                    ? targetDay.close_time.split(":")
+                    : ["23", "59"];
 
                 if (type === "open") {
                   hh =
