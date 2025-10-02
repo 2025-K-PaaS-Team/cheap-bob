@@ -1,6 +1,26 @@
+import { CommonBtn, CommonModal } from "@components/common";
+import type { SellerSignupProps } from "@interface";
+import { useSignupStore } from "@store";
+import { validateLength, validationRules } from "@utils";
 import { useState } from "react";
 
-const RegisterOpTime = () => {
+const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+  const { form, setForm } = useSignupStore();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+
+  const handleClickNext = () => {
+    const { storeName } = validationRules;
+    if (
+      !validateLength(form.store_name, storeName.minLength, storeName.maxLength)
+    ) {
+      setModalMsg(storeName.errorMessage);
+      setShowModal(true);
+      return;
+    }
+    setPageIdx(pageIdx + 1);
+  };
+
   const [opDay, setOpDay] = useState<number[]>([]);
   const daysOfWeek = [
     { label: "월", idx: 0 },
@@ -19,7 +39,7 @@ const RegisterOpTime = () => {
   };
 
   return (
-    <div className="relative flex h-full mx-[20px] flex-col mt-[69px] gap-y-[11px]">
+    <div className="flex mx-[20px] flex-col mt-[69px] gap-y-[11px]">
       <div className="text-[16px]">1/4</div>
       <div className="text-[24px]">
         매장의
@@ -53,7 +73,7 @@ const RegisterOpTime = () => {
         <div className="text-[14px] font-bold">매장 운영 시간</div>
         <div className="text-[14px]">매장을 운영하는 시간을 입력해 주세요.</div>
         {/* batch time ck box */}
-        <div className="flex flex-row gap-x-[22px]h">
+        <div className="flex flex-row gap-x-[22px]">
           <input type="checkbox" id="batchTime" />
           <span>시간 일괄 적용</span>
         </div>
@@ -66,33 +86,55 @@ const RegisterOpTime = () => {
         </div>
 
         {/* list content */}
-        <div className="flex flex-col items-center">
-          {daysOfWeek.map((day) => (
-            <div className="grid grid-cols-8 w-full items-center" key={day.idx}>
-              {/* 1 col */}
-              <div className="font-bold text-[14px] h-[40px] flex items-center justify-center">
-                {day.label}
+        <div className="flex flex-col items-center overflow-y-auto h-[220px]">
+          {daysOfWeek
+            .filter((day) => opDay.includes(day.idx))
+            .sort((a, b) => a.idx - b.idx)
+            .map((day) => (
+              <div
+                className="grid grid-cols-8 w-full items-center"
+                key={day.idx}
+              >
+                {/* 1 col */}
+                <div className="font-bold text-[14px] h-[40px] flex items-center justify-center">
+                  {day.label}
+                </div>
+                {/* 2~3col */}
+                <div className="col-span-3 text-center flex flex-row gap-x-[5px] justify-center">
+                  <div className="bg-[#d9d9d9] rounded-[8px] w-[36px]">9</div>
+                  <div className="">시</div>
+                  <div className="bg-[#d9d9d9] rounded-[8px] w-[36px]">30</div>
+                  <div className="">분</div>
+                </div>
+                {/* 4~5col */}
+                <div className="text-center font-bold">~</div>
+                {/* 6~7col */}
+                <div className="col-span-3 text-center flex flex-row gap-x-[5px] justify-center">
+                  <div className="bg-[#d9d9d9] rounded-[8px] w-[36px]">9</div>
+                  <div className="">시</div>
+                  <div className="bg-[#d9d9d9] rounded-[8px] w-[36px]">30</div>
+                  <div className="">분</div>
+                </div>
               </div>
-              {/* 2~3col */}
-              <div className="col-span-3 text-center flex flex-row gap-x-[5px] justify-center">
-                <div className="bg-[#d9d9d9] rounded-[8px] w-[36px]">9</div>
-                <div className="">시</div>
-                <div className="bg-[#d9d9d9] rounded-[8px] w-[36px]">30</div>
-                <div className="">분</div>
-              </div>
-              {/* 4~5col */}
-              <div className="text-center font-bold">~</div>
-              {/* 6~7col */}
-              <div className="col-span-3 text-center flex flex-row gap-x-[5px] justify-center">
-                <div className="bg-[#d9d9d9] rounded-[8px] w-[36px]">9</div>
-                <div className="">시</div>
-                <div className="bg-[#d9d9d9] rounded-[8px] w-[36px]">30</div>
-                <div className="">분</div>
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
+
+      <CommonBtn
+        category="black"
+        label="다음"
+        onClick={() => handleClickNext()}
+      />
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClcik={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };
