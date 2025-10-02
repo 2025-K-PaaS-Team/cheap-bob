@@ -1,15 +1,15 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import type { SellerSignupProps } from "@interface";
-import { useSignupStore } from "@store";
+import { useSignupImageStore, useSignupStore } from "@store";
 import { validateLength, validationRules } from "@utils";
 import { useRef, useState } from "react";
 
 const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const { form, setForm } = useSignupStore();
+  const { form: imgForm, setForm: setImgForm } = useSignupImageStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [previews, setPreviews] = useState<string[]>([]);
 
   const handleClickNext = () => {
     const { storeDesc } = validationRules;
@@ -39,13 +39,22 @@ const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     const files = e.target.files;
     if (!files) return;
 
-    const selectedFiles = Array.from(files).slice(0, 5 - previews.length); // 최대 5개
-    const urls = selectedFiles.map((file) => URL.createObjectURL(file));
-    setPreviews((prev) => [...prev, ...urls]);
+    const selectedFiles = Array.from(files).slice(0, 5 - imgForm.images.length); // 최대 5개
+    const newImages = selectedFiles.map((file, idx) => ({
+      image_id: "",
+      image_url: URL.createObjectURL(file),
+      is_main: false,
+      display_order: imgForm.images.length + idx,
+    }));
+    setImgForm({
+      images: [...imgForm.images, ...newImages],
+      total: imgForm.images.length + newImages.length,
+    });
   };
 
   const handleRemovePreview = (index: number) => {
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
+    const newImages = imgForm.images.filter((_, i) => i !== index);
+    setImgForm({ images: newImages, total: newImages.length });
   };
 
   return (
@@ -83,12 +92,12 @@ const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       />
 
       {/* preview */}
-      {previews.length > 0 && (
+      {imgForm.images.length > 0 && (
         <div className="grid grid-cols-4 gap-2 mt-[29px]">
-          {previews.map((src, idx) => (
+          {imgForm.images.map((img, idx) => (
             <div key={idx} className="relative">
               <img
-                src={src}
+                src={img.image_url}
                 alt={`preview-${idx}`}
                 className="w-full h-[100px] object-contain"
               />

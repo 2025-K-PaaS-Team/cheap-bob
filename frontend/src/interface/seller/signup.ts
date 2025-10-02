@@ -53,7 +53,7 @@ export type ImagesType = {
   image_id: string;
   image_url: string;
   is_main: boolean;
-  display_order: 0;
+  display_order: number;
 };
 
 export type SignupImageRequestType = {
