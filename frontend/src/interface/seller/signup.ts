@@ -27,7 +27,7 @@ export type AddressInfoType = {
   lng: string;
 };
 
-export type OperationTime = {
+export type OperationTimeType = {
   day_of_week: number;
   open_time: string;
   pickup_start_time: string;
@@ -45,7 +45,7 @@ export type PaymentInfoType = {
 export type SignupRequestType = StoreInfoType & {
   sns_InfoType: SnsInfoType;
   address_InfoType: AddressInfoType;
-  operation_times: OperationTime[];
+  operation_times: OperationTimeType[];
   payment_InfoType: PaymentInfoType;
 };
 
