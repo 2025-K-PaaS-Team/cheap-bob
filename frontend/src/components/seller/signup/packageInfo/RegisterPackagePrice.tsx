@@ -1,6 +1,6 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import type { SellerSignupPkgProps } from "@interface";
-import { validatePrice, validationRules } from "@utils";
+import { validateNum, validationRules } from "@utils";
 import { useState } from "react";
 
 const RegisterPackagePrice = ({
@@ -14,7 +14,7 @@ const RegisterPackagePrice = ({
 
   const handleClickNext = () => {
     const { packagePrice } = validationRules;
-    if (!validatePrice(pkg.nutrition_types.length, packagePrice.minPrice)) {
+    if (!validateNum(pkg.price, packagePrice.minPrice)) {
       setModalMsg(packagePrice.errorMessage);
       setShowModal(true);
       return;

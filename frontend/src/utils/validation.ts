@@ -35,6 +35,10 @@ export const validationRules = {
     minPrice: 1000,
     errorMessage: "패키지의 가격은 1000원 이상이어야 합니다.",
   },
+  packageStock: {
+    minStock: 0,
+    errorMessage: "패키지의 초기 수량은 양수여야 합니다.",
+  },
 };
 
 export const validateLength = (value: string, min: number, max: number) =>
@@ -46,4 +50,4 @@ export const validatePattern = (value: string, pattern: RegExp) =>
 export const validateSelect = (value: number, min: number, max: number) =>
   value >= min && value <= max;
 
-export const validatePrice = (value: number, min: number) => value >= min;
+export const validateNum = (value: number, min: number) => value >= min;
