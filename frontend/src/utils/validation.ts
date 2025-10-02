@@ -26,6 +26,11 @@ export const validationRules = {
     maxLength: 100,
     errorMessage: "패키지 설명은 1~100자여야 합니다.",
   },
+  packageSelect: {
+    minSelect: 1,
+    maxSelect: 3,
+    errorMessage: "영양 정보는 최대 3개까지 선택 가능합니다.",
+  },
 };
 
 export const validateLength = (value: string, min: number, max: number) =>
@@ -33,3 +38,6 @@ export const validateLength = (value: string, min: number, max: number) =>
 
 export const validatePattern = (value: string, pattern: RegExp) =>
   pattern.test(value);
+
+export const validateSelect = (value: number, min: number, max: number) =>
+  value >= min && value <= max;

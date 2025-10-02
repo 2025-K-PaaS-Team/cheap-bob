@@ -1,18 +1,16 @@
-import type { SelectItem } from "@constant";
-
-type SelectGridProps = {
-  data: SelectItem[];
-  selected: string[];
-  onClick: (key: string) => void;
+type SelectGridProps<T extends string> = {
+  data: { key: T; title: string; desc?: string }[];
+  selected: T[];
+  onClick: (key: T) => void;
   selectType?: string;
 };
 
-const SelectGrid = ({
+const SelectGrid = <T extends string>({
   data,
   selected,
   onClick,
   selectType,
-}: SelectGridProps) => {
+}: SelectGridProps<T>) => {
   return (
     <div className="grid grid-cols-2 gap-[10px]">
       {data.map(({ key, title, desc }) => (

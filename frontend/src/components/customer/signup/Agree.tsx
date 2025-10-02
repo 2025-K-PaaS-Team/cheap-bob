@@ -78,7 +78,7 @@ const Agree = ({ onNext }: AgreeProps) => {
           <CommonModal
             desc="필수 항목에 모두 동의해주세요"
             confirmLabel="확인"
-            onConfirmClcik={() => setShowModal(false)}
+            onConfirmClick={() => setShowModal(false)}
             category="black"
           />
         )}

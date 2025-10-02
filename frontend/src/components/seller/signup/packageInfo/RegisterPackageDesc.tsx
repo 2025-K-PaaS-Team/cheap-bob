@@ -82,7 +82,7 @@ const RegisterPackageDesc = ({
         <CommonModal
           desc={modalMsg}
           confirmLabel="확인"
-          onConfirmClcik={() => setShowModal(false)}
+          onConfirmClick={() => setShowModal(false)}
           category="black"
         />
       )}

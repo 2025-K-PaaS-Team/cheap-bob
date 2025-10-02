@@ -2,7 +2,7 @@ type ModalProps = {
   cancelLabel?: string;
   confirmLabel?: string;
   onCancelClick?: () => void;
-  onConfirmClcik: () => void;
+  onConfirmClick: () => void;
   desc: string;
   category?: "red" | "black";
 };
@@ -11,7 +11,7 @@ const CommonModal = ({
   cancelLabel = "취소",
   confirmLabel = "확인",
   onCancelClick,
-  onConfirmClcik,
+  onConfirmClick,
   desc,
   category,
 }: ModalProps) => {
@@ -36,7 +36,7 @@ const CommonModal = ({
 
           <button
             className={`${confrimBtnClass} border-white rounded-[50px] w-full py-[12px]`}
-            onClick={() => onConfirmClcik()}
+            onClick={() => onConfirmClick()}
           >
             {confirmLabel}
           </button>
