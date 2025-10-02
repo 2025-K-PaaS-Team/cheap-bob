@@ -1,9 +1,25 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
 import type { SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
+import { validateLength, validationRules } from "@utils";
+import { useState } from "react";
 
 const RegisterName = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const { form, setForm } = useSignupStore();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+
+  const handleClickNext = () => {
+    const { storeName } = validationRules;
+    if (
+      !validateLength(form.store_name, storeName.minLength, storeName.maxLength)
+    ) {
+      setModalMsg(storeName.errorMessage);
+      setShowModal(true);
+      return;
+    }
+    setPageIdx(pageIdx + 1);
+  };
 
   return (
     <div className="mx-[20px] mt-[69px] flex flex-col gap-y-[11px]">
@@ -24,8 +40,18 @@ const RegisterName = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       <CommonBtn
         category="black"
         label="다음"
-        onClick={() => setPageIdx(pageIdx + 1)}
+        onClick={() => handleClickNext()}
       />
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClcik={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };
