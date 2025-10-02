@@ -14,8 +14,9 @@ import {
   RegisterPuTime,
   SuccessSetting,
 } from "@components/seller/signup";
+import type { PageComponent } from "@interface";
 
-export const pages = [
+export const pages: PageComponent[] = [
   // REGISTER STORE
   SellerAgree,
   RegisterName,
@@ -38,9 +39,16 @@ export const pages = [
   SuccessSetting,
 ];
 
-export const notProgressBarPages = [
+export const notProgressBarPages: PageComponent[] = [
   SellerAgree,
   ConfirmSetting,
   SuccessSetting,
   ConfirmOp,
+];
+
+export const pkgPages: PageComponent[] = [
+  RegisterPackageDesc,
+  RegisterPackageNutrition,
+  RegisterPackagePrice,
+  RegisterPackageNum,
 ];

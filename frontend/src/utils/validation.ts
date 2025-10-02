@@ -16,6 +16,16 @@ export const validationRules = {
     pattern: /^0\d{1,2}\d{3,4}\d{4}$/,
     errorMessage: "01012345678 형식으로 입력해 주세요..",
   },
+  packageName: {
+    minLength: 1,
+    maxLength: 7,
+    errorMessage: "패키지 이름은 1~15자여야 합니다.",
+  },
+  packageDesc: {
+    minLength: 1,
+    maxLength: 100,
+    errorMessage: "패키지 설명은 1~100자여야 합니다.",
+  },
 };
 
 export const validateLength = (value: string, min: number, max: number) =>

@@ -1,7 +1,19 @@
+import type { JSX } from "react";
+import type { ProductRequestType } from "./product";
+
 export interface SellerSignupProps {
   pageIdx: number;
   setPageIdx: React.Dispatch<React.SetStateAction<number>>;
 }
+
+export interface SellerSignupPkgProps extends SellerSignupProps {
+  pkg: ProductRequestType;
+  setPkg: React.Dispatch<React.SetStateAction<ProductRequestType>>;
+}
+
+export type PageComponent =
+  | ((props: SellerSignupProps) => JSX.Element)
+  | ((props: SellerSignupPkgProps) => JSX.Element);
 
 export type StoreInfoType = {
   store_name: string;

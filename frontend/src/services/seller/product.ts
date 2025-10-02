@@ -9,7 +9,10 @@ import { sellerProductApi } from "@services/client";
 export const createProduct = async (
   body: ProductRequestType
 ): Promise<ProductResponseType> => {
-  const { data } = await sellerProductApi.post<ProductResponseType>("", body);
+  const { data } = await sellerProductApi.post<ProductResponseType>(
+    "/register",
+    body
+  );
   return data;
 };
 
