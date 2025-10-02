@@ -1,9 +1,15 @@
-import type { SignupRequestType } from "@interface";
+import type { SignupImageRequestType, SignupRequestType } from "@interface";
 import { create } from "zustand";
 
 type SignupState = {
   form: SignupRequestType;
   setForm: (form: Partial<SignupRequestType>) => void;
+  resetForm: () => void;
+};
+
+type SignupImageState = {
+  form: SignupImageRequestType;
+  setForm: (form: Partial<SignupImageRequestType>) => void;
   resetForm: () => void;
 };
 
@@ -54,6 +60,37 @@ export const useSignupStore = create<SignupState>((set) => ({
           portone_channel_id: "",
           portone_secret_key: "",
         },
+      },
+    }),
+}));
+
+export const useSignupImageStore = create<SignupImageState>((set) => ({
+  form: {
+    store_id: "",
+    images: [
+      {
+        image_id: "",
+        image_url: "",
+        is_main: false,
+        display_order: 0,
+      },
+    ],
+    total: 0,
+  },
+  setForm: (form) => set((state) => ({ form: { ...state.form, ...form } })),
+  resetForm: () =>
+    set({
+      form: {
+        store_id: "",
+        images: [
+          {
+            image_id: "",
+            image_url: "",
+            is_main: false,
+            display_order: 0,
+          },
+        ],
+        total: 0,
       },
     }),
 }));
