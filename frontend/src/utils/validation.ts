@@ -31,6 +31,10 @@ export const validationRules = {
     maxSelect: 3,
     errorMessage: "영양 정보는 최대 3개까지 선택 가능합니다.",
   },
+  packagePrice: {
+    minPrice: 1000,
+    errorMessage: "패키지의 가격은 1000원 이상이어야 합니다.",
+  },
 };
 
 export const validateLength = (value: string, min: number, max: number) =>
@@ -41,3 +45,5 @@ export const validatePattern = (value: string, pattern: RegExp) =>
 
 export const validateSelect = (value: number, min: number, max: number) =>
   value >= min && value <= max;
+
+export const validatePrice = (value: number, min: number) => value >= min;
