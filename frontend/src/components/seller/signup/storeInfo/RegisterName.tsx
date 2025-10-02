@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { CommonBtn } from "@components/common";
+import type { SellerSignupProps } from "@interface";
+import { useSignupStore } from "@store";
 
-const RegisterName = () => {
-  const [value, setValue] = useState<string>("");
+const RegisterName = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+  const { form, setForm } = useSignupStore();
 
   return (
     <div className="mx-[20px] mt-[69px] flex flex-col gap-y-[11px]">
@@ -15,8 +17,14 @@ const RegisterName = () => {
       <input
         className="w-full h-[46px] text-center bg-[#D9D9D9] text-[16px] mt-[40px]"
         placeholder="매장 이름을 입력해 주세요"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
+        value={form.store_name}
+        onChange={(e) => setForm({ store_name: e.target.value })}
+      />
+
+      <CommonBtn
+        category="black"
+        label="다음"
+        onClick={() => setPageIdx(pageIdx + 1)}
       />
     </div>
   );
