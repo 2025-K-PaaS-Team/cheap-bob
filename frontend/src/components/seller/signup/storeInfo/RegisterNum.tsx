@@ -1,7 +1,7 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import type { SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
-import { validateLength, validationRules } from "@utils";
+import { validatePattern, validationRules } from "@utils";
 import { useState } from "react";
 
 const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
@@ -10,15 +10,9 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const [modalMsg, setModalMsg] = useState("");
 
   const handleClickNext = () => {
-    const { storeDesc } = validationRules;
-    if (
-      !validateLength(
-        form.store_introduction,
-        storeDesc.minLength,
-        storeDesc.maxLength
-      )
-    ) {
-      setModalMsg(storeDesc.errorMessage);
+    const { storePhone } = validationRules;
+    if (!validatePattern(form.store_phone, storePhone.pattern)) {
+      setModalMsg(storePhone.errorMessage);
       setShowModal(true);
       return;
     }
