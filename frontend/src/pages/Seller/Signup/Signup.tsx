@@ -9,33 +9,12 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* 페이지 내용 */}
+      {/* page content */}
       <div className="flex-1">
         {/* progressbar header */}
         {isProgressBar && <ProgressBar pageIdx={pageIdx} />}
         <CurrentPage pageIdx={pageIdx} setPageIdx={setPageIdx} />
       </div>
-
-      {/* 바닥 버튼 영역 */}
-      {/* <div className="fixed bottom-4 left-0 w-full px-5 flex gap-2">
-        {pageIdx > 1 && (
-          <CommonBtn
-            label="이전"
-            onClick={() => setPageIdx(pageIdx - 1)}
-            className="bg-[#EDEDED] text-black border-0"
-            width="w-1/3"
-            notBottom
-          />
-        )}
-
-        <CommonBtn
-          label="다음"
-          onClick={() => setPageIdx(pageIdx + 1)}
-          className="bg-black text-white"
-          width={pageIdx > 1 ? "w-2/3" : "w-full"}
-          notBottom
-        />
-      </div> */}
     </div>
   );
 };
