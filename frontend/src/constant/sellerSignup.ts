@@ -16,6 +16,7 @@ import {
 } from "@components/seller/signup";
 
 export const pages = [
+  // REGISTER STORE
   SellerAgree,
   RegisterName,
   RegisterDesc,
@@ -23,10 +24,12 @@ export const pages = [
   RegisterNum,
   ConfirmSetting,
   SuccessSetting,
+  // REGISTER OPERATION
   RegisterOpTime,
   RegisterPuTime,
   ConfirmOp,
   SuccessSetting,
+  // REGISTER PACKAGE
   RegisterPackageDesc,
   RegisterPackageNutrition,
   RegisterPackagePrice,
