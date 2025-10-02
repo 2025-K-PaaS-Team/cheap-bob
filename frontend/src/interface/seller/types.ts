@@ -5,6 +5,11 @@ import type {
   TimeStamp,
 } from "@interface/common/types";
 
+export interface SellerSignupProps {
+  pageIdx: number;
+  setPageIdx: React.Dispatch<React.SetStateAction<number>>;
+}
+
 export type ProductDetailType = {
   product_id: string;
   product_name: string;
@@ -96,8 +101,8 @@ export type GetQrCodeType = QrBaseType & {
 
 export type CoorBaseType = {
   lng: string;
-  lat: string
-}
+  lat: string;
+};
 
 export type MapBaseType = {
   postal_code: any;

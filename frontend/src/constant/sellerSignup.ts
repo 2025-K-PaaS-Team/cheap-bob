@@ -1,5 +1,5 @@
 import {
-  Agree,
+  SellerAgree,
   ConfirmOp,
   ConfirmSetting,
   RegisterAddr,
@@ -16,7 +16,7 @@ import {
 } from "@components/seller/signup";
 
 export const pages = [
-  Agree,
+  SellerAgree,
   RegisterName,
   RegisterDesc,
   RegisterAddr,
@@ -33,4 +33,11 @@ export const pages = [
   RegisterPackageNum,
   ConfirmSetting,
   SuccessSetting,
+];
+
+export const notProgressBarPages = [
+  SellerAgree,
+  ConfirmSetting,
+  SuccessSetting,
+  ConfirmOp,
 ];
