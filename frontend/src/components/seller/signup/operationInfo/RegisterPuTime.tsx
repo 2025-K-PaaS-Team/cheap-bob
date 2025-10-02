@@ -1,6 +1,30 @@
-const RegisterPuTime = () => {
+import { CommonBtn, CommonModal } from "@components/common";
+import type { SellerSignupProps } from "@interface";
+import { useSignupStore } from "@store";
+import { validationRules } from "@utils";
+import { useState } from "react";
+
+const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+  const { form } = useSignupStore();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+
+  const handleClickNext = () => {
+    const { storeAddr } = validationRules;
+    if (!form.address_InfoType.address || !form.address_InfoType.postal_code) {
+      setModalMsg(storeAddr.errorMessage);
+      setShowModal(true);
+      return;
+    }
+    setPageIdx(pageIdx + 1);
+  };
+
+  const handleClickPrev = () => {
+    setPageIdx(pageIdx - 1);
+  };
+
   return (
-    <div className="relative flex h-full mx-[20px] flex-col mt-[69px] gap-y-[11px]">
+    <div className="flex mx-[20px] flex-col mt-[69px] gap-y-[11px]">
       <div className="text-[16px]">2/4</div>
       <div className="text-[24px]">
         할인팩
@@ -50,6 +74,33 @@ const RegisterPuTime = () => {
           있습니다.
         </div>
       </div>
+
+      <CommonBtn
+        category="grey"
+        label="이전"
+        onClick={() => handleClickPrev()}
+        notBottom
+        className="absolute left-[20px] bottom-[38px]"
+        width="w-[100px]"
+      />
+      <CommonBtn
+        category="black"
+        label="다음"
+        onClick={() => handleClickNext()}
+        notBottom
+        className="absolute right-[20px] bottom-[38px]"
+        width="w-[250px]"
+      />
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClcik={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };
