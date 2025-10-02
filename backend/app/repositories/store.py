@@ -1,5 +1,5 @@
-from typing import List, Optional, Dict
-from sqlalchemy import select, and_, or_, update as sql_update
+from typing import List, Optional, Dict, Tuple
+from sqlalchemy import select, and_, or_, update as sql_update, func
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -252,7 +252,7 @@ class StoreRepository(BaseRepository[Store]):
         result = await self.session.execute(query)
         return result.scalars().unique().all()
     
-    async def get_stores_with_products_and_favorites(self, customer_email: str) -> List[tuple[Store, bool]]:
+    async def get_stores_with_products_and_favorites(self, customer_email: str, offset: int = 0, limit: int = 4) -> tuple[List[tuple[Store, bool]], bool]:
         """상품이 있는 가게들과 즐겨찾기 여부를 함께 조회"""
         subquery = (
             select(CustomerFavorite.store_id)
@@ -273,8 +273,14 @@ class StoreRepository(BaseRepository[Store]):
             .order_by(Store.created_at.desc())
             .distinct()  # 중복 제거
         )
-        result = await self.session.execute(query)
-        return result.unique().all()
+        # 페이지네이션 적용
+        paginated_query = query.offset(offset).limit(limit+1)
+        result = await self.session.execute(paginated_query)
+        items = result.unique().all()
+        
+        has_next = len(items) > limit
+    
+        return items[:limit], not has_next
     
     async def search_by_location(
         self,
@@ -311,8 +317,10 @@ class StoreRepository(BaseRepository[Store]):
         sido: str,
         sigungu: str,
         bname: str,
-        customer_email: str
-    ) -> List[tuple[Store, bool]]:
+        customer_email: str,
+        offset: int = 0,
+        limit: int = 4
+    ) -> tuple[List[tuple[Store, bool]], bool]:
         """위치로 가게 검색 (즐겨찾기 정보 포함)"""
         subquery = (
             select(CustomerFavorite.store_id)
@@ -340,8 +348,14 @@ class StoreRepository(BaseRepository[Store]):
             .order_by(Store.store_name)
             .distinct()
         )
-        result = await self.session.execute(query)
-        return result.unique().all()
+        # 페이지네이션 적용
+        paginated_query = query.offset(offset).limit(limit+1)
+        result = await self.session.execute(paginated_query)
+        items = result.unique().all()
+        
+        has_next = len(items) > limit
+    
+        return items[:limit], not has_next
     
     async def search_by_location_and_name(
         self, 
@@ -385,8 +399,10 @@ class StoreRepository(BaseRepository[Store]):
         sigungu: str, 
         bname: str,
         search_name: str,
-        customer_email: str
-    ) -> List[tuple[Store, bool]]:
+        customer_email: str,
+        offset: int = 0,
+        limit: int = 4
+    ) -> tuple[List[tuple[Store, bool]], bool]:
         """주소와 이름으로 가게/상품 검색 (즐겨찾기 정보 포함)"""
         subquery = (
             select(CustomerFavorite.store_id)
@@ -419,8 +435,14 @@ class StoreRepository(BaseRepository[Store]):
             .order_by(Store.store_name)
             .distinct()
         )
-        result = await self.session.execute(query)
-        return result.unique().all()
+        # 페이지네이션 적용
+        paginated_query = query.offset(offset).limit(limit+1)
+        result = await self.session.execute(paginated_query)
+        items = result.unique().all()
+        
+        has_next = len(items) > limit
+    
+        return items[:limit], not has_next
     
     async def search_by_name(self, search_name: str) -> List[Store]:
         """이름으로 가게/상품 검색"""
@@ -446,7 +468,7 @@ class StoreRepository(BaseRepository[Store]):
         result = await self.session.execute(query)
         return result.scalars().unique().all()
     
-    async def search_by_name_with_favorites(self, search_name: str, customer_email: str) -> List[tuple[Store, bool]]:
+    async def search_by_name_with_favorites(self, search_name: str, customer_email: str, offset: int = 0, limit: int = 4) -> tuple[List[tuple[Store, bool]], bool]:
         """이름으로 가게/상품 검색 (즐겨찾기 정보 포함)"""
         subquery = (
             select(CustomerFavorite.store_id)
@@ -473,8 +495,14 @@ class StoreRepository(BaseRepository[Store]):
             .order_by(Store.store_name)
             .distinct()
         )
-        result = await self.session.execute(query)
-        return result.unique().all()
+        # 페이지네이션 적용
+        paginated_query = query.offset(offset).limit(limit+1)
+        result = await self.session.execute(paginated_query)
+        items = result.unique().all()
+        
+        has_next = len(items) > limit
+    
+        return items[:limit], not has_next
     
     async def get_favorite_stores_with_full_info(self, customer_email: str) -> List[Store]:
         """고객이 즐겨찾기한 가게들을 모든 관련 정보와 함께 조회"""

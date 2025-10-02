@@ -390,8 +390,7 @@ async def get_order_qr(
 async def get_dashboard(
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep,
-    order_repo: OrderCurrentItemRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep
 ):
     """
     대시보드 - 재고 현황 조회
@@ -404,46 +403,16 @@ async def get_dashboard(
     # 가게의 모든 상품 조회
     products = await product_repo.get_by_store_id(store_id)
     
-    # 당일 주문 목록 조회
-    orders = await order_repo.get_store_current_orders_with_relations(store_id)
-    
-    # 상품별로 주문 수량 집계
-    product_order_map = {}
-    for order in orders:
-        if order.product_id not in product_order_map:
-            product_order_map[order.product_id] = {
-                "reservation": 0,
-                "accept": 0,
-                "complete": 0,
-                "cancel": 0
-            }
-        
-        product_order_map[order.product_id][order.status.value] += order.quantity
-    
     # 대시보드 응답 생성
     dashboard_items = []
     for product in products:
-        order_data = product_order_map.get(product.product_id, {
-            "reservation": 0,
-            "accept": 0,
-            "complete": 0,
-            "cancel": 0
-        })
-        
-        # 구매된 수량 계산 (수락 전 + 수락 + 완료 - 취소)
-        purchased_stock = (
-            order_data["reservation"] + 
-            order_data["accept"] + 
-            order_data["complete"] - 
-            order_data["cancel"]
-        )
         
         dashboard_item = DashboardStockItem(
             product_id=product.product_id,
             product_name=product.product_name,
             current_stock=product.current_stock,
             initial_stock=product.initial_stock,
-            purchased_stock=purchased_stock,
+            purchased_stock=product.current_stock + product.admin_adjustment - product.initial_stock,
             adjustment_stock=product.admin_adjustment
         )
         dashboard_items.append(dashboard_item)

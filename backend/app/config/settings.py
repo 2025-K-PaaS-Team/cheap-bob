@@ -60,6 +60,14 @@ class Settings(BaseSettings):
     AWS_S3_BUCKET_NAME: str
     AWS_S3_ENDPOINT_URL: str
     
+    # 슈퍼 어드민 이메일 정보 설정
+    SUPER_ADMIN_SMTP_USER: str
+    SUPER_ADMIN_SMTP_PASSWORD: str
+    SUPER_ADMIN_SMTP_EMAIL: str
+    SUPER_ADMIN_SMTP_HOST: str
+    SUPER_ADMIN_SMTP_PORT: int
+    SUPER_ADMIN_SMTP_NAME: str
+    
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

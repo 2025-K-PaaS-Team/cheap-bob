@@ -7,15 +7,19 @@ from api.deps.auth import CurrentSellerDep
 from api.deps.repository import (
     StoreRepositoryDep,
     StorePaymentInfoRepositoryDep,
-    StoreOperationInfoRepositoryDep
+    StoreOperationInfoRepositoryDep,
+    StoreOperationInfoModificationRepositoryDep
 )
 from schemas.store_settings import (
     StoreAddressUpdateRequest,
     StorePaymentUpdateRequest,
-    StoreDayOperationUpdateRequest,
     StoreAddressResponse,
     StorePaymentResponse,
-    StoreOperationResponse
+    StoreOperationResponse,
+    StoreOperationReservationRequest,
+    StoreOperationReservationUpdateRequest,
+    StoreOperationReservationResponse,
+    StoreOperationModificationResponse
 )
 
 router = APIRouter(prefix="/store/settings", tags=["Seller-Store-Settings"])
@@ -103,8 +107,7 @@ async def update_store_payment(
         await payment_repo.update_portone_info(
             store_id=store_id,
             portone_store_id=request.portone_store_id,
-            portone_channel_id=request.portone_channel_id,
-            portone_secret_key=request.portone_secret_key
+            portone_channel_id=request.portone_channel_id
         )
         
         return StorePaymentResponse(
@@ -164,68 +167,214 @@ async def get_store_operation(
         )
 
 
-@router.patch("/operation/day/{day_of_week}", response_model=StoreOperationResponse,
+@router.post("/operation/reservation", response_model=StoreOperationReservationResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
-        404: ["가게를 찾을 수 없음", "해당 요일 운영 정보를 찾을 수 없음"],
-        422: "잘못된 요일 값"
+        404: "가게를 찾을 수 없음",
+        400: ["이미 예약이 존재함", "시간 설정이 올바르지 않음"]
     })
 )
-async def update_store_day_operation(
-    day_of_week: int,
-    request: StoreDayOperationUpdateRequest,
+async def create_operation_reservation(
+    request: StoreOperationReservationRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    operation_repo: StoreOperationInfoRepositoryDep
+    operation_modification_repo: StoreOperationInfoModificationRepositoryDep
 ):
     """
-    특정 요일 운영 정보 수정
+    운영 정보 변경 예약 추가
     
-    특정 요일의 운영 정보만 수정합니다.
-    
-    - day_of_week: 0(월요일) ~ 6(일요일)
-    - 비활성화 시: is_open_enabled를 false로만 설정
-    - 활성화 시: 모든 시간 정보 필수
+    다음 날 적용될 운영 정보 변경을 예약합니다.
+    월요일부터 일요일까지 모든 요일의 정보를 포함해야 합니다.
     """
     seller_email = current_user["sub"]
-    
     store_id = await get_store_id_by_email(seller_email, store_repo)
     
-    if not 0 <= day_of_week <= 6:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="요일은 0(월요일)부터 6(일요일) 사이의 값이어야 합니다."
-        )
-    
     try:
-        # 업데이트
-        updated_info = await operation_repo.update_and_return_by_store_and_day(
+        modifications_data = [
+            {
+                'day_of_week': op.day_of_week,
+                'open_time': op.open_time,
+                'close_time': op.close_time,
+                'pickup_start_time': op.pickup_start_time,
+                'pickup_end_time': op.pickup_end_time,
+                'is_open_enabled': op.is_open_enabled
+            }
+            for op in request.operation_times
+        ]
+        
+        modifications = await operation_modification_repo.create_modifications_batch(
             store_id=store_id,
-            day_of_week=day_of_week,
-            is_open_enabled=request.is_open_enabled,
-            open_time=request.open_time,
-            close_time=request.close_time,
-            pickup_start_time=request.pickup_start_time,
-            pickup_end_time=request.pickup_end_time
+            modifications_data=modifications_data
         )
         
-        if not updated_info:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="해당 요일의 운영 정보를 찾을 수 없습니다."
+        # Response 형식으로 변환
+        modification_responses = [
+            StoreOperationModificationResponse(
+                modification_id=mod.modification_id,
+                operation_id=mod.operation_id,
+                day_of_week=mod.operation_info.day_of_week,
+                new_open_time=mod.new_open_time,
+                new_close_time=mod.new_close_time,
+                new_pickup_start_time=mod.new_pickup_start_time,
+                new_pickup_end_time=mod.new_pickup_end_time,
+                new_is_open_enabled=mod.new_is_open_enabled,
+                created_at=mod.created_at
             )
+            for mod in sorted(modifications, key=lambda x: x.operation_info.day_of_week)
+        ]
         
-        return StoreOperationResponse(
-            day_of_week=updated_info.day_of_week,
-            open_time=updated_info.open_time,
-            close_time=updated_info.close_time,
-            pickup_start_time=updated_info.pickup_start_time,
-            pickup_end_time=updated_info.pickup_end_time,
-            is_open_enabled=updated_info.is_open_enabled
-        )
+        return StoreOperationReservationResponse(modifications=modification_responses)
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"운영 정보 수정 중 오류가 발생했습니다: {str(e)}"
+            detail=f"운영 정보 예약 생성 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.get("/operation/reservation", response_model=StoreOperationReservationResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: "가게를 찾을 수 없음"
+    })
+)
+async def get_operation_reservation(
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    operation_modification_repo: StoreOperationInfoModificationRepositoryDep
+):
+    """
+    운영 정보 변경 예약 조회
+    
+    현재 예약된 운영 정보 변경사항을 조회합니다.
+    """
+    seller_email = current_user["sub"]
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    try:
+        modifications = await operation_modification_repo.get_by_store_id(store_id)
+        
+        modification_responses = [
+            StoreOperationModificationResponse(
+                modification_id=mod.modification_id,
+                operation_id=mod.operation_id,
+                day_of_week=mod.operation_info.day_of_week,
+                new_open_time=mod.new_open_time,
+                new_close_time=mod.new_close_time,
+                new_pickup_start_time=mod.new_pickup_start_time,
+                new_pickup_end_time=mod.new_pickup_end_time,
+                new_is_open_enabled=mod.new_is_open_enabled,
+                created_at=mod.created_at
+            )
+            for mod in sorted(modifications, key=lambda x: x.operation_info.day_of_week)
+        ]
+        
+        return StoreOperationReservationResponse(modifications=modification_responses)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"운영 정보 예약 조회 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.put("/operation/reservation", response_model=StoreOperationReservationResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: ["가게를 찾을 수 없음", "예약을 찾을 수 없음"],
+        400: "시간 설정이 올바르지 않음"
+    })
+)
+async def update_operation_reservation(
+    request: StoreOperationReservationUpdateRequest,
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    operation_modification_repo: StoreOperationInfoModificationRepositoryDep
+):
+    """
+    운영 정보 변경 예약 수정
+    
+    예약된 운영 정보 변경사항을 수정합니다.
+    월요일부터 일요일까지 모든 요일의 정보를 포함해야 합니다.
+    """
+    seller_email = current_user["sub"]
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    try:
+        modifications_data = [
+            {
+                'day_of_week': op.day_of_week,
+                'open_time': op.open_time,
+                'close_time': op.close_time,
+                'pickup_start_time': op.pickup_start_time,
+                'pickup_end_time': op.pickup_end_time,
+                'is_open_enabled': op.is_open_enabled
+            }
+            for op in request.operation_times
+        ]
+        
+        modifications = await operation_modification_repo.update_modifications_batch(
+            store_id=store_id,
+            modifications_data=modifications_data
+        )
+        
+        modification_responses = [
+            StoreOperationModificationResponse(
+                modification_id=mod.modification_id,
+                operation_id=mod.operation_id,
+                day_of_week=mod.operation_info.day_of_week,
+                new_open_time=mod.new_open_time,
+                new_close_time=mod.new_close_time,
+                new_pickup_start_time=mod.new_pickup_start_time,
+                new_pickup_end_time=mod.new_pickup_end_time,
+                new_is_open_enabled=mod.new_is_open_enabled,
+                created_at=mod.created_at
+            )
+            for mod in modifications
+        ]
+        
+        return StoreOperationReservationResponse(modifications=modification_responses)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"운영 정보 예약 수정 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.delete("/operation/reservation", status_code=status.HTTP_204_NO_CONTENT,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: ["가게를 찾을 수 없음", "예약을 찾을 수 없음"]
+    })
+)
+async def delete_operation_reservation(
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    operation_modification_repo: StoreOperationInfoModificationRepositoryDep
+):
+    """
+    운영 정보 변경 예약 삭제
+    
+    예약된 모든 운영 정보 변경사항을 삭제합니다.
+    """
+    seller_email = current_user["sub"]
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    try:
+        await operation_modification_repo.delete_all_by_store_id(store_id)
+        return
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"운영 정보 예약 삭제 중 오류가 발생했습니다: {str(e)}"
         )
