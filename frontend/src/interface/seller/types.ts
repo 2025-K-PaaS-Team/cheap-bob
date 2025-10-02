@@ -5,11 +5,6 @@ import type {
   TimeStamp,
 } from "@interface/common/types";
 
-export interface SellerSignupProps {
-  pageIdx: number;
-  setPageIdx: React.Dispatch<React.SetStateAction<number>>;
-}
-
 export type ProductDetailType = {
   product_id: string;
   product_name: string;
