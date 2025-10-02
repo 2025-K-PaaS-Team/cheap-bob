@@ -4,6 +4,11 @@ export const validationRules = {
     maxLength: 7,
     errorMessage: "매장 이름은 1~7자여야 합니다.",
   },
+  storeDesc: {
+    minLength: 1,
+    maxLength: 100,
+    errorMessage: "매장 설명은 1~100자여야 합니다.",
+  },
   phone: {
     pattern: /^0\d{1,2}-\d{3,4}-\d{4}$/,
     errorMessage: "전화번호 형식이 올바르지 않습니다.",
