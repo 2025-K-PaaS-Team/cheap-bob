@@ -3,7 +3,11 @@ import { create } from "zustand";
 
 type SignupState = {
   form: SignupRequestType;
-  setForm: (form: Partial<SignupRequestType>) => void;
+  setForm: (
+    form:
+      | Partial<SignupRequestType>
+      | ((prev: SignupRequestType) => Partial<SignupRequestType>)
+  ) => void;
   resetForm: () => void;
 };
 
@@ -36,7 +40,13 @@ export const useSignupStore = create<SignupState>((set) => ({
       portone_secret_key: "",
     },
   },
-  setForm: (form) => set((state) => ({ form: { ...state.form, ...form } })),
+
+  setForm: (update) =>
+    set((state) => {
+      const patch = typeof update === "function" ? update(state.form) : update;
+      return { form: { ...state.form, ...patch } };
+    }),
+
   resetForm: () =>
     set({
       form: {

@@ -14,7 +14,11 @@ interface DaumPostcodeProps {
 
 interface PostalCodeProps {
   form: AddressInfoType;
-  setForm: (form: Partial<AddressInfoType>) => void;
+  setForm: (
+    form:
+      | Partial<AddressInfoType>
+      | ((prev: AddressInfoType) => Partial<AddressInfoType>)
+  ) => void;
 }
 
 const PostalCode = ({ form, setForm }: PostalCodeProps) => {
@@ -36,15 +40,24 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
     });
   };
 
-  // get coordinate + move to map center
-  const handleGetCoordinate = async (addr: string) => {
-    const coor = await getCoordinate(addr);
+  const handleComplete = async (data: DaumPostcodeProps) => {
+    const coor = await getCoordinate(data.roadAddress);
+    // get coordinate + move to map center
     if (mapRef.current) {
       const newCenter = new window.naver.maps.LatLng(coor.lat, coor.lng);
       mapRef.current.setCenter(newCenter);
       mapRef.current.setZoom(16, true);
-      // set coordinate form
-      setForm({ lng: coor.lng, lat: coor.lat });
+      // set form
+      setForm({
+        postal_code: data.zonecode,
+        address: data.roadAddress,
+        sido: data.sido,
+        sigungu: data.sigungu,
+        bname: data.bname,
+        lng: coor.lng,
+        lat: coor.lat,
+      });
+      console.warn(form);
     } else {
       console.warn("mapRef가 존재하지 않습니다");
     }
@@ -57,15 +70,7 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
 
     new window.daum.Postcode({
       oncomplete: (data: DaumPostcodeProps) => {
-        handleGetCoordinate(data.roadAddress);
-        // set zonecode and roadaddress form
-        setForm({
-          postal_code: data.zonecode,
-          address: data.roadAddress,
-          sido: data.sido,
-          sigungu: data.sigungu,
-          bname: data.bname,
-        });
+        handleComplete(data);
       },
       theme: postcodeTheme,
       width: "100%",

@@ -1,25 +1,19 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { PostalCode } from "@components/seller/dashboard";
-import type { AddressInfoType, SellerSignupProps } from "@interface";
+import type { SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
-import { validateLength, validationRules } from "@utils";
+import { validationRules } from "@utils";
 import { useState } from "react";
 
 const RegisterAddr = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
-  const { form, setForm } = useSignupStore();
+  const { form } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
 
   const handleClickNext = () => {
-    const { storeDesc } = validationRules;
-    if (
-      !validateLength(
-        form.store_introduction,
-        storeDesc.minLength,
-        storeDesc.maxLength
-      )
-    ) {
-      setModalMsg(storeDesc.errorMessage);
+    const { storeAddr } = validationRules;
+    if (!form.address_InfoType.address || !form.address_InfoType.postal_code) {
+      setModalMsg(storeAddr.errorMessage);
       setShowModal(true);
       return;
     }
@@ -40,11 +34,16 @@ const RegisterAddr = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       {/* postal code */}
       <PostalCode
         form={form.address_InfoType}
-        setForm={(addrForm: Partial<AddressInfoType>) =>
-          setForm({
-            address_InfoType: { ...form.address_InfoType, ...addrForm },
-          })
-        }
+        setForm={(addrForm) => {
+          useSignupStore.getState().setForm((prev) => ({
+            address_InfoType: {
+              ...prev.address_InfoType,
+              ...(typeof addrForm === "function"
+                ? addrForm(prev.address_InfoType)
+                : addrForm),
+            },
+          }));
+        }}
       />
 
       <CommonBtn
