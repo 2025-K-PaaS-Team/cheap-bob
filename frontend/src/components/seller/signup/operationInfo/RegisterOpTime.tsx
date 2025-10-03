@@ -3,12 +3,16 @@ import { CommonOpTime } from "@components/seller/common";
 import type { SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
 import { validateLength, validationRules } from "@utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const { form, setForm } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+
+  useEffect(() => {
+    console.log(form);
+  }, [form]);
 
   const handleClickNext = () => {
     const { storeName } = validationRules;
