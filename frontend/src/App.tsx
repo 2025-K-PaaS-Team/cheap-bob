@@ -3,16 +3,13 @@ import { Layout } from "@components/layouts";
 import {
   My,
   StoreDetail,
-  StoreList,
+  // StoreList,
   LoginCallback,
   CustomerLab,
-  SellerLab,
   QrLab,
   Order,
-  Store,
   OrderManage,
   Signup,
-  CustomerMapLab,
   CustomerHome,
   SellerHome,
   Location,
@@ -56,7 +53,7 @@ const App = () => {
         {/* signup */}
         <Route path="signup" element={<Signup />} />
         {/* store */}
-        <Route path="stores" element={<StoreList />} />
+        {/* <Route path="stores" element={<StoreList />} /> */}
         <Route path="stores/:storeId" element={<StoreDetail />} />
         {/* location */}
         <Route path="location" element={<Location />} />
@@ -70,7 +67,6 @@ const App = () => {
         <Route path="my" element={<My />} />
         {/* lab */}
         <Route path="lab" element={<CustomerLab />} />
-        <Route path="lab/map" element={<CustomerMapLab />} />
         <Route path="qr" element={<QrLab />} />
 
         {/* customer fallback */}
@@ -116,11 +112,6 @@ const App = () => {
         <Route path="billing" element={<BillingInfo />} />
         <Route path="billing/history" element={<BillingHistory />} />
         <Route path="billing/change" element={<BillingChange />} />
-
-        {/* store page -- need to delete after refactoring */}
-        <Route path="store" element={<Store />} />
-        {/* lab */}
-        <Route path="lab" element={<SellerLab />} />
 
         {/* seller fallback */}
         <Route path="*" element={<Navigate to="/s" replace />} />

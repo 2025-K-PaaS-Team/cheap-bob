@@ -1,40 +1,48 @@
-import { CommonBtn } from "@components/common";
 import { ProgressBar } from "@components/seller/signup";
-import { pages } from "@constant";
-import { useState } from "react";
+import { pages, notProgressBarPages, pkgPages } from "@constant";
+import type {
+  PageComponent,
+  ProductRequestType,
+  SellerSignupPkgProps,
+  SellerSignupProps,
+} from "@interface";
+import { useState, type JSX } from "react";
 
 const Signup = () => {
-  const [pageIdx, setPageIdx] = useState<number>(1);
-  const CurrentPage = pages[pageIdx - 1];
+  const [pageIdx, setPageIdx] = useState<number>(0);
+  const CurrentPage = pages[pageIdx];
+  const isProgressBar = !notProgressBarPages.includes(CurrentPage);
+  const [pkg, setPkg] = useState<ProductRequestType>({
+    product_name: "",
+    description: "",
+    price: 0,
+    sale: 0,
+    initial_stock: 0,
+    nutrition_types: [],
+  });
+
+  const baseProps: SellerSignupProps = { pageIdx, setPageIdx };
+  const pkgProps: SellerSignupPkgProps = { ...baseProps, pkg, setPkg };
+
+  // type guard
+  const isPkgPage = (
+    component: PageComponent
+  ): component is (props: SellerSignupPkgProps) => JSX.Element => {
+    return pkgPages.includes(component);
+  };
+
+  let RenderComponent: JSX.Element;
+  if (isPkgPage(CurrentPage)) {
+    RenderComponent = <CurrentPage {...pkgProps} />;
+  } else {
+    const Component = CurrentPage as (props: SellerSignupProps) => JSX.Element;
+    RenderComponent = <Component {...baseProps} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* 페이지 내용 */}
-      <div className="flex-1">
-        <ProgressBar pageIdx={pageIdx} />
-        <CurrentPage />
-      </div>
-
-      {/* 바닥 버튼 영역 */}
-      <div className="fixed bottom-4 left-0 w-full px-5 flex gap-2">
-        {pageIdx > 1 && (
-          <CommonBtn
-            label="이전"
-            onClick={() => setPageIdx(pageIdx - 1)}
-            className="bg-[#EDEDED] text-black border-0"
-            width="w-1/3"
-            notBottom
-          />
-        )}
-
-        <CommonBtn
-          label="다음"
-          onClick={() => setPageIdx(pageIdx + 1)}
-          className="bg-black text-white"
-          width={pageIdx > 1 ? "w-2/3" : "w-full"}
-          notBottom
-        />
-      </div>
+      {isProgressBar && <ProgressBar pageIdx={pageIdx} />}
+      <div className="flex-1">{RenderComponent}</div>
     </div>
   );
 };

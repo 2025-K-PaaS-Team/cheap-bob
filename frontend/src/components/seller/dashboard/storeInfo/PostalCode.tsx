@@ -1,6 +1,7 @@
 import { postcodeTheme } from "@constant";
+import type { AddressInfoType } from "@interface";
 import { getCoordinate } from "@services";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface DaumPostcodeProps {
   zonecode: string;
@@ -11,11 +12,17 @@ interface DaumPostcodeProps {
   [key: string]: any;
 }
 
-const PostalCode = () => {
+interface PostalCodeProps {
+  form: AddressInfoType;
+  setForm: (
+    form:
+      | Partial<AddressInfoType>
+      | ((prev: AddressInfoType) => Partial<AddressInfoType>)
+  ) => void;
+}
+
+const PostalCode = ({ form, setForm }: PostalCodeProps) => {
   const mapRef = useRef<any>(null);
-  const [postCode, setPostCode] = useState("");
-  const [roadAddr, setRoadAddr] = useState("");
-  const [detailAddr, setDetailAddr] = useState<string>("");
 
   // load postal code
   const loadDaumPostcode = () => {
@@ -33,13 +40,24 @@ const PostalCode = () => {
     });
   };
 
-  // get coordinate + move to map center
-  const handleGetCoordinate = async (addr: string) => {
-    const coor = await getCoordinate(addr);
+  const handleComplete = async (data: DaumPostcodeProps) => {
+    const coor = await getCoordinate(data.roadAddress);
+    // get coordinate + move to map center
     if (mapRef.current) {
       const newCenter = new window.naver.maps.LatLng(coor.lat, coor.lng);
       mapRef.current.setCenter(newCenter);
       mapRef.current.setZoom(16, true);
+      // set form
+      setForm({
+        postal_code: data.zonecode,
+        address: data.roadAddress,
+        sido: data.sido,
+        sigungu: data.sigungu,
+        bname: data.bname,
+        lng: coor.lng,
+        lat: coor.lat,
+      });
+      console.warn(form);
     } else {
       console.warn("mapRef가 존재하지 않습니다");
     }
@@ -52,9 +70,7 @@ const PostalCode = () => {
 
     new window.daum.Postcode({
       oncomplete: (data: DaumPostcodeProps) => {
-        setPostCode(data.zonecode);
-        setRoadAddr(data.roadAddress);
-        handleGetCoordinate(data.roadAddress);
+        handleComplete(data);
       },
       theme: postcodeTheme,
       width: "100%",
@@ -95,7 +111,8 @@ const PostalCode = () => {
         <input
           className="bg-[#D9D9D9] text-[16px] w-full p-3"
           id="postCode"
-          value={postCode}
+          readOnly
+          value={form.postal_code}
         />
         <button
           className="bg-[#D9D9D9] text-[16px] w-[180px] px-3"
@@ -108,14 +125,16 @@ const PostalCode = () => {
       <input
         className="bg-[#D9D9D9] text-[16px] w-full h-[37px] p-3"
         id="roadAddr"
-        value={roadAddr}
+        readOnly
+        value={form.address}
       />
       {/* detail address */}
       <input
         className="bg-[#D9D9D9] text-[16px] w-full h-[37px] p-3"
         id="detailAddr"
-        value={detailAddr}
-        onChange={(e) => setDetailAddr(e.target.value)}
+        value={form.detail_address}
+        // set detail addr form
+        onChange={(e) => setForm({ detail_address: e.target.value })}
       />
       <div
         id="map"

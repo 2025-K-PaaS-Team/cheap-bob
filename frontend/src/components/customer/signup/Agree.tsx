@@ -1,4 +1,4 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
 import { useState } from "react";
 
 type AgreeProps = {
@@ -6,6 +6,8 @@ type AgreeProps = {
 };
 
 const Agree = ({ onNext }: AgreeProps) => {
+  const [showModal, setShowModal] = useState(false);
+
   const [agree, setAgree] = useState({
     service: false,
     privacy: false,
@@ -24,7 +26,7 @@ const Agree = ({ onNext }: AgreeProps) => {
   const handleSubmit = () => {
     if (!onNext) return;
     if (!allAgree) {
-      alert("필수 항목에 모두 동의해주세요");
+      setShowModal(true);
       return;
     }
     onNext();
@@ -67,8 +69,20 @@ const Agree = ({ onNext }: AgreeProps) => {
           <div className="font-bold">모두 동의합니다.</div>
         </div>
       </div>
-      {/* 다음 */}
+      {/* next */}
       {onNext && <CommonBtn label="다음" onClick={handleSubmit} />}
+
+      {/* show modal */}
+      <div className="relative">
+        {showModal && (
+          <CommonModal
+            desc="필수 항목에 모두 동의해주세요"
+            confirmLabel="확인"
+            onConfirmClick={() => setShowModal(false)}
+            category="black"
+          />
+        )}
+      </div>
     </div>
   );
 };

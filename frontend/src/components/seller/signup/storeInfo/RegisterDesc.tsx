@@ -1,10 +1,39 @@
-import { CommonBtn } from "@components/common";
-import { useRef, useState } from "react";
+import { CommonBtn, CommonModal } from "@components/common";
+import type { SellerSignupProps } from "@interface";
+import { useSignupImageStore, useSignupStore } from "@store";
+import { validateLength, validationRules } from "@utils";
+import { useEffect, useRef, useState } from "react";
 
-const RegisterDesc = () => {
-  const [value, setValue] = useState<string>("");
+const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+  const { form, setForm } = useSignupStore();
+  const { form: imgForm, setForm: setImgForm } = useSignupImageStore();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [previews, setPreviews] = useState<string[]>([]);
+
+  useEffect(() => {
+    console.log(imgForm);
+  }, [imgForm]);
+
+  const handleClickNext = () => {
+    const { storeDesc } = validationRules;
+    if (
+      !validateLength(
+        form.store_introduction,
+        storeDesc.minLength,
+        storeDesc.maxLength
+      )
+    ) {
+      setModalMsg(storeDesc.errorMessage);
+      setShowModal(true);
+      return;
+    }
+    setPageIdx(pageIdx + 1);
+  };
+
+  const handleClickPrev = () => {
+    setPageIdx(pageIdx - 1);
+  };
 
   const handleClickUpload = () => {
     fileInputRef.current?.click();
@@ -14,17 +43,46 @@ const RegisterDesc = () => {
     const files = e.target.files;
     if (!files) return;
 
-    const selectedFiles = Array.from(files).slice(0, 5 - previews.length); // 최대 5개
-    const urls = selectedFiles.map((file) => URL.createObjectURL(file));
-    setPreviews((prev) => [...prev, ...urls]);
+    const remain = Math.max(0, 5 - imgForm.images.length);
+    const selected = Array.from(files).slice(0, remain);
+
+    const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const MAX = 10 * 1024 * 1024;
+    for (const f of selected) {
+      if (!ALLOWED.includes(f.type)) {
+        setModalMsg("지원 형식: JPG, JPEG, PNG, WEBP");
+        setShowModal(true);
+        return;
+      }
+      if (f.size > MAX) {
+        setModalMsg("최대 크기 10MB를 초과했습니다.");
+        setShowModal(true);
+        return;
+      }
+    }
+
+    const newItems = selected.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setImgForm({ images: [...imgForm.images, ...newItems] });
   };
 
   const handleRemovePreview = (index: number) => {
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
+    const target = imgForm.images[index];
+    if (target) URL.revokeObjectURL(target.preview);
+    setImgForm({ images: imgForm.images.filter((_, i) => i !== index) });
   };
 
+  useEffect(() => {
+    return () => {
+      imgForm.images.forEach((it) => URL.revokeObjectURL(it.preview));
+    };
+  }, []);
+
   return (
-    <div className="mx-[20px] mt-[69px] flex flex-col gap-y-[11px]">
+    <div className="mx-[20px] mt-[69px] flex flex-col gap-y-[11px] min-h-screen">
       <div className="text-[16px]">2/4</div>
       <div className="text-[24px]">
         <span className="font-bold">매장</span>에 대해{" "}
@@ -35,8 +93,8 @@ const RegisterDesc = () => {
       <input
         className="w-full h-[100px] text-center bg-[#D9D9D9] text-[16px] mt-[40px]"
         placeholder="매장 설명을 입력해 주세요"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
+        value={form.store_introduction}
+        onChange={(e) => setForm({ store_introduction: e.target.value })}
       />
 
       {/* upload picture button */}
@@ -58,12 +116,12 @@ const RegisterDesc = () => {
       />
 
       {/* preview */}
-      {previews.length > 0 && (
+      {imgForm.images.length > 0 && (
         <div className="grid grid-cols-4 gap-2 mt-[29px]">
-          {previews.map((src, idx) => (
+          {imgForm.images.map((img, idx) => (
             <div key={idx} className="relative">
               <img
-                src={src}
+                src={img.preview}
                 alt={`preview-${idx}`}
                 className="w-full h-[100px] object-contain"
               />
@@ -77,6 +135,33 @@ const RegisterDesc = () => {
             </div>
           ))}
         </div>
+      )}
+
+      <CommonBtn
+        category="grey"
+        label="이전"
+        onClick={() => handleClickPrev()}
+        notBottom
+        className="absolute left-[20px] bottom-[38px]"
+        width="w-[100px]"
+      />
+      <CommonBtn
+        category="black"
+        label="다음"
+        onClick={() => handleClickNext()}
+        notBottom
+        className="absolute right-[20px] bottom-[38px]"
+        width="w-[250px]"
+      />
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
       )}
     </div>
   );

@@ -1,6 +1,12 @@
+import type { NutritionBase } from "@interface";
+
 export type SelectItem = { key: string; title: string; desc?: string };
 
-export const NutritionList: SelectItem[] = [
+export const NutritionList: {
+  key: NutritionBase;
+  title: string;
+  desc?: string;
+}[] = [
   { key: "diet", title: "다이어트", desc: "체지방 감소와 활력 증진" },
   { key: "LCHF", title: "저탄고지", desc: "식곤증 없는 안정적 에너지" },
   { key: "protein", title: "단백질 보충", desc: "근육 성장과 체력 강화" },
