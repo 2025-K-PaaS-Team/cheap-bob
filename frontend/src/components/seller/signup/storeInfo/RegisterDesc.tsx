@@ -2,7 +2,7 @@ import { CommonBtn, CommonModal } from "@components/common";
 import type { SellerSignupProps } from "@interface";
 import { useSignupImageStore, useSignupStore } from "@store";
 import { validateLength, validationRules } from "@utils";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const { form, setForm } = useSignupStore();
@@ -10,6 +10,10 @@ const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    console.log(imgForm);
+  }, [imgForm]);
 
   const handleClickNext = () => {
     const { storeDesc } = validationRules;
@@ -40,21 +44,17 @@ const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     if (!files) return;
 
     const selectedFiles = Array.from(files).slice(0, 5 - imgForm.images.length); // 최대 5개
-    const newImages = selectedFiles.map((file, idx) => ({
-      image_id: "",
+    const newImages = selectedFiles.map((file) => ({
       image_url: URL.createObjectURL(file),
-      is_main: false,
-      display_order: imgForm.images.length + idx,
     }));
     setImgForm({
       images: [...imgForm.images, ...newImages],
-      total: imgForm.images.length + newImages.length,
     });
   };
 
   const handleRemovePreview = (index: number) => {
     const newImages = imgForm.images.filter((_, i) => i !== index);
-    setImgForm({ images: newImages, total: newImages.length });
+    setImgForm({ images: newImages });
   };
 
   return (

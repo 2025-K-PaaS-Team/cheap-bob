@@ -96,17 +96,13 @@ export const useSignupStore = create<SignupState>((set) => ({
 
 export const useSignupImageStore = create<SignupImageState>((set) => ({
   form: {
-    store_id: "",
     images: [],
-    total: 0,
   },
   setForm: (form) => set((state) => ({ form: { ...state.form, ...form } })),
   resetForm: () =>
     set({
       form: {
-        store_id: "",
         images: [],
-        total: 0,
       },
     }),
 }));

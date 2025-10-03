@@ -62,16 +62,11 @@ export type SignupRequestType = StoreInfoType & {
 };
 
 export type ImagesType = {
-  image_id: string;
   image_url: string;
-  is_main: boolean;
-  display_order: number;
 };
 
 export type SignupImageRequestType = {
-  store_id: string;
   images: ImagesType[];
-  total: number;
 };
 
 export type Offset = { hour: number; min: number };
