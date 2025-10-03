@@ -1,11 +1,16 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
 import type { SellerSignupProps } from "@interface";
 import { registerStore, registerStoreImg } from "@services";
 import { useSignupImageStore, useSignupStore } from "@store";
+import { formatErrMsg } from "@utils";
+import { useState } from "react";
 
 const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const { form } = useSignupStore();
   const { form: imgForm } = useSignupImageStore();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+
   const shopTimes = [
     {
       label: "오픈",
@@ -31,6 +36,7 @@ const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       console.log("등록 성공:", res);
     } catch (err: unknown) {
       console.error("등록 실패:", err);
+      throw err;
     }
   };
 
@@ -41,13 +47,19 @@ const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       console.log("이미지 업로드 성공:", res);
     } catch (err: any) {
       console.error("이미지 업로드 실패:", err);
+      throw err;
     }
   };
 
-  const handleClickNext = () => {
-    handleRegisterStore();
-    handleRegisterStoreImg();
-    setPageIdx(pageIdx + 1);
+  const handleClickNext = async () => {
+    try {
+      await handleRegisterStore();
+      await handleRegisterStoreImg();
+      setPageIdx(pageIdx + 1);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
   };
 
   const handleClickPrev = () => {
@@ -96,6 +108,16 @@ const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           width="w-[250px]"
         />
       </div>
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };

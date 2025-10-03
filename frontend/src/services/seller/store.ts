@@ -27,7 +27,10 @@ export const registerStoreImg = async (
 
   const { data } = await sellerStoreApi.post<SignupImageResponseType>(
     "/register/images",
-    fd
+    fd,
+    {
+      headers: { "Content-Type": undefined as any },
+    }
   );
   return data;
 };
