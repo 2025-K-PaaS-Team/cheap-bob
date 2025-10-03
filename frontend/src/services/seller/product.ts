@@ -30,9 +30,9 @@ export const updateProductPrice = async (
 };
 
 // DELETE: delete product
-export const deleteProduct = async (productId: string): Promise<void> => {
-  await sellerProductApi.delete<void>(`/${productId}`);
-};
+// export const deleteProduct = async (productId: string): Promise<void> => {
+//   await sellerProductApi.delete<void>(`/${productId}`);
+// };
 
 // PATCH: Increase product stock
 export const IncreaseProductStock = async (

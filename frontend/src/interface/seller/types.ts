@@ -1,7 +1,6 @@
 import type {
   OrderBaseType,
   QrBaseType,
-  StoreBaseType,
   TimeStamp,
 } from "@interface/common/types";
 
@@ -12,9 +11,9 @@ export type ProductDetailType = {
   price: number;
 };
 
-export type StoreDetailType = StoreBaseType & {
-  products: ProductDetailType[];
-};
+// export type StoreDetailType = StoreBaseType & {
+//   products: ProductDetailType[];
+// };
 
 export type PaymentBase = {
   portone_store_id: string;
