@@ -3,12 +3,10 @@ import type { SellerSignupPkgProps } from "@interface";
 import { createProduct } from "@services";
 import { formatErrMsg } from "@utils";
 import { useState } from "react";
-import { useNavigate } from "react-router";
 
 const ConfirmPackage = ({ pageIdx, setPageIdx, pkg }: SellerSignupPkgProps) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
-  const navigate = useNavigate();
 
   const handleRegisterProduct = async () => {
     try {
