@@ -8,12 +8,16 @@ import type {
   StoreResponseType,
   StoreWithProductResponseType,
 } from "@interface/seller/types";
+import type { SignupRequestType, SignupResponseType } from "@interface";
 
-// POST: create store
-export const createStore = async (
-  body: StoreRequestType
-): Promise<StoreResponseType> => {
-  const { data } = await sellerStoreApi.post<StoreResponseType>("", body);
+// POST: register store
+export const registerStore = async (
+  body: SignupRequestType
+): Promise<SignupResponseType> => {
+  const { data } = await sellerStoreApi.post<StoreResponseType>(
+    "/register",
+    body
+  );
 
   return data;
 };

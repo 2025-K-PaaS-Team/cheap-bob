@@ -51,3 +51,14 @@ export const validateSelect = (value: number, min: number, max: number) =>
   value >= min && value <= max;
 
 export const validateNum = (value: number, min: number) => value >= min;
+
+export const validateUrl = (raw?: string) => {
+  const s = (raw ?? "").trim();
+  if (!s) return true;
+  try {
+    new URL(/^https?:\/\//i.test(s) ? s : `https://${s}`);
+    return true;
+  } catch {
+    return false;
+  }
+};

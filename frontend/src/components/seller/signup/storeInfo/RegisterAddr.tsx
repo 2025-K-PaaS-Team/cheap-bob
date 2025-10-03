@@ -12,11 +12,18 @@ const RegisterAddr = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
 
   const handleClickNext = () => {
     const { storeAddr } = validationRules;
-    if (!form.address_InfoType.address || !form.address_InfoType.postal_code) {
+    if (!form.address_info.address || !form.address_info.postal_code) {
       setModalMsg(storeAddr.errorMessage);
       setShowModal(true);
       return;
     }
+
+    if (!form.address_info.detail_address?.trim()) {
+      setModalMsg("상세 주소를 입력해 주세요.");
+      setShowModal(true);
+      return;
+    }
+
     setPageIdx(pageIdx + 1);
   };
 
@@ -33,13 +40,13 @@ const RegisterAddr = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
 
       {/* postal code */}
       <PostalCode
-        form={form.address_InfoType}
+        form={form.address_info}
         setForm={(addrForm) => {
           useSignupStore.getState().setForm((prev) => ({
-            address_InfoType: {
-              ...prev.address_InfoType,
+            address_info: {
+              ...prev.address_info,
               ...(typeof addrForm === "function"
-                ? addrForm(prev.address_InfoType)
+                ? addrForm(prev.address_info)
                 : addrForm),
             },
           }));

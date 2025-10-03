@@ -19,7 +19,7 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
 
   const handleClickNext = () => {
     const { storeAddr } = validationRules;
-    if (!form.address_InfoType.address || !form.address_InfoType.postal_code) {
+    if (!form.address_info.address || !form.address_info.postal_code) {
       setModalMsg(storeAddr.errorMessage);
       setShowModal(true);
       return;

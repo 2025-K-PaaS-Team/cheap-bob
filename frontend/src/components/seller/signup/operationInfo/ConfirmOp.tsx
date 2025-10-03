@@ -1,5 +1,6 @@
 import { CommonBtn } from "@components/common";
 import type { SellerSignupProps } from "@interface";
+import { registerStore } from "@services";
 import { useSignupStore } from "@store";
 
 const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
@@ -23,8 +24,19 @@ const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     },
   ];
 
+  const handleCreateStore = async () => {
+    try {
+      const res = await registerStore(form);
+      console.log("등록 성공:", res);
+
+      setPageIdx(pageIdx + 1);
+    } catch (err: unknown) {
+      console.error("등록 실패:", err);
+    }
+  };
+
   const handleClickNext = () => {
-    setPageIdx(pageIdx + 1);
+    handleCreateStore();
   };
 
   const handleClickPrev = () => {

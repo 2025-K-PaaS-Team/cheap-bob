@@ -22,10 +22,10 @@ export type StoreInfoType = {
 };
 
 export type SnsInfoType = {
-  instagram: string;
-  facebook: string;
-  x: string;
-  homepage: string;
+  instagram?: string;
+  facebook?: string;
+  x?: string;
+  homepage?: string;
 };
 
 export type AddressInfoType = {
@@ -55,10 +55,16 @@ export type PaymentInfoType = {
 };
 
 export type SignupRequestType = StoreInfoType & {
-  sns_InfoType: SnsInfoType;
-  address_InfoType: AddressInfoType;
+  sns_info: SnsInfoType;
+  address_info: AddressInfoType;
   operation_times: OperationTimeType[];
-  payment_InfoType: PaymentInfoType;
+  payment_info: PaymentInfoType;
+};
+
+export type SignupResponseType = {
+  store_id: string;
+  store_name: string;
+  message: string;
 };
 
 export type ImagesType = {

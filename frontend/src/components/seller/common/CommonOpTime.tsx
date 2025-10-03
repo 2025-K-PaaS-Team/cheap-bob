@@ -1,5 +1,5 @@
 import type { OperationTimeType } from "@interface";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 interface OpProps {
   form: OperationTimeType[];
@@ -8,9 +8,6 @@ interface OpProps {
 
 const CommonOpTime = ({ form, setForm }: OpProps) => {
   const [isBatch, setIsBatch] = useState(false);
-  const [opDay, setOpDay] = useState<number[]>(() =>
-    [...form.map((f) => f.day_of_week)].sort((a, b) => a - b)
-  );
 
   const daysOfWeek = [
     { label: "월", idx: 0 },
@@ -22,119 +19,85 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     { label: "일", idx: 6 },
   ];
 
-  // opDay가 바뀌면 form의 날짜 라인업을 동일하게 유지
-  useEffect(() => {
-    const newForm = opDay.map((day) => {
-      const exist = form.find((f) => f.day_of_week === day);
-      return (
-        exist || {
-          day_of_week: day,
-          open_time: "",
-          pickup_start_time: "",
-          pickup_end_time: "",
-          close_time: "",
-          is_open_enabled: true,
-        }
-      );
-    });
+  // 항상 0~6 정렬(스토어가 보장해도 표시용 정렬로 한 번 더)
+  const sortedForm = useMemo(
+    () => [...form].sort((a, b) => a.day_of_week - b.day_of_week),
+    [form]
+  );
 
-    const formDays = [...form.map((f) => f.day_of_week)].sort((a, b) => a - b);
-    const newDays = [...newForm.map((f) => f.day_of_week)].sort(
-      (a, b) => a - b
-    );
-
-    const same =
-      formDays.length === newDays.length &&
-      formDays.every((d, i) => d === newDays[i]);
-
-    if (!same) setForm(newForm);
-  }, [opDay, setForm, form]);
-
-  // 부모 form이 바뀌면 opDay 동기화
-  useEffect(() => {
-    const days = [...form.map((f) => f.day_of_week)].sort((a, b) => a - b);
-    const same =
-      days.length === opDay.length && days.every((d, i) => d === opDay[i]);
-    if (!same) setOpDay(days);
-  }, [form]);
-
+  // 요일 토글: 삭제 금지, is_open_enabled만 토글
   const handleClickDays = (idx: number) => {
-    setOpDay((prev) =>
-      prev.includes(idx)
-        ? prev.filter((day) => day !== idx)
-        : [...prev, idx].sort((a, b) => a - b)
+    const next = form.map((f) =>
+      f.day_of_week === idx ? { ...f, is_open_enabled: !f.is_open_enabled } : f
     );
+    setForm(next);
   };
 
   // helper: time string -> [hour, min]
   const parseTimeParts = (time?: string) => {
     if (!time) return ["", ""];
-    const parts = time.split(":");
-    return [parts[0] ?? "", parts[1] ?? ""];
+    const [h = "", m = ""] = time.split(":");
+    return [h, m];
   };
 
   // clamp + format
   const clampAndFormat = (value: string, part: "hour" | "min") => {
     if (value === "") return "";
-    const n = parseInt(value, 10);
+    const n = parseInt(value.replace(/\D/g, "").slice(-2), 10);
     if (isNaN(n)) return "";
     const clamped = Math.max(0, Math.min(part === "hour" ? 23 : 59, n));
     return String(clamped).padStart(2, "0");
   };
 
-  // build time string
+  // build "HH:MM:SS" (빈 값 허용)
   const buildTimeString = (hh: string, mm: string) =>
     hh === "" && mm === ""
       ? ""
       : `${hh.padStart(2, "0")}:${mm.padStart(2, "0")}:00`;
 
   // 배치 입력 상태
-  const [batchOpen, setBatchOpen] = useState(["", ""]);
-  const [batchClose, setBatchClose] = useState(["", ""]);
+  const [batchOpen, setBatchOpen] = useState<[string, string]>(["", ""]);
+  const [batchClose, setBatchClose] = useState<[string, string]>(["", ""]);
 
-  // 배치 변경
+  // 배치 변경: 운영 요일(is_open_enabled)만 적용
   const handleBatchChange = (
     type: "open" | "close",
     part: "hour" | "min",
     rawValue: string
   ) => {
-    let value = rawValue.replace(/\D/g, "");
-    if (value.length > 2) value = value.slice(-2);
-    value = clampAndFormat(value, part);
+    const value = clampAndFormat(rawValue, part);
 
     if (type === "open") {
-      const newOpen = [...batchOpen];
-      newOpen[part === "hour" ? 0 : 1] = value;
-      setBatchOpen(newOpen);
+      const nextOpen: [string, string] = [...batchOpen] as any;
+      nextOpen[part === "hour" ? 0 : 1] = value;
+      setBatchOpen(nextOpen);
 
-      const timeStr = buildTimeString(newOpen[0], newOpen[1]);
+      const timeStr = buildTimeString(nextOpen[0], nextOpen[1]);
       const next = form.map((f) =>
-        opDay.includes(f.day_of_week) ? { ...f, open_time: timeStr } : f
+        f.is_open_enabled ? { ...f, open_time: timeStr } : f
       );
       setForm(next);
     } else {
-      const newClose = [...batchClose];
-      newClose[part === "hour" ? 0 : 1] = value;
-      setBatchClose(newClose);
+      const nextClose: [string, string] = [...batchClose] as any;
+      nextClose[part === "hour" ? 0 : 1] = value;
+      setBatchClose(nextClose);
 
-      const timeStr = buildTimeString(newClose[0], newClose[1]);
+      const timeStr = buildTimeString(nextClose[0], nextClose[1]);
       const next = form.map((f) =>
-        opDay.includes(f.day_of_week) ? { ...f, close_time: timeStr } : f
+        f.is_open_enabled ? { ...f, close_time: timeStr } : f
       );
       setForm(next);
     }
   };
 
-  // ★ 일반 모드: 해당 요일만 변경
+  // 일반 모드: 해당 요일만 변경
   const handleSingleChange = (
     dayIdx: number,
     type: "open" | "close",
     part: "hour" | "min",
     rawValue: string
   ) => {
-    let value = rawValue.replace(/\D/g, "");
-    if (value.length > 2) value = value.slice(-2);
-    value = clampAndFormat(value, part);
+    const value = clampAndFormat(rawValue, part);
 
     const next = form.map((f) => {
       if (f.day_of_week !== dayIdx) return f;
@@ -156,8 +119,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     setForm(next);
   };
 
-  const sortedForm = [...form].sort((a, b) => a.day_of_week - b.day_of_week);
-
   return (
     <>
       {/* operation days */}
@@ -167,17 +128,23 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
           매장을 운영하는 날짜를 모두 선택해 주세요.
         </div>
         <div className="grid grid-cols-7">
-          {daysOfWeek.map((day) => (
-            <div
-              key={day.idx}
-              className={`text-[20px] h-[40px] w-[40px] flex justify-center items-center rounded-full cursor-pointer ${
-                opDay.includes(day.idx) ? "bg-[#d9d9d9]" : ""
-              }`}
-              onClick={() => handleClickDays(day.idx)}
-            >
-              {day.label}
-            </div>
-          ))}
+          {daysOfWeek.map((day) => {
+            const enabled = !!form.find(
+              (f) => f.day_of_week === day.idx && f.is_open_enabled
+            );
+            return (
+              <div
+                key={day.idx}
+                className={`text-[20px] h-[40px] w-[40px] flex justify-center items-center rounded-full cursor-pointer ${
+                  enabled ? "bg-[#d9d9d9]" : ""
+                }`}
+                onClick={() => handleClickDays(day.idx)}
+                title={enabled ? "운영" : "휴무"}
+              >
+                {day.label}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -194,7 +161,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
             checked={isBatch}
             onChange={() => setIsBatch((s) => !s)}
           />
-          <span>시간 일괄 적용</span>
+          <span>시간 일괄 적용 (운영 요일만 적용)</span>
         </div>
 
         {isBatch ? (
@@ -231,7 +198,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
 
             {/* close */}
             <span className="w-[70px] font-bold">매장 마감</span>
-            <div className="flex flex-row gap-x={[10].toString()} items-center justify-center text-[20px]">
+            <div className="flex flex-row gap-x-[10px] items-center justify-center text-[20px]">
               <input
                 className="text-center bg-[#d9d9d9] rounded-[8px] w-[50px] h-[44px]"
                 value={batchClose[0]}
@@ -255,11 +222,12 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
             </div>
           </div>
         ) : (
-          // 일반 모드 (★ 단일 요일만 변경)
+          // 일반 모드
           <div className="flex flex-col items-center overflow-y-auto h-[220px] w-full">
             {sortedForm.map((day) => {
               const [openHour, openMin] = parseTimeParts(day.open_time);
               const [closeHour, closeMin] = parseTimeParts(day.close_time);
+              const disabled = !day.is_open_enabled;
 
               return (
                 <div
@@ -273,7 +241,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                   {/* Open time */}
                   <div className="col-span-3 text-center flex flex-row gap-x-[5px] justify-center">
                     <input
-                      className="w-[36px] text-center bg-[#d9d9d9] rounded"
+                      className="w-[36px] text-center bg-[#d9d9d9] rounded disabled:opacity-50"
                       value={openHour}
                       onChange={(e) =>
                         handleSingleChange(
@@ -285,10 +253,11 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                       }
                       inputMode="numeric"
                       placeholder="hh"
+                      disabled={disabled}
                     />
                     <div>시</div>
                     <input
-                      className="w-[36px] text-center bg-[#d9d9d9] rounded"
+                      className="w-[36px] text-center bg-[#d9d9d9] rounded disabled:opacity-50"
                       value={openMin}
                       onChange={(e) =>
                         handleSingleChange(
@@ -300,6 +269,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                       }
                       inputMode="numeric"
                       placeholder="mm"
+                      disabled={disabled}
                     />
                     <div>분</div>
                   </div>
@@ -309,7 +279,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                   {/* Close time */}
                   <div className="col-span-3 text-center flex flex-row gap-x-[5px] justify-center">
                     <input
-                      className="w-[36px] text-center bg-[#d9d9d9] rounded"
+                      className="w-[36px] text-center bg-[#d9d9d9] rounded disabled:opacity-50"
                       value={closeHour}
                       onChange={(e) =>
                         handleSingleChange(
@@ -321,10 +291,11 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                       }
                       inputMode="numeric"
                       placeholder="hh"
+                      disabled={disabled}
                     />
                     <div>시</div>
                     <input
-                      className="w-[36px] text-center bg-[#d9d9d9] rounded"
+                      className="w-[36px] text-center bg-[#d9d9d9] rounded disabled:opacity-50"
                       value={closeMin}
                       onChange={(e) =>
                         handleSingleChange(
@@ -336,6 +307,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                       }
                       inputMode="numeric"
                       placeholder="mm"
+                      disabled={disabled}
                     />
                     <div>분</div>
                   </div>

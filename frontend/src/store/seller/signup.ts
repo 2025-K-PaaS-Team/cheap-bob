@@ -26,13 +26,31 @@ type SignupImageState = {
   resetForm: () => void;
 };
 
+const DEFAULT_OPEN = "00:00:00";
+const DEFAULT_CLOSE = "23:59:00";
+
+const makeDefaultOpTimes = () =>
+  Array.from({ length: 7 }, (_, d) => ({
+    day_of_week: d,
+    open_time: DEFAULT_OPEN,
+    pickup_start_time: "",
+    pickup_end_time: "",
+    close_time: DEFAULT_CLOSE,
+    is_open_enabled: false,
+  }));
+
 export const useSignupStore = create<SignupState>((set) => ({
   form: {
     store_name: "",
     store_introduction: "",
     store_phone: "",
-    sns_InfoType: { instagram: "", facebook: "", x: "", homepage: "" },
-    address_InfoType: {
+    sns_info: {
+      instagram: undefined,
+      facebook: undefined,
+      x: undefined,
+      homepage: undefined,
+    },
+    address_info: {
       postal_code: "",
       address: "",
       detail_address: "",
@@ -42,8 +60,8 @@ export const useSignupStore = create<SignupState>((set) => ({
       lat: "",
       lng: "",
     },
-    operation_times: [],
-    payment_InfoType: {
+    operation_times: makeDefaultOpTimes(),
+    payment_info: {
       portone_store_id: "",
       portone_channel_id: "",
       portone_secret_key: "",
@@ -62,8 +80,8 @@ export const useSignupStore = create<SignupState>((set) => ({
         store_name: "",
         store_introduction: "",
         store_phone: "",
-        sns_InfoType: { instagram: "", facebook: "", x: "", homepage: "" },
-        address_InfoType: {
+        sns_info: { instagram: "", facebook: "", x: "", homepage: "" },
+        address_info: {
           postal_code: "",
           address: "",
           detail_address: "",
@@ -73,8 +91,8 @@ export const useSignupStore = create<SignupState>((set) => ({
           lat: "",
           lng: "",
         },
-        operation_times: [],
-        payment_InfoType: {
+        operation_times: makeDefaultOpTimes(),
+        payment_info: {
           portone_store_id: "",
           portone_channel_id: "",
           portone_secret_key: "",
