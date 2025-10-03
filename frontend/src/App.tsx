@@ -3,7 +3,7 @@ import { Layout } from "@components/layouts";
 import {
   My,
   StoreDetail,
-  StoreList,
+  // StoreList,
   LoginCallback,
   CustomerLab,
   QrLab,
@@ -53,7 +53,7 @@ const App = () => {
         {/* signup */}
         <Route path="signup" element={<Signup />} />
         {/* store */}
-        <Route path="stores" element={<StoreList />} />
+        {/* <Route path="stores" element={<StoreList />} /> */}
         <Route path="stores/:storeId" element={<StoreDetail />} />
         {/* location */}
         <Route path="location" element={<Location />} />
