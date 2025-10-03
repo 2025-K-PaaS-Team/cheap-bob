@@ -22,7 +22,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     { label: "일", idx: 6 },
   ];
 
-  // from update when opday is changed
+  // opDay가 바뀌면 form의 날짜 라인업을 동일하게 유지
   useEffect(() => {
     const newForm = opDay.map((day) => {
       const exist = form.find((f) => f.day_of_week === day);
@@ -48,9 +48,9 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
       formDays.every((d, i) => d === newDays[i]);
 
     if (!same) setForm(newForm);
-  }, [opDay, setForm]);
+  }, [opDay, setForm, form]);
 
-  // if parent form is changed, synchronize
+  // 부모 form이 바뀌면 opDay 동기화
   useEffect(() => {
     const days = [...form.map((f) => f.day_of_week)].sort((a, b) => a - b);
     const same =
@@ -88,11 +88,11 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
       ? ""
       : `${hh.padStart(2, "0")}:${mm.padStart(2, "0")}:00`;
 
-  // batch state
+  // 배치 입력 상태
   const [batchOpen, setBatchOpen] = useState(["", ""]);
   const [batchClose, setBatchClose] = useState(["", ""]);
 
-  // batch time change logic
+  // 배치 변경
   const handleBatchChange = (
     type: "open" | "close",
     part: "hour" | "min",
@@ -100,7 +100,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
   ) => {
     let value = rawValue.replace(/\D/g, "");
     if (value.length > 2) value = value.slice(-2);
-
     value = clampAndFormat(value, part);
 
     if (type === "open") {
@@ -109,21 +108,52 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
       setBatchOpen(newOpen);
 
       const timeStr = buildTimeString(newOpen[0], newOpen[1]);
-      const newForm = form.map((f) =>
+      const next = form.map((f) =>
         opDay.includes(f.day_of_week) ? { ...f, open_time: timeStr } : f
       );
-      setForm(newForm);
+      setForm(next);
     } else {
       const newClose = [...batchClose];
       newClose[part === "hour" ? 0 : 1] = value;
       setBatchClose(newClose);
 
       const timeStr = buildTimeString(newClose[0], newClose[1]);
-      const newForm = form.map((f) =>
+      const next = form.map((f) =>
         opDay.includes(f.day_of_week) ? { ...f, close_time: timeStr } : f
       );
-      setForm(newForm);
+      setForm(next);
     }
+  };
+
+  // ★ 일반 모드: 해당 요일만 변경
+  const handleSingleChange = (
+    dayIdx: number,
+    type: "open" | "close",
+    part: "hour" | "min",
+    rawValue: string
+  ) => {
+    let value = rawValue.replace(/\D/g, "");
+    if (value.length > 2) value = value.slice(-2);
+    value = clampAndFormat(value, part);
+
+    const next = form.map((f) => {
+      if (f.day_of_week !== dayIdx) return f;
+
+      const [oh, om] = parseTimeParts(f.open_time);
+      const [ch, cm] = parseTimeParts(f.close_time);
+
+      if (type === "open") {
+        const hh = part === "hour" ? value : oh;
+        const mm = part === "min" ? value : om;
+        return { ...f, open_time: buildTimeString(hh, mm) };
+      } else {
+        const hh = part === "hour" ? value : ch;
+        const mm = part === "min" ? value : cm;
+        return { ...f, close_time: buildTimeString(hh, mm) };
+      }
+    });
+
+    setForm(next);
   };
 
   const sortedForm = [...form].sort((a, b) => a.day_of_week - b.day_of_week);
@@ -168,7 +198,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
         </div>
 
         {isBatch ? (
-          // batch mode
+          // 배치 모드
           <div className="flex flex-col gap-y-[20px] justify-center items-center">
             {/* open */}
             <span className="w-[70px] font-bold text-[14px] text-center">
@@ -197,12 +227,11 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
               <span>분</span>
             </div>
 
-            {/* divider */}
             <hr className="border-0 h-[1px] bg-black my-[5px]" />
 
             {/* close */}
             <span className="w-[70px] font-bold">매장 마감</span>
-            <div className="flex flex-row gap-x-[10px] items-center justify-center text-[20px]">
+            <div className="flex flex-row gap-x={[10].toString()} items-center justify-center text-[20px]">
               <input
                 className="text-center bg-[#d9d9d9] rounded-[8px] w-[50px] h-[44px]"
                 value={batchClose[0]}
@@ -226,7 +255,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
             </div>
           </div>
         ) : (
-          // general mode
+          // 일반 모드 (★ 단일 요일만 변경)
           <div className="flex flex-col items-center overflow-y-auto h-[220px] w-full">
             {sortedForm.map((day) => {
               const [openHour, openMin] = parseTimeParts(day.open_time);
@@ -247,7 +276,12 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                       className="w-[36px] text-center bg-[#d9d9d9] rounded"
                       value={openHour}
                       onChange={(e) =>
-                        handleBatchChange("open", "hour", e.target.value)
+                        handleSingleChange(
+                          day.day_of_week,
+                          "open",
+                          "hour",
+                          e.target.value
+                        )
                       }
                       inputMode="numeric"
                       placeholder="hh"
@@ -257,7 +291,12 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                       className="w-[36px] text-center bg-[#d9d9d9] rounded"
                       value={openMin}
                       onChange={(e) =>
-                        handleBatchChange("open", "min", e.target.value)
+                        handleSingleChange(
+                          day.day_of_week,
+                          "open",
+                          "min",
+                          e.target.value
+                        )
                       }
                       inputMode="numeric"
                       placeholder="mm"
@@ -273,7 +312,12 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                       className="w-[36px] text-center bg-[#d9d9d9] rounded"
                       value={closeHour}
                       onChange={(e) =>
-                        handleBatchChange("close", "hour", e.target.value)
+                        handleSingleChange(
+                          day.day_of_week,
+                          "close",
+                          "hour",
+                          e.target.value
+                        )
                       }
                       inputMode="numeric"
                       placeholder="hh"
@@ -283,7 +327,12 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                       className="w-[36px] text-center bg-[#d9d9d9] rounded"
                       value={closeMin}
                       onChange={(e) =>
-                        handleBatchChange("close", "min", e.target.value)
+                        handleSingleChange(
+                          day.day_of_week,
+                          "close",
+                          "min",
+                          e.target.value
+                        )
                       }
                       inputMode="numeric"
                       placeholder="mm"

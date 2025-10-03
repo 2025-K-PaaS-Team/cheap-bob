@@ -3,10 +3,17 @@ import { CommonPuTime } from "@components/seller/common";
 import type { SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
 import { validationRules } from "@utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
-  const { form, setForm } = useSignupStore();
+  const {
+    form,
+    setForm,
+    pickupStartOffset,
+    setPickupStartOffset,
+    pickupDiscardOffset,
+    setPickupDiscardOffset,
+  } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
 
@@ -24,6 +31,10 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     setPageIdx(pageIdx - 1);
   };
 
+  useEffect(() => {
+    console.log(form);
+  }, [form]);
+
   return (
     <div className="flex mx-[20px] flex-col mt-[69px] gap-y-[11px]">
       <div className="text-[16px]">2/4</div>
@@ -40,6 +51,10 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
             operation_times: times,
           }))
         }
+        pickupStartOffset={pickupStartOffset}
+        setPickupStartOffset={setPickupStartOffset}
+        pickupDiscardOffset={pickupDiscardOffset}
+        setPickupDiscardOffset={setPickupDiscardOffset}
       />
 
       <CommonBtn

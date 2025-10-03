@@ -73,3 +73,5 @@ export type SignupImageRequestType = {
   images: ImagesType[];
   total: number;
 };
+
+export type Offset = { hour: number; min: number };

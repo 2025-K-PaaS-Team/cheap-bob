@@ -1,4 +1,8 @@
-import type { SignupImageRequestType, SignupRequestType } from "@interface";
+import type {
+  Offset,
+  SignupImageRequestType,
+  SignupRequestType,
+} from "@interface";
 import { create } from "zustand";
 
 type SignupState = {
@@ -9,6 +13,11 @@ type SignupState = {
       | ((prev: SignupRequestType) => Partial<SignupRequestType>)
   ) => void;
   resetForm: () => void;
+  // time offset
+  pickupStartOffset: Offset;
+  pickupDiscardOffset: Offset;
+  setPickupStartOffset: (hour: number, min: number) => void;
+  setPickupDiscardOffset: (hour: number, min: number) => void;
 };
 
 type SignupImageState = {
@@ -71,7 +80,18 @@ export const useSignupStore = create<SignupState>((set) => ({
           portone_secret_key: "",
         },
       },
+      pickupStartOffset: { hour: 0, min: 0 },
+      pickupDiscardOffset: { hour: 0, min: 0 },
     }),
+
+  // initial offset value
+  pickupStartOffset: { hour: 0, min: 0 },
+  pickupDiscardOffset: { hour: 0, min: 0 },
+
+  setPickupStartOffset: (hour, min) =>
+    set(() => ({ pickupStartOffset: { hour, min } })),
+  setPickupDiscardOffset: (hour, min) =>
+    set(() => ({ pickupDiscardOffset: { hour, min } })),
 }));
 
 export const useSignupImageStore = create<SignupImageState>((set) => ({
