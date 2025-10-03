@@ -1,5 +1,5 @@
 import { CommonBtn } from "@components/common";
-import { PostalCode } from "@components/seller/dashboard";
+// import { PostalCode } from "@components/seller/dashboard";
 import { useNavigate } from "react-router";
 
 const ChangeStoreAddr = () => {
@@ -16,7 +16,7 @@ const ChangeStoreAddr = () => {
         주세요.
       </div>
       {/* postal code */}
-      <PostalCode />
+      {/* <PostalCode /> */}
 
       {/* 다음 */}
       <CommonBtn
