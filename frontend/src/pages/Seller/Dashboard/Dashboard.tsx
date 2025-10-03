@@ -3,8 +3,14 @@ import {
   RemainPkg,
   StoreManage,
 } from "@components/seller/dashboard";
+import { GetStoreDetail } from "@services";
+import { useEffect } from "react";
 
 const Dashboard = () => {
+  useEffect(() => {
+    GetStoreDetail();
+  }, []);
+
   return (
     <div className="flex w-full flex-col">
       {/* now operating status */}

@@ -4,6 +4,7 @@ import type {
   SignupImageResponseType,
   SignupRequestType,
   SignupResponseType,
+  StoreDetailType,
 } from "@interface";
 
 // POST: register store
@@ -32,5 +33,12 @@ export const registerStoreImg = async (
       headers: { "Content-Type": undefined as any },
     }
   );
+  return data;
+};
+
+// GET: get store detail
+export const GetStoreDetail = async (): Promise<StoreDetailType> => {
+  const { data } = await sellerStoreApi.get("");
+
   return data;
 };
