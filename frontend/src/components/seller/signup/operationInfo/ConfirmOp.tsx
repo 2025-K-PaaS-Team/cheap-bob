@@ -1,12 +1,26 @@
 import { CommonBtn } from "@components/common";
 import type { SellerSignupProps } from "@interface";
+import { useSignupStore } from "@store";
 
 const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+  const { form } = useSignupStore();
   const shopTimes = [
-    { label: "오픈", value: "09:00" },
-    { label: "픽업 시작", value: "12:00" },
-    { label: "픽업 마감", value: "14:00" },
-    { label: "마감", value: "21:00" },
+    {
+      label: "오픈",
+      value: form.operation_times[0].open_time.slice(0, 5),
+    },
+    {
+      label: "픽업 시작",
+      value: form.operation_times[0].pickup_start_time.slice(0, 5),
+    },
+    {
+      label: "픽업 마감",
+      value: form.operation_times[0].pickup_end_time.slice(0, 5),
+    },
+    {
+      label: "마감",
+      value: form.operation_times[0].close_time.slice(0, 5),
+    },
   ];
 
   const handleClickNext = () => {
