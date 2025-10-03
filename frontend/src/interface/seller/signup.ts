@@ -68,11 +68,25 @@ export type SignupResponseType = {
 };
 
 export type ImagesType = {
-  image_url: string;
+  file: File;
+  preview: string;
 };
 
 export type SignupImageRequestType = {
   images: ImagesType[];
+};
+
+export type SignupImageBaseType = {
+  image_id: string;
+  image_url: string;
+  is_main: boolean;
+  display_order: number;
+};
+
+export type SignupImageResponseType = {
+  store_id: string;
+  images: SignupImageBaseType[];
+  total: number;
 };
 
 export type Offset = { hour: number; min: number };

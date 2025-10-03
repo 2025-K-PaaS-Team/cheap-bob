@@ -43,19 +43,43 @@ const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     const files = e.target.files;
     if (!files) return;
 
-    const selectedFiles = Array.from(files).slice(0, 5 - imgForm.images.length); // 최대 5개
-    const newImages = selectedFiles.map((file) => ({
-      image_url: URL.createObjectURL(file),
+    const remain = Math.max(0, 5 - imgForm.images.length);
+    const selected = Array.from(files).slice(0, remain);
+
+    const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const MAX = 10 * 1024 * 1024;
+    for (const f of selected) {
+      if (!ALLOWED.includes(f.type)) {
+        setModalMsg("지원 형식: JPG, JPEG, PNG, WEBP");
+        setShowModal(true);
+        return;
+      }
+      if (f.size > MAX) {
+        setModalMsg("최대 크기 10MB를 초과했습니다.");
+        setShowModal(true);
+        return;
+      }
+    }
+
+    const newItems = selected.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
     }));
-    setImgForm({
-      images: [...imgForm.images, ...newImages],
-    });
+
+    setImgForm({ images: [...imgForm.images, ...newItems] });
   };
 
   const handleRemovePreview = (index: number) => {
-    const newImages = imgForm.images.filter((_, i) => i !== index);
-    setImgForm({ images: newImages });
+    const target = imgForm.images[index];
+    if (target) URL.revokeObjectURL(target.preview);
+    setImgForm({ images: imgForm.images.filter((_, i) => i !== index) });
   };
+
+  useEffect(() => {
+    return () => {
+      imgForm.images.forEach((it) => URL.revokeObjectURL(it.preview));
+    };
+  }, []);
 
   return (
     <div className="mx-[20px] mt-[69px] flex flex-col gap-y-[11px] min-h-screen">
@@ -97,7 +121,7 @@ const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           {imgForm.images.map((img, idx) => (
             <div key={idx} className="relative">
               <img
-                src={img.image_url}
+                src={img.preview}
                 alt={`preview-${idx}`}
                 className="w-full h-[100px] object-contain"
               />

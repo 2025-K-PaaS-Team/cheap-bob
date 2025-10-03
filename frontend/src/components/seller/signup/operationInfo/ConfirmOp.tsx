@@ -1,10 +1,11 @@
 import { CommonBtn } from "@components/common";
 import type { SellerSignupProps } from "@interface";
-import { registerStore } from "@services";
-import { useSignupStore } from "@store";
+import { registerStore, registerStoreImg } from "@services";
+import { useSignupImageStore, useSignupStore } from "@store";
 
 const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const { form } = useSignupStore();
+  const { form: imgForm } = useSignupImageStore();
   const shopTimes = [
     {
       label: "오픈",
@@ -24,19 +25,29 @@ const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     },
   ];
 
-  const handleCreateStore = async () => {
+  const handleRegisterStore = async () => {
     try {
       const res = await registerStore(form);
       console.log("등록 성공:", res);
-
-      setPageIdx(pageIdx + 1);
     } catch (err: unknown) {
       console.error("등록 실패:", err);
     }
   };
 
+  const handleRegisterStoreImg = async () => {
+    try {
+      const files = imgForm.images.map((it) => it.file);
+      const res = await registerStoreImg(files);
+      console.log("이미지 업로드 성공:", res);
+    } catch (err: any) {
+      console.error("이미지 업로드 실패:", err);
+    }
+  };
+
   const handleClickNext = () => {
-    handleCreateStore();
+    handleRegisterStore();
+    handleRegisterStoreImg();
+    setPageIdx(pageIdx + 1);
   };
 
   const handleClickPrev = () => {
