@@ -1,7 +1,7 @@
 import { CommonBtn } from "@components/common";
 import type { SellerSignupProps } from "@interface";
 
-const ConfirmSetting = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+const ConfirmStore = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const handleClickNext = () => {
     setPageIdx(pageIdx + 1);
   };
@@ -36,4 +36,4 @@ const ConfirmSetting = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   );
 };
 
-export default ConfirmSetting;
+export default ConfirmStore;

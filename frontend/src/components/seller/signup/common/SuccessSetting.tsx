@@ -1,9 +1,15 @@
 import { CommonBtn } from "@components/common";
 import type { SellerSignupProps } from "@interface";
+import { useNavigate } from "react-router";
 
 const SuccessSetting = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+  const navigate = useNavigate();
   const handleClickNext = () => {
-    setPageIdx(pageIdx + 1);
+    if (pageIdx < 11) {
+      setPageIdx(pageIdx + 1);
+    } else {
+      navigate("/s/dashboard");
+    }
   };
 
   const label = (pageIdx: number): string => {

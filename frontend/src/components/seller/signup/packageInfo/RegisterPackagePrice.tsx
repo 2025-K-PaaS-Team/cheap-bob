@@ -89,7 +89,9 @@ const RegisterPackagePrice = ({
       {/* sale price */}
       <div className="flex flex-row justify-between items-center mt-[34px]">
         <div className="font-bold text-[14px]">패키지 판매가</div>
-        <div className="font-bold text-[20px]">(원가*할인율)</div>
+        <div className="font-bold text-[20px]">
+          {pkg.price * pkg.sale * 0.01} 원
+        </div>
       </div>
 
       <CommonBtn

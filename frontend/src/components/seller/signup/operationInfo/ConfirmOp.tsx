@@ -55,11 +55,12 @@ const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     try {
       await handleRegisterStore();
       await handleRegisterStoreImg();
-      setPageIdx(pageIdx + 1);
+      // setPageIdx(pageIdx + 1);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     }
+    setPageIdx(pageIdx + 1);
   };
 
   const handleClickPrev = () => {
