@@ -1,10 +1,11 @@
-import { sellerStoreApi } from "@services/client";
+import { sellerStoreApi, sellerStoreProfileApi } from "@services/client";
 
 import type {
   SignupImageResponseType,
   SignupRequestType,
   SignupResponseType,
   StoreDetailType,
+  UpdateStoreType,
 } from "@interface";
 
 // POST: register store
@@ -39,6 +40,15 @@ export const registerStoreImg = async (
 // GET: get store detail
 export const GetStoreDetail = async (): Promise<StoreDetailType> => {
   const { data } = await sellerStoreApi.get("");
+
+  return data;
+};
+
+// PUT: update store name
+export const UpdateStoreName = async (
+  store_name: string
+): Promise<UpdateStoreType> => {
+  const { data } = await sellerStoreProfileApi.put("/name", { store_name });
 
   return data;
 };

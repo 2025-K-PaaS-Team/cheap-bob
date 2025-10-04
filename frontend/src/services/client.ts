@@ -30,6 +30,14 @@ export const sellerStoreApi = attachInterceptors(
   })
 );
 
+export const sellerStoreProfileApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/store/profile`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
 export const sellerProductApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store/products`,

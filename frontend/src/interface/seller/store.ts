@@ -29,3 +29,8 @@ export type StoreDetailType = StoreInfoType & {
   images: ImageInfoType[];
   products: ProductResponseType[];
 };
+
+// update store name, introduction, phone
+export type UpdateStoreType = StoreInfoType & {
+  store_id: string;
+};
