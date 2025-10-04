@@ -1,10 +1,16 @@
-import { sellerStoreApi, sellerStoreProfileApi } from "@services/client";
+import {
+  sellerStoreApi,
+  sellerStoreProfileApi,
+  sellerStoreSnsApi,
+} from "@services/client";
 
 import type {
   SignupImageResponseType,
   SignupRequestType,
   SignupResponseType,
+  SnsInfoType,
   StoreDetailType,
+  UpdateStoreSnsType,
   UpdateStoreType,
 } from "@interface";
 
@@ -71,6 +77,15 @@ export const UpdateStorePhone = async (
   const { data } = await sellerStoreProfileApi.put("/phone", {
     store_phone,
   });
+
+  return data;
+};
+
+// PUT: update store sns
+export const UpdateStoreSns = async (
+  sns: SnsInfoType
+): Promise<UpdateStoreSnsType> => {
+  const { data } = await sellerStoreSnsApi.put("", sns);
 
   return data;
 };

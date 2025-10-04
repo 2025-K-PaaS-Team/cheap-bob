@@ -62,3 +62,15 @@ export const validateUrl = (raw?: string) => {
     return false;
   }
 };
+
+export const normalizeUrl = (raw?: string): string | undefined => {
+  const s = (raw ?? "").trim();
+  if (!s) return undefined;
+  const withScheme = /^https?:\/\//i.test(s) ? s : `https://${s}`;
+  try {
+    new URL(withScheme);
+    return withScheme;
+  } catch {
+    return undefined;
+  }
+};

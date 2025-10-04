@@ -1,25 +1,18 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import type { SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
-import { validatePattern, validationRules, validateUrl } from "@utils";
+import {
+  validatePattern,
+  validationRules,
+  validateUrl,
+  normalizeUrl,
+} from "@utils";
 import { useState } from "react";
 
 const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const { form, setForm } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
-
-  const normalizeUrl = (raw?: string): string | undefined => {
-    const s = (raw ?? "").trim();
-    if (!s) return undefined;
-    const withScheme = /^https?:\/\//i.test(s) ? s : `https://${s}`;
-    try {
-      new URL(withScheme);
-      return withScheme;
-    } catch {
-      return undefined;
-    }
-  };
 
   const handleClickNext = () => {
     const { storePhone } = validationRules;
