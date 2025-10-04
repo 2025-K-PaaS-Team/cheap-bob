@@ -14,6 +14,7 @@ import type {
   SignupResponseType,
   SnsInfoType,
   StoreDetailType,
+  StoreOperationType,
   UpdateStoreAddrType,
   UpdateStoreImgType,
   UpdateStoreSnsType,
@@ -139,6 +140,13 @@ export const ChangeStoreMainImg = async (
   image_id: string
 ): Promise<ImageInfoType> => {
   const { data } = await sellerStoreImgApi.put(`/${image_id}`);
+
+  return data;
+};
+
+// GET: get store operation
+export const GetStoreOperation = async (): Promise<StoreOperationType> => {
+  const { data } = await sellerStoreSettingsApi.get("/operation");
 
   return data;
 };

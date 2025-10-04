@@ -51,3 +51,6 @@ export type UpdateStoreImgType = {
   images: ImageInfoType[];
   total: number;
 };
+
+// get store operation
+export type StoreOperationType = OperationTimeType[];

@@ -1,19 +1,11 @@
 import { CommonBtn } from "@components/common";
+import { daysOfWeek } from "@constant";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
 const ChangeOperationTime = () => {
   const [opDay, setOpDay] = useState<number[]>([]);
   const navigate = useNavigate();
-  const daysOfWeek = [
-    { label: "월", idx: 0 },
-    { label: "화", idx: 1 },
-    { label: "수", idx: 2 },
-    { label: "목", idx: 3 },
-    { label: "금", idx: 4 },
-    { label: "토", idx: 5 },
-    { label: "일", idx: 6 },
-  ];
 
   const handleClickDays = (idx: number) => {
     setOpDay((prev) =>

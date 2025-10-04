@@ -4,3 +4,4 @@ export * from "./home";
 export * from "./signup";
 export * from "./layout";
 export * from "./sellerSignup";
+export * from "./time";
