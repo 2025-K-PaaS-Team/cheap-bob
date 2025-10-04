@@ -24,3 +24,17 @@ export type ProductResponseType = ProductRequestType & {
   current_stock: number;
   version: number;
 };
+
+export type DashboardBaseType = {
+  product_id: string;
+  product_name: string;
+  current_stock: number;
+  initial_stock: number;
+  purchased_stock: number;
+  adjustment_stock: number;
+};
+
+export type DashboardResponseType = {
+  items: DashboardBaseType[];
+  total_items: number;
+};

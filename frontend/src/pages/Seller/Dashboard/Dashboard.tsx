@@ -4,16 +4,21 @@ import {
   RemainPkg,
   StoreManage,
 } from "@components/seller/dashboard";
-import type { StoreDetailType } from "@interface";
+import type { DashboardResponseType, StoreDetailType } from "@interface";
 import { GetStoreDetail } from "@services";
+import { GetDashboard } from "@services/seller/order";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
 
 const Dashboard = () => {
   const [data, setData] = useState<StoreDetailType | null>(null);
+  const [remainPkg, setRemainPkg] = useState<DashboardResponseType | null>(
+    null
+  );
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
-  const repProduct = (data?.products ?? [])
+  // 가게 별 패키지 1개 제한 수정 후 제거 필요
+  const repPkg = (remainPkg?.items ?? [])
     .slice()
     .sort((a, b) => a.product_id.localeCompare(b.product_id))[0];
 
@@ -27,8 +32,19 @@ const Dashboard = () => {
     }
   };
 
+  const handleGetDashboard = async () => {
+    try {
+      const res = await GetDashboard();
+      setRemainPkg(res);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
+  };
+
   useEffect(() => {
     handleGetStore();
+    handleGetDashboard();
   }, []);
 
   if (!data) {
@@ -41,10 +57,10 @@ const Dashboard = () => {
 
       {/* remaining package quantity */}
       <RemainPkg
-        product={repProduct ?? []}
+        remainPkg={repPkg ?? []}
         setShowModal={setShowModal}
         setModalMsg={setModalMsg}
-        onChanged={handleGetStore}
+        onChanged={handleGetDashboard}
       />
 
       {/* border */}
