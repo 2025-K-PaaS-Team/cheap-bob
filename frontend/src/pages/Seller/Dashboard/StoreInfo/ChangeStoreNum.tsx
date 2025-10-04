@@ -1,12 +1,36 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
+import { UpdateStorePhone } from "@services";
+import { formatErrMsg, validatePattern } from "@utils";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
 const ChangeStoreNum = () => {
   const [value, setValue] = useState<string>("");
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+
+  const handleUpdateStoreDesc = async (storePhone: string) => {
+    const validMsg = "01012345678 형식으로 입력해 주세요.";
+    const validPattern = /^0\d{1,2}\d{3,4}\d{4}$/;
+
+    if (!validatePattern(value, validPattern)) {
+      setModalMsg(validMsg);
+      setShowModal(true);
+      return;
+    }
+
+    try {
+      await UpdateStorePhone(storePhone);
+      navigate(-1);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
+  };
+
   const handleSubmit = () => {
-    navigate(-1);
+    handleUpdateStoreDesc(value);
   };
 
   return (
@@ -60,12 +84,18 @@ const ChangeStoreNum = () => {
         </div>
       </div>
 
-      {/* 다음 */}
-      <CommonBtn
-        label="다음"
-        onClick={handleSubmit}
-        className="bg-black text-white"
-      />
+      {/* save */}
+      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };

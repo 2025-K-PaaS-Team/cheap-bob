@@ -14,7 +14,7 @@ export const validationRules = {
   },
   storePhone: {
     pattern: /^0\d{1,2}\d{3,4}\d{4}$/,
-    errorMessage: "01012345678 형식으로 입력해 주세요..",
+    errorMessage: "01012345678 형식으로 입력해 주세요.",
   },
   packageName: {
     minLength: 1,
