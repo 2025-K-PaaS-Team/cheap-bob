@@ -60,7 +60,7 @@ const Dashboard = () => {
   return (
     <div className="flex w-full flex-col">
       {/* now operating status */}
-      <NowOpStatus />
+      <NowOpStatus ops={data.operation_times} />
 
       {/* remaining package quantity */}
       <RemainPkg
