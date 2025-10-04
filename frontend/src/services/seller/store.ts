@@ -8,7 +8,9 @@ import {
 
 import type {
   AddressInfoType,
+  ChangeStoreOperationType,
   ImageInfoType,
+  OperationReservationType,
   SignupImageResponseType,
   SignupRequestType,
   SignupResponseType,
@@ -147,6 +149,18 @@ export const ChangeStoreMainImg = async (
 // GET: get store operation
 export const GetStoreOperation = async (): Promise<StoreOperationType> => {
   const { data } = await sellerStoreSettingsApi.get("/operation");
+
+  return data;
+};
+
+// POST: create operation reservation
+export const CreateOperationReservation = async (
+  res: ChangeStoreOperationType
+): Promise<OperationReservationType> => {
+  const { data } = await sellerStoreSettingsApi.post(
+    "/operation/reservation",
+    res
+  );
 
   return data;
 };

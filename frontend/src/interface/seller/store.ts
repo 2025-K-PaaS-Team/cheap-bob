@@ -54,3 +54,25 @@ export type UpdateStoreImgType = {
 
 // get store operation
 export type StoreOperationType = OperationTimeType[];
+
+// change operation time
+export type ChangeStoreOperationType = {
+  operation_times: StoreOperationType;
+};
+
+// get operation reservation
+export type OperationReservationBaseType = {
+  modification_id: number;
+  operation_id: number;
+  day_of_week: number;
+  new_open_time: TimeStamp;
+  new_close_time: TimeStamp;
+  new_pickup_start_time: TimeStamp;
+  new_pickup_end_time: TimeStamp;
+  new_is_open_enabled: boolean;
+  created_at: TimeStamp;
+};
+
+export type OperationReservationType = {
+  modifications: OperationReservationBaseType[];
+};
