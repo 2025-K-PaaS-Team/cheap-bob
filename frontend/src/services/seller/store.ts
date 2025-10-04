@@ -107,7 +107,9 @@ export const UpdateStoreAddr = async (
 
 // GET: get store images
 export const GetStoreImg = async (): Promise<UpdateStoreImgType> => {
-  const { data } = await sellerStoreImgApi.get("");
+  const { data } = await sellerStoreImgApi.get("", {
+    headers: { "Cache-Control": "no-cache" },
+  });
 
   return data;
 };
