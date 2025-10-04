@@ -24,7 +24,8 @@ router = APIRouter(prefix="/store/products", tags=["Seller-Product"])
 @router.post("/register", response_model=ProductResponse, status_code=status.HTTP_201_CREATED,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"],
-        404:"등록된 가게를 찾을 수 없음"
+        404:"등록된 가게를 찾을 수 없음",
+        409:"이미 상품을 등록함" # MVP 제한
     })  
 )
 async def create_product(
@@ -40,6 +41,14 @@ async def create_product(
     seller_email = current_user["sub"]
     
     store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    # MVP 제한
+    exist_product = await product_repo.get_by_store_id(store_id)
+    if exist_product:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="이미 상품이 등록 되어있습니다."
+        )
     
     product_id = generate_product_id()
     
