@@ -3,16 +3,15 @@ import type {
   DashboardResponseType,
   GetQrCodeType,
   GetStoreOrderType,
+  OrderResponseType,
   UpdateOrderAcceptType,
 } from "@interface";
 import type { CancelOrderRequestType } from "@interface/common/types";
 import { sellerOrderApi } from "@services/client";
 
 // GET: get store orders
-export const getStoreOrder = async (
-  storeId: string
-): Promise<GetStoreOrderType> => {
-  const { data } = await sellerOrderApi.get(`/${storeId}`);
+export const getStoreOrder = async (): Promise<OrderResponseType> => {
+  const { data } = await sellerOrderApi.get("");
 
   return data;
 };
