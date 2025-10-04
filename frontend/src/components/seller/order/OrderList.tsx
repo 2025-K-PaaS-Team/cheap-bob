@@ -1,22 +1,26 @@
 import { CommonBtn } from "@components/common";
+import CommonQR from "@components/common/CommonQR";
 import type { OrderBaseType } from "@interface";
+import { useState } from "react";
 
 interface OrderListProps {
   orders: OrderBaseType[];
 }
 
 const OrderList = ({ orders }: OrderListProps) => {
+  const [openQr, setOpenQr] = useState<boolean>(false);
+
   const handleClickCancel = () => {
     console.log("click cancel button");
   };
 
   const handleClickConfirm = () => {
-    console.log("click confrim button");
+    setOpenQr(true);
   };
 
   return (
     <div className="flex flex-col mx-[16px] gap-y-[16px]">
-      {!orders && (
+      {orders.length == 0 && (
         <div className="flex flex-col bg-[#d9d9d9] rounded-[8px] py-[22px] px-[15px] gap-y-[16px]">
           {/* first row */}
           <div className="flex flex-row justify-between items-center">
@@ -56,6 +60,10 @@ const OrderList = ({ orders }: OrderListProps) => {
           </div>
         </div>
       )}
+
+      <div className="">
+        {openQr && <CommonQR onClick={() => setOpenQr(false)} />}
+      </div>
     </div>
   );
 };
