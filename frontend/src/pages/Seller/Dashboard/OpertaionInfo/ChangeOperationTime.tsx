@@ -163,7 +163,7 @@ const ChangeOperationTime = () => {
       </div>
 
       {/* 저장 */}
-      <CommonBtn label="저장" onClick={handleSubmit} className="black" />
+      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
 
       {/* 모달 */}
       {showModal && (

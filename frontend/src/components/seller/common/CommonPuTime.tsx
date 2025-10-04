@@ -1,3 +1,4 @@
+import { idxToDow } from "@constant";
 import type { Offset, OperationTimeType } from "@interface";
 import { useEffect, useMemo } from "react";
 
@@ -9,16 +10,6 @@ interface PuTimeProps {
   pickupDiscardOffset: Offset;
   setPickupDiscardOffset: (hour: number, min: number) => void;
 }
-
-const dayLabel: Record<number, string> = {
-  0: "월",
-  1: "화",
-  2: "수",
-  3: "목",
-  4: "금",
-  5: "토",
-  6: "일",
-};
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
 const toHM = (t?: string) => {
@@ -54,7 +45,7 @@ const CommonPuTime = ({
     return form.find((f) => f.day_of_week === minIdx);
   }, [form]);
   const baseLabel = firstOpenDay
-    ? dayLabel[firstOpenDay.day_of_week]
+    ? idxToDow[firstOpenDay.day_of_week]
     : "운영일";
 
   // 오프셋/close_time 변경 시 계산값 반영 (무한루프 방지: 실제 변경시에만 setForm)
@@ -108,7 +99,7 @@ const CommonPuTime = ({
   return (
     <>
       {/* 픽업 시작 기준 (전부터) */}
-      <div className="text-[14px] font-bold">픽업 시작 기준</div>
+      <div className="text-[14px] font-bold">픽업 시작</div>
       <div className="text-[14px]">
         마감 세일을 시작할 시간을 입력해 주세요.
       </div>
@@ -153,13 +144,8 @@ const CommonPuTime = ({
       </div>
 
       {/* 픽업 마감(폐기) 기준 (전부터 / 이후 폐기) */}
-      <div className="text-[14px] font-bold mt-[40px]">
-        픽업 마감(폐기) 기준
-      </div>
-      <div className="text-[14px]">
-        이 시각 <b>전부터</b> 픽업 가능하며, <b>이후</b> 미픽업 패키지는
-        폐기됩니다.
-      </div>
+      <div className="text-[14px] font-bold mt-[40px]">픽업 마감 시간</div>
+      <div className="text-[14px]">픽업을 마감할 시간을 입력해 주세요.</div>
       <div className="text-center w-full justify-center">
         <div className="flex flex-row text-[20px] justify-center items-center gap-x-[10px]">
           <input
