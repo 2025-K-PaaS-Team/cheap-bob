@@ -1,47 +1,96 @@
-import { CommonBtn } from "@components/common";
-import { useState } from "react";
+import { CommonBtn, CommonModal } from "@components/common";
+import { CommonPkgNum } from "@components/seller/common";
+import type { ProductRequestType } from "@interface";
+import { GetProduct, UpdateProduct } from "@services";
+import { useDashboardStore } from "@store";
+import { formatErrMsg } from "@utils";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 const ChangePackageNum = () => {
-  const [value, setValue] = useState<number>(0);
+  const repProductId = useDashboardStore((s) => s.repProductId);
+  const [pkg, setPkg] = useState<ProductRequestType | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMsg, setModalMsg] = useState("");
+
   const navigate = useNavigate();
-  const handleSubmit = () => {
-    navigate(-1);
+
+  const load = async (id: string) => {
+    try {
+      const res = await GetProduct(id);
+      setPkg(res);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (!repProductId) {
+      setModalMsg("대표 패키지 ID를 찾을 수 없습니다.");
+      setShowModal(true);
+      setLoading(false);
+      return;
+    }
+    load(repProductId);
+  }, [repProductId]);
+
+  const handleSubmit = async () => {
+    if (!repProductId) {
+      setModalMsg("대표 패키지 ID를 찾을 수 없습니다.");
+      setShowModal(true);
+      setLoading(false);
+      return;
+    }
+    if (!pkg) {
+      setModalMsg("패키지 정보를 불러오지 못했습니다.");
+      setShowModal(true);
+      return;
+    }
+    const payload: ProductRequestType = {
+      ...pkg,
+      initial_stock: pkg?.initial_stock,
+    };
+
+    try {
+      await UpdateProduct(repProductId, payload);
+      navigate(-1);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
+  };
+
+  if (loading) return <div className="mt-[80px] px-[20px]">로딩중…</div>;
 
   return (
     <div className="mt-[80px] px-[20px] w-full">
-      {/* question */}
-      <div className="text-[24px]">하루에 몇 개 판매할까요?</div>
-      <div className="text-[14px] font-bold mt-[31px]">패키지 판매 기본값</div>
-      <div className="text-[14px] mt-[10px]">
-        하루에 판매할 것으로 예상되는 재고 개수를 입력해 주세요. 평균적으로 n개
-        판매해요.
-      </div>
-      <div className="flex flex-row items-center justify-center gap-x-[10px] mt-[10px]">
-        <div className="text-[24px]">{value}</div>
-        <div className="flex flex-col text-[10px]">
-          <div onClick={() => setValue((prev) => prev + 1)}>▲</div>
-          <div onClick={() => setValue((prev) => prev - 1)}>▼</div>
-        </div>
-        <div className="text-[20px]">개 판매할게요.</div>
-      </div>
-
-      {/* notice */}
-      <div className="text-[14px] absolute bottom-30 w-[350px] left-1/2 -translate-x-1/2 bg-[#d9d9d9] rounded-[8px] h-[88px] px-[10px] flex flex-col flex justify-center">
-        <div className="font-bold">Tip</div>
-        <div>
-          설정한 기본값보다 판매할 재고가 남거나 부족해도 <br /> ‘일일
-          조정값’으로 매일 조정할 수 있어요.
-        </div>
-      </div>
+      {pkg && (
+        <CommonPkgNum
+          pkg={pkg}
+          setPkg={(next) =>
+            setPkg((prev) =>
+              typeof next === "function" ? (next as any)(prev) : next
+            )
+          }
+        />
+      )}
 
       {/* save */}
-      <CommonBtn
-        label="저장"
-        onClick={handleSubmit}
-        className="bg-black text-white"
-      />
+      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };
