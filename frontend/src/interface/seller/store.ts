@@ -44,3 +44,10 @@ export type UpdateStoreSnsType = SnsInfoType & {
 export type UpdateStoreAddrType = AddressInfoType & {
   store_id: string;
 };
+
+// get store images
+export type UpdateStoreImgType = {
+  store_id: string;
+  images: ImageInfoType[];
+  total: number;
+};

@@ -2,7 +2,7 @@ import { CommonBtn, CommonModal } from "@components/common";
 import type { SnsInfoType } from "@interface";
 import { UpdateStorePhone, UpdateStoreSns } from "@services";
 import { formatErrMsg, normalizeUrl, validatePattern } from "@utils";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 
 const ChangeStoreNum = () => {
@@ -11,10 +11,6 @@ const ChangeStoreNum = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
-
-  useEffect(() => {
-    console.log(sns);
-  }, [sns]);
 
   const handleUpdateStoreDesc = async (storePhone: string) => {
     const validMsg = "01012345678 형식으로 입력해 주세요.";

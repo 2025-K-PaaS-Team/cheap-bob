@@ -1,14 +1,30 @@
-import { CommonBtn } from "@components/common";
-import React, { useRef, useState } from "react";
+import { CommonBtn, CommonModal } from "@components/common";
+import type { ImageInfoType } from "@interface";
+import { GetStoreImg } from "@services";
+import { formatErrMsg } from "@utils";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 const ChangeStoreImg = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const [previews, setPreviews] = useState<string[]>([]);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+  const [imgs, setImgs] = useState<ImageInfoType[]>([]);
 
   const handleSubmit = () => {
     navigate(-1);
+  };
+
+  const handleGetStoreImg = async () => {
+    try {
+      const res = await GetStoreImg();
+      setImgs(res.images);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
   };
 
   const handleClickUpload = () => {
@@ -27,6 +43,10 @@ const ChangeStoreImg = () => {
   const handleRemovePreview = (index: number) => {
     setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
+
+  useEffect(() => {
+    handleGetStoreImg();
+  }, []);
 
   return (
     <div className="mt-[80px] px-[20px] w-full">
@@ -55,8 +75,11 @@ const ChangeStoreImg = () => {
       />
 
       {/* preview */}
-      {previews.length > 0 && (
+      {(previews.length > 0 || imgs.length > 0) && (
         <div className="grid grid-cols-4 gap-2 mt-[29px]">
+          {imgs.map((img, idx) => (
+            <img key={idx} src={img.image_url} />
+          ))}
           {previews.map((src, idx) => (
             <div key={idx} className="relative">
               <img
@@ -76,12 +99,18 @@ const ChangeStoreImg = () => {
         </div>
       )}
 
-      {/* 다음 */}
-      <CommonBtn
-        label="다음"
-        onClick={handleSubmit}
-        className="bg-black text-white"
-      />
+      {/* save */}
+      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };

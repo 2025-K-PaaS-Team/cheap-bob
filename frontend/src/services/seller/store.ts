@@ -1,5 +1,6 @@
 import {
   sellerStoreApi,
+  sellerStoreImgApi,
   sellerStoreProfileApi,
   sellerStoreSettingsApi,
   sellerStoreSnsApi,
@@ -7,12 +8,14 @@ import {
 
 import type {
   AddressInfoType,
+  ImageInfoType,
   SignupImageResponseType,
   SignupRequestType,
   SignupResponseType,
   SnsInfoType,
   StoreDetailType,
   UpdateStoreAddrType,
+  UpdateStoreImgType,
   UpdateStoreSnsType,
   UpdateStoreType,
 } from "@interface";
@@ -98,6 +101,42 @@ export const UpdateStoreAddr = async (
   addr: AddressInfoType
 ): Promise<UpdateStoreAddrType> => {
   const { data } = await sellerStoreSettingsApi.put("/address", addr);
+
+  return data;
+};
+
+// GET: get store images
+export const GetStoreImg = async (): Promise<UpdateStoreImgType> => {
+  const { data } = await sellerStoreImgApi.get("");
+
+  return data;
+};
+
+// POST: add store images
+export const AddStoreImg = async (
+  files: File[]
+): Promise<UpdateStoreImgType> => {
+  const fd = new FormData();
+  files.forEach((f) => fd.append("files", f));
+
+  const { data } = await sellerStoreImgApi.post<UpdateStoreImgType>("", fd, {
+    headers: { "Content-Type": undefined as any },
+  });
+  return data;
+};
+
+// DELETE: delete store image
+export const DeleteStoreImg = async (image_id: string) => {
+  const { data } = await sellerStoreImgApi.delete(`/${image_id}`);
+
+  return data;
+};
+
+// PUT: change main image
+export const ChangeStoreMainImg = async (
+  image_id: string
+): Promise<ImageInfoType> => {
+  const { data } = await sellerStoreImgApi.put(`/${image_id}`);
 
   return data;
 };
