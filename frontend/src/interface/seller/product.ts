@@ -1,17 +1,11 @@
+import type { NutritionBase } from "./base";
+
 export type ProductBase = {
   product_name: string;
   description: string;
   price: number;
   sale: number;
 };
-
-export type NutritionBase =
-  | "diet"
-  | "LCHF"
-  | "protein"
-  | "LSLS"
-  | "balance"
-  | "vegetarian";
 
 export type ProductRequestType = ProductBase & {
   initial_stock: number;
@@ -37,4 +31,9 @@ export type DashboardBaseType = {
 export type DashboardResponseType = {
   items: DashboardBaseType[];
   total_items: number;
+};
+
+// get nutrition
+export type NutritionType = {
+  nutrition_types: NutritionBase[];
 };

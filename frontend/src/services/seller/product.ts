@@ -74,3 +74,25 @@ export const UpdateProduct = async (
 
   return data;
 };
+
+// POST: add product nutrition
+export const AddPkgNutrition = async (
+  product_id: string,
+  types: string[]
+): Promise<ProductResponseType> => {
+  const { data } = await sellerProductApi.post(`/${product_id}/nutrition`, {
+    nutrition_types: types,
+  });
+  return data;
+};
+
+// DELETE: delete product nutrition
+export const DeletePkgNutrition = async (
+  product_id: string,
+  types: string[]
+): Promise<ProductResponseType> => {
+  const { data } = await sellerProductApi.delete(`/${product_id}/nutrition`, {
+    data: { nutrition_types: types },
+  });
+  return data;
+};
