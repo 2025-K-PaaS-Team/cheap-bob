@@ -61,11 +61,7 @@ const BillingChange = () => {
       </>
 
       {/* save */}
-      <CommonBtn
-        label="저장"
-        onClick={() => hanldeSubmit()}
-        className="bg-black text-white"
-      />
+      <CommonBtn label="저장" onClick={() => hanldeSubmit()} category="black" />
     </div>
   );
 };

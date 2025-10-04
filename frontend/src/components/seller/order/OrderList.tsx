@@ -36,14 +36,14 @@ const OrderList = () => {
             label="주문 취소"
             onClick={() => handleClickCancel()}
             notBottom
-            className="bg-transparent"
+            category="transparent"
             width="w-1/3"
           />
           <CommonBtn
             label="픽업 확정하기"
             onClick={() => handleClickConfirm()}
             notBottom
-            className="bg-black text-white"
+            category="black"
             width="w-2/3"
           />
         </div>
