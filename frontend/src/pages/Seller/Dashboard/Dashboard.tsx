@@ -7,6 +7,7 @@ import {
 import type { DashboardResponseType, StoreDetailType } from "@interface";
 import { GetStoreDetail } from "@services";
 import { GetDashboard } from "@services/seller/order";
+import { useDashboardStore } from "@store";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
 
@@ -21,6 +22,7 @@ const Dashboard = () => {
   const repPkg = (remainPkg?.items ?? [])
     .slice()
     .sort((a, b) => a.product_id.localeCompare(b.product_id))[0];
+  const setRepProductId = useDashboardStore((s) => s.setRepProductId);
 
   const handleGetStore = async () => {
     try {
@@ -46,6 +48,11 @@ const Dashboard = () => {
     handleGetStore();
     handleGetDashboard();
   }, []);
+
+  useEffect(() => {
+    if (repPkg?.product_id) setRepProductId(repPkg.product_id);
+    else setRepProductId(null);
+  }, [repPkg?.product_id, setRepProductId]);
 
   if (!data) {
     return <div>로딩중...</div>;

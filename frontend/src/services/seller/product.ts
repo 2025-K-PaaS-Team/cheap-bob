@@ -55,3 +55,22 @@ export const DecreaseProductStock = async (
 
   return data;
 };
+
+// GET: get product
+export const GetProduct = async (
+  product_id: string
+): Promise<ProductResponseType> => {
+  const { data } = await sellerProductApi.get(`/${product_id}`);
+
+  return data;
+};
+
+// PUT: update product
+export const UpdateProduct = async (
+  product_id: string,
+  product: ProductBase
+): Promise<ProductResponseType> => {
+  const { data } = await sellerProductApi.put(`/${product_id}`, { product });
+
+  return data;
+};

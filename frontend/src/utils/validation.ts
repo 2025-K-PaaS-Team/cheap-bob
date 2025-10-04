@@ -18,7 +18,7 @@ export const validationRules = {
   },
   packageName: {
     minLength: 1,
-    maxLength: 7,
+    maxLength: 15,
     errorMessage: "패키지 이름은 1~15자여야 합니다.",
   },
   packageDesc: {
