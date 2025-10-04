@@ -14,11 +14,11 @@ export const validationRules = {
   },
   storePhone: {
     pattern: /^0\d{1,2}\d{3,4}\d{4}$/,
-    errorMessage: "01012345678 형식으로 입력해 주세요..",
+    errorMessage: "01012345678 형식으로 입력해 주세요.",
   },
   packageName: {
     minLength: 1,
-    maxLength: 7,
+    maxLength: 15,
     errorMessage: "패키지 이름은 1~15자여야 합니다.",
   },
   packageDesc: {
@@ -60,5 +60,17 @@ export const validateUrl = (raw?: string) => {
     return true;
   } catch {
     return false;
+  }
+};
+
+export const normalizeUrl = (raw?: string): string | undefined => {
+  const s = (raw ?? "").trim();
+  if (!s) return undefined;
+  const withScheme = /^https?:\/\//i.test(s) ? s : `https://${s}`;
+  try {
+    new URL(withScheme);
+    return withScheme;
+  } catch {
+    return undefined;
   }
 };

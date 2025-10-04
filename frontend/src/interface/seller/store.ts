@@ -29,3 +29,50 @@ export type StoreDetailType = StoreInfoType & {
   images: ImageInfoType[];
   products: ProductResponseType[];
 };
+
+// update store name, introduction, phone
+export type UpdateStoreType = StoreInfoType & {
+  store_id: string;
+};
+
+// update store sns
+export type UpdateStoreSnsType = SnsInfoType & {
+  store_id: string;
+};
+
+// update store address
+export type UpdateStoreAddrType = AddressInfoType & {
+  store_id: string;
+};
+
+// get store images
+export type UpdateStoreImgType = {
+  store_id: string;
+  images: ImageInfoType[];
+  total: number;
+};
+
+// get store operation
+export type StoreOperationType = OperationTimeType[];
+
+// change operation time
+export type ChangeStoreOperationType = {
+  operation_times: StoreOperationType;
+};
+
+// get operation reservation
+export type OperationReservationBaseType = {
+  modification_id: number;
+  operation_id: number;
+  day_of_week: number;
+  new_open_time: TimeStamp;
+  new_close_time: TimeStamp;
+  new_pickup_start_time: TimeStamp;
+  new_pickup_end_time: TimeStamp;
+  new_is_open_enabled: boolean;
+  created_at: TimeStamp;
+};
+
+export type OperationReservationType = {
+  modifications: OperationReservationBaseType[];
+};

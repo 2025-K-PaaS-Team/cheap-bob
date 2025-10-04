@@ -1,12 +1,60 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
+import type { SnsInfoType } from "@interface";
+import { UpdateStorePhone, UpdateStoreSns } from "@services";
+import { formatErrMsg, normalizeUrl, validatePattern } from "@utils";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
 const ChangeStoreNum = () => {
   const [value, setValue] = useState<string>("");
+  const [sns, setSns] = useState<SnsInfoType>({});
   const navigate = useNavigate();
-  const handleSubmit = () => {
-    navigate(-1);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+
+  const handleUpdateStoreDesc = async (storePhone: string) => {
+    const validMsg = "01012345678 형식으로 입력해 주세요.";
+    const validPattern = /^0\d{1,2}\d{3,4}\d{4}$/;
+
+    if (!validatePattern(value, validPattern)) {
+      setModalMsg(validMsg);
+      setShowModal(true);
+      return;
+    }
+
+    try {
+      await UpdateStorePhone(storePhone);
+      return true;
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+      return false;
+    }
+  };
+
+  const handleUpdateStoreSns = async (sns: SnsInfoType) => {
+    try {
+      await UpdateStoreSns(sns);
+      return true;
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+      return false;
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const okDesc = await handleUpdateStoreDesc(value);
+      if (!okDesc) return;
+
+      const okSns = await handleUpdateStoreSns(sns);
+      if (!okSns) return;
+
+      navigate(-1);
+    } catch {
+      return;
+    }
   };
 
   return (
@@ -34,8 +82,16 @@ const ChangeStoreNum = () => {
           <div className="text-[14px] w-[97px] flex items-center">홈페이지</div>
           <input
             className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
+            value={sns?.homepage}
+            onChange={(e) =>
+              setSns((prev) => ({ ...prev, homepage: e.target.value }))
+            }
+            onBlur={(e) =>
+              setSns((prev) => ({
+                ...prev,
+                homepage: normalizeUrl(e.target.value),
+              }))
+            }
           />
         </div>
         <div className="flex flex-row">
@@ -44,8 +100,16 @@ const ChangeStoreNum = () => {
           </div>
           <input
             className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
+            value={sns?.instagram}
+            onChange={(e) =>
+              setSns((prev) => ({ ...prev, instagram: e.target.value }))
+            }
+            onBlur={(e) =>
+              setSns((prev) => ({
+                ...prev,
+                instagram: normalizeUrl(e.target.value),
+              }))
+            }
           />
         </div>
         <div className="flex flex-row">
@@ -54,18 +118,30 @@ const ChangeStoreNum = () => {
           </div>
           <input
             className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
+            value={sns?.x}
+            onChange={(e) => setSns((prev) => ({ ...prev, x: e.target.value }))}
+            onBlur={(e) =>
+              setSns((prev) => ({
+                ...prev,
+                x: normalizeUrl(e.target.value),
+              }))
+            }
           />
         </div>
       </div>
 
-      {/* 다음 */}
-      <CommonBtn
-        label="다음"
-        onClick={handleSubmit}
-        className="bg-black text-white"
-      />
+      {/* save */}
+      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };

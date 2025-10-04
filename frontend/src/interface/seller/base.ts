@@ -1,3 +1,5 @@
+import type { TimeStamp } from "@interface/common/types";
+
 export type StoreInfoType = {
   store_name: string;
   store_introduction: string;
@@ -42,4 +44,18 @@ export type ImageInfoType = {
   image_url: string;
   is_main: boolean;
   display_order: number;
+};
+
+export type NutritionBase =
+  | "diet"
+  | "LCHF"
+  | "protein"
+  | "LSLS"
+  | "balance"
+  | "vegetarian";
+
+export type NutritionInfoType = {
+  id: number;
+  nutrition_type: NutritionBase;
+  created_at: TimeStamp;
 };

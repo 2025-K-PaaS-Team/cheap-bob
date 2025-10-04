@@ -1,4 +1,4 @@
-import PortOneLab from "@components/Lab/PortoneLab";
+// import PortOneLab from "@components/Lab/PortoneLab";
 import type { StoreDetailType } from "@interface";
 import type { CoordBaseType } from "@interface/common/types";
 import { getSpecificStore } from "@services";
@@ -69,7 +69,7 @@ const StoreDetail = () => {
           </div>
 
           <div key={store.store_name} className="gap-y-5 flex flex-col">
-            {store.products.map((p, idx) => (
+            {/* {store.products.map((p, idx) => (
               <div
                 key={idx}
                 className="border-1 border-gray-400 shadow-md rounded-lg flex flex-col gap-y-2"
@@ -85,7 +85,7 @@ const StoreDetail = () => {
                 </div>
                 {storeId && <PortOneLab storeId={storeId} product={p} />}
               </div>
-            ))}
+            ))} */}
           </div>
         </div>
       )}

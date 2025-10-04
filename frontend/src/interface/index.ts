@@ -5,3 +5,5 @@ export * from "./common/layout";
 export * from "./seller/signup";
 export * from "./seller/product";
 export * from "./seller/base";
+export * from "./seller/store";
+export * from "./seller/order";

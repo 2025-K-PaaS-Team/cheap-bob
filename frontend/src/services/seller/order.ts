@@ -1,17 +1,17 @@
 import type {
   CancelOrderResponseType,
+  DashboardResponseType,
   GetQrCodeType,
   GetStoreOrderType,
+  OrderResponseType,
   UpdateOrderAcceptType,
 } from "@interface";
 import type { CancelOrderRequestType } from "@interface/common/types";
 import { sellerOrderApi } from "@services/client";
 
 // GET: get store orders
-export const getStoreOrder = async (
-  storeId: string
-): Promise<GetStoreOrderType> => {
-  const { data } = await sellerOrderApi.get(`/${storeId}`);
+export const getStoreOrder = async (): Promise<OrderResponseType> => {
+  const { data } = await sellerOrderApi.get("");
 
   return data;
 };
@@ -56,6 +56,13 @@ export const updatePickupReady = async (
 // GET: get order qr
 export const GetOrderQr = async (paymentId: string): Promise<GetQrCodeType> => {
   const { data } = await sellerOrderApi.get(`/${paymentId}/qr`);
+
+  return data;
+};
+
+// GET: get dashboard
+export const GetDashboard = async (): Promise<DashboardResponseType> => {
+  const { data } = await sellerOrderApi.get("/dashboard");
 
   return data;
 };

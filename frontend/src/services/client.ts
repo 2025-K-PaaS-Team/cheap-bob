@@ -30,6 +30,38 @@ export const sellerStoreApi = attachInterceptors(
   })
 );
 
+export const sellerStoreProfileApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/store/profile`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const sellerStoreSnsApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/store/sns`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const sellerStoreSettingsApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/store/settings`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const sellerStoreImgApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/store/images`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
 export const sellerProductApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store/products`,
@@ -40,7 +72,7 @@ export const sellerProductApi = attachInterceptors(
 
 export const sellerOrderApi = attachInterceptors(
   axios.create({
-    baseURL: `${BASE}/seller/orders`,
+    baseURL: `${BASE}/seller/store/orders`,
     withCredentials: false,
     headers: { "Content-Type": "application/json" },
   })

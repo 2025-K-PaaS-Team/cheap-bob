@@ -1,3 +1,4 @@
+import { daysOfWeek } from "@constant";
 import type { OperationTimeType } from "@interface";
 import { useMemo, useState } from "react";
 
@@ -8,16 +9,6 @@ interface OpProps {
 
 const CommonOpTime = ({ form, setForm }: OpProps) => {
   const [isBatch, setIsBatch] = useState(false);
-
-  const daysOfWeek = [
-    { label: "월", idx: 0 },
-    { label: "화", idx: 1 },
-    { label: "수", idx: 2 },
-    { label: "목", idx: 3 },
-    { label: "금", idx: 4 },
-    { label: "토", idx: 5 },
-    { label: "일", idx: 6 },
-  ];
 
   // 항상 0~6 정렬(스토어가 보장해도 표시용 정렬로 한 번 더)
   const sortedForm = useMemo(
