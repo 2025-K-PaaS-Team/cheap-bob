@@ -4,34 +4,9 @@ import { CommonOpTime } from "@components/seller/common";
 import type { StoreOperationType, OperationTimeType } from "@interface";
 import { GetStoreOperation } from "@services";
 import { CreateOperationReservation } from "@services";
+import { diffFromClose, fromMinutes, toMinutes } from "@utils";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-
-// ---------- 시간 유틸 ----------
-const toMinutes = (t?: string): number | null => {
-  if (!t) return null;
-  // 기대 포맷: "HH:MM:SS" or "HH:MM"
-  const [hh = "", mm = ""] = t.split(":");
-  const h = Number(hh);
-  const m = Number(mm);
-  if (Number.isNaN(h) || Number.isNaN(m)) return null;
-  return (((h * 60 + m) % 1440) + 1440) % 1440;
-};
-
-const fromMinutes = (mins: number): string => {
-  const m = ((mins % 1440) + 1440) % 1440;
-  const hh = String(Math.floor(m / 60)).padStart(2, "0");
-  const mm = String(m % 60).padStart(2, "0");
-  return `${hh}:${mm}:00`;
-};
-
-// close - pickup 간격(분). 입력 중 하나라도 없으면 null
-const diffFromClose = (close?: string, pickup?: string): number | null => {
-  const c = toMinutes(close);
-  const p = toMinutes(pickup);
-  if (c == null || p == null) return null;
-  return (c - p + 1440) % 1440; // 모듈러(자정 경계 안전)
-};
 
 const ChangeOperationTime = () => {
   const navigate = useNavigate();
@@ -122,12 +97,6 @@ const ChangeOperationTime = () => {
           nextPickupEnd = fromMinutes(newCloseMin - gaps.gapEnd);
         }
       }
-
-      // 휴무일 처리(선택): 휴무면 픽업 비우고 싶다면 아래 주석 해제
-      // if (!f.is_open_enabled) {
-      //   nextPickupStart = "";
-      //   nextPickupEnd = "";
-      // }
 
       return {
         ...d,

@@ -3,32 +3,9 @@ import { CommonPuTime } from "@components/seller/common";
 import type { OperationTimeType, StoreOperationType, Offset } from "@interface";
 import { GetStoreOperation } from "@services";
 import { CreateOperationReservation } from "@services";
+import { diffFromClose, minutesToOffset } from "@utils";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-
-// ---------- 시간 유틸 ----------
-const toMinutes = (t?: string): number | null => {
-  if (!t) return null;
-  const [hh = "", mm = ""] = t.split(":");
-  const h = Number(hh),
-    m = Number(mm);
-  if (Number.isNaN(h) || Number.isNaN(m)) return null;
-  return (((h * 60 + m) % 1440) + 1440) % 1440;
-};
-
-// close - pickup 간격(분). 입력 중 하나라도 없으면 null
-const diffFromClose = (close?: string, pickup?: string): number | null => {
-  const c = toMinutes(close);
-  const p = toMinutes(pickup);
-  if (c == null || p == null) return null;
-  return (c - p + 1440) % 1440;
-};
-// 분 → Offset
-const minutesToOffset = (mins: number | null): Offset => {
-  if (mins == null) return { hour: 0, min: 0 };
-  const m = ((mins % 1440) + 1440) % 1440;
-  return { hour: Math.floor(m / 60), min: m % 60 };
-};
 
 const ChangePickupTime = () => {
   const navigate = useNavigate();
