@@ -1,70 +1,101 @@
-import { CommonBtn } from "@components/common";
-import { useState } from "react";
+import { CommonBtn, CommonModal } from "@components/common";
+import { CommonPrice } from "@components/seller/common";
+import type { ProductBase } from "@interface";
+import { GetProduct, UpdateProduct } from "@services";
+import { useDashboardStore } from "@store";
+import { formatErrMsg } from "@utils";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 const ChangePackagePrice = () => {
-  const [value, setValue] = useState<string>("");
+  const repProductId = useDashboardStore((s) => s.repProductId); // string | null
+  const [product, setProduct] = useState<ProductBase | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const [showModal, setShowModal] = useState(false);
+  const [modalMsg, setModalMsg] = useState("");
   const navigate = useNavigate();
-  const handleSubmit = () => {
-    navigate(-1);
+
+  const load = async (productId: string) => {
+    try {
+      const res = await GetProduct(productId);
+      // 서버 응답이 ProductBase 형태라고 가정
+      setProduct(res as ProductBase);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    } finally {
+      setLoading(false);
+    }
   };
-  const discountRate = ["15", "30", "40", "50"];
+
+  useEffect(() => {
+    if (!repProductId) {
+      setModalMsg("패키지를 찾을 수 없습니다.");
+      setShowModal(true);
+      setLoading(false);
+      return;
+    }
+    load(repProductId);
+  }, [repProductId]);
+
+  const handleSubmit = async () => {
+    if (!repProductId) {
+      setModalMsg("대표 패키지 ID가 없습니다.");
+      setShowModal(true);
+      return;
+    }
+    if (!product) {
+      setModalMsg("패키지 정보를 불러오지 못했습니다.");
+      setShowModal(true);
+      return;
+    }
+
+    // (선택) 간단 검증
+    if (product.price < 0 || product.sale < 0 || product.sale > product.price) {
+      setModalMsg("가격/세일 값을 확인해 주세요.");
+      setShowModal(true);
+      return;
+    }
+
+    try {
+      await UpdateProduct(repProductId, {
+        ...product,
+        price: Math.floor(product.price),
+        sale: Math.floor(product.sale),
+      });
+      navigate(-1);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
+  };
+
+  if (loading) return <div className="mt-[80px] px-[20px]">로딩중…</div>;
 
   return (
     <div className="mt-[80px] px-[20px] w-full">
-      {/* question */}
-      <div className="text-[24px]">패키지를 얼마에 판매할까요?</div>
-      <div className="text-[14px] font-bold">패지키 원가</div>
-      <div className="text-[14px]">
-        패키지를 구성하는 제품의 원가를 입력해 주세요.
-      </div>
-
-      {/* input box */}
-      <input
-        className="w-full h-[56px] text-center bg-[#D9D9D9] text-[16px] mt-[16px] mb-[40px]"
-        placeholder="제품의 원가를 입력해 주세요"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-      />
-
-      {/* discount rate */}
-      <div className="text-[14px] font-bold">패지키 할인율</div>
-      <div className="text-[14px]">패키지를 얼마나 할인할까요?</div>
-
-      {/* input box */}
-      <div className="flex flex-row items-center justify-center gap-x-[10px] mt-[16px]">
-        <input
-          className="w-[204px] h-[56px] text-center bg-[#D9D9D9] text-[16px]"
-          placeholder="할인율을 입력해 주세요"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
+      {product && (
+        <CommonPrice
+          pkg={product}
+          setPkg={(next) =>
+            setProduct((prev) =>
+              typeof next === "function" ? (next as any)(prev) : next
+            )
+          }
         />
-        <span className="text-[18px]">%</span>
-      </div>
-      {/* input assistance btn */}
-      <div className="flex flex-row gap-x-[7px] mt-[11px] mb-[40px] justify-center">
-        {discountRate.map((discount) => (
-          <div className="w-[52px] h-[24px] flex items-center justify-center text-center text-[13px] bg-[#d9d9d9] text-[#666666] rounded-[50px]">
-            {discount}%
-          </div>
-        ))}
-      </div>
+      )}
 
-      {/* divider */}
-      <hr className="border-0 bg-black/10 h-[1px]" />
+      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
 
-      {/* sale price */}
-      <div className="flex flex-row justify-between items-center mt-[34px]">
-        <div className="font-bold text-[14px]">패키지 판매가</div>
-        <div className="font-bold text-[20px]">(원가*할인율)</div>
-      </div>
-
-      {/* 다음 */}
-      <CommonBtn
-        label="다음"
-        onClick={handleSubmit}
-        className="bg-black text-white"
-      />
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };
