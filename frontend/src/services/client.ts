@@ -46,6 +46,14 @@ export const sellerStoreSnsApi = attachInterceptors(
   })
 );
 
+export const sellerStoreSettingsApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/store/settings`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
 export const sellerProductApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store/products`,

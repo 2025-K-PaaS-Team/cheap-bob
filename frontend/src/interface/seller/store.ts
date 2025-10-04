@@ -39,3 +39,8 @@ export type UpdateStoreType = StoreInfoType & {
 export type UpdateStoreSnsType = SnsInfoType & {
   store_id: string;
 };
+
+// update store address
+export type UpdateStoreAddrType = AddressInfoType & {
+  store_id: string;
+};

@@ -1,15 +1,18 @@
 import {
   sellerStoreApi,
   sellerStoreProfileApi,
+  sellerStoreSettingsApi,
   sellerStoreSnsApi,
 } from "@services/client";
 
 import type {
+  AddressInfoType,
   SignupImageResponseType,
   SignupRequestType,
   SignupResponseType,
   SnsInfoType,
   StoreDetailType,
+  UpdateStoreAddrType,
   UpdateStoreSnsType,
   UpdateStoreType,
 } from "@interface";
@@ -86,6 +89,15 @@ export const UpdateStoreSns = async (
   sns: SnsInfoType
 ): Promise<UpdateStoreSnsType> => {
   const { data } = await sellerStoreSnsApi.put("", sns);
+
+  return data;
+};
+
+// PUT: update store address
+export const UpdateStoreAddr = async (
+  addr: AddressInfoType
+): Promise<UpdateStoreAddrType> => {
+  const { data } = await sellerStoreSettingsApi.put("/address", addr);
 
   return data;
 };
