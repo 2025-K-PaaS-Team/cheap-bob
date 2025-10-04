@@ -52,3 +52,25 @@ export const UpdateStoreName = async (
 
   return data;
 };
+
+// PUT: update store description
+export const UpdateStoreDesc = async (
+  store_introduction: string
+): Promise<UpdateStoreType> => {
+  const { data } = await sellerStoreProfileApi.put("/introduction", {
+    store_introduction,
+  });
+
+  return data;
+};
+
+// PUT: update store phone
+export const UpdateStorePhone = async (
+  store_phone: string
+): Promise<UpdateStoreType> => {
+  const { data } = await sellerStoreProfileApi.put("/phone", {
+    store_phone,
+  });
+
+  return data;
+};

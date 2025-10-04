@@ -11,10 +11,10 @@ const ChangeStoreName = ({}) => {
   const [modalMsg, setModalMsg] = useState("");
 
   const handleUpdateStoreName = async (storeName: string) => {
-    const nameValidMsg = "매장 이름은 1~7자여야 합니다.";
+    const validMsg = "매장 이름은 1~7자여야 합니다.";
 
     if (!validateLength(value, 1, 7)) {
-      setModalMsg(nameValidMsg);
+      setModalMsg(validMsg);
       setShowModal(true);
       return;
     }
@@ -47,8 +47,8 @@ const ChangeStoreName = ({}) => {
         onChange={(e) => setValue(e.target.value)}
       />
 
-      {/* 다음 */}
-      <CommonBtn label="다음" onClick={handleSubmit} category="black" />
+      {/* save */}
+      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
 
       {/* show modal */}
       {showModal && (
