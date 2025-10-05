@@ -26,6 +26,7 @@ from schemas.order import (
     DashboardStockItem
 )
 from services.payment import PaymentService
+from services.email import email_service
 from config.settings import settings
 
 router = APIRouter(prefix="/store/orders", tags=["Seller-Order"])
@@ -219,6 +220,15 @@ async def update_order_accept(
         accepted_at=datetime.now(timezone.utc)
     )
     
+    # 주문 확정 이메일 서비스
+    if email_service.is_configured():
+        store = await store_repo.get_by_seller_email(store_id)
+        email_service.send_template(
+            recipient_email=order.customer_id,
+            store_name=store.store_name,
+            template_type="accept"
+        )
+    
     # response 포맷으로 변환
     return OrderItemResponse(
         payment_id=updated_order.payment_id,
@@ -320,6 +330,15 @@ async def cancel_order(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="재고 복구 중 충돌이 발생했습니다. 다시 시도해주세요."
             )
+    
+    # 판매자 주문 취소 이메일 서비스
+    if email_service.is_configured():
+        store = await store_repo.get_by_seller_email(store_id)
+        email_service.send_template(
+            recipient_email=order.customer_id,
+            store_name=store.store_name,
+            template_type="seller_cancel"
+        )
     
     return OrderCancelResponse(
         payment_id=payment_id,
