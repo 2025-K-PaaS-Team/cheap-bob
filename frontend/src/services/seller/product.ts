@@ -70,7 +70,7 @@ export const UpdateProduct = async (
   product_id: string,
   product: ProductBase
 ): Promise<ProductResponseType> => {
-  const { data } = await sellerProductApi.put(`/${product_id}`, { product });
+  const { data } = await sellerProductApi.put(`/${product_id}`, product);
 
   return data;
 };
