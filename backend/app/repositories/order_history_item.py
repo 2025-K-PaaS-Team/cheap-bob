@@ -114,13 +114,13 @@ class OrderHistoryItemRepository(BaseMongoRepository[OrderHistoryItem]):
     
     async def get_store_history(
         self,
-        product_ids: List[str],
+        store_id: str,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         limit: int = 100
     ) -> List[OrderHistoryItem]:
         """가게의 주문 히스토리 조회 (상품 ID 목록 필요)"""
-        filters = {"product_id": {"$in": product_ids}}
+        filters = {"store_id": store_id} 
         
         if start_date or end_date:
             date_filter = {}
