@@ -7,7 +7,7 @@ from datetime import datetime
 from loguru import logger
 
 from config.settings import settings
-from services.email_templates import reservation, accept, user_cancel, store_cancel
+from services.email_templates import reservation, accept, customer_cancel, seller_cancel
 
 class EmailService:
     """구글 SMTP를 사용한 이메일 전송 서비스"""
@@ -111,7 +111,7 @@ class EmailService:
     def send_template(
         self,
         recipient_email: str,
-        store: str,
+        store_name: str,
         template_type: str
     ) -> Dict[str, Any]:
         """
@@ -119,12 +119,13 @@ class EmailService:
         
         Args:
             recipient_email: 수신자 이메일
-            template_type: 템플릿 타입 (default, welcome, order 등)
+            template_type: 템플릿 타입
+            store_name: 가게 이름
             
         Returns:
             성공 여부와 메시지를 포함한 딕셔너리
         """
-        template_data = self._get_email_template(template_type, recipient_email, store)
+        template_data = self._get_email_template(template_type, recipient_email, store_name)
         
         return self.send(
             recipient_email=recipient_email,
@@ -137,7 +138,7 @@ class EmailService:
         self,
         template_type: str,
         recipient_email: str,
-        store: str
+        store_name: str
     ) -> Dict[str, str]:
         """이메일 템플릿 반환"""
         timestamp = datetime.now().strftime("%Y년 %m월 %d일 %H:%M:%S")
@@ -150,18 +151,18 @@ class EmailService:
             },
             "accept": {
                 "subject": "[저렴한끼] 🎉 픽업이 확정되었습니다!",
-                "body": accept.get_accept_text_template(timestamp, recipient_email, store),
-                "html_body": accept.get_accept_html_template(timestamp, recipient_email, store)
+                "body": accept.get_accept_text_template(timestamp, recipient_email, store_name),
+                "html_body": accept.get_accept_html_template(timestamp, recipient_email, store_name)
             },
-            "user_cancel": {
+            "customer_cancel": {
                 "subject": "[저렴한끼] 주문이 취소되었습니다.",
-                "body": user_cancel.get_customer_cancel_text_template(timestamp, recipient_email, store),
-                "html_body": user_cancel.get_cusotmer_cancel_html_template(timestamp, recipient_email, store)
+                "body": customer_cancel.get_customer_cancel_text_template(timestamp, recipient_email, store_name),
+                "html_body": customer_cancel.get_cusotmer_cancel_html_template(timestamp, recipient_email, store_name)
             },
-            "store_cancel": {
+            "seller_cancel": {
                 "subject": "[저렴한끼] 가게가 주문을 취소하였습니다.",
-                "body": store_cancel.get_store_cancel_text_template(timestamp, recipient_email, store),
-                "html_body": store_cancel.get_store_cancel_html_template(timestamp, recipient_email, store)
+                "body": seller_cancel.get_seller_cancel_text_template(timestamp, recipient_email, store_name),
+                "html_body": seller_cancel.get_seller_cancel_html_template(timestamp, recipient_email, store_name)
             }
         }
         

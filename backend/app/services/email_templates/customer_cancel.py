@@ -1,19 +1,18 @@
-def get_store_cancel_text_template(timestamp: str, recipient: str, store: str) -> str:
-        """가게 주문 취소 텍스트 템플릿"""
-        return f"""{store} 주문이 가게 사정으로 인해 취소되었습니다.
-주문 내역에서 주문 취소 사유를 확인하시기 바랍니다.
+def get_customer_cancel_text_template(timestamp: str, recipient: str, store: str) -> str:
+        """소비자 주문 취소 텍스트 템플릿"""
+        return f"""{store}에 대한 주문이 취소되었습니다.
 발송 시간: {timestamp}
 수신자: {recipient}"""
 
-def get_store_cancel_html_template(timestamp: str, recipient: str, store: str) -> str:
-        """가게 주문 취소 HTML 템플릿"""
+def get_cusotmer_cancel_html_template(timestamp: str, recipient: str, store: str) -> str:
+        """소비자 주문 취소 HTML 템플릿"""
         return f"""
         <!DOCTYPE html>
         <html lang="ko">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>가게 주문 취소</title>
+            <title>소비자 주문 취소</title>
             <style>
                 * {{
                     margin: 0;
@@ -23,7 +22,7 @@ def get_store_cancel_html_template(timestamp: str, recipient: str, store: str) -
 
                 body {{
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                    background-color: #f5f5f5;
+                    background-color: #e9e9e2;
                     display: flex;
                     justify-content: center;
                     align-items: center;
@@ -32,7 +31,7 @@ def get_store_cancel_html_template(timestamp: str, recipient: str, store: str) -
                 }}
 
                 .container {{
-                    background-color: white;
+                    background-color: #e9e9e2;
                     border-radius: 16px;
                     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                     max-width: 400px;
@@ -62,7 +61,7 @@ def get_store_cancel_html_template(timestamp: str, recipient: str, store: str) -
 
                 .content {{
                     padding: 40px 30px;
-                    background-color: white;
+                    background-color: #e9e9e2;
                 }}
 
                 .message {{
@@ -131,14 +130,13 @@ def get_store_cancel_html_template(timestamp: str, recipient: str, store: str) -
             <div class="container">
                 <div class="header">
                     <h1>
-                        가게가 주문을 취소하였습니다.
+                        주문이 취소되었습니다.
                     </h1>
                 </div>
                 
                 <div class="content">
                     <p class="message">
-                        {store} 주문이 가게의 사정으로 인해 취소되었습니다.<br>
-                        주문 내역에서 취소 사유를 확인하시기 바랍니다.
+                        {store}에 대한 주문이 취소되었습니다.
                     </p>
                     
                     <div class="info-section">

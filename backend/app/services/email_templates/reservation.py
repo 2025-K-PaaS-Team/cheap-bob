@@ -23,7 +23,7 @@ def get_reservation_html_template(timestamp: str, recipient: str) -> str:
 
                 body {{
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                    background-color: #f5f5f5;
+                    background-color: #e9e9e2;
                     display: flex;
                     justify-content: center;
                     align-items: center;
@@ -32,7 +32,7 @@ def get_reservation_html_template(timestamp: str, recipient: str) -> str:
                 }}
 
                 .container {{
-                    background-color: white;
+                    background-color: #e9e9e2;
                     border-radius: 16px;
                     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                     max-width: 400px;
@@ -62,7 +62,7 @@ def get_reservation_html_template(timestamp: str, recipient: str) -> str:
 
                 .content {{
                     padding: 40px 30px;
-                    background-color: white;
+                    background-color: #e9e9e2;
                 }}
 
                 .message {{
