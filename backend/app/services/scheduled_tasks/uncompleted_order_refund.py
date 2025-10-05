@@ -6,8 +6,10 @@ from collections import defaultdict
 from database.session import get_db
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
+from repositories.store import StoreRepository
 from schemas.order import OrderStatus
 from services.payment import PaymentService
+from services.email import email_service
 
 
 logger = logging.getLogger(__name__)
@@ -30,6 +32,7 @@ class UncompletedOrderRefundTask:
             async for session in get_db():
                 order_repo = OrderCurrentItemRepository(session)
                 payment_info_repo = StorePaymentInfoRepository(session)
+                store_repo = StoreRepository(session)
                 
                 # reservation과 accept 상태의 모든 주문 조회
                 all_orders = await order_repo.get_all_orders_with_relations()
@@ -73,6 +76,14 @@ class UncompletedOrderRefundTask:
                                     payment_id=order.payment_id,
                                     cancel_reason="영업 시간 종료로 인한 자동 환불"
                                 )
+                                
+                                if email_service.is_configured():
+                                    store = await store_repo.get_by_seller_email(order.product.store_id)
+                                    email_service.send_template(
+                                        recipient_email=order.customer_id,
+                                        store_name=store["store_name"],
+                                        template_type="seller_cancel"
+                                    )
                                 
                                 refund_count += 1
                                 total_refund_amount += order.total_amount
