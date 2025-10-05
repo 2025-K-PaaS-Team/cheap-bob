@@ -77,3 +77,19 @@ class DashboardStockItem(BaseModel):
 class DashboardResponse(BaseModel):
     items: List[DashboardStockItem] = Field(default_factory=list, description="상품별 재고 현황")
     total_items: int = Field(..., description="전체 상품 수")
+
+
+class SettlementItem(BaseModel):
+    product_name: str = Field(..., description="상품 이름")
+    quantity: int = Field(..., description="판매된 개수")
+    total_amount: int = Field(..., description="최종 판매가")
+    status: OrderStatus = Field(..., description="주문 상태 (complete/cancel)")
+
+
+class SettlementDayGroup(BaseModel):
+    date: str = Field(..., description="날짜 (YYYY-MM-DD)")
+    items: List[SettlementItem] = Field(default_factory=list, description="해당 날짜의 정산 아이템들")
+
+
+class SettlementResponse(BaseModel):
+    daily_settlements: List[SettlementDayGroup] = Field(default_factory=list, description="날짜별 정산 데이터")
