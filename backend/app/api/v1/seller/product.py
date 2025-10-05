@@ -160,8 +160,6 @@ async def update_product(
         await product_repo.update(product_id, **update_data)
 
     updated_product = await product_repo.get_with_nutrition_info(product_id)
-    print(**updated_product.__dict__)
-    print("end")
     nutrition_types = [n.nutrition_type for n in updated_product.nutrition_info] if updated_product.nutrition_info else []
     
     # 응답 생성
