@@ -129,8 +129,7 @@ async def update_product(
     request: ProductUpdateRequest,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep,
-    nutrition_repo: ProductNutritionRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep
 ):
     """
     상품 정보 수정
@@ -154,8 +153,7 @@ async def update_product(
     # sale이 0이면 None으로 변경
     if 'sale' in update_data and update_data['sale'] == 0:
         update_data['sale'] = None
-    print("start")
-    print(request)
+
     if update_data:
         await product_repo.update(product_id, **update_data)
 
