@@ -154,12 +154,14 @@ async def update_product(
     # sale이 0이면 None으로 변경
     if 'sale' in update_data and update_data['sale'] == 0:
         update_data['sale'] = None
-    
+    print("start")
+    print(request)
     if update_data:
         await product_repo.update(product_id, **update_data)
 
     updated_product = await product_repo.get_with_nutrition_info(product_id)
-
+    print(**updated_product.__dict__)
+    print("end")
     nutrition_types = [n.nutrition_type for n in updated_product.nutrition_info] if updated_product.nutrition_info else []
     
     # 응답 생성
