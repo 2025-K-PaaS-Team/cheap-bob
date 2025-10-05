@@ -52,7 +52,7 @@ async def send_template_email(
     
     result = email_service.send_template(
         recipient_email=recipient_email,
-        store="맛있는 가게",
+        store_name="맛있는 가게",
         template_type=request.template_type
     )
     
