@@ -93,3 +93,7 @@ class SettlementDayGroup(BaseModel):
 
 class SettlementResponse(BaseModel):
     daily_settlements: List[SettlementDayGroup] = Field(default_factory=list, description="날짜별 정산 데이터")
+
+
+class WeeklyRevenueResponse(BaseModel):
+    total_revenue: int = Field(..., description="월요일부터 오늘까지의 총 수익")

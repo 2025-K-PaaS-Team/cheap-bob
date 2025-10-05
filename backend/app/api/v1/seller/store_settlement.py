@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Query
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List
 from collections import defaultdict
 import pytz
@@ -17,7 +17,8 @@ from schemas.order import (
     OrderStatus,
     SettlementResponse,
     SettlementDayGroup,
-    SettlementItem
+    SettlementItem,
+    WeeklyRevenueResponse
 )
 
 router = APIRouter(prefix="/store/settlement", tags=["Seller-Settlement"])
@@ -134,4 +135,60 @@ async def get_store_settlement(
     
     return SettlementResponse(
         daily_settlements=daily_settlements
+    )
+
+
+@router.get("/weekly-revenue", response_model=WeeklyRevenueResponse,
+    responses=create_error_responses({
+        401:["인증 정보가 없음", "토큰 만료"],
+        404:"등록된 가게를 찾을 수 없음"
+    })
+)
+async def get_weekly_revenue(
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    order_repo: OrderCurrentItemRepositoryDep,
+    history_repo: OrderHistoryItemRepositoryDep
+):
+    """
+    주간 수익 집계
+    - 월요일부터 오늘까지의 complete 상태 주문의 총 수익을 반환합니다
+    """
+    
+    seller_email = current_user["sub"]
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    today_kst = datetime.now(kst)
+    
+    # 이번 주 월요일 찾기
+    days_since_monday = today_kst.weekday()
+    monday_kst = (today_kst - timedelta(days=days_since_monday)).replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    monday_utc = monday_kst.astimezone(pytz.UTC)
+    
+    total_revenue = 0
+    
+    # 오늘 날짜의 주문은 current에서 조회
+    current_orders = await order_repo.get_store_orders_with_relations(store_id)
+    
+    for order in current_orders:
+        if order.status == OrderStatus.complete:
+            total_revenue += order.total_amount
+    
+    # 월요일부터 어제까지의 주문은 history에서 조회
+    if days_since_monday > 0:
+        yesterday_end_utc = (today_kst - timedelta(days=1)).replace(hour=23, minute=59, second=59, microsecond=999999).astimezone(pytz.UTC)
+        
+        history_orders = await history_repo.get_store_history(
+            store_id=store_id,
+            start_date=monday_utc,
+            end_date=yesterday_end_utc
+        )
+        
+        for order in history_orders:
+            if order.status == "complete":
+                total_revenue += order.total_amount
+    
+    return WeeklyRevenueResponse(
+        total_revenue=total_revenue
     )
