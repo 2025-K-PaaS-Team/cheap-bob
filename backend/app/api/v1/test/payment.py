@@ -21,6 +21,7 @@ from schemas.payment import (
 )
 from utils.id_generator import generate_payment_id
 from utils.string_utils import join_values
+from services.email import email_service
 from config.settings import settings
 
 router = APIRouter(prefix="/payment")
@@ -82,6 +83,7 @@ async def init_payment(
     테스트용 결제 초기화 API - 상품과 수량을 확인하고 결제 세션을 생성
     포트원 설정이 없어도 테스트용 값을 반환
     """
+    
     # 상품 조회
     product = await product_repo.get_by_product_id(request.product_id)
     
@@ -186,6 +188,8 @@ async def confirm_payment(
     """
     테스트용 결제 최종 확인 API - 포트원 검증 없이 항상 성공으로 처리
     """
+    customer_email = current_user["sub"]
+    
     cart_item = None
     product = None
     
@@ -236,6 +240,14 @@ async def confirm_payment(
         await cart_repo.delete(cart_item.payment_id)
         
         logger.info(f"테스트 결제 완료 - 주문 생성 및 장바구니 삭제 완료")
+        
+        # 주문 예약 이메일 서비스
+        if email_service.is_configured():
+            email_service.send_template(
+                recipient_email=customer_email,
+                store_name="",
+                template_type="reservation"
+            )
         
         return PaymentResponse(
             payment_id=request.payment_id
