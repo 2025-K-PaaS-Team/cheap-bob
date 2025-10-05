@@ -130,7 +130,6 @@ async def get_store_orders(
     })                 
 )
 async def get_order_today(
-    store_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
     order_repo: OrderCurrentItemRepositoryDep
