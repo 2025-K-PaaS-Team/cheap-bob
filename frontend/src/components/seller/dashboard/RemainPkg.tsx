@@ -35,7 +35,7 @@ const RemainPkg = ({
   };
 
   return (
-    <div className="mx-[20px] flex flex-col mt-[7px] bg-[#D9D9D9] rounded-[8px] py-[23px] px-[19px] text-black">
+    <div className="mx-[20px] flex flex-col mt-[24px] bg-[#D9D9D9] rounded-[8px] py-[23px] px-[19px] text-black">
       <div className="text-[24px] mb-[7px]">
         현재 패키지 잔여 수량은 <br />{" "}
         <span className="font-bold">{remainPkg.current_stock}개</span> 입니다.

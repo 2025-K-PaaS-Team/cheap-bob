@@ -2,12 +2,12 @@ import type { PaymentConfirmType, PaymentResponseType } from "@interface";
 import type { OrderBaseType } from "@interface/common/types";
 import type { optionType } from "@interface/customer/option";
 import type {
-  OrderDeleteResponseType,
+  // OrderDeleteResponseType,
   OrderDetailResponseType,
   OrderResponseType,
 } from "@interface/customer/order";
 import {
-  deleteOrder,
+  // deleteOrder,
   GetAllegyOptionList,
   getCurrentOrders,
   getMenuOptionList,
@@ -35,8 +35,8 @@ const CustomerLab = () => {
   );
   const [orderDetail, setOrderDetail] =
     useState<OrderDetailResponseType | null>(null);
-  const [orderDelete, setOrderDelete] =
-    useState<OrderDeleteResponseType | null>(null);
+  // const [orderDelete, setOrderDelete] =
+  //   useState<OrderDeleteResponseType | null>(null);
 
   const handleGetStores = async () => {
     try {
@@ -143,20 +143,20 @@ const CustomerLab = () => {
     }
   };
 
-  const handleDeleteOrder = async () => {
-    if (!orders) return;
-    try {
-      const orderDelete = await deleteOrder(orders[0]?.payment_id, {
-        reason: "개인 사정",
-      });
-      console.log("결제 취소 성공", orderDelete);
-      setOrderDelete(orderDelete);
-    } catch (err: unknown) {
-      console.error("get order detail failed", err);
-      const msg = err instanceof Error ? err.message : "실패해소";
-      setErrMsg(msg);
-    }
-  };
+  // const handleDeleteOrder = async () => {
+  //   if (!orders) return;
+  //   try {
+  //     const orderDelete = await deleteOrder(orders[0]?.payment_id, {
+  //       reason: "개인 사정",
+  //     });
+  //     console.log("결제 취소 성공", orderDelete);
+  //     setOrderDelete(orderDelete);
+  //   } catch (err: unknown) {
+  //     console.error("get order detail failed", err);
+  //     const msg = err instanceof Error ? err.message : "실패해소";
+  //     setErrMsg(msg);
+  //   }
+  // };
 
   // option
   const [preferMenu, setPreferMenu] = useState<optionType | null>(null);
@@ -328,7 +328,7 @@ const CustomerLab = () => {
         )}
 
         {/* cancel detail */}
-        <button
+        {/* <button
           className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
           onClick={() => handleDeleteOrder()}
         >
@@ -338,7 +338,7 @@ const CustomerLab = () => {
           <div className="w-full text-green-500">
             현재 주문 상세: {JSON.stringify(orderDelete)}
           </div>
-        )}
+        )} */}
 
         {/* option */}
         <h2>선호 옵션 가져오기</h2>

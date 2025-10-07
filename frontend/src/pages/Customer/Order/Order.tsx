@@ -4,7 +4,7 @@ import type { OrderBaseType } from "@interface/common/types";
 import type { OrderDetailResponseType } from "@interface/customer/order";
 import {
   completePickup,
-  deleteOrder,
+  // deleteOrder,
   getOrderDetail,
   getOrders,
 } from "@services";
@@ -95,18 +95,18 @@ const Order = () => {
     }
   };
 
-  const handleDeleteOrder = async (paymentId: string) => {
-    try {
-      const res = await deleteOrder(paymentId, {
-        reason: reason,
-      });
-      console.log("결제 취소 성공", res);
-      window.alert("결제 취소 성공했옹 （づ￣3￣）づ╭❤️～");
-    } catch (err: any) {
-      console.error("get order detail failed", err);
-      window.alert(`결제 취소 실패! ( ⓛ ω ⓛ *) ${err.response.data.detail}`);
-    }
-  };
+  // const handleDeleteOrder = async (paymentId: string) => {
+  //   try {
+  //     const res = await deleteOrder(paymentId, {
+  //       reason: reason,
+  //     });
+  //     console.log("결제 취소 성공", res);
+  //     window.alert("결제 취소 성공했옹 （づ￣3￣）づ╭❤️～");
+  //   } catch (err: any) {
+  //     console.error("get order detail failed", err);
+  //     window.alert(`결제 취소 실패! ( ⓛ ω ⓛ *) ${err.response.data.detail}`);
+  //   }
+  // };
 
   const handleCompletePickup = async (paymentId: string, qrData: string) => {
     try {
@@ -129,9 +129,9 @@ const Order = () => {
     handleGetOrderDetail(paymentId);
   };
 
-  const handleClickCancelBtn = (paymentId: string) => {
-    handleDeleteOrder(paymentId);
-  };
+  // const handleClickCancelBtn = (paymentId: string) => {
+  //   handleDeleteOrder(paymentId);
+  // };
 
   const handleClickPickupCompleteBtn = (paymentId: string) => {
     setQrReaderOpen(true);
@@ -182,13 +182,13 @@ const Order = () => {
                     <div>unit 가격: {orderDetail.unit_price}</div>
                   </>
                 )}
-                <button
+                {/* <button
                   type="button"
                   onClick={() => handleClickCancelBtn(order.payment_id)}
                   className="bg-white p-3"
                 >
                   주문 취소하기(환불 포함)
-                </button>
+                </button> */}
                 <input
                   type="text"
                   value={reason}

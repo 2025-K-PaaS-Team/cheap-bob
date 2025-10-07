@@ -35,3 +35,7 @@ export type OrderResponseType = {
   orders: OrderBaseType[];
   total: number;
 };
+
+export type CancelOrderRequestType = {
+  reason: string;
+};

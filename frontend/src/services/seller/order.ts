@@ -1,12 +1,11 @@
 import type {
-  CancelOrderResponseType,
+  // CancelOrderResponseType,
   DashboardResponseType,
   GetQrCodeType,
   GetStoreOrderType,
   OrderResponseType,
   UpdateOrderAcceptType,
 } from "@interface";
-import type { CancelOrderRequestType } from "@interface/common/types";
 import { sellerOrderApi } from "@services/client";
 
 // GET: get store orders
@@ -35,14 +34,14 @@ export const updateOrderAccept = async (
 };
 
 // POST: cancel order
-export const cancelOrder = async (
-  paymentId: string,
-  body: CancelOrderRequestType
-): Promise<CancelOrderResponseType> => {
-  const { data } = await sellerOrderApi.post(`/${paymentId}/cancel`, body);
+// export const cancelOrder = async (
+//   paymentId: string,
+//   body: CancelOrderRequestType
+// ): Promise<CancelOrderResponseType> => {
+//   const { data } = await sellerOrderApi.post(`/${paymentId}/cancel`, body);
 
-  return data;
-};
+//   return data;
+// };
 
 // PATCH: update order pickup ready
 export const updatePickupReady = async (
