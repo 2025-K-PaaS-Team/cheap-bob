@@ -37,3 +37,23 @@ export type DashboardResponseType = {
 export type NutritionType = {
   nutrition_types: NutritionBase[];
 };
+
+// get products
+export type ProductBaseType = {
+  product_id: string;
+  store_id: string;
+  product_name: string;
+  description: string;
+  initial_stock: number;
+  current_stock: number;
+  price: number;
+  sale: number;
+  version: number;
+  nutrition_types: string[];
+};
+
+export type ProductType = {
+  store_id: string;
+  store_name: string;
+  products: ProductBaseType[];
+};

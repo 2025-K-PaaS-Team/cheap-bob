@@ -10,7 +10,7 @@ export const getStores = async (page: number): Promise<StoreSearchType> => {
 };
 
 // GET: get specific store products
-export const getSpecificStore = async (storeId: string) => {
+export const getStoreProduct = async (storeId: string) => {
   const { data } = await customerSearchApi.get(`/${storeId}/products`);
   return data;
 };

@@ -11,8 +11,8 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
   const navigate = useNavigate();
   const todayDow = dayjs().day();
 
-  const handleClickStore = (store_id: string) => {
-    navigate(`${store_id}`);
+  const handleClickStore = (store: StoreSearchBaseType) => {
+    navigate(`${store.store_id}`, { state: { store } });
   };
 
   return (
@@ -21,7 +21,7 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
         <div
           key={store.store_id}
           className="flex flex-col h-[212px] relative"
-          onClick={() => handleClickStore(store.store_id)}
+          onClick={() => handleClickStore(store)}
         >
           {/* favor */}
           <div
