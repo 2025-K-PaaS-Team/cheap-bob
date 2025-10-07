@@ -20,12 +20,12 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="flex justify-center w-full">
+    <div className="flex flex-col justify-around w-full min-h-screen py-[30px]">
       {/* swiper */}
       <Swiper
         pagination={{ clickable: true }}
         modules={[Pagination]}
-        className="mySwiper items-center flex h-[460px] mt-[119px]"
+        className="mySwiper items-center flex h-fit w-full"
       >
         {homeSwiperMap.map((slide, idx) => (
           <SwiperSlide key={idx}>
@@ -35,7 +35,7 @@ const Home = () => {
       </Swiper>
 
       {/* login button */}
-      <div className="fixed bottom-[38px] flex flex-col gap-y-[10px]">
+      <div className="flex flex-col gap-y-[10px] items-center">
         <LoginButton provider="kakao" label="카카오로 계속하기" />
         <LoginButton provider="naver" label="네이버로 계속하기" />
         <LoginButton provider="google" label="구글로 계속하기" />

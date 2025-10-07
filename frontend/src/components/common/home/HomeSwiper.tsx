@@ -6,12 +6,12 @@ type HomeSwiperProps = {
 const HomeSwiper = ({ title, img }: HomeSwiperProps) => {
   return (
     <div className="flex flex-col items-center font-bold text-2xl">
-      <div className="w-fit text-center mb-[31px]">
+      <div className="text-center mb-[31px]">
         {title.split("\n").map((line, idx) => (
           <p key={idx}>{line}</p>
         ))}
       </div>
-      <img src={img} alt="phoneMockUp" className="mb-[24px]" />
+      <img src={img} alt="phoneMockUp" className="mb-[30px]" />
     </div>
   );
 };
