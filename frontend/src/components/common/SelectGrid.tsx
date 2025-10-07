@@ -1,6 +1,6 @@
 type SelectGridProps<T extends string> = {
   data: { key: T; title: string; desc?: string }[];
-  selected: T[];
+  selected: string[];
   onClick: (key: T) => void;
   selectType?: string;
 };
