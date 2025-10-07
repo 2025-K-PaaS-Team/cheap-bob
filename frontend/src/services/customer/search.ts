@@ -28,3 +28,10 @@ export const RemoveFavoriteStore = async (storeId: string) => {
 
   return data;
 };
+
+// GET: get favorites store
+export const GetFavoriteStore = async () => {
+  const { data } = await customerSearchApi.get("/favorites");
+
+  return data;
+};
