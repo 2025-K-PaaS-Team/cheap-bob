@@ -18,6 +18,14 @@ const StoreList = () => {
     }, {} as Record<string, boolean>)
   );
   const todayDow = dayjs().day();
+  const filteredStores = stores?.stores.filter((store) => {
+    const activeKeys = Object.keys(selected).filter((key) => selected[key]);
+    if (activeKeys.length === 0) return true;
+
+    return store.products.some((p) =>
+      p.nutrition_types.some((type) => activeKeys.includes(type))
+    );
+  });
 
   // get stores list
   const handleGetStores = async (pageIdx: number) => {
@@ -87,8 +95,8 @@ const StoreList = () => {
       />
 
       <div className="flex flex-col gap-y-[10px] justify-center">
-        {stores?.stores ? (
-          stores.stores.map((store) => (
+        {filteredStores ? (
+          filteredStores.map((store) => (
             <div
               className="flex flex-col h-[212px] relative"
               onClick={() => handleClickStore({ store_id: store.store_id })}

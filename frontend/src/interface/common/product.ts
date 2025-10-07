@@ -9,7 +9,7 @@ export type ProductBase = {
 
 export type ProductRequestType = ProductBase & {
   initial_stock: number;
-  nutrition_types: NutritionBase[];
+  nutrition_types: string[];
 };
 
 export type ProductResponseType = ProductRequestType & {
