@@ -3,6 +3,8 @@ import type {
   AllergiesBaseType,
   CustomerDetailBaseType,
   CustomerDetailType,
+  CustomerRegisterResponseType,
+  CustomerRegisterType,
   MenuBaseType,
   MenuDeleteType,
   NutritionBaseType,
@@ -14,13 +16,13 @@ import type {
   ToppingBaseType,
   ToppingDeleteType,
 } from "@interface";
-import { customerProfileApi } from "@services/client";
+import { customerProfileApi, customerRegisterApi } from "@services/client";
 
-// POST: create customer detail
-export const CreateCustomerDetail = async (
-  body: CustomerDetailBaseType
-): Promise<CustomerDetailType> => {
-  const { data } = await customerProfileApi.post("/detail", body);
+// POST: create customer register
+export const CreateCustomerRegister = async (
+  body: CustomerRegisterType
+): Promise<CustomerRegisterResponseType> => {
+  const { data } = await customerRegisterApi.post("", body);
 
   return data;
 };

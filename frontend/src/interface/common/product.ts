@@ -1,4 +1,4 @@
-import type { NutritionBase } from "./base";
+import type { NutritionBase } from "../common/base";
 
 export type ProductBase = {
   product_name: string;
@@ -9,7 +9,7 @@ export type ProductBase = {
 
 export type ProductRequestType = ProductBase & {
   initial_stock: number;
-  nutrition_types: NutritionBase[];
+  nutrition_types: string[];
 };
 
 export type ProductResponseType = ProductRequestType & {
@@ -36,4 +36,24 @@ export type DashboardResponseType = {
 // get nutrition
 export type NutritionType = {
   nutrition_types: NutritionBase[];
+};
+
+// get products
+export type ProductBaseType = {
+  product_id: string;
+  store_id: string;
+  product_name: string;
+  description: string;
+  initial_stock: number;
+  current_stock: number;
+  price: number;
+  sale: number;
+  version: number;
+  nutrition_types: string[];
+};
+
+export type ProductType = {
+  store_id: string;
+  store_name: string;
+  products: ProductBaseType[];
 };

@@ -1,14 +1,14 @@
 import type {
   ItemType,
   PaymentResponseType,
-  ProductDetailType,
+  ProductBaseType,
 } from "@interface";
 import PortOne from "@portone/browser-sdk/v2";
 import { confrimPayment, initPayment } from "@services";
 
 type PortOneLabProps = {
   storeId: string;
-  product: ProductDetailType;
+  product: ProductBaseType;
 };
 
 const PortOneLab = ({ storeId, product }: PortOneLabProps) => {

@@ -7,6 +7,7 @@ type AgreeProps = {
 
 const Agree = ({ onNext }: AgreeProps) => {
   const [showModal, setShowModal] = useState(false);
+  const [modalMsg, setModalMsg] = useState<string>("");
 
   const [agree, setAgree] = useState({
     service: false,
@@ -26,6 +27,7 @@ const Agree = ({ onNext }: AgreeProps) => {
   const handleSubmit = () => {
     if (!onNext) return;
     if (!allAgree) {
+      setModalMsg("필수 항목에 모두 동의해주세요");
       setShowModal(true);
       return;
     }
@@ -72,17 +74,14 @@ const Agree = ({ onNext }: AgreeProps) => {
       {/* next */}
       {onNext && <CommonBtn label="다음" onClick={handleSubmit} />}
 
-      {/* show modal */}
-      <div className="relative">
-        {showModal && (
-          <CommonModal
-            desc="필수 항목에 모두 동의해주세요"
-            confirmLabel="확인"
-            onConfirmClick={() => setShowModal(false)}
-            category="black"
-          />
-        )}
-      </div>
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };

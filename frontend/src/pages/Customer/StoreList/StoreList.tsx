@@ -1,94 +1,140 @@
-// import { useNavigate } from "react-router";
-// import { useEffect, useState } from "react";
-// import type { StoreResponseType } from "@interface";
-// import { getStores } from "@services";
-// import { Chips } from "@components/common";
-// import { NutritionList } from "@constant";
+import { useEffect, useState } from "react";
+import { AddFavoriteStore, getStores, RemoveFavoriteStore } from "@services";
+import { Chips, CommonModal } from "@components/common";
+import { NutritionList } from "@constant";
+import type { StoreSearchType } from "@interface";
+import { StoreBox } from "@components/customer/storeList";
 
-// const StoreList = () => {
-//   const [stores, setStores] = useState<StoreResponseType[] | null>([]);
-//   const navigate = useNavigate();
-//   const [selected, setSelected] = useState<Record<string, boolean>>(
-//     NutritionList.reduce((acc, item) => {
-//       acc[item.key] = false;
-//       return acc;
-//     }, {} as Record<string, boolean>)
-//   );
+const StoreList = () => {
+  const [stores, setStores] = useState<StoreSearchType>();
+  const [pageIdx, setPageIdx] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-//   // get stores list
-//   const handleGetStores = async () => {
-//     try {
-//       const stores = await getStores();
-//       console.log("get stores 성공", stores);
-//       setStores(stores);
-//     } catch (err: unknown) {
-//       console.error("get stores fail");
-//     }
-//   };
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+  const [selected, setSelected] = useState<Record<string, boolean>>(
+    NutritionList.reduce((acc, item) => {
+      acc[item.key] = false;
+      return acc;
+    }, {} as Record<string, boolean>)
+  );
 
-//   useEffect(() => {
-//     handleGetStores();
-//   }, []);
+  const filteredStores = stores?.stores.filter((store) => {
+    const activeKeys = Object.keys(selected).filter((key) => selected[key]);
+    if (activeKeys.length === 0) return true;
 
-//   // go to specific store detail page
-//   const handleClickStore = ({ store_id }: { store_id: string }) => {
-//     if (!store_id) return;
-//     navigate(`${store_id}`);
-//   };
+    return store.products.some((p) =>
+      p.nutrition_types.some((type) => activeKeys.includes(type))
+    );
+  });
 
-//   return (
-//     <div className="flex flex-col px-[20px]">
-//       <Chips
-//         chips={NutritionList}
-//         selected={selected}
-//         setSelected={setSelected}
-//       />
+  // get stores list
+  const handleGetStores = async (pageIdx: number) => {
+    if (isLoading) return;
+    if (stores?.is_end) return;
 
-//       <div className="flex flex-col gap-y-5 justify-center p-8">
-//         {stores ? (
-//           stores.map((store) => (
-//             <div
-//               className="flex flex-col h-[212px]"
-//               onClick={() => handleClickStore({ store_id: store.store_id })}
-//               key={store.store_id}
-//             >
-//               <div className="h-[125px] overflow-hidden">
-//                 <img
-//                   src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbqXxZF%2FbtsNKfB5NZ6%2FAAAAAAAAAAAAAAAAAAAAANSGr0mk3BaSXPwBe-A08VCC2nbuIh9kfKJUmoQYzcZ9%2Ftfile.jpg%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DnxT61ICyKtLw3d%252BEs6purwNlAOY%253D"
-//                   alt="locationIcon"
-//                   className="w-full"
-//                 />
-//               </div>
-//               <div className="bg-[#8088C0] p-[15px] flex flex-1 flex-col gap-y-[7px]">
-//                 <div className="flex flex-row justify-between h-full items-end">
-//                   <div className="text-[15px] font-bold">가게 이름</div>
+    try {
+      setIsLoading(true);
+      const newStores = await getStores(pageIdx);
+      setStores((prev) => {
+        if (pageIdx === 0) {
+          return newStores;
+        } else {
+          return {
+            stores: prev?.stores
+              ? [...prev.stores, ...newStores.stores]
+              : newStores.stores,
+            is_end: newStores.is_end,
+          };
+        }
+      });
+    } catch (err: unknown) {
+      setModalMsg("가게 불러오기에 실패했습니다.");
+      setShowModal(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-//                   <div className="bg-[#BFBFBF] p-[5px] rounded-[10px] text-[10px]">
-//                     원가
-//                   </div>
-//                 </div>
+  // add or delete favorite store
+  const handleUpdateFavorStore = async (storeId: string, nowFavor: boolean) => {
+    try {
+      if (!nowFavor) {
+        // add favor store
+        await AddFavoriteStore(storeId);
+      } else {
+        // remove favor store
+        await RemoveFavoriteStore(storeId);
+      }
 
-//                 <div className="flex flex-row justify-between h-full">
-//                   <div className="flex flex-row gap-x-[12px] items-center">
-//                     <div className="text-[12px]">픽업 시간</div>
-//                     <div className="bg-[#BFBFBF] p-[5px] rounded-[10px] text-[12px]">
-//                       XX:XX ~ ZZ:ZZ
-//                     </div>
-//                   </div>
-//                   <div className="bg-[#BFBFBF] p-[5px] rounded-[10px] text-[11px]">
-//                     판매금액
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           ))
-//         ) : (
-//           <div>loading</div>
-//         )}
-//       </div>
-//     </div>
-//   );
-//   0;
-// };
+      await getStores(pageIdx);
+      setStores((prev) => ({
+        ...prev!,
+        stores: prev!.stores.map((s) =>
+          s.store_id === storeId ? { ...s, is_favorite: !nowFavor } : s
+        ),
+      }));
+    } catch (err) {
+      setModalMsg("선호 가게 업데이트에 실패했습니다.");
+      setShowModal(true);
+    }
+  };
 
-// export default StoreList;
+  useEffect(() => {
+    handleGetStores(pageIdx);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollToTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const docHegiht = document.body.scrollHeight;
+
+      if (scrollToTop + windowHeight >= docHegiht - 100) {
+        if (!stores?.is_end) {
+          setPageIdx((prev) => prev + 1);
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  });
+
+  useEffect(() => {
+    if (pageIdx === 0) return;
+    handleGetStores(pageIdx);
+  }, [pageIdx]);
+
+  return (
+    <div className="flex flex-col px-[20px]">
+      <Chips
+        chips={NutritionList}
+        selected={selected}
+        setSelected={setSelected}
+      />
+
+      <div className="flex flex-col gap-y-[10px] justify-center">
+        {filteredStores ? (
+          <StoreBox
+            stores={filteredStores}
+            onToggleFavorite={handleUpdateFavorStore}
+          />
+        ) : (
+          <div>loading</div>
+        )}
+      </div>
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
+    </div>
+  );
+};
+
+export default StoreList;
