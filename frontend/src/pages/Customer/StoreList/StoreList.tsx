@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
-import { getStores } from "@services";
-import { Chips } from "@components/common";
+import { AddFavoriteStore, getStores, RemoveFavoriteStore } from "@services";
+import { Chips, CommonModal } from "@components/common";
 import { NutritionList } from "@constant";
 import type { StoreSearchType } from "@interface";
 import dayjs from "dayjs";
@@ -11,6 +11,9 @@ const StoreList = () => {
   const [pageIdx, setPageIdx] = useState<number>(0);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
   const [selected, setSelected] = useState<Record<string, boolean>>(
     NutritionList.reduce((acc, item) => {
       acc[item.key] = false;
@@ -48,9 +51,34 @@ const StoreList = () => {
         }
       });
     } catch (err: unknown) {
-      console.error("get stores fail");
+      setModalMsg("가게 불러오기에 실패했습니다.");
+      setShowModal(true);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // add or delete favorite store
+  const handleUpdateFavorStore = async (storeId: string, nowFavor: boolean) => {
+    try {
+      if (!nowFavor) {
+        // add favor store
+        await AddFavoriteStore(storeId);
+      } else {
+        // remove favor store
+        await RemoveFavoriteStore(storeId);
+      }
+
+      await getStores(pageIdx);
+      setStores((prev) => ({
+        ...prev!,
+        stores: prev!.stores.map((s) =>
+          s.store_id === storeId ? { ...s, is_favorite: !nowFavor } : s
+        ),
+      }));
+    } catch (err) {
+      setModalMsg("선호 가게 업데이트에 실패했습니다.");
+      setShowModal(true);
     }
   };
 
@@ -106,6 +134,10 @@ const StoreList = () => {
                 className={`rounded-full absolute top-1 right-1 z-10 w-[41px] h-[41px] p-[5px] ${
                   store.is_favorite ? "bg-red-300" : "bg-[#d9d9d9]"
                 } flex justify-center items-center`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdateFavorStore(store.store_id, store.is_favorite);
+                }}
               >
                 <img
                   src="/icon/heart.svg"
@@ -162,9 +194,17 @@ const StoreList = () => {
           <div>loading</div>
         )}
       </div>
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
-  0;
 };
 
 export default StoreList;
