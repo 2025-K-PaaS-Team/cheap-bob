@@ -1,4 +1,5 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
+import { useState } from "react";
 
 type EnterProps = {
   placeholder: string;
@@ -14,12 +15,17 @@ const Enter = ({
   value,
   validate,
 }: EnterProps) => {
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState<string>("");
+
   const handleSubmit = () => {
     const error = validate(value);
     if (error) {
-      alert(error);
+      setModalMsg(error);
+      setShowModal(true);
       return;
     }
+    console.log("if error 통과");
     onNext();
   };
 
@@ -34,6 +40,15 @@ const Enter = ({
       />
       {/* 다음 */}
       <CommonBtn label="다음" onClick={handleSubmit} />
+
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </>
   );
 };

@@ -1,5 +1,6 @@
-import { CommonBtn, SelectedGrid } from "@components/common";
+import { CommonBtn, CommonModal, SelectedGrid } from "@components/common";
 import type { SelectItem } from "@constant";
+import { useState } from "react";
 
 type SelectProps = {
   onNext: () => void;
@@ -18,6 +19,9 @@ const Select = ({
   selected,
   setSelected,
 }: SelectProps) => {
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState<string>("");
+
   const handleClick = (key: string) => {
     if (selected.includes(key)) {
       setSelected(selected.filter((item) => item != key));
@@ -29,7 +33,8 @@ const Select = ({
   const handleSubmit = () => {
     const error = validate?.(selected);
     if (error) {
-      alert(error);
+      setModalMsg(error);
+      setShowModal(true);
       return;
     }
     onNext();
@@ -59,6 +64,15 @@ const Select = ({
         }
         onClick={handleSubmit}
       />
+
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </>
   );
 };

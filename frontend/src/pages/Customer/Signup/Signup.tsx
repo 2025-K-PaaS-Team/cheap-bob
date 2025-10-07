@@ -50,7 +50,7 @@ const Signup = () => {
         navigation={false}
         modules={[Pagination]}
         className="mySwiper h-full"
-        // allowTouchMove={false}
+        allowTouchMove={false}
         onSwiper={(swiper) => (swiperRef.current = swiper)}
       >
         <SwiperSlide>
@@ -66,7 +66,9 @@ const Signup = () => {
             type="enter"
             placeholder="7자 이내로 닉네임을 입력하세요"
             validate={(val) =>
-              val.length > 7 ? "7자 이내로 닉네임을 입력해주세요" : ""
+              val.length > 7 || val.length < 1
+                ? "7자 이내로 닉네임을 입력해주세요"
+                : ""
             }
             onNext={handleNext}
             value={nickname}
