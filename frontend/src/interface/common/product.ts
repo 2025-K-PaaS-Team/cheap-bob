@@ -1,4 +1,4 @@
-import type { NutritionBase } from "./base";
+import type { NutritionBase } from "../common/base";
 
 export type ProductBase = {
   product_name: string;

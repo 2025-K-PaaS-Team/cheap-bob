@@ -1,6 +1,7 @@
 import { CommonBtn, CommonModal, SelectedGrid } from "@components/common";
 import type { SelectItem } from "@constant";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 type SelectProps = {
   onNext: () => void;
@@ -19,8 +20,10 @@ const Select = ({
   selected,
   setSelected,
 }: SelectProps) => {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState<string>("");
+  const isLastPage = selectType === "nutrition";
 
   const handleClick = (key: string) => {
     if (selected.includes(key)) {
@@ -30,14 +33,18 @@ const Select = ({
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (isLastPage: boolean) => {
     const error = validate?.(selected);
     if (error) {
       setModalMsg(error);
       setShowModal(true);
       return;
     }
-    onNext();
+    if (isLastPage) {
+      navigate("/c/stores");
+    } else {
+      onNext();
+    }
   };
 
   return (
@@ -62,7 +69,7 @@ const Select = ({
             ? "랜덤팩 고르러 가기"
             : "건너뛰기"
         }
-        onClick={handleSubmit}
+        onClick={() => handleSubmit(isLastPage)}
       />
 
       {showModal && (

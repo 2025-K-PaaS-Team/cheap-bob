@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import type { ProductRequestType } from "./product";
+
 import type {
   AddressInfoType,
   ImageInfoType,
@@ -7,7 +7,8 @@ import type {
   PaymentInfoType,
   SnsInfoType,
   StoreInfoType,
-} from "./base";
+} from "../common/base";
+import type { ProductRequestType } from "@interface/common/product";
 
 export interface SellerSignupProps {
   pageIdx: number;

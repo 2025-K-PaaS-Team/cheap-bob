@@ -76,3 +76,12 @@ export type OperationReservationBaseType = {
 export type OperationReservationType = {
   modifications: OperationReservationBaseType[];
 };
+
+export type StoreSearchBaseType = StoreDetailType & {
+  is_favorite: boolean;
+};
+
+export type StoreSearchType = {
+  stores: StoreSearchBaseType[];
+  is_end: boolean;
+};

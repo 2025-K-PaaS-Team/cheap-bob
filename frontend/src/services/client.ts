@@ -110,6 +110,14 @@ export const customerOrderApi = attachInterceptors(
   })
 );
 
+export const customerRegisterApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/customer/register`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
 export const customerProfileApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/profile`,

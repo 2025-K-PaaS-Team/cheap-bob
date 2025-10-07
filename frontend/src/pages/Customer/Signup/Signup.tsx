@@ -1,12 +1,8 @@
+import { CommonModal } from "@components/common";
 import { SignupSwiper } from "@components/customer/signup";
 import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
-import {
-  CrateNutrition,
-  CreateAllergies,
-  CreateCustomerDetail,
-  CreatePreferMenu,
-  CreateTopping,
-} from "@services";
+import { CreateCustomerRegister } from "@services";
+import { formatErrMsg } from "@utils";
 import { useRef, useState } from "react";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -19,6 +15,8 @@ const Signup = () => {
   const [menu, setMenu] = useState<string[]>([]);
   const [topping, setTopping] = useState<string[]>([]);
   const [allergy, setAllergy] = useState<string[]>([]);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState<string>("");
 
   const handleNext = async () => {
     const swiper = swiperRef.current;
@@ -27,16 +25,17 @@ const Signup = () => {
 
     if (swiper.isEnd) {
       try {
-        await CreateCustomerDetail({
+        await CreateCustomerRegister({
           nickname,
           phone_number: phone,
+          nutrition_types: nutrition,
+          preferred_menus: menu,
+          allergies: allergy,
+          topping_types: topping,
         });
-        await CreatePreferMenu({ menu_types: menu });
-        await CrateNutrition({ nutrition_types: nutrition });
-        await CreateAllergies({ allergy_types: allergy });
-        await CreateTopping({ topping_types: topping });
       } catch (err: unknown) {
-        console.error("회원정보 등록 실패", err);
+        setModalMsg(formatErrMsg(err));
+        setShowModal(true);
       }
     } else {
       swiper.slideNext();
@@ -141,6 +140,15 @@ const Signup = () => {
           />
         </SwiperSlide>
       </Swiper>
+
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };

@@ -5,6 +5,13 @@ export type CustomerDetailBaseType = {
   phone_number: string;
 };
 
+export type CustomerRegisterType = CustomerDetailBaseType & {
+  preferred_menus: string[];
+  nutrition_types: string[];
+  allergies: string[];
+  topping_types: string[];
+};
+
 export type CustomerDetailType = CustomerDetailBaseType & {
   customer_email: string;
   created_at: TimeStamp;
@@ -87,3 +94,10 @@ export type PreferToppingType = {
 export type ToppingDeleteType = {
   topping_type: string;
 };
+
+export type CustomerRegisterResponseType = PreferMenuType &
+  PreferNutritionType &
+  PreferAllergiesType &
+  PreferToppingType & {
+    detail: CustomerDetailType;
+  };
