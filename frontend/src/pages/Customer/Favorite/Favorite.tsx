@@ -1,11 +1,16 @@
 import { CommonModal } from "@components/common";
+import { StoreBox } from "@components/customer/storeList";
 import type { StoreSearchBaseType } from "@interface";
-import { GetFavoriteStore } from "@services";
+import {
+  AddFavoriteStore,
+  GetFavoriteStore,
+  RemoveFavoriteStore,
+} from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
 
 const Favorite = () => {
-  const [stores, setStores] = useState<StoreSearchBaseType>();
+  const [stores, setStores] = useState<StoreSearchBaseType[]>();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
 
@@ -20,11 +25,30 @@ const Favorite = () => {
     }
   };
 
+  // add or delete favorite store
+  const handleUpdateFavorStore = async (storeId: string, nowFavor: boolean) => {
+    try {
+      if (!nowFavor) {
+        // add favor store
+        await AddFavoriteStore(storeId);
+      } else {
+        // remove favor store
+        await RemoveFavoriteStore(storeId);
+      }
+
+      const updated = await GetFavoriteStore();
+      setStores(updated);
+    } catch (err) {
+      setModalMsg("선호 가게 업데이트에 실패했습니다.");
+      setShowModal(true);
+    }
+  };
+
   useEffect(() => {
     handleGetFavorStore();
   }, []);
 
-  if (!stores) {
+  if (!stores || stores.length === 0) {
     return (
       <div className="flex flex-col w-full h-full justify-center items-center">
         <img
@@ -43,8 +67,11 @@ const Favorite = () => {
   }
 
   return (
-    <>
-      <div></div>
+    <div className="flex flex-col px-[20px]">
+      <div className="flex flex-col gap-y-[10px] justify-center">
+        <StoreBox stores={stores} onToggleFavorite={handleUpdateFavorStore} />
+      </div>
+
       {/* show modal */}
       {showModal && (
         <CommonModal
@@ -54,7 +81,7 @@ const Favorite = () => {
           category="black"
         />
       )}
-    </>
+    </div>
   );
 };
 
