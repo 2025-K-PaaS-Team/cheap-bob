@@ -1,4 +1,8 @@
+import { CommonDropbox, CommonModal } from "@components/common";
+import { OpStatusOption } from "@constant";
 import type { OperationTimeType } from "@interface";
+import type { OptionType } from "@interface/common/types";
+import { useState } from "react";
 
 const toMin = (t?: string) => {
   if (!t) return null;
@@ -33,6 +37,11 @@ const NowOpStatus = ({ ops }: Props) => {
   const jsDay = now.getDay();
   const dow = jsToServerDow(jsDay);
   const currMin = now.getHours() * 60 + now.getMinutes();
+  const [openChangeModal, setOpenChangeModal] = useState<boolean>(false);
+
+  const handleConfirmChange = () => {
+    setOpenChangeModal(false);
+  };
 
   const today = ops.find((o) => o.day_of_week === dow);
   const enabledToday = today?.is_open_enabled;
@@ -88,12 +97,34 @@ const NowOpStatus = ({ ops }: Props) => {
     }
   }
 
+  const [selectedOption, setSelectedOption] = useState<OptionType | null>(null);
+
   return (
-    <div className="mx-[20px] flex flex-col gap-y-[3px] mt-[7px] bg-[#3A3A3A] rounded-[8px] py-[25px] px-[19px] text-white">
-      <div className="text-[24px]">{title}</div>
-      {sub && <div className="text-[20px]">{sub}</div>}
-      <div className="text-[16px]">영업 상태 변경 &gt;</div>
-    </div>
+    <>
+      <div className="mx-[20px] flex flex-col gap-y-[3px] mt-[7px] bg-[#3A3A3A] rounded-[8px] py-[25px] px-[19px] text-white">
+        <div className="text-[24px]">{title}</div>
+        {sub && <div className="text-[20px]">{sub}</div>}
+        <div className="text-[16px]" onClick={() => setOpenChangeModal(true)}>
+          영업 상태 변경 &gt;
+        </div>
+      </div>
+
+      {openChangeModal && (
+        <CommonModal
+          cancelLabel="취소"
+          confirmLabel="변경하기"
+          desc="영업 상태 변경"
+          onCancelClick={() => setOpenChangeModal(false)}
+          onConfirmClick={() => handleConfirmChange()}
+        >
+          <CommonDropbox
+            options={OpStatusOption}
+            value={selectedOption}
+            onChange={setSelectedOption}
+          />
+        </CommonModal>
+      )}
+    </>
   );
 };
 
