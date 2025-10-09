@@ -7,7 +7,7 @@ from datetime import datetime
 from loguru import logger
 
 from config.settings import settings
-
+from services.email_templates import reservation, accept, customer_cancel, seller_cancel
 
 class EmailService:
     """구글 SMTP를 사용한 이메일 전송 서비스"""
@@ -111,19 +111,21 @@ class EmailService:
     def send_template(
         self,
         recipient_email: str,
-        template_type: str = "default"
+        store_name: str,
+        template_type: str
     ) -> Dict[str, Any]:
         """
         템플릿 기반 이메일 전송
         
         Args:
             recipient_email: 수신자 이메일
-            template_type: 템플릿 타입 (default, welcome, order 등)
+            template_type: 템플릿 타입
+            store_name: 가게 이름
             
         Returns:
             성공 여부와 메시지를 포함한 딕셔너리
         """
-        template_data = self._get_email_template(template_type, recipient_email)
+        template_data = self._get_email_template(template_type, recipient_email, store_name)
         
         return self.send(
             recipient_email=recipient_email,
@@ -135,88 +137,37 @@ class EmailService:
     def _get_email_template(
         self,
         template_type: str,
-        recipient_email: str
+        recipient_email: str,
+        store_name: str
     ) -> Dict[str, str]:
         """이메일 템플릿 반환"""
         timestamp = datetime.now().strftime("%Y년 %m월 %d일 %H:%M:%S")
         
         templates = {
-            "default": {
-                "subject": "[Cheap Bob] 테스트 이메일입니다 🍱",
-                "body": self._get_default_text_template(timestamp, recipient_email),
-                "html_body": self._get_default_html_template(timestamp, recipient_email)
+            "reservation": {
+                "subject": "[저렴한끼] 🎉 주문이 등록되었습니다!",
+                "body": reservation.get_reservation_text_template(timestamp, recipient_email),
+                "html_body": reservation.get_reservation_html_template(timestamp, recipient_email)
             },
-            "welcome": {
-                "subject": "[Cheap Bob] 회원가입을 환영합니다! 🎉",
-                "body": f"안녕하세요!\n\nCheap Bob에 가입해주셔서 감사합니다.\n이제 맛있는 도시락을 저렴하게 즐기실 수 있습니다.\n\n가입 일시: {timestamp}",
-                "html_body": None
+            "accept": {
+                "subject": "[저렴한끼] 🎉 픽업이 확정되었습니다!",
+                "body": accept.get_accept_text_template(timestamp, recipient_email, store_name),
+                "html_body": accept.get_accept_html_template(timestamp, recipient_email, store_name)
             },
-            "order": {
-                "subject": "[Cheap Bob] 주문이 확인되었습니다 📦",
-                "body": f"주문이 정상적으로 접수되었습니다.\n\n주문 일시: {timestamp}",
-                "html_body": None
+            "customer_cancel": {
+                "subject": "[저렴한끼] 주문이 취소되었습니다.",
+                "body": customer_cancel.get_customer_cancel_text_template(timestamp, recipient_email, store_name),
+                "html_body": customer_cancel.get_cusotmer_cancel_html_template(timestamp, recipient_email, store_name)
             },
-            "complete": {
-                "subject": "[Cheap Bob] 주문이 완료되었습니다 📦",
-                "body": f"주문이 정상적으로 완료되었습니다.\n\n주문 일시: {timestamp}",
-                "html_body": None
+            "seller_cancel": {
+                "subject": "[저렴한끼] 가게가 주문을 취소하였습니다.",
+                "body": seller_cancel.get_seller_cancel_text_template(timestamp, recipient_email, store_name),
+                "html_body": seller_cancel.get_seller_cancel_html_template(timestamp, recipient_email, store_name)
             }
         }
         
-        return templates.get(template_type, templates["default"])
-    
-    def _get_default_text_template(self, timestamp: str, recipient: str) -> str:
-        """기본 텍스트 템플릿"""
-        return f"""
-안녕하세요!
+        return templates.get(template_type)
 
-이것은 Cheap Bob의 테스트 이메일입니다.
-구글 SMTP를 사용하여 이메일이 정상적으로 발송되었습니다.
-
-발송 시간: {timestamp}
-수신자: {recipient}
-
-이 메일은 테스트 목적으로 발송되었습니다.
-© 2024 Cheap Bob. All rights reserved.
-        """
-    
-    def _get_default_html_template(self, timestamp: str, recipient: str) -> str:
-        """기본 HTML 템플릿"""
-        return f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                .header {{ background-color: #4CAF50; color: white; text-align: center; padding: 20px; border-radius: 10px 10px 0 0; }}
-                .content {{ background-color: #f4f4f4; padding: 30px; border-radius: 0 0 10px 10px; }}
-                .button {{ display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 20px; }}
-                .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #777; }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h1>🍱 Cheap Bob</h1>
-                </div>
-                <div class="content">
-                    <h2>안녕하세요!!!</h2>
-                    <p>Cheap Bob 이메일 테스트 입니다.</p>
-                    <p>이메일이 정상적으로 발송되었습니다.</p>
-                    <p><strong>발송 시간:</strong> {timestamp}</p>
-                    <p><strong>수신자:</strong> {recipient}</p>
-                    <a href="#" class="button">더 알아보기</a>
-                </div>
-                <div class="footer">
-                    <p>이 메일은 테스트 목적으로 발송되었습니다.</p>
-                    <p>© 2025 Cheap Bob. All rights reserved.</p>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
     def is_configured(self) -> bool:
         """SMTP 설정이 올바르게 구성되었는지 확인"""
         return bool(

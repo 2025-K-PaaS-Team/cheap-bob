@@ -8,7 +8,8 @@ from api.deps.repository import (
     OrderCurrentItemRepositoryDep,
     OrderHistoryItemRepositoryDep,
     StoreProductInfoRepositoryDep,
-    StorePaymentInfoRepositoryDep
+    StorePaymentInfoRepositoryDep,
+    StoreRepositoryDep
 )
 from repositories.store_product_info import StockUpdateResult
 from schemas.order import (
@@ -21,6 +22,7 @@ from schemas.order import (
     
 )
 from services.payment import PaymentService
+from services.email import email_service
 from config.settings import settings
 
 
@@ -334,11 +336,13 @@ async def cancel_order(
     current_user: CurrentCustomerDep,
     order_repo: OrderCurrentItemRepositoryDep,
     product_repo: StoreProductInfoRepositoryDep,
-    payment_info_repo: StorePaymentInfoRepositoryDep
+    payment_info_repo: StorePaymentInfoRepositoryDep,
+    store_repo: StoreRepositoryDep
 ):
     """
     주문 취소 (포트원 환불 포함)
     """
+    customer_email = current_user["sub"]
     
     # 주문 조회 (with product info)
     order = await order_repo.get_order_with_product_relation(payment_id)
@@ -394,6 +398,15 @@ async def cancel_order(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="재고 복구 중 충돌이 발생했습니다. 다시 시도해주세요."
             )
+    
+    # 소비자 주문 취소 이메일 서비스
+    if email_service.is_configured():
+        store = await store_repo.get_by_seller_email(order.product.store_id)
+        email_service.send_template(
+            recipient_email=customer_email,
+            store_name=store.store_name,
+            template_type="customer_cancel"
+        )
     
     return OrderCancelResponse(
         payment_id=payment_id,

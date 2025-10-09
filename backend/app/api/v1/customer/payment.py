@@ -20,6 +20,7 @@ from schemas.payment import (
     PaymentResponse
 )
 from services.payment import PaymentService
+from services.email import email_service
 from utils.docs_error import create_error_responses
 from utils.id_generator import generate_payment_id
 from utils.string_utils import join_values
@@ -359,6 +360,14 @@ async def confirm_payment(
         
         # 장바구니에서 삭제
         await cart_repo.delete(cart_item.payment_id)
+        
+        # 주문 예약 이메일 서비스
+        if email_service.is_configured():
+            email_service.send_template(
+                recipient_email=customer_email,
+                store_name="",
+                template_type="reservation"
+            )
         
         return PaymentResponse(
             payment_id=request.payment_id

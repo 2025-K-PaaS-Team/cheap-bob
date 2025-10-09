@@ -9,6 +9,7 @@ from repositories.store_operation_info import StoreOperationInfoRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
 from schemas.order import OrderStatus
 from services.payment import PaymentService
+from services.email import email_service
 
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ class AutoCancelReservationOrdersTask:
             async for session in get_db():
                 order_repo = OrderCurrentItemRepository(session)
                 payment_info_repo = StorePaymentInfoRepository(session)
-
+                
                 payment_info = await payment_info_repo.get_by_store_id(store_id)
 
                 if not payment_info or not payment_info.portone_secret_key:
@@ -69,7 +70,14 @@ class AutoCancelReservationOrdersTask:
                                 payment_id=order.payment_id,
                                 cancel_reason="픽업 마감 시간 종료로 인한 자동 환불"
                             )
-
+                            
+                            if email_service.is_configured():
+                                email_service.send_template(
+                                    recipient_email=order.customer_id,
+                                    store_name=store_name,
+                                    template_type="seller_cancel"
+                                )
+                            
                             cancelled_count += 1
                             total_refund_amount += order.total_amount
 
