@@ -94,6 +94,14 @@ class OAuthService:
         if not seller_exists:
             # 신규 회원 생성
             await self.seller_repository.create(email=email)
+        else:
+            # 기존 판매자인 경우 is_active 상태 확인
+            seller = await self.seller_repository.get_by_email(email)
+            if seller and not seller.is_active:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="탈퇴한 계정입니다. 재가입을 원하시면 고객센터로 문의해주세요."
+                )
         
         # JWT 토큰 생성
         access_token = self.jwt_service.create_user_token(
