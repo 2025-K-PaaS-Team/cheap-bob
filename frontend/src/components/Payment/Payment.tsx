@@ -62,7 +62,7 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
 
     try {
       const response = await PortOne.requestPayment({
-        storeId: "store-f7494ada-17a2-49c9-bb23-183d354afb27",
+        storeId: storeId,
         channelKey: "channel-key-2bde6533-669f-4e5a-ae0c-5a471f10a463",
         paymentId: paymentResult?.payment_id,
         orderName: item.name,
