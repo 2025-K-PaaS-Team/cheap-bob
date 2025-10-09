@@ -7,13 +7,12 @@ from api.deps.auth import CurrentSellerDep, CurrentSellerNoActiveDep
 from api.deps.repository import (
     SellerRepositoryDep,
     StoreRepositoryDep,
-    StoreOperationInfoRepositoryDep
+    StoreOperationInfoRepositoryDep,
+    SellerWithdrawReservationRepositoryDep
 )
 from api.deps.service import JWTServiceDep
 from schemas.auth import UserType
 from schemas.withdraw import WithdrawResponse
-
-from database.mongodb_models import SellerWithdrawReservation
 
 router = APIRouter(prefix="/withdraw", tags=["Seller-Withdraw"])
 
@@ -31,6 +30,7 @@ async def withdraw_seller(
     seller_repo: SellerRepositoryDep,
     store_repo: StoreRepositoryDep,
     operation_repo: StoreOperationInfoRepositoryDep,
+    withdraw_repo: SellerWithdrawReservationRepositoryDep,
     jwt_service: JWTServiceDep
 ):
     """
@@ -63,11 +63,10 @@ async def withdraw_seller(
     
     await seller_repo.update(seller_email, is_active=False)
     
-    withdraw_reservation = SellerWithdrawReservation(
+    await withdraw_repo.create_withdrawal(
         seller_email=seller_email,
         withdrawn_at=datetime.now(timezone.utc)
     )
-    await withdraw_reservation.insert()
     
     new_token = jwt_service.create_user_token(
         email=seller_email,
@@ -88,6 +87,7 @@ async def withdraw_seller(
 async def cancel_withdraw(
     current_user: CurrentSellerNoActiveDep,
     seller_repo: SellerRepositoryDep,
+    withdraw_repo: SellerWithdrawReservationRepositoryDep,
     jwt_service: JWTServiceDep
 ):
     """
@@ -110,9 +110,7 @@ async def cancel_withdraw(
             detail="이미 활성화된 계정입니다"
         )
     
-    withdraw_record = await SellerWithdrawReservation.find_one(
-        SellerWithdrawReservation.seller_email == seller_email
-    )
+    withdraw_record = await withdraw_repo.get_by_seller_email(seller_email)
     
     if not withdraw_record:
         raise HTTPException(
@@ -122,7 +120,7 @@ async def cancel_withdraw(
     
     await seller_repo.update(seller.email, is_active=True)
     
-    await withdraw_record.delete()
+    await withdraw_repo.delete_by_seller_email(seller_email)
     
     new_token = jwt_service.create_user_token(
         email=seller_email,

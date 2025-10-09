@@ -16,6 +16,7 @@ from repositories.customer_preferences import (
 from repositories.customer_favorite import CustomerFavoriteRepository
 # 판매자
 from repositories.seller import SellerRepository
+from repositories.seller_withdraw_reservation import SellerWithdrawReservationRepository
 from repositories.store import StoreRepository
 from repositories.store_image import StoreImageRepository
 from repositories.store_address import StoreAddressRepository
@@ -67,6 +68,10 @@ def get_customer_favorite_repository(session: AsyncSessionDep) -> CustomerFavori
 # 판매자
 def get_seller_repository(session: AsyncSessionDep) -> SellerRepository:
     return SellerRepository(session)
+
+
+def get_seller_withdraw_reservation_repository() -> SellerWithdrawReservationRepository:
+    return SellerWithdrawReservationRepository()
 
 
 def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
@@ -131,6 +136,7 @@ CustomerFavoriteRepositoryDep = Annotated[CustomerFavoriteRepository, Depends(ge
 # 판매자
 SellerRepositoryDep = Annotated[SellerRepository, Depends(get_seller_repository)]
 StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
+SellerWithdrawReservationRepositoryDep = Annotated[SellerWithdrawReservationRepository, Depends(get_seller_withdraw_reservation_repository)]
 StoreImageRepositoryDep = Annotated[StoreImageRepository, Depends(get_store_image_repository)]
 StorePaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_store_payment_info_repository)]
 StoreAddressRepositoryDep = Annotated[StoreAddressRepository, Depends(get_store_address_repository)]
