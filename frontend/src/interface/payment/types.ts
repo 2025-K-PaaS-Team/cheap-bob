@@ -28,3 +28,23 @@ export type PaymentResponseType = PaymentBaseType & {
 };
 
 export type PaymentConfirmType = PaymentBaseType;
+
+export type SettlementWeekType = {
+  total_revenue: number;
+};
+
+export type SettlementItemType = {
+  product_name: string;
+  quantity: number;
+  total_amount: number;
+  status: string;
+};
+
+export type SettlementBaseType = {
+  date: string;
+  items: SettlementItemType[];
+};
+
+export type SettlementType = {
+  daily_settlements: SettlementBaseType[];
+};
