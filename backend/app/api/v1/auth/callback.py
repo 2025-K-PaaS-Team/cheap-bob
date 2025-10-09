@@ -113,8 +113,7 @@ async def customer_oauth_callback(
 
 @router.get("/{provider}/callback/seller",
     responses=create_error_responses({         
-        400:"Oauth 로그인 에러가 발생",
-        403:"탈퇴한 회원임"
+        400:"Oauth 로그인 에러가 발생"
     })
 )
 async def seller_oauth_callback(
