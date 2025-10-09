@@ -15,7 +15,7 @@ from schemas.withdraw import WithdrawResponse
 router = APIRouter(prefix="/withdraw", tags=["Customer-Withdraw"])
 
 
-@router.post("", status_code=status.HTTP_200_OK,
+@router.post("", status_code=status.HTTP_200_OK, response_model=WithdrawResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
         403: ["진행 중인 주문이 있어 탈퇴할 수 없음"],
@@ -74,7 +74,7 @@ async def withdraw_customer(
     return WithdrawResponse(message="탈퇴가 완료되었습니다", access_token=new_token)
 
 
-@router.delete("/cancel", status_code=status.HTTP_200_OK,
+@router.delete("/cancel", status_code=status.HTTP_200_OK, response_model=WithdrawResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
         404: ["소비자를 찾을 수 없음", "탈퇴 기록을 찾을 수 없음"],
