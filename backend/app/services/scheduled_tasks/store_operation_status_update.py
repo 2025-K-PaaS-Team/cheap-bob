@@ -18,24 +18,22 @@ class StoreOperationStatusUpdateTask:
     
     @staticmethod
     async def update_store_operation_status():
-        """전날의 is_open_enabled 값으로 is_currently_open을 업데이트하는 메인 로직"""
+        """당일 is_currently_open을 업데이트하는 메인 로직"""
         logger.info("가게 운영 상태 업데이트 작업 시작...")
         start_time = datetime.now(timezone.utc)
         
         try:
             now_kst = datetime.now(KST)
-            yesterday_kst = now_kst - timedelta(days=1)
-            yesterday_day_of_week = yesterday_kst.weekday()
+            now_kst_day_of_week = now_kst.weekday()
             
             logger.info(
                 f"KST 기준 - 현재: {now_kst.strftime('%Y-%m-%d %H:%M:%S')}, "
-                f"어제: {yesterday_kst.strftime('%Y-%m-%d')}, "
-                f"어제 요일: {yesterday_day_of_week}"
+                f"오늘 요일: {now_kst_day_of_week}"
             )
             async for session in get_db():
                 stmt = (
                     update(StoreOperationInfo)
-                    .where(StoreOperationInfo.day_of_week == yesterday_day_of_week)
+                    .where(StoreOperationInfo.day_of_week == now_kst_day_of_week)
                     .values(is_currently_open=StoreOperationInfo.is_open_enabled)
                 )
                 
@@ -52,7 +50,7 @@ class StoreOperationStatusUpdateTask:
                 
                 # 업데이트 통계 로깅
                 StoreOperationStatusUpdateTask._log_update_statistics(
-                    updated_count, yesterday_day_of_week
+                    updated_count, now_kst_day_of_week
                 )
                 
         except Exception as e:

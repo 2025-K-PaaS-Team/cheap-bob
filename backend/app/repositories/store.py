@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Tuple
-from sqlalchemy import select, and_, or_, update as sql_update, func
+from sqlalchemy import select, and_, or_, update as sql_update, case
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -256,15 +256,21 @@ class StoreRepository(BaseRepository[Store]):
     
     async def get_stores_with_products_and_favorites(self, customer_email: str, offset: int = 0, limit: int = 4) -> tuple[List[tuple[Store, bool]], bool]:
         """상품이 있는 가게들과 즐겨찾기 여부를 함께 조회"""
-        subquery = (
+        
+        favorite_stores_query = (
             select(CustomerFavorite.store_id)
             .where(CustomerFavorite.customer_email == customer_email)
-            .subquery()
         )
         
         query = (
-            select(Store, Store.store_id.in_(subquery))
-            .join(Store.products)  # INNER JOIN으로 상품이 있는 가게만 필터링
+            select(
+                Store,
+                case(
+                    (Store.store_id.in_(favorite_stores_query), True),
+                    else_=False
+                ).label('is_favorite')
+            )
+            .join(Store.products)
             .options(
                 selectinload(Store.address),
                 selectinload(Store.sns_info),
@@ -275,13 +281,14 @@ class StoreRepository(BaseRepository[Store]):
             .order_by(Store.created_at.desc())
             .distinct()  # 중복 제거
         )
+        
         # 페이지네이션 적용
         paginated_query = query.offset(offset).limit(limit+1)
         result = await self.session.execute(paginated_query)
         items = result.unique().all()
         
         has_next = len(items) > limit
-    
+        
         return items[:limit], not has_next
     
     async def search_by_location(
