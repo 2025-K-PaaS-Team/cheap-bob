@@ -17,6 +17,8 @@ import type {
   SnsInfoType,
   StoreDetailType,
   StoreOperationType,
+  StorePaymentResponseType,
+  StorePaymentType,
   UpdateStoreAddrType,
   UpdateStoreImgType,
   UpdateStoreSnsType,
@@ -161,6 +163,15 @@ export const CreateOperationReservation = async (
     "/operation/reservation",
     res
   );
+
+  return data;
+};
+
+// PATCH: Update store payment
+export const UpdateStorePayment = async (
+  body: StorePaymentType
+): Promise<StorePaymentResponseType> => {
+  const { data } = await sellerStoreSettingsApi.put("/payment", body);
 
   return data;
 };

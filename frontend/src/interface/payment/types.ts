@@ -48,3 +48,12 @@ export type SettlementBaseType = {
 export type SettlementType = {
   daily_settlements: SettlementBaseType[];
 };
+
+export type StorePaymentType = {
+  portone_store_id: string;
+  portone_channel_id: string;
+};
+
+export type StorePaymentResponseType = StorePaymentType & {
+  store_id: string;
+};
