@@ -12,7 +12,7 @@ from services.scheduled_tasks.operation_modification_apply import scheduled_task
 from services.scheduled_tasks.store_operation_status_update import scheduled_task as store_operation_status_update_task
 from services.scheduled_tasks.auto_cancel_reservation_orders import scheduled_task as store_auto_complete_order_task, AutoCancelReservationOrdersTask
 from services.scheduled_tasks.auto_complete_orders import scheduled_task as store_auto_cancel_reservation_order_task, AutoCompleteOrdersTask
-
+from services.scheduled_tasks.user_withdraw_process import scheduled_task as user_withdraw_process_task
 
 logger = logging.getLogger(__name__)
 KST = pytz_timezone('Asia/Seoul')
@@ -29,7 +29,8 @@ class SchedulerService:
             inventory_reset_task,
             order_migration_task,
             OperationModificationApplyTask,
-            store_operation_status_update_task
+            store_operation_status_update_task,
+            user_withdraw_process_task
         ]
     
     def start(self):
