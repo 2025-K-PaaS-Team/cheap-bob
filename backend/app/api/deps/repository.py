@@ -14,6 +14,7 @@ from repositories.customer_preferences import (
     CustomerToppingTypeRepository
 )
 from repositories.customer_favorite import CustomerFavoriteRepository
+from repositories.customer_withdraw_reservation import CustomerWithdrawReservationRepository
 # 판매자
 from repositories.seller import SellerRepository
 from repositories.seller_withdraw_reservation import SellerWithdrawReservationRepository
@@ -63,6 +64,10 @@ def get_customer_topping_type_repository(session: AsyncSessionDep) -> CustomerTo
 
 def get_customer_favorite_repository(session: AsyncSessionDep) -> CustomerFavoriteRepository:
     return CustomerFavoriteRepository(session)
+
+
+def get_customer_withdraw_reservation_repository() -> CustomerWithdrawReservationRepository:
+    return CustomerWithdrawReservationRepository()
 
 
 # 판매자
@@ -133,6 +138,7 @@ CustomerNutritionTypeRepositoryDep = Annotated[CustomerNutritionTypeRepository, 
 CustomerAllergyRepositoryDep = Annotated[CustomerAllergyRepository, Depends(get_customer_allergy_repository)]
 CustomerToppingTypeRepositoryDep = Annotated[CustomerToppingTypeRepository, Depends(get_customer_topping_type_repository)]
 CustomerFavoriteRepositoryDep = Annotated[CustomerFavoriteRepository, Depends(get_customer_favorite_repository)]
+CustomerWithdrawReservationRepositoryDep = Annotated[CustomerWithdrawReservationRepository, Depends(get_customer_withdraw_reservation_repository)]
 # 판매자
 SellerRepositoryDep = Annotated[SellerRepository, Depends(get_seller_repository)]
 StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
