@@ -10,7 +10,6 @@ export type ItemType = {
   price: number;
   currency: "KRW";
   currencyLabel: "원";
-  img: string;
 };
 
 export type PaymentRequestType = {

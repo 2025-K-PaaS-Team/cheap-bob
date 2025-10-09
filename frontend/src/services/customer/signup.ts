@@ -27,6 +27,13 @@ export const CreateCustomerRegister = async (
   return data;
 };
 
+// GET: get customer detail
+export const GetCustomerDetail = async (): Promise<CustomerDetailType> => {
+  const { data } = await customerProfileApi.get("/detail");
+
+  return data;
+};
+
 // PATCH: update customer detail
 export const UpdateCustomerDetail = async (
   body: CustomerDetailBaseType

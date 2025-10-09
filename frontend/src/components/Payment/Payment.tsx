@@ -1,4 +1,6 @@
+import { CommonBtn } from "@components/common";
 import type {
+  CustomerDetailType,
   ItemType,
   PaymentResponseType,
   ProductBaseType,
@@ -6,19 +8,19 @@ import type {
 import PortOne from "@portone/browser-sdk/v2";
 import { confrimPayment, initPayment } from "@services";
 
-type PortOneLabProps = {
+type PortOneProps = {
   storeId: string;
   product: ProductBaseType;
+  customer: CustomerDetailType;
 };
 
-const PortOneLab = ({ storeId, product }: PortOneLabProps) => {
+const Payment = ({ storeId, product, customer }: PortOneProps) => {
   const item: ItemType = {
     id: product.product_id,
     name: product.product_name,
     price: product.price,
     currency: "KRW",
     currencyLabel: "원",
-    img: "https://velog.velcdn.com/images/gimgyuwon/profile/e18f35d4-46dd-4ea7-859a-53bfaaad629b/image.png",
   };
 
   const handleInitPayment = async (): Promise<PaymentResponseType | null> => {
@@ -72,14 +74,13 @@ const PortOneLab = ({ storeId, product }: PortOneLabProps) => {
         },
         redirectUrl: window.location.href,
         customer: {
-          fullName: "김규원",
-          email: "gimgyuwon2@gmail.com",
-          phoneNumber: "01086910510",
+          fullName: customer.nickname,
+          email: customer.customer_email,
+          phoneNumber: customer.phone_number,
         },
         customData: {
           productId: product.product_id,
           quantity: 1,
-          userId: "USR_12345",
           storeId: storeId,
         },
       });
@@ -100,12 +101,15 @@ const PortOneLab = ({ storeId, product }: PortOneLabProps) => {
           <div>결제 정보를 불러오는 중입니다.</div>
         ) : (
           <>
-            <div className="flex flex-row gap-x-5">
-              <button type="submit" className="p-3 bg-orange-300 rounded-xl">
-                결제
-              </button>
-              <button className="p-3 bg-gray-300 rounded-xl">새로고침</button>
-            </div>
+            <CommonBtn
+              type="submit"
+              category="white"
+              width="w-full"
+              notBottom
+              label={`${(product.price * product.sale) / 100}원 구매하기 (${
+                product.current_stock
+              }개 남음)`}
+            />
           </>
         )}
       </form>
@@ -113,4 +117,4 @@ const PortOneLab = ({ storeId, product }: PortOneLabProps) => {
   );
 };
 
-export default PortOneLab;
+export default Payment;
