@@ -9,7 +9,8 @@ from api.v1.seller import (
     store,
     product, 
     order,
-    store_settlement
+    store_settlement,
+    withdraw
 )
 
 router = APIRouter(prefix="/seller")
@@ -23,3 +24,4 @@ router.include_router(store.router)
 router.include_router(product.router)
 router.include_router(order.router)
 router.include_router(store_settlement.router)
+router.include_router(withdraw.router)

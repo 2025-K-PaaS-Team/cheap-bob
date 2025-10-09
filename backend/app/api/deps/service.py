@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
+from api.deps.repository import CustomerRepositoryDep, SellerRepositoryDep
 from api.deps.database import AsyncSessionDep
 from services.auth.jwt import JWTService
 from services.auth.oauth_service import OAuthService
@@ -13,14 +14,13 @@ def get_jwt_service() -> JWTService:
 
 
 def get_oauth_service(
-    session: AsyncSessionDep,
+    customer_repository: CustomerRepositoryDep,
+    seller_repository: SellerRepositoryDep,
     jwt_service: Annotated[JWTService, Depends(get_jwt_service)]
 ) -> OAuthService:
-    from repositories.customer import CustomerRepository
-    from repositories.seller import SellerRepository
     return OAuthService(
-        customer_repository=CustomerRepository(session),
-        seller_repository=SellerRepository(session),
+        customer_repository=customer_repository,
+        seller_repository=seller_repository,
         jwt_service=jwt_service
     )
 

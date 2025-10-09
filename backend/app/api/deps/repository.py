@@ -4,6 +4,7 @@ from fastapi import Depends
 
 from api.deps.database import AsyncSessionDep
 # 소비자
+from repositories.customer import CustomerRepository
 from repositories.customer_detail import CustomerDetailRepository
 from repositories.customer_profile import CustomerProfileRepository
 from repositories.customer_preferences import (
@@ -13,8 +14,10 @@ from repositories.customer_preferences import (
     CustomerToppingTypeRepository
 )
 from repositories.customer_favorite import CustomerFavoriteRepository
+from repositories.customer_withdraw_reservation import CustomerWithdrawReservationRepository
 # 판매자
 from repositories.seller import SellerRepository
+from repositories.seller_withdraw_reservation import SellerWithdrawReservationRepository
 from repositories.store import StoreRepository
 from repositories.store_image import StoreImageRepository
 from repositories.store_address import StoreAddressRepository
@@ -32,6 +35,9 @@ from repositories.order_history_item import OrderHistoryItemRepository
 
 
 # 소비자
+def get_customer_repository(session: AsyncSessionDep) -> CustomerRepository:
+    return CustomerRepository(session)
+
 def get_customer_detail_repository(session: AsyncSessionDep) -> CustomerDetailRepository:
     return CustomerDetailRepository(session)
 
@@ -60,9 +66,17 @@ def get_customer_favorite_repository(session: AsyncSessionDep) -> CustomerFavori
     return CustomerFavoriteRepository(session)
 
 
+def get_customer_withdraw_reservation_repository() -> CustomerWithdrawReservationRepository:
+    return CustomerWithdrawReservationRepository()
+
+
 # 판매자
 def get_seller_repository(session: AsyncSessionDep) -> SellerRepository:
     return SellerRepository(session)
+
+
+def get_seller_withdraw_reservation_repository() -> SellerWithdrawReservationRepository:
+    return SellerWithdrawReservationRepository()
 
 
 def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
@@ -116,6 +130,7 @@ def get_order_history_item_repository() -> OrderHistoryItemRepository:
 
 
 # 소비자
+CustomerRepositoryDep = Annotated[CustomerRepository, Depends(get_customer_repository)]
 CustomerDetailRepositoryDep = Annotated[CustomerDetailRepository, Depends(get_customer_detail_repository)]
 CustomerProfileRepositoryDep = Annotated[CustomerProfileRepository, Depends(get_customer_profile_repository)]
 CustomerPreferredMenuRepositoryDep = Annotated[CustomerPreferredMenuRepository, Depends(get_customer_preferred_menu_repository)]
@@ -123,9 +138,11 @@ CustomerNutritionTypeRepositoryDep = Annotated[CustomerNutritionTypeRepository, 
 CustomerAllergyRepositoryDep = Annotated[CustomerAllergyRepository, Depends(get_customer_allergy_repository)]
 CustomerToppingTypeRepositoryDep = Annotated[CustomerToppingTypeRepository, Depends(get_customer_topping_type_repository)]
 CustomerFavoriteRepositoryDep = Annotated[CustomerFavoriteRepository, Depends(get_customer_favorite_repository)]
+CustomerWithdrawReservationRepositoryDep = Annotated[CustomerWithdrawReservationRepository, Depends(get_customer_withdraw_reservation_repository)]
 # 판매자
 SellerRepositoryDep = Annotated[SellerRepository, Depends(get_seller_repository)]
 StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
+SellerWithdrawReservationRepositoryDep = Annotated[SellerWithdrawReservationRepository, Depends(get_seller_withdraw_reservation_repository)]
 StoreImageRepositoryDep = Annotated[StoreImageRepository, Depends(get_store_image_repository)]
 StorePaymentInfoRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_store_payment_info_repository)]
 StoreAddressRepositoryDep = Annotated[StoreAddressRepository, Depends(get_store_address_repository)]
