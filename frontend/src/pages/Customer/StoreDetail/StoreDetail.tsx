@@ -1,11 +1,15 @@
-// import PortOneLab from "@components/Lab/PortoneLab";
 import { CommonModal } from "@components/common";
-import PortOneLab from "@components/Lab/PortoneLab";
+import Payment from "@components/Payment/Payment";
 import { idxToDow, NutritionList } from "@constant";
-import type { ProductType, StoreSearchBaseType } from "@interface";
+import type {
+  CustomerDetailType,
+  ProductType,
+  StoreSearchBaseType,
+} from "@interface";
 import type { CoordBaseType } from "@interface/common/types";
 import {
   AddFavoriteStore,
+  GetCustomerDetail,
   getStoreProduct,
   RemoveFavoriteStore,
 } from "@services";
@@ -22,6 +26,7 @@ const StoreDetail = () => {
   const { storeId } = useParams<{ storeId: string }>();
   const [product, setProduct] = useState<ProductType | null>(null);
   const [isFavor, setIsFavor] = useState<boolean>(store.is_favorite);
+  const [customer, setCustomer] = useState<CustomerDetailType | null>(null);
   const [startCoord, setStartCoord] = useState<CoordBaseType>({
     lat: "",
     lng: "",
@@ -39,6 +44,17 @@ const StoreDetail = () => {
     window.open(directionUrl, "_blank");
   };
 
+  // get customer detail
+  const handleGetCustomerDetail = async () => {
+    try {
+      const res = await GetCustomerDetail();
+      setCustomer(res);
+    } catch (err) {
+      setModalMsg("고객 데이터 가져오기에 실패했습니다.");
+      setShowModal(true);
+    }
+  };
+
   const handleGetProducts = async (id: string) => {
     try {
       const res = await getStoreProduct(id);
@@ -50,6 +66,8 @@ const StoreDetail = () => {
   };
 
   useEffect(() => {
+    handleGetCustomerDetail();
+
     if (storeId) {
       handleGetProducts(storeId);
     }
@@ -118,7 +136,7 @@ const StoreDetail = () => {
             </div>
           </div>
 
-          <div className="flex flex-col mx-[20px] mt-[33px] gap-y-[30px] relative">
+          <div className="flex flex-col mx-[20px] my-[33px] gap-y-[30px] relative">
             {/* store name */}
             <div className="font-bold text-[15px]">
               {product.store_name}
@@ -284,8 +302,12 @@ const StoreDetail = () => {
               </div>
             </div>
 
-            {storeId && (
-              <PortOneLab storeId={storeId} product={product.products[0]} />
+            {storeId && customer && (
+              <Payment
+                storeId={storeId}
+                product={product.products[0]}
+                customer={customer}
+              />
             )}
           </div>
         </div>

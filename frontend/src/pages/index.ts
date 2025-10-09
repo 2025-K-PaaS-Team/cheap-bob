@@ -20,5 +20,5 @@ export * from "./Seller/Billing";
 
 // lab
 export { default as CustomerLab } from "./Common/Lab/CustomerLab";
-export { default as PortOneLab } from "../components/Lab/PortoneLab";
+export { default as PortOneLab } from "../components/Payment/Payment";
 export { default as QrLab } from "./Common/Lab/QrLab";

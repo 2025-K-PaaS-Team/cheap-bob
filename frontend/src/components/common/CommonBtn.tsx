@@ -4,11 +4,13 @@ type BtnProps = {
   notBottom?: boolean;
   className?: string;
   width?: string;
-  onClick: () => void;
+  onClick?: () => void;
+  type?: "button" | "submit" | "reset";
 };
 
 const CommonBtn = ({
   category = "white",
+  type,
   label,
   onClick,
   className,
@@ -25,6 +27,7 @@ const CommonBtn = ({
 
   return (
     <button
+      type={type}
       onClick={onClick}
       className={`font-bold rounded-[10px] text-base h-[54px] flex justify-center items-center
         ${notBottom ? "" : "absolute bottom-[38px] left-1/2 -translate-x-1/2"} 
