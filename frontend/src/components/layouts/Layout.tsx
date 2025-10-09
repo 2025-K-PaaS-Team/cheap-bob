@@ -53,11 +53,6 @@ const Layout = () => {
         navigate("/s", { replace: true });
         return;
       }
-
-      if (!role) {
-        navigate("/c", { replace: true });
-        return;
-      }
     }
   }, [location.pathname, navigate]);
 
