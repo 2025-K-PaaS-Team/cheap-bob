@@ -36,7 +36,7 @@ const StoreDetail = () => {
     endLng: 0,
   });
   const [descOpen, setDescOpen] = useState<boolean>(false);
-  const todayDow = dayjs().day();
+  const todayDow = (dayjs().day() + 6) % 7;
 
   const directionUrl = `http://map.naver.com/index.nhn?slng=${startCoord.lng}&slat=${startCoord.lat}&stext=내위치&elng=${endCoord.endLng}&elat=${endCoord.endLat}&etext=도착가게&menu=route&pathType=1`;
   const handleClickDirection = () => {
