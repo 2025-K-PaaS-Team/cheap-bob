@@ -33,8 +33,6 @@ const Layout = () => {
     const token = localStorage.getItem("accessToken");
     const role = localStorage.getItem("loginRole");
 
-    console.log(path);
-
     if (role === "seller" && path.startsWith("/c")) {
       navigate("/auth/role-check", { replace: true });
       return;
