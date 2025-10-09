@@ -14,11 +14,13 @@ def get_jwt_service() -> JWTService:
 
 
 def get_oauth_service(
+    customer_repository: CustomerRepositoryDep,
+    seller_repository: SellerRepositoryDep,
     jwt_service: Annotated[JWTService, Depends(get_jwt_service)]
 ) -> OAuthService:
     return OAuthService(
-        customer_repository=CustomerRepositoryDep,
-        seller_repository=SellerRepositoryDep,
+        customer_repository=customer_repository,
+        seller_repository=seller_repository,
         jwt_service=jwt_service
     )
 
