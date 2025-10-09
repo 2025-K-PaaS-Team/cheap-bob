@@ -2,7 +2,7 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from beanie import init_beanie
 
 from config.settings import settings
-from database.mongodb_models import OrderHistoryItem, SellerWithdrawReservation
+from database.mongodb_models import OrderHistoryItem, SellerWithdrawReservation, CustomerWithdrawReservation
 
 class MongoDB:
     """MongoDB 클라이언트 및 데이터베이스 관리"""
@@ -17,7 +17,7 @@ class MongoDB:
         
         await init_beanie(
             database=self.database,
-            document_models=[OrderHistoryItem, SellerWithdrawReservation]
+            document_models=[OrderHistoryItem, SellerWithdrawReservation, CustomerWithdrawReservation]
         )
         
     async def disconnect(self):
