@@ -10,6 +10,8 @@ from database.models.store_product_info import StoreProductInfo
 from database.models.store_payment_info import StorePaymentInfo
 from database.models.store_operation_info import StoreOperationInfo
 from database.models.customer_favorite import CustomerFavorite
+from database.models.order_current_item import OrderCurrentItem
+from schemas.order import OrderStatus
 from repositories.base import BaseRepository
 
 
@@ -521,3 +523,19 @@ class StoreRepository(BaseRepository[Store]):
         )
         result = await self.session.execute(query)
         return result.scalars().unique().all()
+    
+    async def has_active_orders(self, store_id: str) -> bool:
+        """가게에 진행 중인 주문이 있는지 확인"""
+        query = (
+            select(OrderCurrentItem)
+            .join(StoreProductInfo, OrderCurrentItem.product_id == StoreProductInfo.product_id)
+            .where(
+                and_(
+                    StoreProductInfo.store_id == store_id,
+                    OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept])
+                )
+            )
+            .limit(1)
+        )
+        result = await self.session.execute(query)
+        return result.scalars().first() is not None
