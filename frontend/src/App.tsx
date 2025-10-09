@@ -18,6 +18,7 @@ import {
   Dashboard,
   SellerSignup,
   LoginFail,
+  RoleCheck,
 } from "@pages";
 import {
   ChangeOperationInfo,
@@ -45,6 +46,8 @@ const App = () => {
       <Route path="/auth/success" element={<LoginCallback />} />
       {/* login 409 failed */}
       <Route path="/auth/fail" element={<LoginFail />} />
+      {/* role path */}
+      <Route path="/auth/role-check" element={<RoleCheck />} />
 
       {/* customer side */}
       <Route path="/c" element={<Layout />}>

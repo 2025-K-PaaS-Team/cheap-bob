@@ -3,7 +3,6 @@ import { useNavigate } from "react-router";
 
 const LoginFail = () => {
   const navigate = useNavigate();
-  localStorage.removeItem("accessToken");
 
   return (
     <div className="flex flex-col h-full items-center justify-center text-center">

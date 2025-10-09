@@ -1,6 +1,4 @@
 import { LoginButton, HomeSwiper } from "@components/common/home";
-import { useEffect } from "react";
-import { useNavigate } from "react-router";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -9,15 +7,7 @@ import "swiper/css/pagination";
 import { homeSwiperMap } from "@constant";
 
 const Home = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-
-    if (token) {
-      navigate("stores");
-    }
-  }, []);
+  localStorage.clear();
 
   return (
     <div className="flex flex-col justify-around w-full min-h-screen py-[30px]">
