@@ -4,6 +4,7 @@ from fastapi import Depends
 
 from api.deps.database import AsyncSessionDep
 # 소비자
+from repositories.customer import CustomerRepository
 from repositories.customer_detail import CustomerDetailRepository
 from repositories.customer_profile import CustomerProfileRepository
 from repositories.customer_preferences import (
@@ -32,6 +33,9 @@ from repositories.order_history_item import OrderHistoryItemRepository
 
 
 # 소비자
+def get_customer_repository(session: AsyncSessionDep) -> CustomerRepository:
+    return CustomerRepository(session)
+
 def get_customer_detail_repository(session: AsyncSessionDep) -> CustomerDetailRepository:
     return CustomerDetailRepository(session)
 
@@ -116,6 +120,7 @@ def get_order_history_item_repository() -> OrderHistoryItemRepository:
 
 
 # 소비자
+CustomerRepositoryDep = Annotated[CustomerRepository, Depends(get_customer_repository)]
 CustomerDetailRepositoryDep = Annotated[CustomerDetailRepository, Depends(get_customer_detail_repository)]
 CustomerProfileRepositoryDep = Annotated[CustomerProfileRepository, Depends(get_customer_profile_repository)]
 CustomerPreferredMenuRepositoryDep = Annotated[CustomerPreferredMenuRepository, Depends(get_customer_preferred_menu_repository)]
