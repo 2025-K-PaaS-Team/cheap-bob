@@ -11,6 +11,36 @@ const attachInterceptors = (instance: AxiosInstance) => {
     }
     return config;
   });
+
+  instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      const status = error.response?.status;
+      const role = localStorage.getItem("loginRole");
+
+      // 401 Unauthorized
+      if (status === 401) {
+        if (role === "seller") {
+          window.location.href = "/s";
+        } else {
+          window.location.href = "/c";
+        }
+        return Promise.reject(error);
+      }
+
+      // 439 Withdrawn user
+      if (status === 439) {
+        if (role === "seller") {
+          window.location.href = "/s";
+        } else {
+          window.location.href = "/c";
+        }
+        return Promise.reject(error);
+      }
+
+      return Promise.reject(error);
+    }
+  );
   return instance;
 };
 
