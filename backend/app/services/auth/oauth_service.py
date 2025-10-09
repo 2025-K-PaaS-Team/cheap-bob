@@ -75,8 +75,16 @@ class OAuthService:
     
     async def _handle_seller_login(self, email: str) -> Tuple[TokenResponse, bool]:
         # Customer로 이미 가입되어 있는지 체크
-        customer_exists = await self.customer_repository.exists_by_email(email)
-        if customer_exists:
+        customer = await self.customer_repository.get_by_email(email)
+        
+        if customer:
+            # is_active 상태 확인
+            if customer and not customer.is_active:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="탈퇴한 계정입니다. 재가입을 원하시면 고객센터로 문의해주세요."
+                )
+            
             # 이미 소비자로 가입, 충돌 발생
             access_token = self.jwt_service.create_user_token(
                 email=email,
@@ -87,16 +95,14 @@ class OAuthService:
             #     status_code=status.HTTP_409_CONFLICT,
             #     detail="이미 소비자로 존재하는 회원입니다."
             # )
+            
+        seller = await self.seller_repository.get_by_email(email)
         
-        # Seller로 가입되어 있는지 체크
-        seller_exists = await self.seller_repository.exists_by_email(email)
-        
-        if not seller_exists:
+        if not seller:
             # 신규 회원 생성
             await self.seller_repository.create(email=email)
         else:
-            # 기존 판매자인 경우 is_active 상태 확인
-            seller = await self.seller_repository.get_by_email(email)
+            # is_active 상태 확인
             if seller and not seller.is_active:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
