@@ -39,9 +39,9 @@ class JWTService:
         except JWTError:
             return None
     
-    def create_user_token(self, email: str, user_type: str) -> str:
+    def create_user_token(self, email: str, user_type: str, is_active: bool) -> str:
         access_token = self.create_access_token(
-            data={"sub": email},
+            data={"sub": email, "is_active": is_active},
             user_type=user_type
         )
         return access_token
@@ -73,7 +73,8 @@ class JWTService:
         if exp - now < timedelta(minutes=5):
             new_token = self.create_user_token(
                 email=payload['sub'],
-                user_type=payload['user_type']
+                user_type=payload['user_type'],
+                is_active=payload['is_active']
             )
             return True, new_token, payload
         

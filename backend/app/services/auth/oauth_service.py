@@ -1,6 +1,4 @@
-from typing import Union, Tuple
-
-from fastapi import HTTPException, status
+from typing import Tuple
 
 from config.oauth import OAuthProvider
 from repositories.customer import CustomerRepository
@@ -45,12 +43,13 @@ class OAuthService:
     
     async def _handle_customer_login(self, email: str) -> Tuple[TokenResponse, bool]:
         # Seller로 이미 가입되어 있는지 체크
-        seller_exists = await self.seller_repository.exists_by_email(email)
-        if seller_exists:
+        seller = await self.seller_repository.get_by_email(email)
+        if seller:
             # 이미 판매자로 가입, 충돌 발생
             access_token = self.jwt_service.create_user_token(
                 email=email,
-                user_type=UserType.SELLER.value
+                user_type=UserType.SELLER.value,
+                is_active=seller.is_active
             )
             return TokenResponse(access_token=access_token, user_type=UserType.SELLER), True
             # raise HTTPException(
@@ -59,16 +58,20 @@ class OAuthService:
             # )
         
         # Customer로 가입되어 있는지 체크
-        customer_exists = await self.customer_repository.exists_by_email(email)
+        customer = await self.customer_repository.get_by_email(email)
         
-        if not customer_exists:
+        if not customer:
             # 신규 회원 생성
             await self.customer_repository.create(email=email)
+            is_active = True
+        else:
+            is_active = customer.is_active
         
         # JWT 토큰 생성
         access_token = self.jwt_service.create_user_token(
             email=email,
-            user_type=UserType.CUSTOMER.value
+            user_type=UserType.CUSTOMER.value,
+            is_active=is_active
         )
         
         return TokenResponse(access_token=access_token, user_type=UserType.CUSTOMER), False
@@ -78,17 +81,11 @@ class OAuthService:
         customer = await self.customer_repository.get_by_email(email)
         
         if customer:
-            # is_active 상태 확인
-            if customer and not customer.is_active:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="탈퇴한 계정입니다. 재가입을 원하시면 고객센터로 문의해주세요."
-                )
-            
             # 이미 소비자로 가입, 충돌 발생
             access_token = self.jwt_service.create_user_token(
                 email=email,
-                user_type=UserType.CUSTOMER.value
+                user_type=UserType.CUSTOMER.value,
+                is_active=customer.is_active
             )
             return TokenResponse(access_token=access_token, user_type=UserType.CUSTOMER), True
             # raise HTTPException(
@@ -101,18 +98,15 @@ class OAuthService:
         if not seller:
             # 신규 회원 생성
             await self.seller_repository.create(email=email)
+            is_active = True
         else:
-            # is_active 상태 확인
-            if seller and not seller.is_active:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="탈퇴한 계정입니다. 재가입을 원하시면 고객센터로 문의해주세요."
-                )
+            is_active = seller.is_active
         
         # JWT 토큰 생성
         access_token = self.jwt_service.create_user_token(
             email=email,
-            user_type=UserType.SELLER.value
+            user_type=UserType.SELLER.value,
+            is_active=is_active
         )
         
         return TokenResponse(access_token=access_token,user_type=UserType.SELLER), False
