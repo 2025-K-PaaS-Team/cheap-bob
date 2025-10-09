@@ -185,3 +185,17 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         
         result = await self.session.execute(stmt)
         return result.scalars().all()
+    
+    async def get_customer_active_orders(self, customer_id: str) -> List[OrderCurrentItem]:
+        """소비자의 진행 중인 주문(reservation, accept) 조회"""
+        stmt = (
+            select(OrderCurrentItem)
+            .where(
+                and_(
+                    OrderCurrentItem.customer_id == customer_id,
+                    OrderCurrentItem.status.in_([OrderStatus.reservation, OrderStatus.accept])
+                )
+            )
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
