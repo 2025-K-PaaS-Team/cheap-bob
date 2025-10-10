@@ -1,11 +1,13 @@
 # 저렴한끼(cheap-bob)
 
 - **frontend**: React (Vite, pnpm)  
-- **backend**: 
+- **backend**: FastAPI, PostgreSQL, MongoDB, Redis, JWT + OAuth 2.0, SQLAlchemy, Beanie, APScheduler, Alembic, Object Storage
 
 ---
 
 ## 디렉토리 구조
+
+- [Backend](./backend/README.md)
 
 ## Contributor
  
