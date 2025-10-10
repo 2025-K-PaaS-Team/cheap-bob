@@ -35,6 +35,9 @@ class OAuthClient(ABC):
         if self.config.scope:
             params["scope"] = self.config.scope
         
+        # 로그인 캐쉬 안 되게 수정
+        params["prompt"] = "select_account"
+        
         query_string = "&".join(f"{k}={v}" for k, v in params.items())
         return f"{self.config.authorize_url}?{query_string}"
     
