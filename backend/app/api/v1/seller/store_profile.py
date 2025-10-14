@@ -10,9 +10,24 @@ from schemas.seller_profile import (
     StorePhoneUpdateRequest,
     StoreProfileResponse
 )
+from schemas.me import UserProfileMeResponse
 
 router = APIRouter(prefix="/store/profile", tags=["Seller-Store-Profile"])
 
+@router.get(
+    "/me",
+    response_model=UserProfileMeResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"]
+    })
+)
+async def get_customer_profile_all(
+    current_user: CurrentSellerDep
+):
+    """소비자 이메일 조회"""
+    seller_email = current_user["sub"]
+    
+    return UserProfileMeResponse(email=seller_email)
 
 @router.put("/name", response_model=StoreProfileResponse,
     responses=create_error_responses({

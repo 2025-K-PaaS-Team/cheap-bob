@@ -31,6 +31,8 @@ from schemas.customer_preferences_response import (
 
 from schemas.customer_profile import CustomerProfileResponse
 
+from schemas.me import UserProfileMeResponse
+
 router = APIRouter(prefix="/profile", tags=["Customer-Profile"])
 
 
@@ -51,6 +53,22 @@ async def get_customer_profile_all(
     profile_data = await profile_repo.get_all_profile_data(customer_email)
     
     return CustomerProfileResponse(**profile_data)
+
+
+@router.get(
+    "/me",
+    response_model=UserProfileMeResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"]
+    })
+)
+async def get_customer_profile_all(
+    current_user: CurrentCustomerDep
+):
+    """소비자 이메일 조회"""
+    customer_email = current_user["sub"]
+    
+    return UserProfileMeResponse(email=customer_email)
 
 
 @router.get(
@@ -76,8 +94,6 @@ async def get_customer_detail(
         )
     
     return detail
-
-
 
 
 @router.patch(
