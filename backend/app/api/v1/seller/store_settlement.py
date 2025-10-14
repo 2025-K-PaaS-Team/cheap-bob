@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Query
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Dict, List
 from collections import defaultdict
 import pytz
@@ -36,8 +36,8 @@ async def get_store_settlement(
     store_repo: StoreRepositoryDep,
     order_repo: OrderCurrentItemRepositoryDep,
     history_repo: OrderHistoryItemRepositoryDep,
-    start_date: datetime = Query(..., description="조회 시작일"),
-    end_date: datetime = Query(..., description="조회 시작일")
+    start_date: date = Query(..., description="조회 시작일"),
+    end_date: date = Query(..., description="조회 종료일")
 ):
     """
     가게 정산 조회
@@ -59,17 +59,18 @@ async def get_store_settlement(
     # 현재 시간 (KST)
     today = datetime.now(kst).replace(hour=0, minute=0, second=0, microsecond=0)
     
-    # 프론트에서 받은 KST 날짜를 UTC로 변환
-    start_date_kst = kst.localize(start_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=None))
+    start_datetime = datetime.combine(start_date, datetime.min.time())
+    start_date_kst = kst.localize(start_datetime)
     start_date_utc = start_date_kst.astimezone(pytz.UTC)
     
-    end_date_kst = kst.localize(end_date.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=None))
+    end_datetime = datetime.combine(end_date, datetime.max.time())
+    end_date_kst = kst.localize(end_datetime)
     end_date_utc = end_date_kst.astimezone(pytz.UTC)
     
     all_orders = []
     
     # end_date가 오늘인 경우 current에서 조회
-    if end_date_kst.date() >= today.date():
+    if end_date >= today.date():
         current_orders = await order_repo.get_store_orders_with_relations(store_id)
         
         for order in current_orders:
@@ -88,7 +89,7 @@ async def get_store_settlement(
                 })
     
     # 과거 날짜가 포함된 경우 history에서 조회
-    if start_date_kst.date() < today.date():
+    if start_date < today.date():
         history_orders = await history_repo.get_store_history(
             store_id=store_id,
             start_date=start_date_utc,
