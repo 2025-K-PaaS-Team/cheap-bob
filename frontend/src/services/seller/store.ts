@@ -61,6 +61,13 @@ export const GetStoreDetail = async (): Promise<StoreDetailType> => {
   return data;
 };
 
+// PATCH: close store
+export const CloseStore = async () => {
+  const { data } = await sellerStoreApi.patch("/close");
+
+  return data;
+};
+
 // PUT: update store name
 export const UpdateStoreName = async (
   store_name: string
