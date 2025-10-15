@@ -1,5 +1,10 @@
 export type TimeStamp = string;
 
+export type OptionType = {
+  label: string;
+  value: string;
+};
+
 export type PaymentBaseType = {
   payment_id: string;
 };

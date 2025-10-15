@@ -1,13 +1,35 @@
+import { CommonModal } from "@components/common";
+import { GetStoreWeekSettlement } from "@services";
+import { formatErrMsg } from "@utils";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 const BillingInfo = () => {
   const navigate = useNavigate();
+  const [weekRevenue, setWeekRevenue] = useState<number>(0);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+
+  const handleGetWeekBilling = async () => {
+    try {
+      const res = await GetStoreWeekSettlement();
+      setWeekRevenue(res.total_revenue);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+      return;
+    }
+  };
+
+  useEffect(() => {
+    handleGetWeekBilling();
+  }, []);
 
   return (
     <div>
       <div className="text-[24px] mx-[37px]">
         <div>이번 주 수익</div>
-        <div>00,000원</div>
+        <div>{weekRevenue ?? 0} 원</div>
         <div
           className="mt-[10px] text-black/80 text-[18px]"
           onClick={() => navigate("history")}
@@ -31,6 +53,16 @@ const BillingInfo = () => {
           <div>&gt;</div>
         </div>
       </div>
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="black"
+        />
+      )}
     </div>
   );
 };

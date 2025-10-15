@@ -5,6 +5,7 @@ type ModalProps = {
   onConfirmClick: () => void;
   desc: string;
   category?: "red" | "black";
+  children?: React.ReactNode;
 };
 
 const CommonModal = ({
@@ -14,6 +15,7 @@ const CommonModal = ({
   onConfirmClick,
   desc,
   category,
+  children,
 }: ModalProps) => {
   const confrimBtnClass =
     category === "red"
@@ -23,7 +25,13 @@ const CommonModal = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="flex flex-col w-[359px] p-[20px] rounded-[16px] gap-y-[10px] border-[1px] border-black bg-white">
-        <div className="text-[16px]">{desc}</div>
+        {/* description */}
+        {desc && <div className="text-[16px]">{desc}</div>}
+
+        {/* children */}
+        {children}
+
+        {/* button */}
         <div className="flex flex-row gap-x-[20px] text-[18px] text-center">
           {cancelLabel && onCancelClick && (
             <button

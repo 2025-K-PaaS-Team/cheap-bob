@@ -9,7 +9,7 @@ interface StoreBoxProps {
 
 const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
   const navigate = useNavigate();
-  const todayDow = dayjs().day();
+  const todayDow = (dayjs().day() + 6) % 7;
 
   const handleClickStore = (store: StoreSearchBaseType) => {
     navigate(`${store.store_id}`, { state: { store } });
