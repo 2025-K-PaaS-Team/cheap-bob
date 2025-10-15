@@ -25,15 +25,6 @@ const Home = () => {
       </Swiper>
 
       {/* login button */}
-      <div className="space-y-2 p-4">
-        <div className="font-bold bg-[#d9d9d9] rounded-lg">
-          hello (bold 700)
-        </div>
-        <div className="font-normal bg-main-500">bye (normal 400)</div>
-        <div className="font-extrabold">extrabold 800</div>
-        <div className="font-black">black 900</div>
-      </div>
-
       <div className="flex flex-col gap-y-[10px] items-center">
         <LoginButton
           provider="kakao"
