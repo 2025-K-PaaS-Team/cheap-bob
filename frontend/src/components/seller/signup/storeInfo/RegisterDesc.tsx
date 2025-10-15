@@ -128,7 +128,7 @@ const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
               <button
                 type="button"
                 onClick={() => handleRemovePreview(idx)}
-                className="absolute top-0 right-0 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full"
+                className="absolute top-0 right-0 text-custom-black text-xs w-5 h-5 flex items-center justify-center rounded-full"
               >
                 X
               </button>

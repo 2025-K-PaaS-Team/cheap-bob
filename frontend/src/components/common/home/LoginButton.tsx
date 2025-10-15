@@ -11,10 +11,10 @@ const LoginButton = ({
 }: loginButtonProps) => {
   // customer style
   const providerStyleMap: Record<string, string> = {
-    // kakao: "bg-[#FEE500] text-black",
-    kakao: "bg-main-500 text-black",
+    // kakao: "bg-[#FEE500] text-custom-black",
+    kakao: "bg-main-500 text-custom-black",
     naver: "bg-[#03C75A] text-white",
-    google: "bg-[#EFEFEF] text-black",
+    google: "bg-[#EFEFEF] text-custom-black",
   };
   const providerStyle = providerStyleMap[provider];
 

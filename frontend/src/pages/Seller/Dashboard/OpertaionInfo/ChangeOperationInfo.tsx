@@ -64,7 +64,7 @@ const ChangeOperationInfo = () => {
           </div>
           <div className="flex flex-row gap-x-[6px]">
             {activeDays.length === 0 ? (
-              <div className="text-[13px] text-black/50">
+              <div className="text-[13px] text-custom-black/50">
                 영업 중인 요일이 없습니다
               </div>
             ) : (
@@ -79,7 +79,7 @@ const ChangeOperationInfo = () => {
                       ${
                         isSelected
                           ? "bg-black text-white"
-                          : "bg-[#D9D9D9] text-black"
+                          : "bg-[#D9D9D9] text-custom-black"
                       }`}
                     onClick={() => setSelectedDow(dow)}
                     aria-pressed={isSelected}
@@ -123,7 +123,7 @@ const ChangeOperationInfo = () => {
               </div>
             </>
           ) : (
-            <div className="text-center text-[14px] text-black/60">
+            <div className="text-center text-[14px] text-custom-black/60">
               표시할 영업 시간이 없습니다.
             </div>
           )}
