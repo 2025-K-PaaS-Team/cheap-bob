@@ -56,13 +56,13 @@ const RemainPkg = ({
           </div>
           <div className="absolute right-[10px] top-[31px] flex flex-col justify-center gap-y-[4px]">
             <div
-              className="bg-white w-[20px] aspect-square flex items-center justify-center text-[10px] rounded-full"
+              className="bg-custom-white w-[20px] aspect-square flex items-center justify-center text-[10px] rounded-full"
               onClick={() => handleIncreaseStock()}
             >
               ▲
             </div>
             <div
-              className="bg-white w-[20px] aspect-square flex items-center justify-center text-[10px] rounded-full"
+              className="bg-custom-white w-[20px] aspect-square flex items-center justify-center text-[10px] rounded-full"
               onClick={() => handleDecreaseStock()}
             >
               ▼

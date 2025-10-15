@@ -19,10 +19,10 @@ const CommonBtn = ({
 }: BtnProps) => {
   const colorClass = {
     transparent: "bg-transparent text-black border-0",
-    white: "bg-white text-black border border-[#222222]",
+    white: "bg-custom-white text-black border border-[#222222]",
     grey: "bg-[#EDEDED] text-black border-0",
     black: "bg-black text-white border border-black",
-    red: "bg-white text-[#FF0000] border border-[#FF0000]",
+    red: "bg-custom-white text-[#FF0000] border border-[#FF0000]",
   }[category];
 
   return (

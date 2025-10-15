@@ -171,7 +171,7 @@ const Order = () => {
                 <button
                   type="button"
                   onClick={() => handleClickDetailBtn(order.payment_id)}
-                  className="bg-white p-3"
+                  className="bg-custom-white p-3"
                 >
                   주문 상세 보기
                 </button>
@@ -185,7 +185,7 @@ const Order = () => {
                 {/* <button
                   type="button"
                   onClick={() => handleClickCancelBtn(order.payment_id)}
-                  className="bg-white p-3"
+                  className="bg-custom-white p-3"
                 >
                   주문 취소하기(환불 포함)
                 </button> */}
@@ -198,7 +198,7 @@ const Order = () => {
                 <button
                   type="button"
                   onClick={() => handleClickPickupCompleteBtn(order.payment_id)}
-                  className="bg-white p-3"
+                  className="bg-custom-white p-3"
                 >
                   픽업 완료하기(qr)
                 </button>

@@ -128,7 +128,7 @@ const ChangeStoreImg = () => {
                 className="w-full h-[100px] object-contain"
               />
               {img.is_main && (
-                <span className="absolute left-1 top-1 z-10 px-2 py-0.5 text-[11px] bg-white text-black rounded-full shadow">
+                <span className="absolute left-1 top-1 z-10 px-2 py-0.5 text-[11px] bg-custom-white text-black rounded-full shadow">
                   대표
                 </span>
               )}

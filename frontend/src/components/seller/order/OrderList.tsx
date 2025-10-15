@@ -35,7 +35,7 @@ const OrderList = ({ orders }: OrderListProps) => {
 
           {/* second row */}
 
-          <div className="ml-[40px] bg-white rounded-[8px] flex flex-col py-[9.5px] px-[14px]">
+          <div className="ml-[40px] bg-custom-white rounded-[8px] flex flex-col py-[9.5px] px-[14px]">
             <div className="text-[16px]">영양목표: 균형있게</div>
             <div className="text-[16px]">선호 메뉴: 포케</div>
             <div className="text-[16px]">알레르기 정보: 갑각류</div>
