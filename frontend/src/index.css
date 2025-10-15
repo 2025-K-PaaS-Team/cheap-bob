@@ -38,45 +38,45 @@
   --custom-shadow: 0 4px 12px oklch(0 0 0 / 0.12);
 }
 
-titleFont {
-  font-weight: 400;
-  font-size: 32px;
+.titleFont {
+  /* font-weight: 400; */
+  font-size: 24px;
 }
 
 h1 {
   font-weight: 700;
-  font-size: 27px;
+  font-size: 20px;
 }
 
 h2 {
-  font-weight: 400;
-  font-size: 24px;
+  /* font-weight: 400; */
+  font-size: 18px;
 }
 
 h3 {
   font-weight: 700;
-  font-size: 21px;
-}
-
-bodyFont {
-  font-weight: 400;
-  font-size: 21px;
-  letter-spacing: -0.02em;
-}
-
-hintFont {
-  font-weight: 400;
-  font-size: 19px;
-}
-
-tagFont {
-  font-weight: 400;
   font-size: 16px;
 }
 
-btnFont {
+.bodyFont {
+  /* font-weight: 400; */
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.hintFont {
+  /* font-weight: 400; */
+  font-size: 14px;
+}
+
+.tagFont {
+  /* font-weight: 400; */
+  font-size: 12px;
+}
+
+.btnFont {
   font-weight: 700;
-  font-size: 21px;
+  font-size: 16px;
 }
 
 [type="checkbox"] {
