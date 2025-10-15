@@ -33,27 +33,27 @@ const Layout = () => {
     const token = localStorage.getItem("accessToken");
     const role = localStorage.getItem("loginRole");
 
-    if (role === "seller" && path.startsWith("/c")) {
-      navigate("/auth/role-check", { replace: true });
-      return;
-    }
+    // if (role === "seller" && path.startsWith("/c")) {
+    //   navigate("/auth/role-check", { replace: true });
+    //   return;
+    // }
 
-    if (role === "customer" && path.startsWith("/s")) {
-      navigate("/auth/role-check", { replace: true });
-      return;
-    }
+    // if (role === "customer" && path.startsWith("/s")) {
+    //   navigate("/auth/role-check", { replace: true });
+    //   return;
+    // }
 
-    if (!token) {
-      if (role === "customer") {
-        navigate("/c", { replace: true });
-        return;
-      }
+    // if (!token) {
+    //   if (role === "customer") {
+    //     navigate("/c", { replace: true });
+    //     return;
+    //   }
 
-      if (role === "seller") {
-        navigate("/s", { replace: true });
-        return;
-      }
-    }
+    //   if (role === "seller") {
+    //     navigate("/s", { replace: true });
+    //     return;
+    //   }
+    // }
   }, [location.pathname, navigate]);
 
   return (
