@@ -127,7 +127,7 @@ const ChangeOperationTime = () => {
       <CommonOpTime form={form} setForm={setForm} />
 
       {/* 공지 */}
-      <div className="absolute bottom-30 w-[350px] left-1/2 -translate-x-1/2 bg-[#d9d9d9] rounded-[8px] h-[57px] px-[10px] flex items-center">
+      <div className="absolute bottom-30 w-[350px] left-1/2 -translate-x-1/2 bg-custom-white rounded-[8px] h-[57px] px-[10px] flex items-center">
         변경 시 다음 영업일부터 적용됩니다.
       </div>
 

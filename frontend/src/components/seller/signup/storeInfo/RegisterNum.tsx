@@ -54,7 +54,7 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       <div className="mt-[40px] gap-y-[11px]">
         <div className="text-[16px]">매장 전화번호 (*필수)</div>
         <input
-          className="w-full h-[46px] text-center bg-[#D9D9D9] text-[16px]"
+          className="w-full h-[46px] text-center bg-custom-white text-[16px]"
           placeholder="매장 전화번호를 입력해 주세요"
           value={form.store_phone}
           onChange={(e) => setForm({ store_phone: e.target.value })}
@@ -67,7 +67,7 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
         <div className="flex flex-row">
           <div className="text-[14px] w-[97px] flex items-center">홈페이지</div>
           <input
-            className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
+            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
             value={form.sns_info.homepage}
             onChange={(e) =>
               setForm({
@@ -92,7 +92,7 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
             인스타그램
           </div>
           <input
-            className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
+            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
             value={form.sns_info.instagram}
             onChange={(e) =>
               setForm({
@@ -117,7 +117,7 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
             X (Twitter)
           </div>
           <input
-            className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
+            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
             value={form.sns_info.x}
             onChange={(e) =>
               setForm({

@@ -116,21 +116,21 @@ const StoreDetail = () => {
       {product ? (
         <div className="flex flex-col justify-center">
           {/* store image */}
-          <div className="bg-[#d9d9d9] h-[290px] relative">
+          <div className="bg-custom-white h-[290px] relative">
             <img
               src={store.images.find((img) => img.is_main)?.image_url}
               alt="StoreImage"
               className="w-full h-full object-none"
             />
             <div className="absolute bottom-1 left-1 text-center gap-y-[4px] flex flex-col">
-              <div className="bg-[#d9d9d9] rounded-[10px] py-[5px] px-[10px]">
+              <div className="bg-custom-white rounded-[10px] py-[5px] px-[10px]">
                 {store.operation_times.find(
                   (dow) => dow.day_of_week === todayDow
                 )?.is_currently_open
                   ? "영업중"
                   : "영업 종료"}
               </div>
-              <div className="bg-[#d9d9d9] rounded-[10px] py-[5px] px-[10px]">
+              <div className="bg-custom-white rounded-[10px] py-[5px] px-[10px]">
                 {product.products[0].current_stock}개
               </div>
             </div>
@@ -143,7 +143,7 @@ const StoreDetail = () => {
               {/* favor */}
               <div
                 className={`rounded-full absolute top-1 right-1 z-10 w-[41px] h-[41px] p-[5px] ${
-                  isFavor ? "bg-red-300" : "bg-[#d9d9d9]"
+                  isFavor ? "bg-red-300" : "bg-custom-white"
                 } flex justify-center items-center`}
                 onClick={() =>
                   handleUpdateFavorStore(product.store_id, isFavor)
@@ -284,7 +284,7 @@ const StoreDetail = () => {
               </div>
               {/* desc */}
               <div className="text-[11px]">
-                <ol className="list-decimal bg-[#d9d9d9] py-[18px] px-[15px] rounded-[5px] space-y-1">
+                <ol className="list-decimal bg-custom-white py-[18px] px-[15px] rounded-[5px] space-y-1">
                   <li className="ml-2">
                     오직 픽업 시간에만 가게에서 픽업할 수 있어요.
                   </li>

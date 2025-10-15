@@ -77,9 +77,9 @@ const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           <div key={t.label} className="flex items-start gap-3">
             {/* circle + line */}
             <div className="flex flex-col items-center">
-              <div className="w-[34px] h-[34px] rounded-full bg-[#D9D9D9]"></div>
+              <div className="w-[34px] h-[34px] rounded-full bg-custom-white"></div>
               {idx < shopTimes.length - 1 && (
-                <div className="w-px h-[27px] bg-[#D9D9D9]"></div>
+                <div className="w-px h-[27px] bg-custom-white"></div>
               )}
             </div>
 

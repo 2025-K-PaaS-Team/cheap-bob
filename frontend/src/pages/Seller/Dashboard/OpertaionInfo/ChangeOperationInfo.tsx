@@ -79,7 +79,7 @@ const ChangeOperationInfo = () => {
                       ${
                         isSelected
                           ? "bg-black text-white"
-                          : "bg-[#D9D9D9] text-custom-black"
+                          : "bg-custom-white text-custom-black"
                       }`}
                     onClick={() => setSelectedDow(dow)}
                     aria-pressed={isSelected}
@@ -94,7 +94,7 @@ const ChangeOperationInfo = () => {
         </div>
 
         {/* 선택된 요일의 시간 */}
-        <div className="bg-[#D9D9D9] rounded-[8px] my-[8px] flex flex-col py-[15px] px-[23px] space-y-[10px]">
+        <div className="bg-custom-white rounded-[8px] my-[8px] flex flex-col py-[15px] px-[23px] space-y-[10px]">
           {selectedOp ? (
             <>
               <div className="grid grid-cols-3 items-center">

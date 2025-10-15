@@ -21,7 +21,7 @@ const OrderList = ({ orders }: OrderListProps) => {
   return (
     <div className="flex flex-col mx-[16px] gap-y-[16px]">
       {orders.length == 0 && (
-        <div className="flex flex-col bg-[#d9d9d9] rounded-[8px] py-[22px] px-[15px] gap-y-[16px]">
+        <div className="flex flex-col bg-custom-white rounded-[8px] py-[22px] px-[15px] gap-y-[16px]">
           {/* first row */}
           <div className="flex flex-row justify-between items-center">
             <div className="flex flex-row gap-x-[12px] items-center">

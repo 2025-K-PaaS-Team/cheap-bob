@@ -29,7 +29,7 @@ const BillingChange = () => {
         <div className="text-[16px] mt-[50px]">대표 상점 아이디</div>
         {/* input box */}
         <input
-          className="w-full h-[46px] text-center bg-[#D9D9D9] text-[16px]"
+          className="w-full h-[46px] text-center bg-custom-white text-[16px]"
           placeholder="대표 상점 아이디를 입력해 주세요"
           value={storeId}
           onChange={(e) => setStoreId(e.target.value)}
@@ -45,7 +45,7 @@ const BillingChange = () => {
         <div className="text-[16px] mt-[15px]">채널 키</div>
         {/* input box */}
         <input
-          className="w-full h-[46px] text-center bg-[#D9D9D9] text-[16px]"
+          className="w-full h-[46px] text-center bg-custom-white text-[16px]"
           placeholder="채널 키를 입력해 주세요"
           value={chId}
           onChange={(e) => setChId(e.target.value)}
@@ -60,7 +60,7 @@ const BillingChange = () => {
         {/* <div className="text-[16px] mt-[15px]">시크릿 V2 API</div> */}
         {/* input box */}
         {/* <input
-          className="w-full h-[46px] text-center bg-[#D9D9D9] text-[16px]"
+          className="w-full h-[46px] text-center bg-custom-white text-[16px]"
           placeholder="채널 키를 입력해 주세요"
           value={value}
           onChange={(e) => setValue(e.target.value)}
