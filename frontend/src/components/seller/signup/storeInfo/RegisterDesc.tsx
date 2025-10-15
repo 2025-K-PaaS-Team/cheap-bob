@@ -91,7 +91,7 @@ const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
 
       {/* input box */}
       <input
-        className="w-full h-[100px] text-center bg-[#D9D9D9] text-[16px] mt-[40px]"
+        className="w-full h-[100px] text-center bg-custom-white text-[16px] mt-[40px]"
         placeholder="매장 설명을 입력해 주세요"
         value={form.store_introduction}
         onChange={(e) => setForm({ store_introduction: e.target.value })}
@@ -128,7 +128,7 @@ const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
               <button
                 type="button"
                 onClick={() => handleRemovePreview(idx)}
-                className="absolute top-0 right-0 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full"
+                className="absolute top-0 right-0 text-custom-black text-xs w-5 h-5 flex items-center justify-center rounded-full"
               >
                 X
               </button>

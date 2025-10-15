@@ -16,7 +16,7 @@ const SellerFooter = () => {
   ];
 
   return (
-    <div className="grid grid-cols-3 items-center text-center p-4 bg-[#D9D9D9] h-[68px]">
+    <div className="grid grid-cols-3 items-center text-center p-4 bg-custom-white h-[68px]">
       {items.map((item) => (
         <FooterItem
           key={item.to}

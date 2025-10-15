@@ -17,7 +17,7 @@ const CommonPrice = ({ pkg, setPkg }: PriceProps) => {
 
       {/* input box */}
       <input
-        className="w-full h-[56px] text-center bg-[#D9D9D9] text-[16px] mt-[16px] mb-[40px]"
+        className="w-full h-[56px] text-center bg-custom-white text-[16px] mt-[16px] mb-[40px]"
         placeholder="제품의 원가를 입력해 주세요"
         value={pkg.price}
         onChange={(e) =>
@@ -32,7 +32,7 @@ const CommonPrice = ({ pkg, setPkg }: PriceProps) => {
       {/* input box */}
       <div className="flex flex-row items-center justify-center gap-x-[10px] mt-[16px]">
         <input
-          className="w-[204px] h-[56px] text-center bg-[#D9D9D9] text-[16px]"
+          className="w-[204px] h-[56px] text-center bg-custom-white text-[16px]"
           placeholder="할인율을 입력해 주세요"
           value={pkg.sale}
           onChange={(e) =>
@@ -51,7 +51,11 @@ const CommonPrice = ({ pkg, setPkg }: PriceProps) => {
             <div
               key={discount}
               className={`w-[52px] h-[24px] flex items-center justify-center text-center text-[13px] rounded-[50px] cursor-pointer
-          ${isSelected ? "bg-black text-white" : "bg-[#d9d9d9] text-[#666666]"}
+          ${
+            isSelected
+              ? "bg-black text-white"
+              : "bg-custom-white text-[#666666]"
+          }
         `}
               onClick={() => setPkg((prev) => ({ ...prev, sale: discountNum }))}
             >

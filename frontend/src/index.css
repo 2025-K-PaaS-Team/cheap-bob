@@ -1,17 +1,5 @@
+@import url("https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard.css");
 @import "tailwindcss";
-
-@font-face {
-  font-family: "Pretendard";
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  src: url("https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard-Regular.woff2")
-      format("woff2"),
-    url("https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard-Regular.woff")
-      format("woff"),
-    url("https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard-Regular.otf")
-      format("opentype");
-}
 
 @layer base {
   html,
@@ -25,25 +13,70 @@
   body {
     font-family: "Pretendard", sans-serif;
     box-sizing: border-box;
+    font-synthesis-weight: none;
   }
 }
 
+@theme {
+  /* main & sub color */
+  --color-main-normal: oklch(0.9098 0.236 131.12);
+  --color-main-deep: oklch(0.7311 0.1852 130.73);
+  --color-main-pale: oklch(0.9673 0.0809 126.53);
+  --color-sub-orange: oklch(0.7516 0.1733 55.62);
+  --color-sub-yellow: oklch(0.9075 0.1846 103.79);
+
+  /* custom white & black */
+  --color-custom-white: oklch(0.9851 0 0);
+  --color-custom-black: oklch(0.3211 0 0);
+
+  /* rounded */
+  --radius-sm: 8px;
+  --radius: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --custom-shadow: 0 4px 12px oklch(0 0 0 / 0.12);
+}
+
+titleFont {
+  font-weight: 400;
+  font-size: 32px;
+}
+
 h1 {
-  font-size: xx-large;
-  font-weight: 900;
-  margin: 0.5em;
+  font-weight: 700;
+  font-size: 27px;
 }
 
 h2 {
-  font-size: x-large;
-  font-weight: 800;
-  margin: 0.5em;
+  font-weight: 400;
+  font-size: 24px;
 }
 
 h3 {
-  font-size: large;
   font-weight: 700;
-  margin: 0.5em;
+  font-size: 21px;
+}
+
+bodyFont {
+  font-weight: 400;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+}
+
+hintFont {
+  font-weight: 400;
+  font-size: 19px;
+}
+
+tagFont {
+  font-weight: 400;
+  font-size: 16px;
+}
+
+btnFont {
+  font-weight: 700;
+  font-size: 21px;
 }
 
 [type="checkbox"] {
@@ -57,7 +90,6 @@ h3 {
 
 [type="checkbox"]:checked {
   background-color: #222222;
-  border: no;
 }
 
 .mySwiper {

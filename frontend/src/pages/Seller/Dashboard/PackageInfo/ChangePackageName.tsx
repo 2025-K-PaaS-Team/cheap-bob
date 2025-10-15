@@ -81,7 +81,7 @@ const ChangePackageName = () => {
       </div>
 
       <input
-        className="w-full h-[46px] text-center bg-[#D9D9D9] text-[16px] mt-[40px]"
+        className="w-full h-[46px] text-center bg-custom-white text-[16px] mt-[40px]"
         placeholder="패키지의 이름을 입력해 주세요"
         value={name}
         onChange={(e) => setName(e.target.value)}

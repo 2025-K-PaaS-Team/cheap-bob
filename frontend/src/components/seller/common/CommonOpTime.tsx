@@ -127,7 +127,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
               <div
                 key={day.idx}
                 className={`text-[20px] h-[40px] w-[40px] flex justify-center items-center rounded-full cursor-pointer ${
-                  enabled ? "bg-[#d9d9d9]" : ""
+                  enabled ? "bg-custom-white" : ""
                 }`}
                 onClick={() => handleClickDays(day.idx)}
                 title={enabled ? "운영" : "휴무"}
@@ -164,7 +164,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
             </span>
             <div className="flex flex-row gap-x-[10px] items-center justify-center text-[20px]">
               <input
-                className="text-center bg-[#d9d9d9] rounded-[8px] w-[50px] h-[44px]"
+                className="text-center bg-custom-white rounded-[8px] w-[50px] h-[44px]"
                 value={batchOpen[0]}
                 onChange={(e) =>
                   handleBatchChange("open", "hour", e.target.value)
@@ -174,7 +174,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
               />
               <span>시</span>
               <input
-                className="text-center bg-[#d9d9d9] rounded-[8px] w-[50px] h-[44px]"
+                className="text-center bg-custom-white rounded-[8px] w-[50px] h-[44px]"
                 value={batchOpen[1]}
                 onChange={(e) =>
                   handleBatchChange("open", "min", e.target.value)
@@ -191,7 +191,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
             <span className="w-[70px] font-bold">매장 마감</span>
             <div className="flex flex-row gap-x-[10px] items-center justify-center text-[20px]">
               <input
-                className="text-center bg-[#d9d9d9] rounded-[8px] w-[50px] h-[44px]"
+                className="text-center bg-custom-white rounded-[8px] w-[50px] h-[44px]"
                 value={batchClose[0]}
                 onChange={(e) =>
                   handleBatchChange("close", "hour", e.target.value)
@@ -201,7 +201,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
               />
               <span>시</span>
               <input
-                className="text-center bg-[#d9d9d9] rounded-[8px] w-[50px] h-[44px]"
+                className="text-center bg-custom-white rounded-[8px] w-[50px] h-[44px]"
                 value={batchClose[1]}
                 onChange={(e) =>
                   handleBatchChange("close", "min", e.target.value)
@@ -232,7 +232,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                   {/* Open time */}
                   <div className="col-span-3 text-center flex flex-row gap-x-[5px] justify-center">
                     <input
-                      className="w-[36px] text-center bg-[#d9d9d9] rounded disabled:opacity-50"
+                      className="w-[36px] text-center bg-custom-white rounded disabled:opacity-50"
                       value={openHour}
                       onChange={(e) =>
                         handleSingleChange(
@@ -248,7 +248,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                     />
                     <div>시</div>
                     <input
-                      className="w-[36px] text-center bg-[#d9d9d9] rounded disabled:opacity-50"
+                      className="w-[36px] text-center bg-custom-white rounded disabled:opacity-50"
                       value={openMin}
                       onChange={(e) =>
                         handleSingleChange(
@@ -270,7 +270,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                   {/* Close time */}
                   <div className="col-span-3 text-center flex flex-row gap-x-[5px] justify-center">
                     <input
-                      className="w-[36px] text-center bg-[#d9d9d9] rounded disabled:opacity-50"
+                      className="w-[36px] text-center bg-custom-white rounded disabled:opacity-50"
                       value={closeHour}
                       onChange={(e) =>
                         handleSingleChange(
@@ -286,7 +286,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
                     />
                     <div>시</div>
                     <input
-                      className="w-[36px] text-center bg-[#d9d9d9] rounded disabled:opacity-50"
+                      className="w-[36px] text-center bg-custom-white rounded disabled:opacity-50"
                       value={closeMin}
                       onChange={(e) =>
                         handleSingleChange(

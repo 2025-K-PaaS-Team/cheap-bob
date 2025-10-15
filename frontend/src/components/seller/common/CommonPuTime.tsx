@@ -106,7 +106,7 @@ const CommonPuTime = ({
       <div className="text-center w-full justify-center">
         <div className="flex flex-row text-[20px] justify-center items-center gap-x-[10px]">
           <input
-            className="bg-[#d9d9d9] rounded-[8px] w-[50px] h-[44px] text-center"
+            className="bg-custom-white rounded-[8px] w-[50px] h-[44px] text-center"
             value={pickupStartOffset.hour}
             onChange={(e) =>
               setPickupStartOffset(
@@ -119,7 +119,7 @@ const CommonPuTime = ({
           />
           <div>시</div>
           <input
-            className="bg-[#d9d9d9] rounded-[8px] w-[50px] h-[44px] text-center"
+            className="bg-custom-white rounded-[8px] w-[50px] h-[44px] text-center"
             value={pickupStartOffset.min}
             onChange={(e) =>
               setPickupStartOffset(
@@ -149,7 +149,7 @@ const CommonPuTime = ({
       <div className="text-center w-full justify-center">
         <div className="flex flex-row text-[20px] justify-center items-center gap-x-[10px]">
           <input
-            className="bg-[#d9d9d9] rounded-[8px] w-[50px] h-[44px] text-center"
+            className="bg-custom-white rounded-[8px] w-[50px] h-[44px] text-center"
             value={pickupDiscardOffset.hour}
             onChange={(e) =>
               setPickupDiscardOffset(
@@ -162,7 +162,7 @@ const CommonPuTime = ({
           />
           <div>시</div>
           <input
-            className="bg-[#d9d9d9] rounded-[8px] w-[50px] h-[44px] text-center"
+            className="bg-custom-white rounded-[8px] w-[50px] h-[44px] text-center"
             value={pickupDiscardOffset.min}
             onChange={(e) =>
               setPickupDiscardOffset(

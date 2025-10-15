@@ -81,7 +81,7 @@ const ChangePackageDesc = () => {
       </div>
 
       <textarea
-        className="w-full h-[140px] bg-[#D9D9D9] text-[16px] mt-[40px] p-3 rounded"
+        className="w-full h-[140px] bg-custom-white text-[16px] mt-[40px] p-3 rounded"
         placeholder="패키지의 설명을 입력해 주세요"
         value={desc}
         onChange={(e) => setDesc(e.target.value)}

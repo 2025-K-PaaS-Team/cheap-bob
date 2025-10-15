@@ -10,7 +10,7 @@ const CommonQR = ({ onClick }: CommonQRPros) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-      <div className="flex flex-col w-[359px] p-[20px] rounded-[16px] gap-y-[10px] border-[1px] border-black bg-white items-center">
+      <div className="flex flex-col w-[359px] p-[20px] rounded-[16px] gap-y-[10px] border-[1px] border-black bg-custom-white items-center">
         <div className="text-[16px] text-center">
           손님에게 아래 QR코드를 보여주세요.
           <br />

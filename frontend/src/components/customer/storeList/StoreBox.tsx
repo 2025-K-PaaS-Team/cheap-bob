@@ -26,7 +26,7 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
           {/* favor */}
           <div
             className={`rounded-full absolute top-1 right-1 z-10 w-[41px] h-[41px] p-[5px] ${
-              store.is_favorite ? "bg-red-300" : "bg-[#d9d9d9]"
+              store.is_favorite ? "bg-red-300" : "bg-custom-white"
             } flex justify-center items-center`}
             onClick={(e) => {
               e.stopPropagation();
@@ -41,7 +41,7 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
           </div>
 
           {/* now open */}
-          <div className="bg-[#d9d9d9] rounded-[10px] absolute top-1 left-1 z-10 p-[5px]">
+          <div className="bg-custom-white rounded-[10px] absolute top-1 left-1 z-10 p-[5px]">
             {store.operation_times.find((dow) => dow.day_of_week === todayDow)
               ?.is_currently_open
               ? "영업중"

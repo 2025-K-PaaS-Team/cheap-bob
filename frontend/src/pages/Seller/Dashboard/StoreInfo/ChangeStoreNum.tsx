@@ -68,7 +68,7 @@ const ChangeStoreNum = () => {
       <div className="mt-[40px] gap-y-[11px]">
         <div className="text-[16px]">매장 전화번호 (*필수)</div>
         <input
-          className="w-full h-[46px] text-center bg-[#D9D9D9] text-[16px]"
+          className="w-full h-[46px] text-center bg-custom-white text-[16px]"
           placeholder="매장 전화번호를 입력해 주세요"
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -81,7 +81,7 @@ const ChangeStoreNum = () => {
         <div className="flex flex-row">
           <div className="text-[14px] w-[97px] flex items-center">홈페이지</div>
           <input
-            className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
+            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
             value={sns?.homepage}
             onChange={(e) =>
               setSns((prev) => ({ ...prev, homepage: e.target.value }))
@@ -99,7 +99,7 @@ const ChangeStoreNum = () => {
             인스타그램
           </div>
           <input
-            className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
+            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
             value={sns?.instagram}
             onChange={(e) =>
               setSns((prev) => ({ ...prev, instagram: e.target.value }))
@@ -117,7 +117,7 @@ const ChangeStoreNum = () => {
             X (Twitter)
           </div>
           <input
-            className="w-full h-[40px] text-center bg-[#D9D9D9] text-[16px]"
+            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
             value={sns?.x}
             onChange={(e) => setSns((prev) => ({ ...prev, x: e.target.value }))}
             onBlur={(e) =>

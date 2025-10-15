@@ -31,7 +31,7 @@ const BillingInfo = () => {
         <div>이번 주 수익</div>
         <div>{weekRevenue ?? 0} 원</div>
         <div
-          className="mt-[10px] text-black/80 text-[18px]"
+          className="mt-[10px] text-custom-black/80 text-[18px]"
           onClick={() => navigate("history")}
         >
           정산 내역 보기 &gt;
