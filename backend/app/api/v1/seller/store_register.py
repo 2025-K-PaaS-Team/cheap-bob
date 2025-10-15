@@ -136,16 +136,16 @@ async def register_store_images(
     current_user: CurrentSellerDep,
     image_service: ImageServiceDep,
     store_repo: StoreRepositoryDep,
-    files: List[UploadFile] = File(..., description="업로드할 이미지 파일들 (첫 번째가 대표 이미지) / 한 번에 이미지 최대 5개 / jpeg, jpg, png, webp타입 가능 / 최대 10MB")
+    files: List[UploadFile] = File(..., description="업로드할 이미지 파일들 (첫 번째가 대표 이미지) / 한 번에 이미지 최대 10개 / jpeg, jpg, png, webp타입 가능 / 최대 15MB")
 ):
     """
     가게 이미지 최초 등록
     
     첫 번째 이미지가 대표 이미지로 설정됩니다.
-    최대 5개까지 업로드 가능합니다.
+    최대 10개까지 업로드 가능합니다.
     
     지원 형식: JPG, JPEG, PNG, WEBP
-    최대 크기: 10MB
+    최대 크기: 15MB
     """
     seller_email = current_user["sub"]
 
@@ -157,16 +157,16 @@ async def register_store_images(
             detail="업로드할 이미지가 없습니다."
         )
     
-    if len(files) > 5:
+    if len(files) > 10:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="이미지는 최대 5개까지 업로드 가능합니다."
+            detail="이미지는 최대 10개까지 업로드 가능합니다."
         )
     
     # 파일 검증 및 준비
     validated_files = []
     allowed_types = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
-    max_size = 10 * 1024 * 1024  # 10MB
+    max_size = 15 * 1024 * 1024  # 15MB
     
     try:
         for file in files:
@@ -182,7 +182,7 @@ async def register_store_images(
             if len(file_content) > max_size:
                 raise HTTPException(
                     status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    detail=f"파일 크기가 너무 큽니다 (최대 10MB): {file.filename}"
+                    detail=f"파일 크기가 너무 큽니다 (최대 15MB): {file.filename}"
                 )
             
             # 파일 포인터 리셋
