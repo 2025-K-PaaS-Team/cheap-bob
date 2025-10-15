@@ -150,7 +150,7 @@ export const DeleteStoreImg = async (image_id: string) => {
 export const ChangeStoreMainImg = async (
   image_id: string
 ): Promise<ImageInfoType> => {
-  const { data } = await sellerStoreImgApi.put(`/${image_id}`);
+  const { data } = await sellerStoreImgApi.put(`/main/${image_id}`);
 
   return data;
 };

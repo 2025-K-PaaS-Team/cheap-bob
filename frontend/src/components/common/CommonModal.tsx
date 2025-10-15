@@ -22,7 +22,7 @@ const CommonModal = ({
       ? "bg-custom-white border-[#FF0000]"
       : category === "black"
       ? "bg-black text-white border-black"
-      : "bg-main-depp text-white border-none";
+      : "bg-main-deep text-white border-none";
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
