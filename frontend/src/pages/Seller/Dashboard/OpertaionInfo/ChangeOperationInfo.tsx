@@ -94,7 +94,7 @@ const ChangeOperationInfo = () => {
         </div>
 
         {/* 선택된 요일의 시간 */}
-        <div className="bg-custom-white rounded-[8px] my-[8px] flex flex-col py-[15px] px-[23px] space-y-[10px]">
+        <div className="bg-custom-white rounded-sm my-[8px] flex flex-col py-[15px] px-[23px] space-y-[10px]">
           {selectedOp ? (
             <>
               <div className="grid grid-cols-3 items-center">
@@ -146,7 +146,7 @@ const ChangeOperationInfo = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

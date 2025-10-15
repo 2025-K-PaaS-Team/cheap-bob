@@ -123,14 +123,14 @@ const StoreDetail = () => {
               className="w-full h-full object-none"
             />
             <div className="absolute bottom-1 left-1 text-center gap-y-[4px] flex flex-col">
-              <div className="bg-custom-white rounded-[10px] py-[5px] px-[10px]">
+              <div className="bg-custom-white rounded py-[5px] px-[10px]">
                 {store.operation_times.find(
                   (dow) => dow.day_of_week === todayDow
                 )?.is_currently_open
                   ? "영업중"
                   : "영업 종료"}
               </div>
-              <div className="bg-custom-white rounded-[10px] py-[5px] px-[10px]">
+              <div className="bg-custom-white rounded py-[5px] px-[10px]">
                 {product.products[0].current_stock}개
               </div>
             </div>
@@ -183,7 +183,7 @@ const StoreDetail = () => {
             {/* store addr */}
             <div className="gap-y-[13px] flex flex-col">
               <div className="font-bold text-[15px]">가게 주소</div>
-              <div className="bg-[#BFBFBF] text-[11px] w-fit rounded-[10px] px-[17px] py-[5.5px]">
+              <div className="bg-[#BFBFBF] text-[11px] w-fit rounded px-[17px] py-[5.5px]">
                 {store.address.address} {store.address.detail_address},{" "}
                 {store.address.postal_code}
               </div>
@@ -213,7 +213,7 @@ const StoreDetail = () => {
                 {product.products[0].product_name}
               </div>
               {/* product desc */}
-              <div className="bg-[#BFBFBF] text-[11px] w-fit rounded-[10px] px-[17px] py-[5.5px]">
+              <div className="bg-[#BFBFBF] text-[11px] w-fit rounded px-[17px] py-[5.5px]">
                 {product.products[0].description}
               </div>
             </div>
@@ -230,7 +230,7 @@ const StoreDetail = () => {
                   return (
                     <div
                       key={n}
-                      className="bg-[#BFBFBF] w-fit rounded-[10px] px-[17px] py-[5.5px]"
+                      className="bg-[#BFBFBF] w-fit rounded px-[17px] py-[5.5px]"
                     >
                       {nutritionLabel.title}
                     </div>
@@ -259,13 +259,13 @@ const StoreDetail = () => {
               <div className="font-bold text-[15px]">픽업 시간</div>
               {/* pu time */}
               <div className="flex flex-row gap-x-[15px] items-center justify-center">
-                <div className="bg-[#BFBFBF] text-[16px] font-bold w-fit rounded-[10px] px-[17px] py-[5.5px]">
+                <div className="bg-[#BFBFBF] text-[16px] font-bold w-fit rounded px-[17px] py-[5.5px]">
                   {store.operation_times
                     .find((dow) => dow.day_of_week === todayDow)
                     ?.pickup_start_time.slice(0, 5)}
                 </div>
                 ~
-                <div className="bg-[#BFBFBF] text-[16px] font-bold w-fit rounded-[10px] px-[17px] py-[5.5px]">
+                <div className="bg-[#BFBFBF] text-[16px] font-bold w-fit rounded px-[17px] py-[5.5px]">
                   {store.operation_times
                     .find((dow) => dow.day_of_week === todayDow)
                     ?.pickup_end_time.slice(0, 5)}
@@ -320,7 +320,7 @@ const StoreDetail = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
 
@@ -330,7 +330,7 @@ const StoreDetail = () => {
           desc={store.store_introduction}
           confirmLabel="확인"
           onConfirmClick={() => setDescOpen(false)}
-          category="black"
+          category="green"
         />
       )}
     </>

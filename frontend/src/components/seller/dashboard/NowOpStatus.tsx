@@ -108,7 +108,7 @@ const NowOpStatus = ({ ops }: Props) => {
 
   return (
     <>
-      <div className="mx-[20px] flex flex-col gap-y-[3px] mt-[7px] bg-[#393939] rounded-[8px] py-[25px] px-[19px] text-white">
+      <div className="mx-[20px] flex flex-col gap-y-[3px] mt-[7px] bg-[#393939] rounded-sm py-[25px] px-[19px] text-white">
         <div
           className="titleFont text-[24px]"
           dangerouslySetInnerHTML={{
@@ -147,7 +147,7 @@ const NowOpStatus = ({ ops }: Props) => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </>

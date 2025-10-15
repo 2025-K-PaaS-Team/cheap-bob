@@ -25,7 +25,7 @@ const ConfirmStore = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
         width="w-[100px]"
       />
       <CommonBtn
-        category="black"
+        category="green"
         label="설정 완료"
         onClick={() => handleClickNext()}
         notBottom

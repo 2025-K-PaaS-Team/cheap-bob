@@ -77,7 +77,7 @@ const BillingChange = () => {
       <CommonBtn
         label="저장"
         onClick={() => handleUpdatePayment()}
-        category="black"
+        category="green"
       />
 
       {/* show modal */}
@@ -86,7 +86,7 @@ const BillingChange = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

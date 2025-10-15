@@ -1,8 +1,8 @@
 import { CommonBtn, CommonModal } from "@components/common";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PostalCode } from "@components/seller/dashboard";
 import { useNavigate } from "react-router";
-import { UpdateStoreAddr } from "@services";
+import { GetStoreDetail, UpdateStoreAddr } from "@services";
 import { formatErrMsg } from "@utils";
 import type { AddressInfoType } from "@interface";
 
@@ -21,6 +21,19 @@ const ChangeStoreAddr = () => {
   const [addr, setAddr] = useState<AddressInfoType>(initialAddr);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+
+  useEffect(() => {
+    const handleGetStore = async () => {
+      try {
+        const res = await GetStoreDetail();
+        setAddr(res.address);
+      } catch (err) {
+        console.error(formatErrMsg(err));
+      }
+    };
+
+    handleGetStore();
+  }, []);
 
   const validateAddr = (a: AddressInfoType) => {
     if (!a.address || !a.postal_code) {
@@ -48,7 +61,7 @@ const ChangeStoreAddr = () => {
   };
 
   return (
-    <div className="mt-[80px] px-[20px] w-full">
+    <div className="mt-[30px] px-[20px] w-full">
       {/* question */}
       <div className="text-[24px]">
         변경할 <span className="font-bold">매장 주소</span>를 <br /> 입력해
@@ -66,7 +79,7 @@ const ChangeStoreAddr = () => {
       />
 
       {/* save */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
 
       {/* show modal */}
       {showModal && (
@@ -74,7 +87,7 @@ const ChangeStoreAddr = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

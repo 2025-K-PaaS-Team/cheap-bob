@@ -21,6 +21,7 @@ export type StoreOperationTimeDetailType = OperationTimeType & {
 
 export type StoreDetailType = StoreInfoType & {
   store_id: string;
+  store_name: string;
   seller_email: string;
   created_at: TimeStamp;
   address: StoreAddrDetailType;

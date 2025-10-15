@@ -145,7 +145,7 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
         width="w-[100px]"
       />
       <CommonBtn
-        category="black"
+        category="green"
         label="다음"
         onClick={() => handleClickNext()}
         notBottom
@@ -159,7 +159,7 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

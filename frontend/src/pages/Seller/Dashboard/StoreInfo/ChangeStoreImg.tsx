@@ -91,20 +91,43 @@ const ChangeStoreImg = () => {
   }, []);
 
   return (
-    <div className="mt-[80px] px-[20px] w-full">
+    <div className="mt-[30px] px-[20px] w-full">
       {/* question */}
       <div className="text-[24px] mb-[44px]">
-        변경할 <span className="font-bold">이미지</span>를 <br /> 새로 업로드해
-        주세요.
+        변경할 <span className="font-bold">이미지</span>를 <br /> 등록해 주세요.
       </div>
 
-      {/* upload picture button */}
+      {/* represent image */}
+      <img src="" alt="" />
+
       <div className="w-full flex justify-center">
         <CommonBtn
-          label="(사진 업로드)"
+          label="대표 사진 변경"
           notBottom
           onClick={handleClickUpload}
           className="border-[#999999] font-normal"
+          category="white"
+        />
+      </div>
+
+      {/* notice */}
+      <div className="hint bg-[#E7E7E7] rounded py-[20px] px-[8px] mt-[20px] mb-[40px]">
+        <span className="font-bold">가게 외부 사진</span>을 대표 사진으로
+        등록하면
+        <br /> 손님들이 가게를 더 잘 찾아오실 수 있어요.
+      </div>
+
+      {/* other image */}
+      <h2>다른 사진도 있나요?</h2>
+
+      {/* upload picture button */}
+      <div className="w-full flex justify-center py-[20px]">
+        <CommonBtn
+          label="제품 사진 등록 (0/10)"
+          notBottom
+          onClick={handleClickUpload}
+          className="border-[#999999] font-normal"
+          category="white"
         />
       </div>
 
@@ -145,7 +168,13 @@ const ChangeStoreImg = () => {
       )}
 
       {/* save */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+      <CommonBtn
+        label="저장"
+        onClick={handleSubmit}
+        category="green"
+        notBottom
+        className="w-[350px] flex w-full justify-center my-[50px]"
+      />
 
       {/* show modal */}
       {showModal && (
@@ -153,7 +182,7 @@ const ChangeStoreImg = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

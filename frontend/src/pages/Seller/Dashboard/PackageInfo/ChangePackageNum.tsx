@@ -80,7 +80,7 @@ const ChangePackageNum = () => {
       )}
 
       {/* save */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
 
       {/* show modal */}
       {showModal && (
@@ -88,7 +88,7 @@ const ChangePackageNum = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

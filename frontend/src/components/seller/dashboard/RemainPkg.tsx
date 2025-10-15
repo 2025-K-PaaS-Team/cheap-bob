@@ -35,7 +35,7 @@ const RemainPkg = ({
   };
 
   return (
-    <div className="mx-[20px] flex flex-col mt-[24px] bg-custom-white rounded-[8px] py-[23px] px-[19px] text-custom-black">
+    <div className="mx-[20px] flex flex-col mt-[24px] bg-custom-white rounded-sm py-[23px] px-[19px] text-custom-black">
       <div className="text-[24px] mb-[7px]">
         현재 패키지 잔여 수량은 <br />{" "}
         <span className="font-bold">{remainPkg.current_stock}개</span> 입니다.
@@ -60,7 +60,7 @@ const RemainPkg = ({
         <img src="/icon/plus.svg" alt="plusIcon" className="pt-[15px]" />
 
         {/* 일일조정값 */}
-        <div className="relative py-[14px] w-[115px] flex flex-row  bg-main-pale rounded-[8px] justify-center">
+        <div className="relative py-[14px] w-[115px] flex flex-row  bg-main-pale rounded-sm justify-center">
           <div className="flex flex-col justify-center">
             <div className="text-[14px]">일일 조정값</div>
             <div className="text-[24px]">{remainPkg.adjustment_stock}</div>

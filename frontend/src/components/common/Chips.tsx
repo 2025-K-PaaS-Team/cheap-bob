@@ -16,7 +16,7 @@ const Chips = ({ chips, selected, setSelected }: ChipsProps) => {
               selected[chip.key]
                 ? "bg-[#222222] text-white"
                 : "bg-[#f0f0f0] text-custom-black"
-            } rounded-[10px] px-[10px] py-[7px] text-center text-[12px] min-h-[28px] flex items-center whitespace-nowrap`}
+            } rounded px-[10px] py-[7px] text-center text-[12px] min-h-[28px] flex items-center whitespace-nowrap`}
             key={idx}
             onClick={() =>
               setSelected((prev) => ({

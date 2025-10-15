@@ -1,7 +1,7 @@
 import { CommonBtn, CommonModal } from "@components/common";
-import { UpdateStoreDesc } from "@services";
+import { GetStoreDetail, UpdateStoreDesc } from "@services";
 import { formatErrMsg, validateLength } from "@utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 const ChangeStoreDesc = () => {
@@ -9,6 +9,19 @@ const ChangeStoreDesc = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+
+  useEffect(() => {
+    const handleGetStore = async () => {
+      try {
+        const res = await GetStoreDetail();
+        setValue(res.store_introduction);
+      } catch (err) {
+        console.error(formatErrMsg(err));
+      }
+    };
+
+    handleGetStore();
+  }, []);
 
   const handleUpdateStoreDesc = async (storeName: string) => {
     const validMsg = "매장 설명은 1~100자여야 합니다.";
@@ -40,15 +53,15 @@ const ChangeStoreDesc = () => {
         주세요.
       </div>
       {/* input box */}
-      <input
-        className="w-full h-[100px] text-center bg-custom-white text-[16px] mt-[40px]"
+      <textarea
+        className="w-full h-[100px] p-5 text-start bg-custom-white text-[16px] mt-[40px]"
         placeholder="매장 설명을 입력해 주세요"
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
 
       {/* save */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
 
       {/* show modal */}
       {showModal && (
@@ -56,7 +69,7 @@ const ChangeStoreDesc = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

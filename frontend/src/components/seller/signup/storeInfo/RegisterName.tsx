@@ -38,7 +38,7 @@ const RegisterName = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       />
 
       <CommonBtn
-        category="black"
+        category="green"
         label="다음"
         onClick={() => handleClickNext()}
       />
@@ -49,7 +49,7 @@ const RegisterName = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

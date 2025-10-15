@@ -138,19 +138,19 @@ const ChangePickupTime = () => {
       />
 
       {/* notice */}
-      <div className="absolute bottom-30 w-[350px] left-1/2 -translate-x-1/2 bg-custom-white rounded-[8px] h-[57px] px-[10px] flex items-center">
+      <div className="absolute bottom-30 w-[350px] left-1/2 -translate-x-1/2 bg-custom-white rounded-sm h-[57px] px-[10px] flex items-center">
         변경시 다음 영업일부터 적용됩니다.
       </div>
 
       {/* btn */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
 
       {showModal && (
         <CommonModal
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

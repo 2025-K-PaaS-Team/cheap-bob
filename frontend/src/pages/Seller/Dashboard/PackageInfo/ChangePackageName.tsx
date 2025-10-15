@@ -88,14 +88,14 @@ const ChangePackageName = () => {
         maxLength={15}
       />
 
-      <CommonBtn label="저장" onClick={() => handleSubmit()} category="black" />
+      <CommonBtn label="저장" onClick={() => handleSubmit()} category="green" />
 
       {showModal && (
         <CommonModal
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

@@ -49,7 +49,7 @@ const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
 
       {/* next */}
       <CommonBtn
-        category="black"
+        category="green"
         label="다음"
         onClick={() => handleClickNext()}
       />
@@ -60,7 +60,7 @@ const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>
