@@ -5,6 +5,7 @@ from utils.docs_error import create_error_responses
 from utils.store_utils import get_store_id_by_email
 from api.deps.auth import CurrentSellerDep
 from api.deps.repository import StoreRepositoryDep
+from api.deps.repository import StoreImageRepositoryDep
 from api.deps.service import ImageServiceDep
 from schemas.image import StoreImagesUploadResponse, StoreImagesResponse, ImageUploadResponse
 from core.exceptions import HTTPValueError
@@ -18,7 +19,7 @@ async def validate_image_files(files: List[UploadFile]) -> List[tuple]:
     """
     validated_files = []
     allowed_types = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
-    max_size = 10 * 1024 * 1024  # 10MB
+    max_size = 15 * 1024 * 1024  # 15MB
     
     for file in files:
         # 파일 타입 검증
@@ -33,7 +34,7 @@ async def validate_image_files(files: List[UploadFile]) -> List[tuple]:
         if len(file_content) > max_size:
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"파일 크기가 너무 큽니다 (최대 10MB): {file.filename}"
+                detail=f"파일 크기가 너무 큽니다 (최대 15MB): {file.filename}"
             )
         
         # 파일 포인터 리셋
@@ -46,7 +47,7 @@ async def validate_image_files(files: List[UploadFile]) -> List[tuple]:
 
 @router.post("", response_model=StoreImagesUploadResponse,
     responses=create_error_responses({
-        400: ["업로드할 이미지가 없음", "이미지는 한 번에 최대 5개", "지원하지 않는 파일 형식"],
+        400: ["업로드할 이미지가 없음", "이미지는 최대 11개", "지원하지 않는 파일 형식"],
         401: ["인증 정보가 없음", "토큰 만료"],
         404: "가게를 찾을 수 없음",
         413: "파일 크기가 너무 큼"
@@ -55,6 +56,7 @@ async def validate_image_files(files: List[UploadFile]) -> List[tuple]:
 async def add_store_images(
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
+    image_repo: StoreImageRepositoryDep,
     image_service: ImageServiceDep,
     files: List[UploadFile] = File(..., description="추가할 이미지 파일들")
 ):
@@ -62,10 +64,10 @@ async def add_store_images(
     가게 이미지 추가
     
     기존 이미지에 추가로 이미지를 업로드합니다.
-    최대 5개까지 동시에 업로드 가능합니다.
+    이미지는 가게 당, 최대 11개까지 업로드 가능합니다.
     
     지원 형식: JPG, JPEG, PNG, WEBP
-    최대 크기: 10MB
+    최대 크기: 15MB
     """
     seller_email = current_user["sub"]
     
@@ -77,10 +79,12 @@ async def add_store_images(
             detail="업로드할 이미지가 없습니다."
         )
     
-    if len(files) > 5:
+    images = await image_repo.get_by_store_id(store_id)
+    
+    if len(files) + len(images) > 11:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="이미지는 한 번에 최대 5개까지 업로드 가능합니다."
+            detail="이미지는 최대 11개까지 업로드 가능합니다."
         )
     
     try:

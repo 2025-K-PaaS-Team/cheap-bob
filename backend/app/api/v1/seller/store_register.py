@@ -125,7 +125,7 @@ async def register_seller_store(
 # 이미지 업로드 관련 엔드포인트
 @router.post("/images", response_model=StoreImagesUploadResponse, status_code=status.HTTP_201_CREATED,
     responses=create_error_responses({
-        400: ["업로드할 이미지가 없음", "이미지는 한 번에 최대 5개", "지원하지 않는 파일 형식"],
+        400: ["업로드할 이미지가 없음", "이미지는 최대 11개", "지원하지 않는 파일 형식"],
         401: ["인증 정보가 없음", "토큰 만료"],
         404: "가게를 찾을 수 없음",
         409: "이미 등록된 이미지가 있음",
@@ -136,13 +136,13 @@ async def register_store_images(
     current_user: CurrentSellerDep,
     image_service: ImageServiceDep,
     store_repo: StoreRepositoryDep,
-    files: List[UploadFile] = File(..., description="업로드할 이미지 파일들 (첫 번째가 대표 이미지) / 한 번에 이미지 최대 10개 / jpeg, jpg, png, webp타입 가능 / 최대 15MB")
+    files: List[UploadFile] = File(..., description="업로드할 이미지 파일들 (첫 번째가 대표 이미지) / 이미지는 최대 11개 / jpeg, jpg, png, webp타입 가능 / 최대 15MB")
 ):
     """
     가게 이미지 최초 등록
     
     첫 번째 이미지가 대표 이미지로 설정됩니다.
-    최대 10개까지 업로드 가능합니다.
+    최대 11개까지 업로드 가능합니다.
     
     지원 형식: JPG, JPEG, PNG, WEBP
     최대 크기: 15MB
@@ -157,7 +157,7 @@ async def register_store_images(
             detail="업로드할 이미지가 없습니다."
         )
     
-    if len(files) > 10:
+    if len(files) > 11:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="이미지는 최대 10개까지 업로드 가능합니다."
