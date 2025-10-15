@@ -58,7 +58,7 @@ const Dashboard = () => {
     return <div>로딩중...</div>;
   }
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex w-full flex-col pb-[30px]">
       {/* now operating status */}
       <NowOpStatus ops={data.operation_times} />
 
