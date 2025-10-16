@@ -81,16 +81,31 @@ h3 {
 }
 
 [type="checkbox"] {
-  width: 25px;
-  height: 25px;
-  accent-color: #222222;
+  width: 20px;
+  height: 20px;
   appearance: none;
-  border-radius: 50%;
-  border: 1px solid #222222;
+  border: 1px solid #e7e7e7;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
 }
 
 [type="checkbox"]:checked {
-  background-color: #222222;
+  background-color: #7ebe27;
+  border-color: #7ebe27;
+}
+
+[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .mySwiper {

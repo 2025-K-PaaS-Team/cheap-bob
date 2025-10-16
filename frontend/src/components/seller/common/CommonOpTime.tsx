@@ -111,11 +111,11 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-y-[20px]">
       {/* operation days */}
-      <div className="flex flex-col gap-y-[10px] mt-[38px]">
-        <div className="text-[14px] font-bold">운영 요일</div>
-        <div className="text-[14px]">
+      <div className="flex flex-col gap-y-[10px] mt-[40px] pb-[40px] border-b-1 border-black/10">
+        <h3>운영 요일</h3>
+        <div className="bodyFont">
           매장을 운영하는 날짜를 모두 선택해 주세요.
         </div>
         <div className="grid grid-cols-7">
@@ -124,15 +124,16 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
               (f) => f.day_of_week === day.idx && f.is_open_enabled
             );
             return (
-              <div
-                key={day.idx}
-                className={`text-[20px] h-[40px] w-[40px] flex justify-center items-center rounded-full cursor-pointer ${
-                  enabled ? "bg-custom-white" : ""
-                }`}
-                onClick={() => handleClickDays(day.idx)}
-                title={enabled ? "운영" : "휴무"}
-              >
-                {day.label}
+              <div className="flex justify-center" key={day.idx}>
+                <div
+                  className={`hintFont font-bold h-[36px] w-[36px] flex justify-center items-center rounded-full cursor-pointer ${
+                    enabled ? "bg-main-deep text-white" : ""
+                  }`}
+                  onClick={() => handleClickDays(day.idx)}
+                  title={enabled ? "운영" : "휴무"}
+                >
+                  {day.label}
+                </div>
               </div>
             );
           })}
@@ -140,9 +141,9 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
       </div>
 
       {/* operation time */}
-      <div className="flex flex-col mt-[40px] gap-y-[10px]">
-        <div className="text-[14px] font-bold">매장 운영 시간</div>
-        <div className="text-[14px]">매장을 운영하는 시간을 입력해 주세요.</div>
+      <div className="flex flex-col gap-y-[10px]">
+        <h3>매장 운영 시간</h3>
+        <div className="bodyFont">매장을 운영하는 시간을 입력해 주세요.</div>
 
         {/* batch checkbox */}
         <div className="flex flex-row gap-x-[22px]">
@@ -152,14 +153,14 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
             checked={isBatch}
             onChange={() => setIsBatch((s) => !s)}
           />
-          <span>시간 일괄 적용 (운영 요일만 적용)</span>
+          <span className="bodyFont">시간 일괄 적용 (운영 요일만 적용)</span>
         </div>
 
         {isBatch ? (
           // 배치 모드
           <div className="flex flex-col gap-y-[20px] justify-center items-center">
             {/* open */}
-            <span className="w-[70px] font-bold text-[14px] text-center">
+            <span className="w-[70px] font-bold hintFont text-center">
               매장 오픈
             </span>
             <div className="flex flex-row gap-x-[10px] items-center justify-center text-[20px]">
@@ -214,7 +215,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
           </div>
         ) : (
           // 일반 모드
-          <div className="flex flex-col items-center overflow-y-auto h-[220px] w-full">
+          <div className="flex flex-col items-center w-full">
             {sortedForm.map((day) => {
               const [openHour, openMin] = parseTimeParts(day.open_time);
               const [closeHour, closeMin] = parseTimeParts(day.close_time);
@@ -308,7 +309,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 
