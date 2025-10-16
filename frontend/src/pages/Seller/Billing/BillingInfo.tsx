@@ -16,6 +16,7 @@ const BillingInfo = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const [store, setStore] = useState<StoreDetailType | null>(null);
+  const [showWarn, setShowWarn] = useState<Boolean>(false);
   const today = dayjs();
   const endDate = today.add(-6, "day");
 
@@ -42,6 +43,7 @@ const BillingInfo = () => {
   };
 
   const handlePostWithdraw = async () => {
+    setShowWarn(false);
     try {
       await WithdrawSeller();
       navigate("withdraw");
@@ -107,7 +109,7 @@ const BillingInfo = () => {
           {/* withdraw */}
           <div
             className="bodyFont font-bold text-sub-red py-[20px]"
-            onClick={handlePostWithdraw}
+            onClick={() => setShowWarn(true)}
           >
             <div>계정 탈퇴</div>
           </div>
@@ -121,6 +123,18 @@ const BillingInfo = () => {
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
           category="green"
+        />
+      )}
+
+      {/* show warn modal */}
+      {showWarn && (
+        <CommonModal
+          desc="계정 탈퇴 시, <b>가게 정보는 유지</b>되지만<br/> <b>가게가 더이상 타 사용자에게 노출되지 않습니다.</b> <br/> <br/> 탈퇴하시겠습니까?"
+          confirmLabel="네, 탈퇴합니다."
+          onConfirmClick={handlePostWithdraw}
+          onCancelClick={() => setShowWarn(false)}
+          category="red"
+          className="text-start"
         />
       )}
     </div>
