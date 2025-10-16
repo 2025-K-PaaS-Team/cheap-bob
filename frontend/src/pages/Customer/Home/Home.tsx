@@ -35,7 +35,7 @@ const Home = () => {
 
       {/* change to customer account */}
       <div
-        className="btnFont text-center text-main-deep"
+        className="btnFont text-center text-main-deep py-5"
         onClick={() => navigate("/s")}
       >
         판매자 계정으로 전환
