@@ -1,4 +1,3 @@
-import { idxToDow } from "@constant";
 import type { Offset, OperationTimeType } from "@interface";
 import { useEffect, useMemo } from "react";
 
@@ -44,9 +43,6 @@ const CommonPuTime = ({
     const minIdx = Math.min(...open.map((f) => f.day_of_week));
     return form.find((f) => f.day_of_week === minIdx);
   }, [form]);
-  const baseLabel = firstOpenDay
-    ? idxToDow[firstOpenDay.day_of_week]
-    : "운영일";
 
   // 오프셋/close_time 변경 시 계산값 반영 (무한루프 방지: 실제 변경시에만 setForm)
   useEffect(() => {
