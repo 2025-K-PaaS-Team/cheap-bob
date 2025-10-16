@@ -162,6 +162,13 @@ export const GetStoreOperation = async (): Promise<StoreOperationType> => {
   return data;
 };
 
+// GET: get store operation reservation
+export const GetStoreOpReservation = async () => {
+  const { data } = await sellerStoreSettingsApi.get("/operation/reservation");
+
+  return data;
+};
+
 // POST: create operation reservation
 export const CreateOperationReservation = async (
   res: ChangeStoreOperationType

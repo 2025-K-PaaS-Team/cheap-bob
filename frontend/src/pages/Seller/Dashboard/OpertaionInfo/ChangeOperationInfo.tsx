@@ -1,7 +1,7 @@
 import { CommonModal } from "@components/common";
 import { idxToDow } from "@constant";
 import type { StoreOperationType } from "@interface";
-import { GetStoreOperation } from "@services";
+import { GetStoreOperation, GetStoreOpReservation } from "@services";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -21,6 +21,7 @@ const ChangeOperationInfo = () => {
   ];
 
   const [op, setOp] = useState<StoreOperationType>([]);
+  const [reservation, setReservation] = useState([]);
   const [selectedDow, setSelectedDow] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -46,8 +47,21 @@ const ChangeOperationInfo = () => {
     }
   };
 
+  const handleGetStoreReservation = async () => {
+    try {
+      const res = await GetStoreOpReservation();
+      setReservation(res.modifications);
+    } catch {
+      setModalMsg("운영 변경 예약 정보를 불러오는 것에 실패했습니다.");
+      setShowModal(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     handleGetStoreOperation();
+    handleGetStoreReservation();
   }, []);
 
   if (loading) return <div className="mx-[35px]">로딩중...</div>;
@@ -123,13 +137,21 @@ const ChangeOperationInfo = () => {
       </div>
 
       {items.map((item) => (
-        <div key={item.to}>
+        <div
+          key={item.to}
+          className="flex flex-row items-center justify-between"
+        >
           <div
             className="bodyFont font-bold py-[20px] border-b-[1px] border-black/10 cursor-pointer"
             onClick={() => navigate(item.to)}
           >
             {item.label}
           </div>
+          {reservation.length !== 0 && item.label === "운영 시간 변경" && (
+            <div className="tagFont h-fit bg-main-pale border border-main-deep font-main-deep rounded-sm py-[8px] px-[16px]">
+              변경 예약중
+            </div>
+          )}
         </div>
       ))}
 
