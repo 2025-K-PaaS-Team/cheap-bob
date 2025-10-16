@@ -1,69 +1,115 @@
 import { CommonBtn } from "@components/common";
 import CommonQR from "@components/common/CommonQR";
+import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
 import type { OrderBaseType } from "@interface";
+import { getTitleByKey } from "@utils";
 import { useState } from "react";
 
 interface OrderListProps {
   orders: OrderBaseType[];
+  status: string;
 }
 
-const OrderList = ({ orders }: OrderListProps) => {
+const OrderList = ({ orders, status }: OrderListProps) => {
   const [openQr, setOpenQr] = useState<boolean>(false);
+
+  const cfmLabel = [
+    { key: "reservation", title: "픽업 확정하기" },
+    { key: "accepted", title: "픽업 QR 표시" },
+  ];
 
   const handleClickCancel = () => {
     console.log("click cancel button");
   };
 
-  const handleClickConfirm = () => {
-    setOpenQr(true);
+  const handleClickConfirm = (status: string) => {
+    if (status === "reservation") {
+      console.log("isreser");
+    } else {
+      setOpenQr(true);
+    }
   };
 
+  if (orders.length == 0 || !orders) {
+    return (
+      <div className="flex flex-col flex-1 gap-y-[20px] justify-center items-center mx-[20px]">
+        <img src="/icon/angrySalad.svg" alt="angrySaladIcon" width="116px" />
+        <div>
+          <h1>주문 내역이 비어있어요.</h1>
+          <div className="tagFont">다양한 랜덤팩을 주문하고 픽업해보세요.</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col mx-[16px] gap-y-[16px]">
-      {orders.length == 0 && (
-        <div className="flex flex-col bg-custom-white rounded-sm py-[22px] px-[15px] gap-y-[16px]">
-          {/* first row */}
-          <div className="flex flex-row justify-between items-center">
-            <div className="flex flex-row gap-x-[12px] items-center">
-              <div className="font-bold text-[16px]">13:22</div>
-              <div className="text-[20px]">
-                수량: <span className="font-bold">1개</span>
+    <div className="flex flex-col mx-[16px] gap-y-[16px] pb-[50px]">
+      {orders.map((order, idx) => {
+        return (
+          <div
+            className="bg-white shadow flex flex-col p-[16px] gap-y-[16px]"
+            key={idx}
+          >
+            {/* first row */}
+            <div className="flex flex-row justify-between border-b border-black/10 pb-[16px]">
+              {/* time */}
+              <h3>{order.reservation_at.slice(11, 16)}</h3>
+              {/* quantity */}
+              <h3>
+                <span className="font-normal">주문 수량:</span>{" "}
+                <span className="text-main-deep">{order.quantity}</span>개
+              </h3>
+            </div>
+            {/* second row */}
+            <div className="flex flex-row justify-between py-[16px]">
+              {/* customer name */}
+              <h3>
+                <span className="font-normal">주문자:</span>{" "}
+                {order.customer_nickname}
+              </h3>
+              {/* more info */}
+              <div className="tagFont text-[#6C6C6C]">정보 더보기</div>
+            </div>
+            {/* third row */}
+            <div className="flex flex-row gap-x-[10px] flex-wrap justify-start gap-y-[10px] border-b border-black/10 pb-[16px] tagFont">
+              {/* nutrition_types info */}
+              <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
+                {getTitleByKey(order.nutrition_types[0], NutritionList)}
+              </div>
+              {/* preferred_menus info */}
+              <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
+                {getTitleByKey(order.preferred_menus[0], MenuList)}
+              </div>
+              {/* topping_types info */}
+              <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
+                {getTitleByKey(order.topping_types[0], ToppingList)}
+              </div>
+              {/* allergies info */}
+              <div className="bg-[#E7E7E7] border border-[#E7E7E7] rounded py-[7px] px-[16px]">
+                {getTitleByKey(order.allergies[0], AllergyList)}
               </div>
             </div>
-            <div className="text-[16px]">주문자 정보 더보기 &gt;</div>
+            {/* fourth row */}
+            <div className="grid grid-cols-3 pt-[16px]">
+              <CommonBtn
+                label="주문취소"
+                notBottom
+                category="white"
+                className="w-full border-none"
+                onClick={handleClickCancel}
+              />
+              <CommonBtn
+                label={getTitleByKey(status, cfmLabel) ?? ""}
+                notBottom
+                className="col-span-2 w-full"
+                onClick={() => handleClickConfirm(status)}
+              />
+            </div>
+
+            {openQr && <CommonQR onClick={() => setOpenQr(false)} />}
           </div>
-
-          {/* second row */}
-
-          <div className="ml-[40px] bg-custom-white rounded-sm flex flex-col py-[9.5px] px-[14px]">
-            <div className="text-[16px]">영양목표: 균형있게</div>
-            <div className="text-[16px]">선호 메뉴: 포케</div>
-            <div className="text-[16px]">알레르기 정보: 갑각류</div>
-          </div>
-
-          {/* third row - btn */}
-          <div className="flex flex-row ml-[40px]">
-            <CommonBtn
-              label="주문 취소"
-              onClick={() => handleClickCancel()}
-              notBottom
-              category="transparent"
-              width="w-1/3"
-            />
-            <CommonBtn
-              label="픽업 확정하기"
-              onClick={() => handleClickConfirm()}
-              notBottom
-              category="green"
-              width="w-2/3"
-            />
-          </div>
-        </div>
-      )}
-
-      <div className="">
-        {openQr && <CommonQR onClick={() => setOpenQr(false)} />}
-      </div>
+        );
+      })}
     </div>
   );
 };

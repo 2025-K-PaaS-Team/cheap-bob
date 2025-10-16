@@ -67,7 +67,7 @@ const Order = () => {
   }, [status, reservationOrders, acceptedOrders, otherOrders]);
 
   return (
-    <>
+    <div className="flex flex-col h-full">
       <Now />
       <StatusBar status={status} setStatus={setStatus} />
 
@@ -77,7 +77,7 @@ const Order = () => {
         <div>주문 시간 순 ▽</div>
       </div>
 
-      <OrderList orders={nowOrderList} />
+      <OrderList orders={nowOrderList} status={status}/>
 
       {/* show modal */}
       {showModal && (
@@ -88,7 +88,7 @@ const Order = () => {
           category="green"
         />
       )}
-    </>
+    </div>
   );
 };
 
