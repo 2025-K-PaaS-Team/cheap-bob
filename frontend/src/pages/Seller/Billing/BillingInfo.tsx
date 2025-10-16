@@ -1,6 +1,8 @@
 import { CommonModal } from "@components/common";
-import { GetStoreWeekSettlement } from "@services";
+import type { StoreDetailType } from "@interface";
+import { GetStoreDetail, GetStoreWeekSettlement } from "@services";
 import { formatErrMsg } from "@utils";
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -9,6 +11,9 @@ const BillingInfo = () => {
   const [weekRevenue, setWeekRevenue] = useState<number>(0);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const [store, setStore] = useState<StoreDetailType | null>(null);
+  const today = dayjs();
+  const endDate = today.add(-6, "day");
 
   const handleGetWeekBilling = async () => {
     try {
@@ -21,36 +26,71 @@ const BillingInfo = () => {
     }
   };
 
+  const handleGetStore = async () => {
+    try {
+      const res = await GetStoreDetail();
+      setStore(res);
+    } catch (err) {
+      console.error(formatErrMsg(err));
+    }
+  };
+
   useEffect(() => {
     handleGetWeekBilling();
+    handleGetStore();
   }, []);
 
   return (
-    <div>
-      <div className="text-[24px] mx-[37px]">
-        <div>이번 주 수익</div>
-        <div>{weekRevenue ?? 0} 원</div>
-        <div
-          className="mt-[10px] text-custom-black/80 text-[18px]"
-          onClick={() => navigate("history")}
-        >
-          정산 내역 보기 &gt;
+    <div className="flex flex-col relative h-full">
+      {/* top content */}
+      <div className="mx-[20px]">
+        {/* greeting */}
+        <div className="flex flex-col pb-[31.5px] gap-y-[10px]">
+          <div className="titleFont">{store?.store_name} 님, 안녕하세요.</div>
+          <div className="bodyFont">{store?.seller_email}</div>
         </div>
-
-        <hr className="h-[1px] border-0 bg-black/20 mb-[44px] mt-[369px]" />
-
-        {/* change billing info */}
-        <div
-          className="text-[16px] font-bold py-[20px] flex flex-row justify-between"
-          onClick={() => navigate("change")}
-        >
-          <div>정산 정보 변경</div>
-          <div>&gt;</div>
+        {/* total revenue */}
+        <div className="flex flex-col bg-main-pale border border-main-deep rounded text-custom-black px-[16px] py-[20px] gap-y-[5px]">
+          <h1>이번 주 수익</h1>
+          <div className="hintFont">
+            {endDate.format("YYYY.MM.DD")} ~ {today.format("MM.DD")}
+          </div>
+          <h2>{weekRevenue ?? 0} 원</h2>
         </div>
-        {/* help */}
-        <div className="text-[16px] font-bold py-[20px] flex flex-row justify-between">
-          <div>도움말</div>
-          <div>&gt;</div>
+      </div>
+
+      {/* bottom content */}
+      <div className="absolute bottom-5 w-full max-w-[420px] py-[20px] border-t border-black/10">
+        <div className="mx-[20px]">
+          {/* history */}
+          <div
+            onClick={() => navigate("history")}
+            className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
+          >
+            <div>정산 내역 보기</div>
+            <div>&gt;</div>
+          </div>
+          {/* change billing info */}
+          <div
+            className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
+            onClick={() => navigate("change")}
+          >
+            <div>정산 정보 변경</div>
+            <div>&gt;</div>
+          </div>
+          {/* help */}
+          <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
+            <div>도움말</div>
+            <div>&gt;</div>
+          </div>
+          {/* logout */}
+          <div className="bodyFont font-bold py-[20px] border-b border-black/10">
+            <div onClick={() => navigate("/s")}>로그아웃</div>
+          </div>
+          {/* withdraw */}
+          <div className="bodyFont font-bold text-sub-red py-[20px]">
+            <div>계정 탈퇴</div>
+          </div>
         </div>
       </div>
 

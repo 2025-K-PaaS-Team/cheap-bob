@@ -1,12 +1,17 @@
 import { QRCodeSVG } from "qrcode.react";
 import CommonBtn from "./CommonBtn";
+import type { GetQrCodeType } from "@interface";
 
 interface CommonQRPros {
   onClick: () => void;
+  qrData: GetQrCodeType;
 }
 
-const CommonQR = ({ onClick }: CommonQRPros) => {
-  const qrValue = "hello";
+const CommonQR = ({ onClick, qrData }: CommonQRPros) => {
+  const qrValue = JSON.stringify({
+    payment_id: qrData.payment_id,
+    qr_data: qrData.qr_data,
+  });
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">

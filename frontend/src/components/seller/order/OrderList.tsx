@@ -1,7 +1,7 @@
 import { CommonBtn, CommonModal, CommonProfile } from "@components/common";
 import CommonQR from "@components/common/CommonQR";
 import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
-import type { OrderBaseType } from "@interface";
+import type { GetQrCodeType, OrderBaseType } from "@interface";
 import { GetOrderQr, updateOrderAccept } from "@services";
 import { formatErrMsg, getTitleByKey } from "@utils";
 import { useState } from "react";
@@ -15,6 +15,7 @@ const OrderList = ({ orders, status }: OrderListProps) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showAcceptModal, setShowAcceptModal] = useState<boolean>(false);
   const [openQr, setOpenQr] = useState<boolean>(false);
+  const [qrData, setQrData] = useState<GetQrCodeType | null>(null);
   const [modalMsg, setModalMsg] = useState("");
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
     null
@@ -45,7 +46,7 @@ const OrderList = ({ orders, status }: OrderListProps) => {
     setOpenQr(true);
     try {
       const res = await GetOrderQr(payment_id);
-      console.log("QR data:", res);
+      setQrData(res);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
@@ -162,7 +163,9 @@ const OrderList = ({ orders, status }: OrderListProps) => {
             </div>
 
             {/* qr modal */}
-            {openQr && <CommonQR onClick={() => setOpenQr(false)} />}
+            {openQr && qrData && (
+              <CommonQR onClick={() => setOpenQr(false)} qrData={qrData} />
+            )}
           </div>
         );
       })}
