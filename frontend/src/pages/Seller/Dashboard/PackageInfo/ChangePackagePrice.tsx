@@ -71,10 +71,10 @@ const ChangePackagePrice = () => {
     }
   };
 
-  if (loading) return <div className="mt-[80px] px-[20px]">로딩중…</div>;
+  if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
 
   return (
-    <div className="mt-[80px] px-[20px] w-full">
+    <div className="mt-[30px] px-[20px] w-full">
       {product && (
         <CommonPrice
           pkg={product}
@@ -86,14 +86,14 @@ const ChangePackagePrice = () => {
         />
       )}
 
-      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
 
       {showModal && (
         <CommonModal
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

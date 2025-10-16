@@ -91,14 +91,15 @@ const ChangePackageNutrition = () => {
     navigate(-1);
   };
 
-  if (loading) return <div className="mt-[80px] px-[20px]">로딩중…</div>;
+  if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
 
   return (
-    <div className="mt-[80px] px-[20px] w-full">
-      <div className="text-[24px]">패키지의 특징은 무엇인가요?</div>
-      <div className="text-[14px] mb-[36px]">
-        최대 3개까지 선택할 수 있어요.
+    <div className="mt-[30px] px-[20px] w-full flex flex-col gap-y-[20px]">
+      <div className="titleFont">
+        변경할 <b>패키지의 영양 특징</b>을 <br />
+        선택해 주세요.
       </div>
+      <div className="hintFont]">최대 3개까지 선택할 수 있어요.</div>
 
       <SelectedGrid
         data={NutritionList}
@@ -107,14 +108,14 @@ const ChangePackageNutrition = () => {
         onClick={handleClick}
       />
 
-      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
 
       {showModal && (
         <CommonModal
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

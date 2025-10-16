@@ -1,8 +1,8 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import type { SnsInfoType } from "@interface";
-import { UpdateStorePhone, UpdateStoreSns } from "@services";
+import { GetStoreDetail, UpdateStorePhone, UpdateStoreSns } from "@services";
 import { formatErrMsg, normalizeUrl, validatePattern } from "@utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 const ChangeStoreNum = () => {
@@ -11,6 +11,20 @@ const ChangeStoreNum = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+
+  useEffect(() => {
+    const handleGetStore = async () => {
+      try {
+        const res = await GetStoreDetail();
+        setValue(res.store_phone);
+        setSns(res.sns);
+      } catch (err) {
+        console.error(formatErrMsg(err));
+      }
+    };
+
+    handleGetStore();
+  }, []);
 
   const handleUpdateStoreDesc = async (storePhone: string) => {
     const validMsg = "01012345678 형식으로 입력해 주세요.";
@@ -58,7 +72,7 @@ const ChangeStoreNum = () => {
   };
 
   return (
-    <div className="mt-[80px] px-[20px] w-full">
+    <div className="mt-[30px] px-[20px] w-full">
       {/* question */}
       <div className="text-[24px]">
         변경할 <span className="font-bold">매장 연락처</span>를 <br /> 입력해
@@ -81,7 +95,7 @@ const ChangeStoreNum = () => {
         <div className="flex flex-row">
           <div className="text-[14px] w-[97px] flex items-center">홈페이지</div>
           <input
-            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
+            className="w-full h-[40px] p-3 text-center bg-custom-white text-[16px]"
             value={sns?.homepage}
             onChange={(e) =>
               setSns((prev) => ({ ...prev, homepage: e.target.value }))
@@ -99,7 +113,7 @@ const ChangeStoreNum = () => {
             인스타그램
           </div>
           <input
-            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
+            className="w-full h-[40px] p-3 text-center bg-custom-white text-[16px]"
             value={sns?.instagram}
             onChange={(e) =>
               setSns((prev) => ({ ...prev, instagram: e.target.value }))
@@ -117,7 +131,7 @@ const ChangeStoreNum = () => {
             X (Twitter)
           </div>
           <input
-            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
+            className="w-full h-[40px] p-3 text-center bg-custom-white text-[16px]"
             value={sns?.x}
             onChange={(e) => setSns((prev) => ({ ...prev, x: e.target.value }))}
             onBlur={(e) =>
@@ -131,7 +145,7 @@ const ChangeStoreNum = () => {
       </div>
 
       {/* save */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
 
       {/* show modal */}
       {showModal && (
@@ -139,7 +153,7 @@ const ChangeStoreNum = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

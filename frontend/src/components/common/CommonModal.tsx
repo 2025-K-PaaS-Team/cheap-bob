@@ -4,7 +4,7 @@ type ModalProps = {
   onCancelClick?: () => void;
   onConfirmClick: () => void;
   desc: string;
-  category?: "red" | "black";
+  category?: "red" | "black" | "green";
   children?: React.ReactNode;
 };
 
@@ -14,17 +14,19 @@ const CommonModal = ({
   onCancelClick,
   onConfirmClick,
   desc,
-  category,
+  category = "green",
   children,
 }: ModalProps) => {
   const confrimBtnClass =
     category === "red"
       ? "bg-custom-white border-[#FF0000]"
-      : "bg-black text-white border-black";
+      : category === "black"
+      ? "bg-black text-white border-black"
+      : "bg-main-deep text-white border-none";
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-      <div className="flex flex-col w-[359px] p-[20px] rounded-[16px] gap-y-[10px] border-[1px] border-black bg-custom-white">
+      <div className="flex flex-col w-[359px] p-[20px] rounded-lg gap-y-[10px] border-[1px] border-black bg-custom-white">
         {/* description */}
         {desc && <div className="text-[16px]">{desc}</div>}
 

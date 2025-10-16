@@ -41,7 +41,7 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
           </div>
 
           {/* now open */}
-          <div className="bg-custom-white rounded-[10px] absolute top-1 left-1 z-10 p-[5px]">
+          <div className="bg-custom-white rounded absolute top-1 left-1 z-10 p-[5px]">
             {store.operation_times.find((dow) => dow.day_of_week === todayDow)
               ?.is_currently_open
               ? "영업중"
@@ -61,7 +61,7 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
           <div className="bg-[#8088C0] p-[15px] flex flex-1 flex-col gap-y-[7px]">
             <div className="flex flex-row justify-between h-full items-end">
               <div className="text-[15px] font-bold">{store.store_name}</div>
-              <div className="bg-[#BFBFBF] p-[5px] rounded-[10px] text-[10px]">
+              <div className="bg-[#BFBFBF] p-[5px] rounded text-[10px]">
                 {store.products[0].price} 원
               </div>
             </div>
@@ -69,7 +69,7 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
             <div className="flex flex-row justify-between h-full">
               <div className="flex flex-row gap-x-[12px] items-center">
                 <div className="text-[12px]">픽업 시간</div>
-                <div className="bg-[#BFBFBF] p-[5px] rounded-[10px] text-[12px]">
+                <div className="bg-[#BFBFBF] p-[5px] rounded text-[12px]">
                   {store.operation_times
                     .find((dow) => dow.day_of_week === todayDow)
                     ?.pickup_start_time.slice(0, 5)}
@@ -79,7 +79,7 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
                     ?.pickup_end_time.slice(0, 5)}
                 </div>
               </div>
-              <div className="bg-[#BFBFBF] p-[5px] rounded-[10px] text-[11px]">
+              <div className="bg-[#BFBFBF] p-[5px] rounded text-[11px]">
                 {(store.products[0].price * store.products[0].sale) / 100}원
               </div>
             </div>

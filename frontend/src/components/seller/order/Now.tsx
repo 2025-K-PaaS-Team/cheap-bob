@@ -1,7 +1,7 @@
 const NowStatus = () => {
   return (
     <div className="flex flex-col mx-[20px] my-[15px] gap-y-[15px]">
-      <div className="flex flex-col bg-main-500 rounded-[8px] p-[17px]">
+      <div className="flex flex-col bg-main-500 rounded-sm p-[17px]">
         <div className="text-[24px]">
           지금은 <span className="font-bold">픽업 시간</span> 입니다
         </div>

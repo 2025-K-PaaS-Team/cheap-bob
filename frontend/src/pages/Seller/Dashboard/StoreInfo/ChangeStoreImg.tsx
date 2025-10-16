@@ -1,8 +1,12 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import type { ImageInfoType } from "@interface";
-import { AddStoreImg, DeleteStoreImg, GetStoreImg } from "@services";
+import {
+  AddStoreImg,
+  ChangeStoreMainImg,
+  DeleteStoreImg,
+  GetStoreImg,
+} from "@services";
 import { formatErrMsg } from "@utils";
-import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -27,32 +31,27 @@ const ChangeStoreImg = () => {
     }
   };
 
-  const handleAddStoreImg = async (files: File[]) => {
-    try {
-      const res = await AddStoreImg(files);
-      setImgs(res.images ?? []);
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setModalMsg(
-          "업로드 중 에러가 발생했습니다. 파일 크기를 확인해 주세요.(최대 10MB)"
-        );
-        setShowModal(true);
-        return;
-      }
-      setModalMsg(formatErrMsg(err));
-      setShowModal(true);
-    }
-  };
-
-  const handleClickUpload = () => {
+  const handleClickUpload = (isMain = false) => {
+    fileInputRef.current!.dataset.isMain = isMain ? "true" : "false";
     fileInputRef.current?.click();
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const list = e.target.files;
-    if (!list) return;
+    const files = e.target.files ? Array.from(e.target.files).slice(0, 5) : [];
+    if (files.length === 0) return;
 
-    const files = Array.from(list).slice(0, 5);
+    const isMain = fileInputRef.current?.dataset.isMain === "true";
+
+    // 일반 사진일 경우 10개 제한 체크
+    if (!isMain) {
+      const currentCount = imgs.length - 1;
+      if (currentCount + files.length > 10) {
+        setModalMsg("제품 사진은 최대 10장까지 등록 가능합니다.");
+        setShowModal(true);
+        e.target.value = "";
+        return;
+      }
+    }
 
     const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     const MAX = 5 * 1024 * 1024;
@@ -72,7 +71,26 @@ const ChangeStoreImg = () => {
       }
     }
 
-    await handleAddStoreImg(files);
+    // 업로드 전 기존 이미지 리스트 저장
+    const oldImgs = [...imgs];
+
+    // 업로드
+    const res = await AddStoreImg(files);
+    const newImgs = res.images ?? [];
+    setImgs(newImgs);
+
+    // 선택한 파일이 대표 사진 변경용이면 새로 추가된 이미지 찾기
+    if (fileInputRef.current?.dataset.isMain === "true") {
+      const newImage = newImgs.find(
+        (img) => !oldImgs.some((old) => old.image_id === img.image_id)
+      );
+      if (newImage) {
+        await ChangeStoreMainImg(newImage.image_id);
+        // 다시 전체 이미지 가져오기
+        await handleGetStoreImg();
+      }
+    }
+
     e.target.value = "";
   };
 
@@ -90,62 +108,97 @@ const ChangeStoreImg = () => {
     handleGetStoreImg();
   }, []);
 
+  if (!imgs || imgs.length === 0) {
+    return <div>이미지를 불러오는 중</div>;
+  }
+
   return (
-    <div className="mt-[80px] px-[20px] w-full">
+    <div className="mt-[30px] px-[20px] w-full gap-y-[40px] flex flex-col">
       {/* question */}
-      <div className="text-[24px] mb-[44px]">
-        변경할 <span className="font-bold">이미지</span>를 <br /> 새로 업로드해
-        주세요.
+      <div className="text-[24px]">
+        변경할 <span className="font-bold">이미지</span>를 <br /> 등록해 주세요.
       </div>
 
-      {/* upload picture button */}
-      <div className="w-full flex justify-center">
-        <CommonBtn
-          label="(사진 업로드)"
-          notBottom
-          onClick={handleClickUpload}
-          className="border-[#999999] font-normal"
+      {/* represent image */}
+      <div className="flex flex-col gap-y-[20px]">
+        <div className="w-full h-[125px] overflow-hidden">
+          <img
+            src={imgs[0].image_url}
+            alt="representImg"
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
+
+        <div className="w-full flex justify-center">
+          <CommonBtn
+            label="대표 사진 변경"
+            notBottom
+            onClick={() => handleClickUpload(true)}
+            className="font-normal"
+            category="white"
+          />
+        </div>
+      </div>
+
+      {/* notice */}
+      <div className="hint bg-[#E7E7E7] rounded py-[20px] px-[8px]">
+        <span className="font-bold">가게 외부 사진</span>을 대표 사진으로
+        등록하면
+        <br /> 손님들이 가게를 더 잘 찾아오실 수 있어요.
+      </div>
+
+      {/* other image */}
+      <div className="flex flex-col gap-y-[20px]">
+        <h2>다른 사진도 있나요?</h2>
+        {/* preview */}
+        {imgs.length > 0 && (
+          <div className="grid grid-cols-3 gap-2">
+            {imgs.slice(1).map((img, idx) => (
+              <div className="relative" key={idx}>
+                <img
+                  key={idx}
+                  src={img.image_url}
+                  alt={`img-${idx}`}
+                  className="w-full h-[100px] object-contain"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleClickDelete(img.image_id)}
+                  className="absolute top-0 right-0 text-custom-black text-xs w-5 h-5 flex items-center justify-center rounded-full"
+                >
+                  X
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {/* upload picture button */}
+        <div className="w-full flex justify-center">
+          <CommonBtn
+            label={`제품 사진 등록 (${imgs.length - 1}/10)`}
+            notBottom
+            onClick={() => handleClickUpload(false)}
+            className="font-normal"
+            category="white"
+          />
+        </div>
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          className="hidden"
+          onChange={handleFileChange}
         />
       </div>
 
-      <input
-        type="file"
-        accept="image/*"
-        ref={fileInputRef}
-        className="hidden"
-        onChange={handleFileChange}
-      />
-
-      {/* preview */}
-      {imgs.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 mt-[29px]">
-          {imgs.map((img, idx) => (
-            <div className="relative" key={idx}>
-              <img
-                key={idx}
-                src={img.image_url}
-                alt={`img-${idx}`}
-                className="w-full h-[100px] object-contain"
-              />
-              {img.is_main && (
-                <span className="absolute left-1 top-1 z-10 px-2 py-0.5 text-[11px] bg-custom-white text-custom-black rounded-full shadow">
-                  대표
-                </span>
-              )}
-              <button
-                type="button"
-                onClick={() => handleClickDelete(img.image_id)}
-                className="absolute top-0 right-0 text-custom-black text-xs w-5 h-5 flex items-center justify-center rounded-full"
-              >
-                X
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* save */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+      <CommonBtn
+        label="저장"
+        onClick={handleSubmit}
+        category="green"
+        notBottom
+        className="w-[350px] flex w-full justify-center mb-[50px]"
+      />
 
       {/* show modal */}
       {showModal && (
@@ -153,7 +206,7 @@ const ChangeStoreImg = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

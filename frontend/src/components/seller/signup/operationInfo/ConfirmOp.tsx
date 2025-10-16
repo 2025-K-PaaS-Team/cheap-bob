@@ -101,7 +101,7 @@ const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           width="w-[100px]"
         />
         <CommonBtn
-          category="black"
+          category="green"
           label="설정 완료"
           onClick={() => handleClickNext()}
           notBottom
@@ -116,7 +116,7 @@ const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

@@ -46,7 +46,7 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
     if (mapRef.current) {
       const newCenter = new window.naver.maps.LatLng(coor.lat, coor.lng);
       mapRef.current.setCenter(newCenter);
-      mapRef.current.setZoom(16, true);
+      mapRef.current.setZoom(17, true);
       // set form
       setForm({
         postal_code: data.zonecode,
@@ -108,39 +108,31 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
     <div className="flex flex-col mt-[37px] gap-y-[11px]">
       {/* postal code */}
       <div className="flex flex-row gap-x-[10px] h-[37px]">
+        {/* road address */}
         <input
-          className="bg-custom-white text-[16px] w-full p-3"
-          id="postCode"
+          className="hint w-full h-[37px] p-3 border-b-1 border-black/20"
+          id="roadAddr"
           readOnly
-          value={form.postal_code}
+          value={form.address}
+          placeholder="주소를 입력하세요."
         />
         <button
-          className="bg-custom-white text-[16px] w-[180px] px-3"
+          className="border border-main-deep border-1 rounded hint w-[180px] px-3"
           onClick={() => openPostalCode()}
         >
-          우편 번호 찾기
+          우편번호 찾기
         </button>
       </div>
-      {/* road address */}
-      <input
-        className="bg-custom-white text-[16px] w-full h-[37px] p-3"
-        id="roadAddr"
-        readOnly
-        value={form.address}
-      />
       {/* detail address */}
       <input
-        className="bg-custom-white text-[16px] w-full h-[37px] p-3"
+        className="hint w-full h-[37px] p-3 border-b-1 border-black/20"
         id="detailAddr"
         value={form.detail_address}
+        placeholder="상세주소를 입력하세요."
         // set detail addr form
         onChange={(e) => setForm({ detail_address: e.target.value })}
       />
-      <div
-        id="map"
-        style={{ width: "100%", height: "250px" }}
-        className="mt-[34px]"
-      />
+      <div id="map" style={{ width: "100%", height: "201px" }} />
     </div>
   );
 };

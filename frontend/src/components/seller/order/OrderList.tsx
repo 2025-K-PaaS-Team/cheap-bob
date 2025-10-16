@@ -21,7 +21,7 @@ const OrderList = ({ orders }: OrderListProps) => {
   return (
     <div className="flex flex-col mx-[16px] gap-y-[16px]">
       {orders.length == 0 && (
-        <div className="flex flex-col bg-custom-white rounded-[8px] py-[22px] px-[15px] gap-y-[16px]">
+        <div className="flex flex-col bg-custom-white rounded-sm py-[22px] px-[15px] gap-y-[16px]">
           {/* first row */}
           <div className="flex flex-row justify-between items-center">
             <div className="flex flex-row gap-x-[12px] items-center">
@@ -35,7 +35,7 @@ const OrderList = ({ orders }: OrderListProps) => {
 
           {/* second row */}
 
-          <div className="ml-[40px] bg-custom-white rounded-[8px] flex flex-col py-[9.5px] px-[14px]">
+          <div className="ml-[40px] bg-custom-white rounded-sm flex flex-col py-[9.5px] px-[14px]">
             <div className="text-[16px]">영양목표: 균형있게</div>
             <div className="text-[16px]">선호 메뉴: 포케</div>
             <div className="text-[16px]">알레르기 정보: 갑각류</div>
@@ -54,7 +54,7 @@ const OrderList = ({ orders }: OrderListProps) => {
               label="픽업 확정하기"
               onClick={() => handleClickConfirm()}
               notBottom
-              category="black"
+              category="green"
               width="w-2/3"
             />
           </div>

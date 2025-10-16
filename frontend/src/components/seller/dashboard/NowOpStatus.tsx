@@ -2,7 +2,8 @@ import { CommonDropbox, CommonModal } from "@components/common";
 import { OpStatusOption } from "@constant";
 import type { OperationTimeType } from "@interface";
 import type { OptionType } from "@interface/common/types";
-import { useState } from "react";
+import { CloseStore } from "@services";
+import { useState, useMemo } from "react";
 
 const toMin = (t?: string) => {
   if (!t) return null;
@@ -22,91 +23,106 @@ const fmtDur = (mm: number) => {
 
 const jsToServerDow = (jsDay: number) => (jsDay + 6) % 7;
 
-const normalizeSpan = (openMin: number, closeMin: number) => {
-  if (closeMin >= openMin)
-    return { open: openMin, close: closeMin, cross: false };
-  return { open: openMin, close: closeMin + 1440, cross: true };
-};
+const normalizeSpan = (openMin: number, closeMin: number) =>
+  closeMin >= openMin
+    ? { open: openMin, close: closeMin, cross: false }
+    : { open: openMin, close: closeMin + 1440, cross: true };
 
 type Props = {
   ops: OperationTimeType[];
 };
 
 const NowOpStatus = ({ ops }: Props) => {
-  const now = new Date();
-  const jsDay = now.getDay();
-  const dow = jsToServerDow(jsDay);
-  const currMin = now.getHours() * 60 + now.getMinutes();
-  const [openChangeModal, setOpenChangeModal] = useState<boolean>(false);
+  const [openChangeModal, setOpenChangeModal] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<OptionType | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
 
-  const handleConfirmChange = () => {
-    setOpenChangeModal(false);
-  };
+  const now = new Date();
+  const dow = jsToServerDow(now.getDay());
+  const currMin = now.getHours() * 60 + now.getMinutes();
 
   const today = ops.find((o) => o.day_of_week === dow);
-  const enabledToday = today?.is_open_enabled;
+  const enabledToday = today?.is_open_enabled ?? false;
 
-  let title = "지금은 영업 전입니다.";
-  let sub = "";
+  const statusInfo = useMemo(() => {
+    if (!today) return { title: "지금은 영업 전입니다.", sub: "" };
 
-  if (!today) {
-    return (
-      <div className="mx-[20px] flex flex-col gap-y-[3px] mt-[7px] bg-[#393939] rounded-[8px] py-[25px] px-[19px] text-white">
-        <div className="text-[24px]">{title}</div>
-        {sub && <div className="text-[20px]">{sub}</div>}
-        <div className="text-[16px]">영업 상태 변경 &gt;</div>
-      </div>
-    );
-  }
+    const o = toMin(today.open_time) ?? 0;
+    const c = toMin(today.close_time) ?? 0;
+    const s = toMin(today.pickup_start_time) ?? null;
+    const e = toMin(today.pickup_end_time) ?? null;
+    const { open, close } = normalizeSpan(o, c);
+    const current = currMin < open ? currMin + 1440 : currMin;
 
-  const o = toMin(today.open_time) ?? 0;
-  const c = toMin(today.close_time) ?? 0;
-  const s = toMin(today.pickup_start_time) ?? null;
-  const e = toMin(today.pickup_end_time) ?? null;
+    if (!enabledToday) {
+      return { title: "오늘은 휴무입니다.", sub: "" };
+    }
 
-  const { open, close } = normalizeSpan(o, c);
-
-  const current = currMin < open ? currMin + 1440 : currMin;
-
-  if (!enabledToday) {
-    title = "오늘은 휴무입니다.";
-  } else {
     if (current < open) {
-      title = "지금은 영업 전입니다.";
-      sub = `영업 시작까지 ${fmtDur(open - current)}`;
-    } else if (current >= open && current < close) {
-      title = "지금은 운영중 입니다.";
+      return {
+        title: "지금은 영업 전입니다.",
+        sub: `영업 시작까지 ${fmtDur(open - current)}`,
+      };
+    }
 
+    if (current >= open && current < close) {
+      let sub = "";
       if (s != null && e != null) {
         const sN = s < open ? s + 1440 : s;
         const eN = e < open ? e + 1440 : e;
 
-        if (current < sN) {
-          sub = `손님 픽업 시간까지 ${fmtDur(sN - current)}`;
-        } else if (current >= sN && current < eN) {
-          sub = `픽업 마감까지 ${fmtDur(eN - current)}`;
-        } else {
-          sub = "오늘 픽업이 종료되었습니다.";
-        }
+        if (current < sN) sub = `손님 픽업 시간까지 ${fmtDur(sN - current)}`;
+        else if (current < eN) sub = `픽업 마감까지 ${fmtDur(eN - current)}`;
+        else sub = "오늘 픽업이 종료되었습니다.";
       } else {
         sub = `영업 마감까지 ${fmtDur(close - current)}`;
       }
-    } else {
-      title = "지금은 운영 종료입니다.";
-      sub = "";
+      return { title: "지금은 영업중입니다.", sub };
     }
-  }
 
-  const [selectedOption, setSelectedOption] = useState<OptionType | null>(null);
+    return { title: "지금은 운영 종료입니다.", sub: "" };
+  }, [today, currMin, enabledToday]);
+
+  const highlightStatus = (text: string) => {
+    const statusWords = ["영업 전", "영업중", "운영 종료", "휴무"];
+    let highlighted = text;
+    statusWords.forEach((word) => {
+      highlighted = highlighted.replace(
+        word,
+        `<span class='text-main-deep font-bold'>${word} </span>`
+      );
+    });
+    return highlighted;
+  };
+
+  const handleChangeOpStatus = async () => {
+    try {
+      await CloseStore();
+    } catch (err) {
+      setModalMsg("영업 상태 변경에 실패했습니다.");
+      setShowModal(true);
+      return;
+    }
+  };
 
   return (
     <>
-      <div className="mx-[20px] flex flex-col gap-y-[3px] mt-[7px] bg-[#393939] rounded-[8px] py-[25px] px-[19px] text-white">
-        <div className="text-[24px]">{title}</div>
-        {sub && <div className="text-[20px]">{sub}</div>}
-        <div className="text-[16px]" onClick={() => setOpenChangeModal(true)}>
+      <div className="mx-[20px] flex flex-col gap-y-[3px] mt-[7px] bg-[#393939] rounded-sm py-[25px] px-[19px] text-white">
+        <div
+          className="titleFont text-[24px]"
+          dangerouslySetInnerHTML={{
+            __html: highlightStatus(statusInfo.title),
+          }}
+        />
+        {statusInfo.sub && <div className="text-[20px]">{statusInfo.sub}</div>}
+
+        <button
+          onClick={() => setOpenChangeModal(true)}
+          className="text-[16px] text-left mt-[3px]"
+        >
           영업 상태 변경 &gt;
-        </div>
+        </button>
       </div>
 
       {openChangeModal && (
@@ -115,7 +131,7 @@ const NowOpStatus = ({ ops }: Props) => {
           confirmLabel="변경하기"
           desc="영업 상태 변경"
           onCancelClick={() => setOpenChangeModal(false)}
-          onConfirmClick={() => handleConfirmChange()}
+          onConfirmClick={() => handleChangeOpStatus()}
         >
           <CommonDropbox
             options={OpStatusOption}
@@ -123,6 +139,16 @@ const NowOpStatus = ({ ops }: Props) => {
             onChange={setSelectedOption}
           />
         </CommonModal>
+      )}
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="green"
+        />
       )}
     </>
   );

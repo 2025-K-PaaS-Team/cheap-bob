@@ -5,8 +5,10 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { homeSwiperMap } from "@constant";
+import { useNavigate } from "react-router";
 
 const Home = () => {
+  const navigate = useNavigate();
   localStorage.clear();
 
   return (
@@ -29,6 +31,14 @@ const Home = () => {
         <LoginButton provider="kakao" label="카카오로 계속하기" />
         <LoginButton provider="naver" label="네이버로 계속하기" />
         <LoginButton provider="google" label="구글로 계속하기" />
+      </div>
+
+      {/* change to customer account */}
+      <div
+        className="btnFont text-center text-main-deep py-5"
+        onClick={() => navigate("/s")}
+      >
+        판매자 계정으로 전환
       </div>
     </div>
   );

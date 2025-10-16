@@ -42,7 +42,7 @@ const CommonPkgNum = ({ pkg, setPkg }: PkgNumProps) => {
       </div>
 
       {/* notice */}
-      <div className="text-[14px] absolute bottom-100 w-[350px] left-1/2 -translate-x-1/2 bg-custom-white rounded-[8px] h-[88px] px-[10px] flex flex-col flex justify-center">
+      <div className="text-[14px] absolute bottom-50 w-[350px] left-1/2 -translate-x-1/2 bg-custom-white rounded-sm h-[88px] px-[10px] flex flex-col flex justify-center">
         <div className="font-bold">Tip</div>
         <div>
           설정한 기본값보다 판매할 재고가 남거나 부족해도 <br /> ‘일일

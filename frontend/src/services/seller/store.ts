@@ -61,6 +61,13 @@ export const GetStoreDetail = async (): Promise<StoreDetailType> => {
   return data;
 };
 
+// PATCH: close store
+export const CloseStore = async () => {
+  const { data } = await sellerStoreApi.patch("/close");
+
+  return data;
+};
+
 // PUT: update store name
 export const UpdateStoreName = async (
   store_name: string
@@ -143,7 +150,7 @@ export const DeleteStoreImg = async (image_id: string) => {
 export const ChangeStoreMainImg = async (
   image_id: string
 ): Promise<ImageInfoType> => {
-  const { data } = await sellerStoreImgApi.put(`/${image_id}`);
+  const { data } = await sellerStoreImgApi.put(`/main/${image_id}`);
 
   return data;
 };
@@ -151,6 +158,13 @@ export const ChangeStoreMainImg = async (
 // GET: get store operation
 export const GetStoreOperation = async (): Promise<StoreOperationType> => {
   const { data } = await sellerStoreSettingsApi.get("/operation");
+
+  return data;
+};
+
+// GET: get store operation reservation
+export const GetStoreOpReservation = async () => {
+  const { data } = await sellerStoreSettingsApi.get("/operation/reservation");
 
   return data;
 };

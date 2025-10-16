@@ -122,17 +122,23 @@ const ChangeOperationTime = () => {
   }
 
   return (
-    <div className="relative flex h-full mx-[20px] flex-col">
+    <div className="relative px-[20px] mb-[50px] flex flex-col gap-y-[20px]">
       {/* 기존값으로 초기화된 폼을 CommonOpTime에 연결 */}
       <CommonOpTime form={form} setForm={setForm} />
 
       {/* 공지 */}
-      <div className="absolute bottom-30 w-[350px] left-1/2 -translate-x-1/2 bg-custom-white rounded-[8px] h-[57px] px-[10px] flex items-center">
+      <div className="w-full bg-[#E7E7E7] rounded-sm px-[10px] h-[57px] flex items-center text-custom-black">
         변경 시 다음 영업일부터 적용됩니다.
       </div>
 
       {/* 저장 */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+      <CommonBtn
+        label="저장"
+        onClick={handleSubmit}
+        category="green"
+        notBottom
+        className="w-full justify-center"
+      />
 
       {/* 모달 */}
       {showModal && (
@@ -140,7 +146,7 @@ const ChangeOperationTime = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

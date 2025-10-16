@@ -17,26 +17,17 @@ const SelectGrid = <T extends string>({
         <div
           key={key}
           onClick={() => onClick(key)}
-          className={`relative rounded-[5px] p-[15px] w-[170px] cursor-pointer
+          className={`relative rounded-[5px] p-[10px] cursor-pointer shadow border
             ${
               selected.includes(key)
-                ? "bg-[#484848] text-white"
-                : "bg-[#717171] text-white"
+                ? "bg-main-pale text-main-deep border-main-deep"
+                : "bg-white text-custom-black"
             }
             ${selectType === "nutrition" ? "h-[90px]" : "h-[65px]"}
           `}
         >
-          {selected.includes(key) && (
-            <img
-              src="/icon/checked.svg"
-              alt="checked"
-              className={`absolute z-10 left-1/2 -translate-x-1/2 ${
-                selectType === "nutrition" ? "top-6" : "top-[13px]"
-              }`}
-            />
-          )}
-          <div className="font-semibold text-[15px]">{title}</div>
-          {desc && <div className="text-[11px]">{desc}</div>}
+          <div className="font-bold bodyFont">{title}</div>
+          {desc && <div className="hintFont">{desc}</div>}
         </div>
       ))}
     </div>

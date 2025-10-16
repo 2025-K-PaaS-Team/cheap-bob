@@ -36,7 +36,7 @@ const Enter = ({
         placeholder={placeholder}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="border border-[1px] w-[350px] h-[54px] flex items-center justify-center px-[12px] rounded-[10px] mt-[45px]"
+        className="border border-[1px] w-[350px] h-[54px] flex items-center justify-center px-[12px] rounded mt-[45px]"
       />
       {/* 다음 */}
       <CommonBtn label="다음" onClick={handleSubmit} />
@@ -46,7 +46,7 @@ const Enter = ({
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </>

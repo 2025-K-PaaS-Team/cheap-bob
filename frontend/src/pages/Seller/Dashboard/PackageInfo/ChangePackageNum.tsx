@@ -64,10 +64,10 @@ const ChangePackageNum = () => {
     }
   };
 
-  if (loading) return <div className="mt-[80px] px-[20px]">로딩중…</div>;
+  if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
 
   return (
-    <div className="mt-[80px] px-[20px] w-full">
+    <div className="flex flex-col mt-[30px] px-[20px]">
       {pkg && (
         <CommonPkgNum
           pkg={pkg}
@@ -80,7 +80,7 @@ const ChangePackageNum = () => {
       )}
 
       {/* save */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="black" />
+      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
 
       {/* show modal */}
       {showModal && (
@@ -88,7 +88,7 @@ const ChangePackageNum = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

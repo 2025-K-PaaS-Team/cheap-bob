@@ -42,7 +42,7 @@ const ConfirmPackage = ({ pageIdx, setPageIdx, pkg }: SellerSignupPkgProps) => {
         width="w-[100px]"
       />
       <CommonBtn
-        category="black"
+        category="green"
         label="설정 완료"
         onClick={() => handleClickNext()}
         notBottom
@@ -56,7 +56,7 @@ const ConfirmPackage = ({ pageIdx, setPageIdx, pkg }: SellerSignupPkgProps) => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

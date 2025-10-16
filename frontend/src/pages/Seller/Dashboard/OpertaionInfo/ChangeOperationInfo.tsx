@@ -1,7 +1,7 @@
 import { CommonModal } from "@components/common";
 import { idxToDow } from "@constant";
 import type { StoreOperationType } from "@interface";
-import { GetStoreOperation } from "@services";
+import { GetStoreOperation, GetStoreOpReservation } from "@services";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -21,6 +21,7 @@ const ChangeOperationInfo = () => {
   ];
 
   const [op, setOp] = useState<StoreOperationType>([]);
+  const [reservation, setReservation] = useState([]);
   const [selectedDow, setSelectedDow] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -46,80 +47,85 @@ const ChangeOperationInfo = () => {
     }
   };
 
+  const handleGetStoreReservation = async () => {
+    try {
+      const res = await GetStoreOpReservation();
+      setReservation(res.modifications);
+    } catch {
+      setModalMsg("운영 변경 예약 정보를 불러오는 것에 실패했습니다.");
+      setShowModal(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     handleGetStoreOperation();
+    handleGetStoreReservation();
   }, []);
 
   if (loading) return <div className="mx-[35px]">로딩중...</div>;
 
   return (
     <div className="mx-[35px]">
-      <div className="flex flex-col gap-y-[9px]">
-        <div className="text-[16px]">현재 영업 시간</div>
+      <div className="flex flex-col gap-y-[10px]">
+        <h3 className="py-[10px]">현재 영업 시간</h3>
 
         {/* 영업 요일: 활성 요일만 */}
-        <div className="text-[14px] flex flex-row">
-          <div className="flex items-center justify-center mr-[40px]">
-            영업 요일
-          </div>
-          <div className="flex flex-row gap-x-[6px]">
-            {activeDays.length === 0 ? (
-              <div className="text-[13px] text-custom-black/50">
-                영업 중인 요일이 없습니다
-              </div>
-            ) : (
-              activeDays.map((day) => {
-                const dow = day.day_of_week;
-                const isSelected = selectedDow === dow;
-                return (
-                  <button
-                    key={dow}
-                    type="button"
-                    className={`w-[32px] h-[32px] rounded-full flex items-center justify-center
+
+        <div className="flex flex-row justify-around hint">
+          {activeDays.length === 0 ? (
+            <div className="text-custom-black/50">
+              영업 중인 요일이 없습니다
+            </div>
+          ) : (
+            activeDays.map((day) => {
+              const dow = day.day_of_week;
+              const isSelected = selectedDow === dow;
+              return (
+                <button
+                  key={dow}
+                  type="button"
+                  className={`w-[32px] h-[32px] rounded-full flex items-center justify-center
                       ${
                         isSelected
-                          ? "bg-black text-white"
+                          ? "bg-main-deep text-white"
                           : "bg-custom-white text-custom-black"
                       }`}
-                    onClick={() => setSelectedDow(dow)}
-                    aria-pressed={isSelected}
-                    title={idxToDow[dow]}
-                  >
-                    {idxToDow[dow]}
-                  </button>
-                );
-              })
-            )}
-          </div>
+                  onClick={() => setSelectedDow(dow)}
+                  aria-pressed={isSelected}
+                  title={idxToDow[dow]}
+                >
+                  {idxToDow[dow]}
+                </button>
+              );
+            })
+          )}
         </div>
 
         {/* 선택된 요일의 시간 */}
-        <div className="bg-custom-white rounded-[8px] my-[8px] flex flex-col py-[15px] px-[23px] space-y-[10px]">
+        <div className="bg-[#E7E7E7] hintFont rounded-sm my-[8px] flex flex-col py-[15px] px-[23px] space-y-[10px]">
           {selectedOp ? (
             <>
               <div className="grid grid-cols-3 items-center">
-                <div className="text-[14px]">오픈 시간</div>
-                <div className="text-[20px] col-span-2 text-center">
-                  {hhmm(selectedOp.open_time)}
-                </div>
+                <div>오픈 시간</div>
+                <div className="text-center">{hhmm(selectedOp.open_time)}</div>
               </div>
               <div className="grid grid-cols-3 items-center">
-                <div className="text-[14px]">픽업 확정 시간</div>
-                <div className="text-[20px] col-span-2 text-center">
+                <div>픽업 확정 시간</div>
+                <div className="text-center">
                   {hhmm(selectedOp.pickup_start_time)}
                 </div>
               </div>
               <div className="grid grid-cols-3 items-center">
-                <div className="text-[14px]">픽업 마감 시간</div>
-                <div className="text-[20px] col-span-2 text-center">
+                <div>픽업 마감 시간</div>
+                <div className="text-center">
                   {hhmm(selectedOp.pickup_end_time)}
                 </div>
               </div>
               <div className="grid grid-cols-3 items-center">
-                <div className="text-[14px]">마감 시간</div>
-                <div className="text-[20px] col-span-2 text-center">
-                  {hhmm(selectedOp.close_time)}
-                </div>
+                <div>마감 시간</div>
+                <div className="text-center">{hhmm(selectedOp.close_time)}</div>
               </div>
             </>
           ) : (
@@ -131,13 +137,21 @@ const ChangeOperationInfo = () => {
       </div>
 
       {items.map((item) => (
-        <div key={item.to}>
+        <div
+          key={item.to}
+          className="flex flex-row items-center justify-between"
+        >
           <div
-            className="text-[16px] py-[20px] border-b-[1px] border-black/10 cursor-pointer"
+            className="bodyFont font-bold py-[20px] border-b-[1px] border-black/10 cursor-pointer"
             onClick={() => navigate(item.to)}
           >
             {item.label}
           </div>
+          {reservation.length !== 0 && item.label === "운영 시간 변경" && (
+            <div className="tagFont h-fit bg-main-pale border border-main-deep font-main-deep rounded-sm py-[8px] px-[16px]">
+              변경 예약중
+            </div>
+          )}
         </div>
       ))}
 
@@ -146,7 +160,7 @@ const ChangeOperationInfo = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
-          category="black"
+          category="green"
         />
       )}
     </div>

@@ -1,4 +1,3 @@
-import { idxToDow } from "@constant";
 import type { Offset, OperationTimeType } from "@interface";
 import { useEffect, useMemo } from "react";
 
@@ -44,9 +43,6 @@ const CommonPuTime = ({
     const minIdx = Math.min(...open.map((f) => f.day_of_week));
     return form.find((f) => f.day_of_week === minIdx);
   }, [form]);
-  const baseLabel = firstOpenDay
-    ? idxToDow[firstOpenDay.day_of_week]
-    : "운영일";
 
   // 오프셋/close_time 변경 시 계산값 반영 (무한루프 방지: 실제 변경시에만 setForm)
   useEffect(() => {
@@ -106,7 +102,7 @@ const CommonPuTime = ({
       <div className="text-center w-full justify-center">
         <div className="flex flex-row text-[20px] justify-center items-center gap-x-[10px]">
           <input
-            className="bg-custom-white rounded-[8px] w-[50px] h-[44px] text-center"
+            className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
             value={pickupStartOffset.hour}
             onChange={(e) =>
               setPickupStartOffset(
@@ -119,7 +115,7 @@ const CommonPuTime = ({
           />
           <div>시</div>
           <input
-            className="bg-custom-white rounded-[8px] w-[50px] h-[44px] text-center"
+            className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
             value={pickupStartOffset.min}
             onChange={(e) =>
               setPickupStartOffset(
@@ -133,12 +129,7 @@ const CommonPuTime = ({
           <div>분 전부터</div>
         </div>
         <div className="text-[14px] mt-[10px]">
-          {baseLabel}요일 기준{" "}
-          <b>
-            {sHH}시 {sMM}분 전부터
-          </b>{" "}
-          사용자들은 매장에 방문하여
-          <br />
+          손님들이 {sHH}시 {sMM}분부터 매장에 방문하여 <br />
           패키지를 픽업할 수 있습니다.
         </div>
       </div>
@@ -149,7 +140,7 @@ const CommonPuTime = ({
       <div className="text-center w-full justify-center">
         <div className="flex flex-row text-[20px] justify-center items-center gap-x-[10px]">
           <input
-            className="bg-custom-white rounded-[8px] w-[50px] h-[44px] text-center"
+            className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
             value={pickupDiscardOffset.hour}
             onChange={(e) =>
               setPickupDiscardOffset(
@@ -162,7 +153,7 @@ const CommonPuTime = ({
           />
           <div>시</div>
           <input
-            className="bg-custom-white rounded-[8px] w-[50px] h-[44px] text-center"
+            className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
             value={pickupDiscardOffset.min}
             onChange={(e) =>
               setPickupDiscardOffset(
@@ -176,11 +167,7 @@ const CommonPuTime = ({
           <div>분 전부터</div>
         </div>
         <div className="text-[14px] mt-[10px]">
-          {baseLabel}요일 기준{" "}
-          <b>
-            {dHH}시 {dMM}분 이후
-          </b>{" "}
-          픽업되지 않은 패키지는 <b>폐기합니다</b>.
+          {dHH}시 {dMM}분까지 픽업되지 않은 패키지는 폐기합니다.
         </div>
       </div>
     </>

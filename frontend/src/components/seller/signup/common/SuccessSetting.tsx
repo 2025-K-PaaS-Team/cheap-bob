@@ -29,7 +29,7 @@ const SuccessSetting = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       </div>
 
       <CommonBtn
-        category="black"
+        category="green"
         label="확인"
         onClick={() => handleClickNext()}
       />
