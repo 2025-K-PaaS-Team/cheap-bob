@@ -1,4 +1,4 @@
-import { CommonBtn, CommonModal } from "@components/common";
+import { CommonBtn, CommonModal, CommonProfile } from "@components/common";
 import CommonQR from "@components/common/CommonQR";
 import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
 import type { OrderBaseType } from "@interface";
@@ -17,6 +17,10 @@ const OrderList = ({ orders, status }: OrderListProps) => {
   const [openQr, setOpenQr] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
+    null
+  );
+  const [showProfile, setShowProfile] = useState<boolean>(false);
+  const [selectedProfile, setSelectedProfile] = useState<OrderBaseType | null>(
     null
   );
 
@@ -60,6 +64,11 @@ const OrderList = ({ orders, status }: OrderListProps) => {
     }
   };
 
+  const handleOpenProfile = (order: OrderBaseType) => {
+    setSelectedProfile(order);
+    setShowProfile(true);
+  };
+
   if (orders.length == 0 || !orders) {
     return (
       <div className="bg-custom-white flex flex-col flex-1 gap-y-[20px] justify-center items-center px-[20px]">
@@ -73,7 +82,18 @@ const OrderList = ({ orders, status }: OrderListProps) => {
   }
 
   return (
-    <div className="bg-custom-white flex flex-col px-[16px] pb-[50px] gap-y-[16px]">
+    <div className="bg-custom-white flex flex-col flex-1 px-[16px] py-[20px] gap-y-[16px]">
+      {/* summary */}
+      <div className="hintFont justify-between flex flex-row">
+        <div>
+          <span className="text-main-deep font-bold">
+            {orders?.length ?? "0"}
+          </span>{" "}
+          건의 주문 내역이 있습니다.
+        </div>
+        <div>주문 시간 순 ▽</div>
+      </div>
+
       {orders.map((order, idx) => {
         return (
           <div
@@ -98,7 +118,12 @@ const OrderList = ({ orders, status }: OrderListProps) => {
                 {order.customer_nickname}
               </h3>
               {/* more info */}
-              <div className="tagFont text-[#6C6C6C]">정보 더보기</div>
+              <div
+                onClick={() => handleOpenProfile(order)}
+                className="tagFont text-[#6C6C6C]"
+              >
+                정보 더보기
+              </div>
             </div>
             {/* third row */}
             <div className="flex flex-row gap-x-[10px] flex-wrap justify-start gap-y-[10px] border-b border-black/10 pb-[16px] tagFont">
@@ -161,6 +186,27 @@ const OrderList = ({ orders, status }: OrderListProps) => {
           onConfirmClick={() => handleAcceptConfirm()}
           onCancelClick={() => setShowAcceptModal(false)}
           category="green"
+        />
+      )}
+
+      {/* show profile modal */}
+      {showProfile && selectedProfile && (
+        <CommonProfile
+          nickname={selectedProfile.customer_nickname}
+          phone={selectedProfile.customer_phone_number}
+          nutrition_goal={selectedProfile.nutrition_types.map((n) =>
+            getTitleByKey(n, NutritionList)
+          )}
+          prefer_menu={selectedProfile.preferred_menus.map((m) =>
+            getTitleByKey(m, MenuList)
+          )}
+          prefer_topping={selectedProfile.topping_types.map((t) =>
+            getTitleByKey(t, ToppingList)
+          )}
+          allergy={selectedProfile.allergies.map((a) =>
+            getTitleByKey(a, AllergyList)
+          )}
+          onCancelClick={() => setShowProfile(false)}
         />
       )}
     </div>
