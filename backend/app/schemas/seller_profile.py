@@ -23,12 +23,15 @@ class StoreAddressInfo(BaseModel):
     lng: str = Field(..., description="경도")
 
 
-
-
 class StorePaymentInfoCreateRequest(BaseModel):
     portone_store_id: str = Field(..., description="포트원 가게 ID")
     portone_channel_id: str = Field(..., description="포트원 채널 ID")
     portone_secret_key: str = Field(..., description="포트원 시크릿 키")
+
+
+class StorePaymentInfoCheckResponse(BaseModel):
+    is_exist:bool = Field(..., description="포트원 결제 정보가 이미 존재하는지")
+
 
 class SellerProfileCreateRequest(BaseModel):
     """판매자 회원가입 요청"""
@@ -45,9 +48,6 @@ class SellerProfileCreateRequest(BaseModel):
     
     # 운영 정보
     operation_times: List[StoreOperationTime] = Field(..., description="요일별 운영 시간", min_items=7, max_items=7)
-    
-    # 결제 정보
-    payment_info: StorePaymentInfoCreateRequest = Field(..., description="결제 정보")
     
     @field_validator('operation_times')
     @classmethod
