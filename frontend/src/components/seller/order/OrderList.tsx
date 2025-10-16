@@ -62,7 +62,7 @@ const OrderList = ({ orders, status }: OrderListProps) => {
 
   if (orders.length == 0 || !orders) {
     return (
-      <div className="flex flex-col flex-1 gap-y-[20px] justify-center items-center mx-[20px]">
+      <div className="bg-custom-white flex flex-col flex-1 gap-y-[20px] justify-center items-center mx-[20px]">
         <img src="/icon/angrySalad.svg" alt="angrySaladIcon" width="116px" />
         <div>
           <h1>주문 내역이 비어있어요.</h1>
@@ -73,11 +73,11 @@ const OrderList = ({ orders, status }: OrderListProps) => {
   }
 
   return (
-    <div className="flex flex-col mx-[16px] gap-y-[16px] pb-[50px]">
+    <div className="bg-custom-white flex flex-col px-[16px] pb-[50px] gap-y-[16px]">
       {orders.map((order, idx) => {
         return (
           <div
-            className="bg-white shadow flex flex-col p-[16px] gap-y-[16px]"
+            className="bg-white shadow flex flex-col p-[16px] gap-y-[16px] rounded"
             key={idx}
           >
             {/* first row */}

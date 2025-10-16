@@ -72,12 +72,12 @@ const Order = () => {
       <StatusBar status={status} setStatus={setStatus} />
 
       {/* summary */}
-      <div className="text-[14px] justify-between mx-[16px] flex flex-row my-[20px]">
+      <div className="bg-custom-white text-[14px] justify-between px-[16px] py-[20px] flex flex-row">
         <div>{orders?.total ?? "0"}건의 주문 내역이 있습니다.</div>
         <div>주문 시간 순 ▽</div>
       </div>
 
-      <OrderList orders={nowOrderList} status={status}/>
+      <OrderList orders={nowOrderList} status={status} />
 
       {/* show modal */}
       {showModal && (
