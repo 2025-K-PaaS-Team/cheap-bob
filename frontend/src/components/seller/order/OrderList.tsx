@@ -120,7 +120,7 @@ const OrderList = ({ orders, status }: OrderListProps) => {
               </div>
             </div>
             {/* fourth row */}
-            <div className="grid grid-cols-3 pt-[16px]">
+            <div className="grid grid-cols-3">
               <CommonBtn
                 label="주문취소"
                 notBottom
