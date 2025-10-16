@@ -1,17 +1,20 @@
 import type { PaymentConfirmType, PaymentResponseType } from "@interface";
 import type { OrderBaseType } from "@interface/common/types";
+import type { optionType } from "@interface/customer/option";
 import type {
-  OrderDeleteResponseType,
+  // OrderDeleteResponseType,
   OrderDetailResponseType,
   OrderResponseType,
 } from "@interface/customer/order";
 import {
-  deleteOrder,
+  // deleteOrder,
+  GetAllegyOptionList,
   getCurrentOrders,
+  getMenuOptionList,
+  GetNutritionOptionList,
   getOrderDetail,
   getOrders,
-  getSpecificStore,
-  getStores,
+  GetToppingOptionList,
 } from "@services";
 import {
   cancelPayment,
@@ -22,39 +25,15 @@ import { useEffect, useState } from "react";
 
 const CustomerLab = () => {
   const [errMsg, setErrMsg] = useState<string | null>(null);
-  const [stores, setStores] = useState(null);
-  const [store, setStore] = useState(null);
+
   const [orders, setOrders] = useState<OrderBaseType[] | null>(null);
   const [currentOrders, setCurrentOrders] = useState<OrderResponseType | null>(
     null
   );
   const [orderDetail, setOrderDetail] =
     useState<OrderDetailResponseType | null>(null);
-  const [orderDelete, setOrderDelete] =
-    useState<OrderDeleteResponseType | null>(null);
-
-  const handleGetStores = async () => {
-    try {
-      const stores = await getStores();
-      console.log("get stores 성공", stores);
-      setStores(stores);
-    } catch (err: unknown) {
-      console.error("get stores fail");
-      const msg = err instanceof Error ? err.message : "실패해소";
-      setErrMsg(msg);
-    }
-  };
-
-  const hadnleGetSpecificStore = async () => {
-    try {
-      const store = await getSpecificStore("STR_1756711885_298d70b4");
-      setStore(store);
-    } catch (err: unknown) {
-      console.error("등록 실패:", err);
-      const msg = err instanceof Error ? err.message : "실패했슈...";
-      setErrMsg(msg);
-    }
-  };
+  // const [orderDelete, setOrderDelete] =
+  //   useState<OrderDeleteResponseType | null>(null);
 
   const [payment, setPayment] = useState<PaymentResponseType | null>(null);
   const [confirm, setConfirm] = useState<PaymentConfirmType | null>(null);
@@ -138,18 +117,62 @@ const CustomerLab = () => {
     }
   };
 
-  const handleDeleteOrder = async () => {
-    if (!orders) return;
+  // const handleDeleteOrder = async () => {
+  //   if (!orders) return;
+  //   try {
+  //     const orderDelete = await deleteOrder(orders[0]?.payment_id, {
+  //       reason: "개인 사정",
+  //     });
+  //     console.log("결제 취소 성공", orderDelete);
+  //     setOrderDelete(orderDelete);
+  //   } catch (err: unknown) {
+  //     console.error("get order detail failed", err);
+  //     const msg = err instanceof Error ? err.message : "실패해소";
+  //     setErrMsg(msg);
+  //   }
+  // };
+
+  // option
+  const [preferMenu, setPreferMenu] = useState<optionType | null>(null);
+  const [preferNutrition, setPreferNutrition] = useState<optionType | null>(
+    null
+  );
+  const [preferAllergy, setPreferAllergy] = useState<optionType | null>(null);
+  const [preferTopping, setPreferTopping] = useState<optionType | null>(null);
+
+  const handleGetMenuOption = async () => {
     try {
-      const orderDelete = await deleteOrder(orders[0]?.payment_id, {
-        reason: "개인 사정",
-      });
-      console.log("결제 취소 성공", orderDelete);
-      setOrderDelete(orderDelete);
+      const menu = await getMenuOptionList();
+      setPreferMenu(menu);
     } catch (err: unknown) {
-      console.error("get order detail failed", err);
-      const msg = err instanceof Error ? err.message : "실패해소";
-      setErrMsg(msg);
+      console.error("get prefer menu option fail", err);
+    }
+  };
+
+  const handleGetNutritionOption = async () => {
+    try {
+      const nutrition = await GetNutritionOptionList();
+      setPreferNutrition(nutrition);
+    } catch (err: unknown) {
+      console.error("get prefer nutrion option fail", err);
+    }
+  };
+
+  const handleGetAllergyOption = async () => {
+    try {
+      const allergy = await GetAllegyOptionList();
+      setPreferAllergy(allergy);
+    } catch (err: unknown) {
+      console.error("get prefer allergy option fail", err);
+    }
+  };
+
+  const handleGetToppingOption = async () => {
+    try {
+      const topping = await GetToppingOptionList();
+      setPreferTopping(topping);
+    } catch (err: unknown) {
+      console.error("get prefer menu option fail", err);
     }
   };
 
@@ -162,36 +185,6 @@ const CustomerLab = () => {
     <div className="min-h-screen m-5 gap-y-2 flex flex-col justify-center items-center">
       {/* <Map /> */}
       {/* {payment?.payment_id && <PortOneLab paymentId={payment.payment_id} />} */}
-
-      {/* 가게 검색 테스트 */}
-      <div className="flex flex-col space-y-2 p-2 w-full p-2">
-        <h2>가게 검색 테스트</h2>
-        {/* get stores */}
-        <button
-          className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
-          onClick={() => handleGetStores()}
-        >
-          가게 목록 가져오기 (GET: /search/stores)
-        </button>
-        {stores && (
-          <div className="w-full text-green-500">
-            등록된 가게 정보: {JSON.stringify(stores)}
-          </div>
-        )}
-
-        {/* get specific store */}
-        <button
-          className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
-          onClick={() => hadnleGetSpecificStore()}
-        >
-          특정 가게 가져오기 (GET: /search/stores/...)
-        </button>
-        {store && (
-          <div className="w-full text-green-500">
-            등록된 가게 정보: {JSON.stringify(store)}
-          </div>
-        )}
-      </div>
 
       {/* 결제 테스트 */}
       <div className="flex flex-col space-y-2 p-2 w-full p-2">
@@ -279,7 +272,7 @@ const CustomerLab = () => {
         )}
 
         {/* cancel detail */}
-        <button
+        {/* <button
           className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
           onClick={() => handleDeleteOrder()}
         >
@@ -288,6 +281,53 @@ const CustomerLab = () => {
         {orderDelete && (
           <div className="w-full text-green-500">
             현재 주문 상세: {JSON.stringify(orderDelete)}
+          </div>
+        )} */}
+
+        {/* option */}
+        <h2>선호 옵션 가져오기</h2>
+        <button
+          className={`bg-green-100 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetMenuOption()}
+        >
+          메뉴 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferMenu && (
+          <div className="w-full text-green-500">
+            현재 선호 메뉴: {JSON.stringify(preferMenu)}
+          </div>
+        )}
+        <button
+          className={`bg-green-200 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetNutritionOption()}
+        >
+          영양 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferNutrition && (
+          <div className="w-full text-green-500">
+            현재 선호 영양: {JSON.stringify(preferNutrition)}
+          </div>
+        )}
+        <button
+          className={`bg-green-300 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetAllergyOption()}
+        >
+          알러지 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferAllergy && (
+          <div className="w-full text-green-500">
+            현재 선호 알러지: {JSON.stringify(preferAllergy)}
+          </div>
+        )}
+        <button
+          className={`bg-green-400 p-3 rounded-xl text-center cursor-pointer`}
+          onClick={() => handleGetToppingOption()}
+        >
+          토핑 옵션 가져오기 (GET: /common/options)
+        </button>
+        {preferTopping && (
+          <div className="w-full text-green-500">
+            현재 선호 토핑: {JSON.stringify(preferTopping)}
           </div>
         )}
       </div>

@@ -1,7 +1,6 @@
 import type {
   OrderBaseType,
   QrBaseType,
-  StoreBaseType,
   TimeStamp,
 } from "@interface/common/types";
 
@@ -12,47 +11,9 @@ export type ProductDetailType = {
   price: number;
 };
 
-export type StoreDetailType = StoreBaseType & {
-  products: ProductDetailType[];
-};
-
-export type ProductBase = {
-  product_name: string;
-  price: number;
-  sale: number;
-};
-
-export type ProductStockBase = ProductBase & {
-  product_id: string;
-  store_id: string;
-  initial_stock: number;
-  current_stock: number;
-};
-
-export type StoreProduct = Omit<ProductStockBase, "store_id">;
-
-export type StoreRequestType = {
-  store_name: string;
-};
-
-export type StoreResponseType = StoreBaseType & {
-  seller_email: string;
-  created_at: TimeStamp;
-};
-
-export type StoreWithProductResponseType = StoreBaseType & {
-  products: StoreProduct[];
-  total: number;
-};
-
-export type ProductRequestType = Omit<
-  ProductStockBase,
-  "product_id" | "current_stock"
->;
-
-export type ProductResponseType = ProductStockBase & {
-  version: number;
-};
+// export type StoreDetailType = StoreBaseType & {
+//   products: ProductDetailType[];
+// };
 
 export type PaymentBase = {
   portone_store_id: string;
@@ -92,4 +53,20 @@ export type CancelOrderResponseType = {
 export type GetQrCodeType = QrBaseType & {
   payment_id: string;
   created_at: TimeStamp;
+};
+
+export type CoorBaseType = {
+  lng: string;
+  lat: string;
+};
+
+export type MapBaseType = {
+  postal_code: any;
+  address: string;
+  detail_address: string;
+  sido: string;
+  sigungu: string;
+  bname: string;
+  lng: string;
+  lat: string;
 };

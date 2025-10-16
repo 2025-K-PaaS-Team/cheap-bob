@@ -1,6 +1,4 @@
-from typing import Union
-
-from fastapi import HTTPException, status
+from typing import Tuple
 
 from config.oauth import OAuthProvider
 from repositories.customer import CustomerRepository
@@ -26,7 +24,7 @@ class OAuthService:
         provider: OAuthProvider,
         code: str,
         user_type: UserType
-    ) -> TokenResponse:
+    ) -> Tuple[TokenResponse, bool]:
         # OAuth 클라이언트 생성
         oauth_client = OAuthClientFactory.create(provider)
         
@@ -43,56 +41,72 @@ class OAuthService:
         else:
             return await self._handle_seller_login(oauth_user.email)
     
-    async def _handle_customer_login(self, email: str) -> TokenResponse:
+    async def _handle_customer_login(self, email: str) -> Tuple[TokenResponse, bool]:
         # Seller로 이미 가입되어 있는지 체크
-        seller_exists = await self.seller_repository.exists_by_email(email)
-        if seller_exists:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="이미 판매자로 존재하는 회원입니다."
+        seller = await self.seller_repository.get_by_email(email)
+        if seller:
+            # 이미 판매자로 가입, 충돌 발생
+            access_token = self.jwt_service.create_user_token(
+                email=email,
+                user_type=UserType.SELLER.value,
+                is_active=seller.is_active
             )
+            return TokenResponse(access_token=access_token, user_type=UserType.SELLER), True
+            # raise HTTPException(
+            #     status_code=status.HTTP_409_CONFLICT,
+            #     detail="이미 판매자로 존재하는 회원입니다."
+            # )
         
         # Customer로 가입되어 있는지 체크
-        customer_exists = await self.customer_repository.exists_by_email(email)
+        customer = await self.customer_repository.get_by_email(email)
         
-        if not customer_exists:
+        if not customer:
             # 신규 회원 생성
             await self.customer_repository.create(email=email)
+            is_active = True
+        else:
+            is_active = customer.is_active
         
         # JWT 토큰 생성
         access_token = self.jwt_service.create_user_token(
             email=email,
-            user_type=UserType.CUSTOMER.value
+            user_type=UserType.CUSTOMER.value,
+            is_active=is_active
         )
         
-        return TokenResponse(
-            access_token=access_token,
-            user_type=UserType.CUSTOMER
-        )
+        return TokenResponse(access_token=access_token, user_type=UserType.CUSTOMER), False
     
-    async def _handle_seller_login(self, email: str) -> TokenResponse:
+    async def _handle_seller_login(self, email: str) -> Tuple[TokenResponse, bool]:
         # Customer로 이미 가입되어 있는지 체크
-        customer_exists = await self.customer_repository.exists_by_email(email)
-        if customer_exists:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="이미 소비자로 존재하는 회원입니다."
+        customer = await self.customer_repository.get_by_email(email)
+        
+        if customer:
+            # 이미 소비자로 가입, 충돌 발생
+            access_token = self.jwt_service.create_user_token(
+                email=email,
+                user_type=UserType.CUSTOMER.value,
+                is_active=customer.is_active
             )
+            return TokenResponse(access_token=access_token, user_type=UserType.CUSTOMER), True
+            # raise HTTPException(
+            #     status_code=status.HTTP_409_CONFLICT,
+            #     detail="이미 소비자로 존재하는 회원입니다."
+            # )
+            
+        seller = await self.seller_repository.get_by_email(email)
         
-        # Seller로 가입되어 있는지 체크
-        seller_exists = await self.seller_repository.exists_by_email(email)
-        
-        if not seller_exists:
+        if not seller:
             # 신규 회원 생성
             await self.seller_repository.create(email=email)
+            is_active = True
+        else:
+            is_active = seller.is_active
         
         # JWT 토큰 생성
         access_token = self.jwt_service.create_user_token(
             email=email,
-            user_type=UserType.SELLER.value
+            user_type=UserType.SELLER.value,
+            is_active=is_active
         )
         
-        return TokenResponse(
-            access_token=access_token,
-            user_type=UserType.SELLER
-        )
+        return TokenResponse(access_token=access_token,user_type=UserType.SELLER), False

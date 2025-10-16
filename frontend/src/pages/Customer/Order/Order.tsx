@@ -1,9 +1,10 @@
+import { CommonBtn } from "@components/common";
 import { orderStatus } from "@constant";
 import type { OrderBaseType } from "@interface/common/types";
 import type { OrderDetailResponseType } from "@interface/customer/order";
 import {
   completePickup,
-  deleteOrder,
+  // deleteOrder,
   getOrderDetail,
   getOrders,
 } from "@services";
@@ -11,6 +12,7 @@ import { formatDate } from "@utils";
 import { AxiosError } from "axios";
 import { useEffect, useRef, useState } from "react";
 import { QrReader } from "react-qr-reader";
+import { useNavigate } from "react-router";
 
 const Order = () => {
   const [orders, setOrders] = useState<OrderBaseType[] | null>(null);
@@ -25,6 +27,31 @@ const Order = () => {
     null
   );
   const scannedRef = useRef(false);
+  const isOrder = false;
+  const navigate = useNavigate();
+
+  if (!isOrder) {
+    return (
+      <div className="flex flex-col w-full h-full justify-center items-center">
+        <img
+          src="/icon/saladBowl.svg"
+          alt="saladBowlIcon"
+          className="pb-[26px] w-[116px]"
+        />
+        <div className="text-[20px] pb-[17px] font-bold">
+          주문내역이 비어있어요.
+        </div>
+        <div className="text-[12px] font-base pb-[46px]">
+          다양한 랜덤팩을 주문하고 픽업해보세요.
+        </div>
+        <CommonBtn
+          label="실시간 랜덤팩 보러가기"
+          notBottom={true}
+          onClick={() => navigate("/c/stores")}
+        />
+      </div>
+    );
+  }
 
   const handleGetOrders = async () => {
     try {
@@ -68,18 +95,18 @@ const Order = () => {
     }
   };
 
-  const handleDeleteOrder = async (paymentId: string) => {
-    try {
-      const res = await deleteOrder(paymentId, {
-        reason: reason,
-      });
-      console.log("결제 취소 성공", res);
-      window.alert("결제 취소 성공했옹 （づ￣3￣）づ╭❤️～");
-    } catch (err: any) {
-      console.error("get order detail failed", err);
-      window.alert(`결제 취소 실패! ( ⓛ ω ⓛ *) ${err.response.data.detail}`);
-    }
-  };
+  // const handleDeleteOrder = async (paymentId: string) => {
+  //   try {
+  //     const res = await deleteOrder(paymentId, {
+  //       reason: reason,
+  //     });
+  //     console.log("결제 취소 성공", res);
+  //     window.alert("결제 취소 성공했옹 （づ￣3￣）づ╭❤️～");
+  //   } catch (err: any) {
+  //     console.error("get order detail failed", err);
+  //     window.alert(`결제 취소 실패! ( ⓛ ω ⓛ *) ${err.response.data.detail}`);
+  //   }
+  // };
 
   const handleCompletePickup = async (paymentId: string, qrData: string) => {
     try {
@@ -102,9 +129,9 @@ const Order = () => {
     handleGetOrderDetail(paymentId);
   };
 
-  const handleClickCancelBtn = (paymentId: string) => {
-    handleDeleteOrder(paymentId);
-  };
+  // const handleClickCancelBtn = (paymentId: string) => {
+  //   handleDeleteOrder(paymentId);
+  // };
 
   const handleClickPickupCompleteBtn = (paymentId: string) => {
     setQrReaderOpen(true);
@@ -144,7 +171,7 @@ const Order = () => {
                 <button
                   type="button"
                   onClick={() => handleClickDetailBtn(order.payment_id)}
-                  className="bg-white p-3"
+                  className="bg-custom-white p-3"
                 >
                   주문 상세 보기
                 </button>
@@ -155,13 +182,13 @@ const Order = () => {
                     <div>unit 가격: {orderDetail.unit_price}</div>
                   </>
                 )}
-                <button
+                {/* <button
                   type="button"
                   onClick={() => handleClickCancelBtn(order.payment_id)}
-                  className="bg-white p-3"
+                  className="bg-custom-white p-3"
                 >
                   주문 취소하기(환불 포함)
-                </button>
+                </button> */}
                 <input
                   type="text"
                   value={reason}
@@ -171,7 +198,7 @@ const Order = () => {
                 <button
                   type="button"
                   onClick={() => handleClickPickupCompleteBtn(order.payment_id)}
-                  className="bg-white p-3"
+                  className="bg-custom-white p-3"
                 >
                   픽업 완료하기(qr)
                 </button>

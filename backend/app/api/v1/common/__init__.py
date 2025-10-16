@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from api.v1.common import health
+from api.v1.common import options
 
-router = APIRouter(prefix="/common", tags=["Common"])
+router = APIRouter(prefix="/common")
 
-router.include_router(health.router)
+router.include_router(options.router)

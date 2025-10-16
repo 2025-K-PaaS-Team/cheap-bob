@@ -15,10 +15,10 @@ class CartItemRepository(BaseRepository[CartItem]):
         """결제 ID로 조회"""
         return await self.get_by_pk(payment_id)
     
-    async def get_by_user_id(self, user_id: str) -> List[CartItem]:
-        """사용자 ID로 장바구니 조회"""
+    async def get_by_cutomer_id(self, customer_id: str) -> List[CartItem]:
+        """소비자 ID로 장바구니 조회"""
         return await self.get_many(
-            filters={"user_id": user_id},
+            filters={"customer_id": customer_id},
             order_by=["-created_at"],
             load_relations=["product"]
         )
@@ -36,27 +36,3 @@ class CartItemRepository(BaseRepository[CartItem]):
         
         if deleted_item:
             return deleted_item.quantity
-         
-    
-    # async def get_expired_items(self, expire_minutes: int = 30) -> List[CartItem]:
-    #     """만료된 장바구니 항목 조회"""
-    #     expire_time = datetime.now() - timedelta(minutes=expire_minutes)
-    #     return await self.get_many(
-    #         filters={"created_at": {"lt": expire_time}}
-    #     )
-    
-    # async def delete_user_items(self, user_id: str) -> int:
-    #     """사용자의 모든 장바구니 항목 삭제"""
-    #     return await self.delete_where(user_id=user_id)
-    
-    # async def get_cart_summary(self, user_id: str) -> dict:
-    #     """사용자 장바구니 요약 정보"""
-    #     items = await self.get_by_user_id(user_id)
-    #     total_price = sum(item.price * item.quantity for item in items)
-    #     total_quantity = sum(item.quantity for item in items)
-        
-    #     return {
-    #         "item_count": len(items),
-    #         "total_quantity": total_quantity,
-    #         "total_price": total_price
-    #     }

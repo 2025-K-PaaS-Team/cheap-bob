@@ -18,6 +18,37 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: cheapbob-redis
+    networks:
+      - cheapbob-network
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7-jammy
+    container_name: cheapbob-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: cheap
+      MONGO_INITDB_ROOT_PASSWORD: bob
+      MONGO_INITDB_DATABASE: cheapbob
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - cheapbob-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ../backend
@@ -30,6 +61,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
     networks:
       - cheapbob-network
     volumes:
@@ -41,3 +76,5 @@ networks:
 
 volumes:
   postgresql-data:
+  redis-data:
+  mongodb-data:

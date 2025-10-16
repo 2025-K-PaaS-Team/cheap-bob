@@ -32,7 +32,7 @@ class BaseRepository(Generic[ModelType]):
         """새 레코드 생성"""
         db_obj = self.model(**kwargs)
         self.session.add(db_obj)
-        await self.session.commit()
+        await self.session.flush()
         await self.session.refresh(db_obj)
         return db_obj
     
@@ -112,7 +112,7 @@ class BaseRepository(Generic[ModelType]):
             for key, value in kwargs.items():
                 if hasattr(obj, key):
                     setattr(obj, key, value)
-            await self.session.commit()
+            await self.session.flush()
             await self.session.refresh(obj)
         return obj
     
@@ -127,7 +127,7 @@ class BaseRepository(Generic[ModelType]):
                 if hasattr(obj, key):
                     setattr(obj, key, value)
         
-        await self.session.commit()
+        await self.session.flush()
         return len(objects)
     
     async def update_lock(
@@ -154,7 +154,7 @@ class BaseRepository(Generic[ModelType]):
             .values(**kwargs)
         )
         
-        await self.session.commit()
+        await self.session.flush()
         
         # rowcount로 성공 여부 반환
         return result.rowcount > 0
@@ -164,7 +164,7 @@ class BaseRepository(Generic[ModelType]):
         obj = await self.get_by_pk(pk_value)
         if obj:
             await self.session.delete(obj)
-            await self.session.commit()
+            await self.session.flush()
             return True
         return False
     
@@ -173,7 +173,7 @@ class BaseRepository(Generic[ModelType]):
         obj = await self.get_by_pk(pk_value)
         if obj:
             await self.session.delete(obj)
-            await self.session.commit()
+            await self.session.flush()
             return obj
         return None
     
@@ -190,7 +190,7 @@ class BaseRepository(Generic[ModelType]):
         for obj in objects:
             await self.session.delete(obj)
         
-        await self.session.commit()
+        await self.session.flush()
         
         return deleted_objects
         
@@ -203,7 +203,7 @@ class BaseRepository(Generic[ModelType]):
         for obj in objects:
             await self.session.delete(obj)
         
-        await self.session.commit()
+        await self.session.flush()
         return len(objects)
     
     async def exists(self, **filters) -> bool:

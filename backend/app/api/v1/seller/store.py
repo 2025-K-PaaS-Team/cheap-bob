@@ -1,281 +1,232 @@
-from typing import Annotated
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, status
+from loguru import logger
 
 from utils.docs_error import create_error_responses
-
-from api.deps import CurrentSellerDep, AsyncSessionDep
-from repositories.store import StoreRepository
-from repositories.store_product_info import StoreProductInfoRepository
-from repositories.store_payment_info import StorePaymentInfoRepository
-from schemas.store import (
-    StoreCreateRequest,
-    StoreUpdateRequest,
-    StoreResponse,
-    StoreProductsResponse,
-    StoreProductResponse,
-    StorePaymentInfoCreateRequest,
-    StorePaymentInfoResponse,
-    StorePaymentInfoStatusResponse
+from utils.store_utils import get_store_id_by_email
+from api.deps.auth import CurrentSellerDep
+from api.deps.repository import (
+    StoreRepositoryDep, 
+    StoreOperationInfoRepositoryDep,
+    OrderCurrentItemRepositoryDep,
+    StorePaymentInfoRepositoryDep,
+    StoreProductInfoRepositoryDep
 )
-from utils.id_generator import generate_store_id
+from repositories.store_product_info import StockUpdateResult
+from schemas.store import StoreDetailResponse, StoreSNSInfo, StoreCloseStateResponse
+from schemas.product import ProductResponse
+from schemas.image import ImageUploadResponse
+from schemas.store_operation import StoreOperationResponse
+from schemas.store_settings import StoreAddressResponse
+from schemas.order import OrderStatus
+from services.payment import PaymentService
+from core.object_storage import object_storage
+from config.settings import settings
 
-router = APIRouter(prefix="/stores", tags=["Seller-Store"])
+router = APIRouter(prefix="/store", tags=["Seller-Store"])
 
-
-def get_store_repository(session: AsyncSessionDep) -> StoreRepository:
-    return StoreRepository(session)
-
-
-def get_product_repository(session: AsyncSessionDep) -> StoreProductInfoRepository:
-    return StoreProductInfoRepository(session)
-
-
-def get_payment_repository(session: AsyncSessionDep) -> StorePaymentInfoRepository:
-    return StorePaymentInfoRepository(session)
-
-
-StoreRepositoryDep = Annotated[StoreRepository, Depends(get_store_repository)]
-ProductRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_product_repository)]
-PaymentRepositoryDep = Annotated[StorePaymentInfoRepository, Depends(get_payment_repository)]
-
-
-@router.get("", response_model=StoreResponse,
+@router.get("", response_model=StoreDetailResponse,
     responses=create_error_responses({
-        401:["인증 정보가 없음", "토큰 만료"],
-        404:"등록된 가게가 없음"
-    }) 
-)
-async def get_my_stores(
-    current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep
-):
-    """
-    내 가게 목록 조회
-    """
-    
-    stores = await store_repo.get_by_seller_email(current_user["sub"])
-    
-    if stores:
-        return StoreResponse.model_validate(stores[0])
-    
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="등록된 가게가 없습니다."
-        )
-
-
-@router.post("", response_model=StoreResponse, status_code=status.HTTP_201_CREATED,
-    responses=create_error_responses({
-        401:["인증 정보가 없음", "토큰 만료"]
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: "가게를 찾을 수 없음"
     })
 )
-async def create_store(
-    request: StoreCreateRequest,
+async def get_store_detail(
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep
 ):
     """
-    내 가게 등록
+    가게 상세 정보 조회
+    
+    가게의 모든 정보를 한 번에 조회합니다.
+    - 기본 정보
+    - 주소 정보
+    - SNS 정보
+    - 운영 시간
+    - 이미지
+    - 상품 목록
     """
+    seller_email = current_user["sub"]
     
-    store_data = {
-        "store_id": generate_store_id(),
-        "store_name": request.store_name,
-        "seller_email": current_user["sub"]
-    }
-    
-    store = await store_repo.create(**store_data)
-    
-    return StoreResponse.model_validate(store)
+    store_id = await get_store_id_by_email(seller_email, store_repo)
 
+    store = await store_repo.get_with_full_info(store_id)
 
-@router.put("/{store_id}", response_model=StoreResponse,
-    responses=create_error_responses({
-        401:["인증 정보가 없음", "토큰 만료"],
-        403: "가게를 수정할 수 있는 권한이 없음",
-        404:"등록된 가게를 찾을 수 없음"
-    })            
-)
-async def update_store(
-    store_id: str,
-    request: StoreUpdateRequest,
-    current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep
-):
-    """
-    내 가게 정보 수정
-    """
-    
-    store = await store_repo.get_by_store_id(store_id)
-    
-    if not store:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="가게를 찾을 수 없습니다"
-        )
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 가게를 수정할 권한이 없습니다"
-        )
-    
-    update_data = {"store_name": request.store_name}
-    updated_store = await store_repo.update(store_id, **update_data)
-    
-    return StoreResponse.model_validate(updated_store)
-
-
-@router.get("/{store_id}/products", response_model=StoreProductsResponse,
-    responses=create_error_responses({
-        401:["인증 정보가 없음", "토큰 만료"],
-        403: "가게를 수정할 수 있는 권한이 없음",
-        404:"등록된 가게를 찾을 수 없음"
-    })  
-)
-async def get_store_products(
-    store_id: str,
-    current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep,
-    product_repo: ProductRepositoryDep
-):
-    """
-    내 가게의 상품 목록 조회
-    """
-    store = await store_repo.get_by_store_id(store_id)
-    
-    if not store:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="가게를 찾을 수 없습니다"
-        )
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 가게의 상품을 조회할 권한이 없습니다"
-        )
-    
-    products = await product_repo.get_by_store_id(store_id)
-    
-    return StoreProductsResponse(
-        store_id=store.store_id,
-        store_name=store.store_name,
-        products=[StoreProductResponse.model_validate(product) for product in products],
-        total=len(products)
-    )
-    
-
-@router.delete("/{store_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_store(
-    store_id: str,
-    current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep
-):
-    """
-    내 가게 삭제(미구현) - 정책에 따라 구현, 기본 정보를 삭제할 것인가, 아닌가
-    """
-    
-    pass
-
-
-@router.get("/{store_id}/payment-info/status", response_model=StorePaymentInfoStatusResponse,
-    responses=create_error_responses({
-        401:["인증 정보가 없음", "토큰 만료"],
-        403: "가게를 수정할 수 있는 권한이 없음",
-        404:"등록된 가게를 찾을 수 없음"
-    })  
-)
-async def check_payment_info_status(
-    store_id: str,
-    current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep,
-    payment_repo: PaymentRepositoryDep
-):
-    """
-    가게의 결제 정보 등록 상태 확인
-    """
-    
-    # 가게 존재 여부 및 권한 확인
-    store = await store_repo.get_by_store_id(store_id)
-    
-    if not store:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="가게를 찾을 수 없습니다"
-        )
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 가게의 결제 정보를 조회할 권한이 없습니다"
-        )
-    
- 
-    info_status = await payment_repo.has_complete_info(store_id)
-    
-    return StorePaymentInfoStatusResponse(
-        info_status=info_status
-    )
-
-
-@router.post("/{store_id}/payment-info", response_model=StorePaymentInfoResponse, status_code=status.HTTP_201_CREATED,
-    responses=create_error_responses({
-        401:["인증 정보가 없음", "토큰 만료"],
-        403: "가게를 수정할 수 있는 권한이 없음",
-        404:"등록된 가게를 찾을 수 없음"
-    })  
-)
-async def register_payment_info(
-    store_id: str,
-    request: StorePaymentInfoCreateRequest,
-    current_user: CurrentSellerDep,
-    store_repo: StoreRepositoryDep,
-    payment_repo: PaymentRepositoryDep
-):
-    """
-    가게의 결제 정보 등록
-    """
-    
-    # 가게 존재 여부 및 권한 확인
-    store = await store_repo.get_by_store_id(store_id)
-    
-    if not store:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="가게를 찾을 수 없습니다"
-        )
-    
-    if store.seller_email != current_user["sub"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="이 가게의 결제 정보를 등록할 권한이 없습니다"
-        )
-    
-    # 이미 결제 정보가 있는지 확인
-    existing_payment_info = await payment_repo.get_by_store_id(store_id)
-    
-    if existing_payment_info:
-        # 이미 있으면 업데이트
-        payment_info = await payment_repo.update_portone_info(
-            store_id=store_id,
-            portone_store_id=request.portone_store_id,
-            portone_channel_id=request.portone_channel_id,
-            portone_secret_key=request.portone_secret_key
-        )
-    else:
-        # 없으면 새로 생성
-        payment_data = {
-            "store_id": store_id,
-            "portone_store_id": request.portone_store_id,
-            "portone_channel_id": request.portone_channel_id,
-            "portone_secret_key": request.portone_secret_key
+    try:
+        
+        # 기본 정보
+        store_detail = {
+            "store_id": store.store_id,
+            "store_name": store.store_name,
+            "store_introduction": store.store_introduction,
+            "store_phone": store.store_phone,
+            "seller_email": store.seller_email,
+            "created_at": store.created_at
         }
-        payment_info = await payment_repo.create(**payment_data)
+        
+        # 주소 정보
+        store_detail["address"] = StoreAddressResponse(
+            store_id=store.store_id,
+            postal_code=store.store_postal_code,
+            address=store.store_address,
+            detail_address=store.store_detail_address,
+            sido=store.address.sido,
+            sigungu=store.address.sigungu,
+            bname=store.address.bname,
+            lat=store.address.lat,
+            lng=store.address.lng
+        )
+
+        
+        # SNS 정보
+        store_detail["sns"] = StoreSNSInfo(
+            instagram=store.sns_info.instagram,
+            facebook=store.sns_info.facebook,
+            x=store.sns_info.x,
+            homepage=store.sns_info.homepage
+        )
+        
+        # 운영 시간 정보 변환
+        store_detail["operation_times"] = [
+            StoreOperationResponse.model_validate(op) for op in store.operation_info
+        ]
+
+        
+        # 이미지 정보 변환
+        image_responses = []
+        for img in store.images:
+            image_url = object_storage.get_file_url(img.image_id)
+            image_responses.append(
+                ImageUploadResponse(
+                    image_id=img.image_id,
+                    image_url=image_url,
+                    is_main=img.is_main,
+                    display_order=img.display_order
+                )
+            )
+        store_detail["images"] = image_responses
+        
+        # 상품 정보 변환
+        product_responses = []
+        for product in store.products:
+            nutrition_types = [info.nutrition_type for info in product.nutrition_info] if product.nutrition_info else []
+            
+            product_responses.append(
+                ProductResponse(
+                    product_id=product.product_id,
+                    store_id=product.store_id,
+                    product_name=product.product_name,
+                    description=product.description,
+                    initial_stock=product.initial_stock,
+                    current_stock=product.current_stock,
+                    price=product.price,
+                    sale=product.sale,
+                    version=product.version,
+                    nutrition_types=nutrition_types
+                )
+            )
+        store_detail["products"] = product_responses
+        
+        return StoreDetailResponse(**store_detail)
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"가게 정보 조회 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.patch("/close", response_model=StoreCloseStateResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: "가게를 찾을 수 없음",
+        500: "가게 마감 처리 중 오류 발생"
+    })
+)
+async def close_store(
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    operation_repo: StoreOperationInfoRepositoryDep,
+    order_repo: OrderCurrentItemRepositoryDep,
+    payment_info_repo: StorePaymentInfoRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep
+):
+    """
+    가게 마감 처리
     
-    return StorePaymentInfoResponse(
-        store_id=payment_info.store_id,
-        portone_store_id=payment_info.portone_store_id,
-        portone_channel_id=payment_info.portone_channel_id
-    )
+    - 가게의 운영 상태를 마감으로 변경
+    - reservation/accept 상태의 모든 주문을 환불 처리
+    """
+    seller_email = current_user["sub"]
+    
+    try:
+        store_id = await get_store_id_by_email(seller_email, store_repo)
+        
+        # 오늘 날짜의 가게 운영 정보만 업데이트
+        today_operation = await operation_repo.get_today_operation_info(store_id)
+        
+        if today_operation:
+            await operation_repo.update_open_status(
+                operation_id=today_operation.operation_id,
+                is_currently_open=False
+            )
+
+        payment_info = await payment_info_repo.get_by_store_id(store_id)
+        if not payment_info or not payment_info.portone_secret_key:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="가게의 결제 설정이 완료되지 않았습니다"
+            )
+        
+        current_orders = await order_repo.get_store_current_orders_with_relations(store_id)
+        
+        refund_count = 0
+        
+        for order in current_orders:
+            if order.status in [OrderStatus.reservation, OrderStatus.accept]:
+                try:
+                    refund_result = await PaymentService.process_refund(
+                        payment_id=order.payment_id,
+                        secret_key=payment_info.portone_secret_key,
+                        reason="가게 개인 사정으로 인한 마감"
+                    )
+                    
+                    if refund_result.get("success"):
+                        # 주문 취소 처리
+                        quantity = await order_repo.cancel_order(
+                            payment_id=order.payment_id,
+                            cancel_reason="가게 개인 사정으로 인한 마감"
+                        )
+                        
+                        # 재고 복구
+                        max_retries = settings.MAX_RETRY_LOCK
+                        for attempt in range(max_retries):
+                            result = await product_repo.adjust_purchased_stock(order.product_id, -quantity)
+                            
+                            if result == StockUpdateResult.SUCCESS:
+                                break
+                            
+                            if attempt == max_retries - 1:
+                                logger.error(f"가게 마감 처리로 인한 환불 중 - 재고 복구 오류 발생: {str(e)}")
+                                break
+                        
+                        refund_count += 1
+                    else:
+                        logger.error(f"가게 마감 처리로 인한 환불 중 - 환불 오류 발생: {str(e)}")
+                        
+                except Exception as e:
+                    logger.error(f"가게 마감 처리로 인한 환불 중 - 오류 발생: {str(e)}")
+        
+        # 결과 반환
+        return {
+            "success": True,
+            "message": "가게가 마감되었습니다",
+            "refunded_orders": refund_count
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"가게 마감 처리 중 오류가 발생했습니다: {str(e)}"
+        )

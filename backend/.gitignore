@@ -6,3 +6,5 @@ postgresql-data/
 .env
 logs
 *.log
+
+.vscode/

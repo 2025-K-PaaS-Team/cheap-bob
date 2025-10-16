@@ -22,6 +22,18 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     DB_NAME: str
     
+    # Redis 정보
+    REDIS_HOST: str
+    REDIS_PORT: int
+    REDIS_DB: int
+    
+    # MongoDB 정보
+    MONGODB_HOST: str
+    MONGODB_PORT: int
+    MONGODB_USER: str
+    MONGODB_PASSWORD: str
+    MONGODB_NAME: str
+    
     #Oauth2.0 정보
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
@@ -41,6 +53,21 @@ class Settings(BaseSettings):
     # 낙관적 Lock 재시도 횟수
     MAX_RETRY_LOCK: int
     
+    # AWS S3 설정
+    AWS_ACCESS_KEY_ID: str
+    AWS_SECRET_ACCESS_KEY: str
+    AWS_REGION: str
+    AWS_S3_BUCKET_NAME: str
+    AWS_S3_ENDPOINT_URL: str
+    
+    # 슈퍼 어드민 이메일 정보 설정
+    SUPER_ADMIN_SMTP_USER: str
+    SUPER_ADMIN_SMTP_PASSWORD: str
+    SUPER_ADMIN_SMTP_EMAIL: str
+    SUPER_ADMIN_SMTP_HOST: str
+    SUPER_ADMIN_SMTP_PORT: int
+    SUPER_ADMIN_SMTP_NAME: str
+    
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
@@ -48,6 +75,14 @@ class Settings(BaseSettings):
     @property
     def SYNC_DATABASE_URL(self) -> str:
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    
+    @property
+    def REDIS_URL(self) -> str:
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
+    
+    @property
+    def MONGODB_URL(self) -> str:
+        return f"mongodb://{self.MONGODB_USER}:{self.MONGODB_PASSWORD}@{self.MONGODB_HOST}:{self.MONGODB_PORT}/{self.MONGODB_NAME}?authSource=admin"
 
 
 settings = Settings()

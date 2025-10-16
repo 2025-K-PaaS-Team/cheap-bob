@@ -1,5 +1,10 @@
 export type TimeStamp = string;
 
+export type OptionType = {
+  label: string;
+  value: string;
+};
+
 export type PaymentBaseType = {
   payment_id: string;
 };
@@ -40,10 +45,11 @@ export type OrderBaseType = PaymentBaseType &
     price: number;
   };
 
-export type CancelOrderRequestType = {
-  reason: string;
-};
-
 export type QrBaseType = {
   qr_data: string;
+};
+
+export type CoordBaseType = {
+  lat: string;
+  lng: string;
 };

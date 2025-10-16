@@ -11,6 +11,36 @@ const attachInterceptors = (instance: AxiosInstance) => {
     }
     return config;
   });
+
+  instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      const status = error.response?.status;
+      const role = localStorage.getItem("loginRole");
+
+      // 401 Unauthorized
+      if (status === 401) {
+        if (role === "seller") {
+          window.location.href = "/s";
+        } else {
+          window.location.href = "/c";
+        }
+        return Promise.reject(error);
+      }
+
+      // 439 Withdrawn user
+      if (status === 439) {
+        if (role === "seller") {
+          window.location.href = "/s";
+        } else {
+          window.location.href = "/c";
+        }
+        return Promise.reject(error);
+      }
+
+      return Promise.reject(error);
+    }
+  );
   return instance;
 };
 
@@ -24,7 +54,39 @@ export const api = attachInterceptors(
 
 export const sellerStoreApi = attachInterceptors(
   axios.create({
-    baseURL: `${BASE}/seller/stores`,
+    baseURL: `${BASE}/seller/store`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const sellerStoreProfileApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/store/profile`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const sellerStoreSnsApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/store/sns`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const sellerStoreSettingsApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/store/settings`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const sellerStoreImgApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/store/images`,
     withCredentials: false,
     headers: { "Content-Type": "application/json" },
   })
@@ -32,7 +94,7 @@ export const sellerStoreApi = attachInterceptors(
 
 export const sellerProductApi = attachInterceptors(
   axios.create({
-    baseURL: `${BASE}/seller/products`,
+    baseURL: `${BASE}/seller/store/products`,
     withCredentials: false,
     headers: { "Content-Type": "application/json" },
   })
@@ -40,7 +102,15 @@ export const sellerProductApi = attachInterceptors(
 
 export const sellerOrderApi = attachInterceptors(
   axios.create({
-    baseURL: `${BASE}/seller/orders`,
+    baseURL: `${BASE}/seller/store/orders`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const sellerSettlementApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/store/settlement`,
     withCredentials: false,
     headers: { "Content-Type": "application/json" },
   })
@@ -73,6 +143,51 @@ export const customerPaymentApi = attachInterceptors(
 export const customerOrderApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/orders`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const customerRegisterApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/customer/register`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const customerProfileApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/customer/profile`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const optionInfoApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/common/options`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+// kakao
+const kakaoAttachInterceptors = (instance: AxiosInstance) => {
+  instance.interceptors.request.use((config) => {
+    const token = import.meta.env.VITE_KAKAO_REST_API;
+    if (token) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `KakaoAK ${token}`;
+    }
+    return config;
+  });
+  return instance;
+};
+
+export const kakaoApi = kakaoAttachInterceptors(
+  axios.create({
+    baseURL: `https://dapi.kakao.com/v2/local/search/address.json`,
     withCredentials: false,
     headers: { "Content-Type": "application/json" },
   })

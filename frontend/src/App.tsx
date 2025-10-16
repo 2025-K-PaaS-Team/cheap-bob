@@ -6,27 +6,64 @@ import {
   StoreList,
   LoginCallback,
   CustomerLab,
-  SellerLab,
   QrLab,
   Order,
-  Store,
   OrderManage,
+  Signup,
+  CustomerHome,
+  SellerHome,
+  Location,
+  Favorite,
+  Noti,
+  Dashboard,
+  SellerSignup,
+  LoginFail,
+  RoleCheck,
 } from "@pages";
-import { CustomerHome, SellerHome } from "@pages/Common/Home";
+import {
+  ChangeOperationInfo,
+  ChangeOperationTime,
+  ChangePackageDesc,
+  ChangePackageInfo,
+  ChangePackageName,
+  ChangePackageNum,
+  ChangePackageNutrition,
+  ChangePackagePrice,
+  ChangePickupTime,
+  ChangeStoreAddr,
+  ChangeStoreDesc,
+  ChangeStoreImg,
+  ChangeStoreInfo,
+  ChangeStoreName,
+  ChangeStoreNum,
+} from "@pages/Seller/Dashboard";
+import { BillingChange, BillingHistory, BillingInfo } from "@pages/Seller";
 
 const App = () => {
   return (
     <Routes>
       {/* login callback */}
       <Route path="/auth/success" element={<LoginCallback />} />
+      {/* login 409 failed */}
+      <Route path="/auth/fail" element={<LoginFail />} />
+      {/* role path */}
+      <Route path="/auth/role-check" element={<RoleCheck />} />
 
       {/* customer side */}
       <Route path="/c" element={<Layout />}>
         {/* home */}
         <Route index element={<CustomerHome />} />
+        {/* signup */}
+        <Route path="signup" element={<Signup />} />
         {/* store */}
         <Route path="stores" element={<StoreList />} />
         <Route path="stores/:storeId" element={<StoreDetail />} />
+        {/* location */}
+        <Route path="location" element={<Location />} />
+        {/* favorite */}
+        <Route path="favorite" element={<Favorite />} />
+        {/* noti */}
+        <Route path="noti" element={<Noti />} />
         {/* order */}
         <Route path="order" element={<Order />} />
         {/* mypage */}
@@ -34,24 +71,57 @@ const App = () => {
         {/* lab */}
         <Route path="lab" element={<CustomerLab />} />
         <Route path="qr" element={<QrLab />} />
+
+        {/* customer fallback */}
+        <Route path="*" element={<Navigate to="/c" replace />} />
       </Route>
 
       {/* seller side */}
       <Route path="/s" element={<Layout />}>
         {/* home */}
         <Route index element={<SellerHome />} />
-        {/* order */}
+        {/* signup */}
+        <Route path="signup" element={<SellerSignup />} />
+        {/* dashboard = store management */}
+        <Route path="dashboard" element={<Dashboard />}></Route>
+        {/* order management */}
         <Route path="order" element={<OrderManage />} />
-        {/* store */}
-        <Route path="store" element={<Store />} />
-        {/* lab */}
-        <Route path="lab" element={<SellerLab />} />
+        {/* change store info */}
+        <Route path="change/store" element={<ChangeStoreInfo />} />
+        <Route path="change/store/name" element={<ChangeStoreName />} />
+        <Route path="change/store/desc" element={<ChangeStoreDesc />} />
+        <Route path="change/store/num" element={<ChangeStoreNum />} />
+        <Route path="change/store/addr" element={<ChangeStoreAddr />} />
+        <Route path="change/store/img" element={<ChangeStoreImg />} />
+        {/* change operation info */}
+        <Route path="change/operation" element={<ChangeOperationInfo />} />
+        <Route
+          path="change/operation/op-time"
+          element={<ChangeOperationTime />}
+        />
+        <Route path="change/operation/pu-time" element={<ChangePickupTime />} />
+        {/* change package info */}
+        <Route path="change/package" element={<ChangePackageInfo />} />
+        <Route path="change/package/name" element={<ChangePackageName />} />
+        <Route path="change/package/desc" element={<ChangePackageDesc />} />
+        <Route
+          path="change/package/nutrition"
+          element={<ChangePackageNutrition />}
+        />
+        <Route path="change/package/price" element={<ChangePackagePrice />} />
+        <Route path="change/package/num" element={<ChangePackageNum />} />
+
+        {/* billing management */}
+        <Route path="billing" element={<BillingInfo />} />
+        <Route path="billing/history" element={<BillingHistory />} />
+        <Route path="billing/change" element={<BillingChange />} />
+
+        {/* seller fallback */}
+        <Route path="*" element={<Navigate to="/s" replace />} />
       </Route>
 
-      {/* 루트 접근시 고객 홈으로 */}
-      <Route path="/" element={<Navigate to="/c" replace />} />
-      {/* fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* global fallback */}
+      <Route path="*" element={<Navigate to="/c" replace />} />
     </Routes>
   );
 };

@@ -21,16 +21,14 @@ class StorePaymentInfoRepository(BaseRepository[StorePaymentInfo]):
     async def update_portone_info(
         self, 
         store_id: str,
-        portone_store_id: str = None,
-        portone_channel_id: str = None,
-        portone_secret_key: str = None
+        portone_store_id: str,
+        portone_channel_id: str
     ) -> Optional[StorePaymentInfo]:
-        """포트원 정보 업데이트 (None이 아닌 값만 업데이트)"""
+        """포트원 정보 업데이트"""
         
         update_data = {}
         update_data["portone_store_id"] = portone_store_id
         update_data["portone_channel_id"] = portone_channel_id
-        update_data["portone_secret_key"] = portone_secret_key
         
         if update_data:
             return await self.update(store_id, **update_data)
