@@ -1,8 +1,9 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
 import CommonQR from "@components/common/CommonQR";
 import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
 import type { OrderBaseType } from "@interface";
-import { getTitleByKey } from "@utils";
+import { GetOrderQr, updateOrderAccept } from "@services";
+import { formatErrMsg, getTitleByKey } from "@utils";
 import { useState } from "react";
 
 interface OrderListProps {
@@ -11,7 +12,13 @@ interface OrderListProps {
 }
 
 const OrderList = ({ orders, status }: OrderListProps) => {
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showAcceptModal, setShowAcceptModal] = useState<boolean>(false);
   const [openQr, setOpenQr] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
+    null
+  );
 
   const cfmLabel = [
     { key: "reservation", title: "픽업 확정하기" },
@@ -22,11 +29,34 @@ const OrderList = ({ orders, status }: OrderListProps) => {
     console.log("click cancel button");
   };
 
-  const handleClickConfirm = (status: string) => {
+  const handleClickConfirm = async (status: string, payment_id: string) => {
     if (status === "reservation") {
-      console.log("isreser");
-    } else {
-      setOpenQr(true);
+      // 픽업 확정 모달 오픈
+      setSelectedPaymentId(payment_id);
+      setShowAcceptModal(true);
+      return;
+    }
+
+    // QR 표시
+    setOpenQr(true);
+    try {
+      const res = await GetOrderQr(payment_id);
+      console.log("QR data:", res);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
+  };
+
+  const handleAcceptConfirm = async () => {
+    if (!selectedPaymentId) return;
+    try {
+      const res = await updateOrderAccept(selectedPaymentId);
+      console.log("픽업 확정 완료:", res);
+      setShowAcceptModal(false);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
     }
   };
 
@@ -102,14 +132,37 @@ const OrderList = ({ orders, status }: OrderListProps) => {
                 label={getTitleByKey(status, cfmLabel) ?? ""}
                 notBottom
                 className="col-span-2 w-full"
-                onClick={() => handleClickConfirm(status)}
+                onClick={() => handleClickConfirm(status, order.payment_id)}
               />
             </div>
 
+            {/* qr modal */}
             {openQr && <CommonQR onClick={() => setOpenQr(false)} />}
           </div>
         );
       })}
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="green"
+        />
+      )}
+
+      {/* show accept modal */}
+      {showAcceptModal && (
+        <CommonModal
+          desc="이 주문의 픽업을 확정할까요?"
+          confirmLabel="픽업 확정하기"
+          cancelLabel="취소"
+          onConfirmClick={() => handleAcceptConfirm()}
+          onCancelClick={() => setShowAcceptModal(false)}
+          category="green"
+        />
+      )}
     </div>
   );
 };

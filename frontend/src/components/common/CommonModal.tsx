@@ -28,16 +28,16 @@ const CommonModal = ({
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="flex flex-col w-[359px] p-[20px] rounded-lg gap-y-[10px] border-[1px] border-black bg-custom-white">
         {/* description */}
-        {desc && <div className="text-[16px]">{desc}</div>}
+        {desc && <div className="text-center bodyFont">{desc}</div>}
 
         {/* children */}
         {children}
 
         {/* button */}
-        <div className="flex flex-row gap-x-[20px] text-[18px] text-center">
+        <div className="grid grid-cols-3 gap-x-[20px] btnFont">
           {cancelLabel && onCancelClick && (
             <button
-              className="bg-custom-white border-[1px] border-black rounded-[50px] w-full py-[12px]"
+              className="bg-custom-white rounded w-full py-[12px]"
               onClick={() => onCancelClick()}
             >
               {cancelLabel}
@@ -45,7 +45,7 @@ const CommonModal = ({
           )}
 
           <button
-            className={`${confrimBtnClass} border-white rounded-[50px] w-full py-[12px]`}
+            className={`${confrimBtnClass} col-span-2 rounded w-full py-[12px]`}
             onClick={() => onConfirmClick()}
           >
             {confirmLabel}
