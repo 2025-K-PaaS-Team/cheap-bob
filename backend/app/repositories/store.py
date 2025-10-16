@@ -156,9 +156,7 @@ class StoreRepository(BaseRepository[Store]):
         # SNS info (optional)
         sns_info: Optional[Dict[str, Optional[str]]],
         # Operation times
-        operation_times: List[Dict],
-        # Payment info
-        payment_info: Dict[str, str]
+        operation_times: List[Dict]
     ) -> Store:
         """가게와 모든 관련 정보를 한 번에 생성"""
         
@@ -213,16 +211,6 @@ class StoreRepository(BaseRepository[Store]):
                         is_currently_open=False
                     )
                     self.session.add(operation)
-            
-            # 5. Payment 정보 생성
-            if payment_info:
-                payment = StorePaymentInfo(
-                    store_id=store_id,
-                    portone_store_id=payment_info.get("portone_store_id"),
-                    portone_channel_id=payment_info.get("portone_channel_id"),
-                    portone_secret_key=payment_info.get("portone_secret_key")
-                )
-                self.session.add(payment)
             
             # 모든 변경사항 커밋
             await self.session.flush()

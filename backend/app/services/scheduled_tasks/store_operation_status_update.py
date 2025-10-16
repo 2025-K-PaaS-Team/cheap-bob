@@ -1,10 +1,13 @@
 import logging
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any
-from sqlalchemy import update
+from sqlalchemy import update, select
+from sqlalchemy.orm import joinedload
 
 from database.session import get_db
 from database.models.store_operation_info import StoreOperationInfo
+from database.models.store import Store
+from repositories.store_payment_info import StorePaymentInfoRepository
 
 
 logger = logging.getLogger(__name__)
@@ -31,15 +34,51 @@ class StoreOperationStatusUpdateTask:
                 f"오늘 요일: {now_kst_day_of_week}"
             )
             async for session in get_db():
-                stmt = (
-                    update(StoreOperationInfo)
-                    .where(StoreOperationInfo.day_of_week == now_kst_day_of_week)
-                    .values(is_currently_open=StoreOperationInfo.is_open_enabled)
-                )
+                # 포트원 정보가 있는 가게들만 조회
+                payment_repo = StorePaymentInfoRepository(session)
                 
-                result = await session.execute(stmt)
-                updated_count = result.rowcount
+                # 오늘 요일의 모든 운영 정보 조회
+                query = (
+                    select(StoreOperationInfo)
+                    .join(Store)
+                    .where(StoreOperationInfo.day_of_week == now_kst_day_of_week)
+                    .options(joinedload(StoreOperationInfo.store))
+                )
+                result = await session.execute(query)
+                operation_infos = result.scalars().all()
+                
+                updated_count = 0
+                skipped_count = 0
+                
+                for op_info in operation_infos:
+                    # 포트원 정보 확인
+                    has_complete_payment = await payment_repo.has_complete_info(op_info.store_id)
+                    
+                    if not has_complete_payment:
+                        logger.debug(
+                            f"포트원 정보가 없는 가게 건너뛰기 - "
+                            f"가게ID: {op_info.store_id}"
+                        )
+                        skipped_count += 1
+                        continue
+                    
+                    # 포트원 정보가 있는 가게만 업데이트
+                    stmt = (
+                        update(StoreOperationInfo)
+                        .where(StoreOperationInfo.operation_id == op_info.operation_id)
+                        .values(is_currently_open=op_info.is_open_enabled)
+                    )
+                    
+                    result = await session.execute(stmt)
+                    if result.rowcount > 0:
+                        updated_count += 1
+                
                 await session.commit()
+                
+                if skipped_count > 0:
+                    logger.info(
+                        f"포트원 정보가 없어 {skipped_count}개 가게를 건너뛰었습니다."
+                    )
                 
                 elapsed_time = (datetime.now(timezone.utc) - start_time).total_seconds()
                 logger.info(
@@ -50,24 +89,32 @@ class StoreOperationStatusUpdateTask:
                 
                 # 업데이트 통계 로깅
                 StoreOperationStatusUpdateTask._log_update_statistics(
-                    updated_count, now_kst_day_of_week
+                    updated_count, now_kst_day_of_week, skipped_count
                 )
                 
         except Exception as e:
             logger.error(f"가게 운영 상태 업데이트 중 오류 발생: {e}", exc_info=True)
     
     @staticmethod
-    def _log_update_statistics(updated_count: int, day_of_week: int):
+    def _log_update_statistics(updated_count: int, day_of_week: int, skipped_count: int):
         """업데이트 통계 로깅"""
         day_names = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
         day_name = day_names[day_of_week] if 0 <= day_of_week <= 6 else "알 수 없음"
         
-        logger.info(
+        log_msg = (
             f"가게 운영 상태 업데이트 통계 - "
             f"업데이트된 가게 수: {updated_count}, "
+        )
+        
+        if skipped_count > 0:
+            log_msg += f"건너뛴 가게 수: {skipped_count}, "
+        
+        log_msg += (
             f"대상 요일: {day_name} ({day_of_week}), "
             f"업데이트 시각: {datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S KST')}"
         )
+        
+        logger.info(log_msg)
     
     @staticmethod
     async def force_update_now() -> Dict[str, Any]:

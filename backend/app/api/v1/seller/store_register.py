@@ -5,9 +5,9 @@ from utils.id_generator import generate_store_id
 from utils.docs_error import create_error_responses
 from utils.store_utils import get_store_id_by_email
 from api.deps.auth import CurrentSellerDep
-from api.deps.repository import StoreRepositoryDep
+from api.deps.repository import StoreRepositoryDep, StorePaymentInfoRepositoryDep
 from api.deps.service import ImageServiceDep
-from schemas.seller_profile import SellerProfileCreateRequest, SellerProfileResponse
+from schemas.seller_profile import SellerProfileCreateRequest, SellerProfileResponse, StorePaymentInfoCreateRequest, StorePaymentInfoCheckResponse
 from schemas.image import StoreImagesUploadResponse
 from core.exceptions import HTTPValueError
 
@@ -74,13 +74,6 @@ async def register_seller_store(
             for op_time in request.operation_times
         ]
         
-        # 결제 정보
-        payment_data = {
-            "portone_store_id": request.payment_info.portone_store_id,
-            "portone_channel_id": request.payment_info.portone_channel_id,
-            "portone_secret_key": request.payment_info.portone_secret_key
-        }
-        
         # 통합 생성
         store = await store_repo.create_store_with_full_info(
             store_id=store_id,
@@ -99,8 +92,7 @@ async def register_seller_store(
             lng=request.address_info.lng,
             # Optional info
             sns_info=sns_info,
-            operation_times=operation_times_dict,
-            payment_info=payment_data
+            operation_times=operation_times_dict
         )
         
         # 성공 응답
@@ -213,3 +205,78 @@ async def register_store_images(
         # 파일 닫기
         for file in files:
             await file.close()
+
+
+@router.post("/payment", status_code=status.HTTP_204_NO_CONTENT,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: "가게를 찾을 수 없음",
+        409: "이미 결제 정보가 등록되어 있음"
+    })
+)
+async def register_payment_info(
+    request: StorePaymentInfoCreateRequest,
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    payment_repo: StorePaymentInfoRepositoryDep
+):
+    """
+    가게 결제 정보 등록
+    
+    판매자의 가게에 결제 정보를 등록합니다.
+    이미 결제 정보가 있는 경우 에러를 반환합니다.
+    
+    필수 정보:
+    - 포트원 가게 ID
+    - 포트원 채널 ID
+    - 포트원 시크릿 키
+    """
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    existing_payment = await payment_repo.exists_by_store_id(store_id)
+    if existing_payment:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="이미 결제 정보가 등록되어 있습니다."
+        )
+    
+    try:
+        await payment_repo.create(
+            store_id=store_id,
+            portone_store_id=request.portone_store_id,
+            portone_channel_id=request.portone_channel_id,
+            portone_secret_key=request.portone_secret_key
+        )
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"결제 정보 등록 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.get("/payment", response_model=StorePaymentInfoCheckResponse, status_code=status.HTTP_200_OK,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: "가게를 찾을 수 없음"
+    })
+)
+async def check_payment_info(
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    payment_repo: StorePaymentInfoRepositoryDep
+):
+    """
+    가게 결제 정보 확인
+    
+    판매자의 가게에 결제 정보가 등록되어 있는지 확인합니다.
+    """
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    has_payment_info = await payment_repo.exists_by_store_id(store_id)
+    
+    return StorePaymentInfoCheckResponse(is_exist=has_payment_info)
