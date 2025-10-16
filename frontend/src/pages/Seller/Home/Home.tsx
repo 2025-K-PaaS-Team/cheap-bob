@@ -1,5 +1,6 @@
 import { HomeSwiper, LoginButton } from "@components/common/home";
 import { homeSwiperMap } from "@constant";
+import { useNavigate } from "react-router";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -7,6 +8,7 @@ import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 const Home = () => {
+  const navigate = useNavigate();
   localStorage.clear();
 
   return (
@@ -41,6 +43,14 @@ const Home = () => {
           label="구글로 계속하기"
           isCustomer={false}
         />
+      </div>
+
+      {/* change to customer account */}
+      <div
+        className="btnFont text-center text-main-deep"
+        onClick={() => navigate("/c")}
+      >
+        구매자 계정으로 전환
       </div>
     </div>
   );
