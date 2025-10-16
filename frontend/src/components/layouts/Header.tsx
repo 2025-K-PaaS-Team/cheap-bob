@@ -16,7 +16,7 @@ const Header = ({ layout }: HeaderProps) => {
 
   return (
     <>
-      <div className="h-[85px] pt-[15px] px-[20px] grid grid-cols-3 items-center">
+      <div className="h-[60px] mt-[10px] px-[20px] grid grid-cols-3 items-center">
         {/* left */}
         {myLayout.back ? (
           <img
@@ -35,15 +35,23 @@ const Header = ({ layout }: HeaderProps) => {
         )}
 
         {/* center */}
-        <div className="font-bold text-[15px] text-center">
-          {myLayout.title}
-        </div>
+        {myLayout.title ? (
+          <div className="font-bold text-[15px] text-center">
+            {myLayout.title}
+          </div>
+        ) : myLayout?.centerIcon ? (
+          <div className="flex justify-center">
+            <img src="/icon/angrySalad.svg" alt="angrySaladIcon" width="47px" />
+          </div>
+        ) : (
+          <div />
+        )}
 
         {/* right */}
         <div className="flex flex-row justify-end gap-x-[20px]">
           {myLayout.heart && (
             <img
-              src="/icon/heart.svg"
+              src="/icon/heartFull.svg"
               alt="heartIcon"
               onClick={() => navigate("/c/favorite")}
             />
@@ -57,9 +65,10 @@ const Header = ({ layout }: HeaderProps) => {
           )}
         </div>
       </div>
+
       {/* search bar */}
       {myLayout.search && (
-        <div className="border border-1 border-[#222222] flex flex-row justify-between p-[14px] rounded-[58px] m-[20px]">
+        <div className="border border-1 border-main-deep flex flex-row justify-between px-[18px] py-[16px] h-[54px] mx-[20px] rounded-[50px]">
           <input
             type="text"
             className="focus:outline-none"

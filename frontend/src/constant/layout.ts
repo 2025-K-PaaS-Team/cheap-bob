@@ -2,6 +2,7 @@ export const layoutMap = {
   default: {
     back: false,
     title: "",
+    centerIcon: false,
     loc: false,
     heart: false,
     noti: false,
@@ -11,6 +12,7 @@ export const layoutMap = {
   onBoarding: {
     back: true,
     title: "",
+    centerIcon: false,
     loc: false,
     heart: false,
     noti: false,
@@ -20,6 +22,7 @@ export const layoutMap = {
   Home: {
     back: false,
     title: "",
+    centerIcon: true,
     loc: true,
     heart: true,
     noti: true,
@@ -29,6 +32,7 @@ export const layoutMap = {
   SetLoc: {
     back: true,
     title: "위치 설정",
+    centerIcon: false,
     loc: false,
     heart: false,
     noti: false,
@@ -38,6 +42,7 @@ export const layoutMap = {
   Search: {
     back: true,
     title: "검색",
+    centerIcon: false,
     loc: false,
     heart: false,
     noti: false,
@@ -47,6 +52,7 @@ export const layoutMap = {
   FavStore: {
     back: true,
     title: "관심 가게",
+    centerIcon: false,
     loc: false,
     heart: false,
     noti: false,
@@ -56,6 +62,7 @@ export const layoutMap = {
   Noti: {
     back: true,
     title: "주문 알림",
+    centerIcon: false,
     loc: false,
     heart: false,
     noti: false,
@@ -65,6 +72,7 @@ export const layoutMap = {
   StoreDesc: {
     back: true,
     title: "매장 설명",
+    centerIcon: false,
     loc: false,
     heart: false,
     noti: false,
@@ -74,6 +82,7 @@ export const layoutMap = {
   Payment: {
     back: true,
     title: "결제",
+    centerIcon: false,
     loc: false,
     heart: false,
     noti: false,
@@ -83,6 +92,7 @@ export const layoutMap = {
   Order: {
     back: false,
     title: "주문 현황",
+    centerIcon: false,
     loc: false,
     heart: false,
     noti: true,
@@ -92,6 +102,7 @@ export const layoutMap = {
   My: {
     back: false,
     title: "마이페이지",
+    centerIcon: false,
     loc: false,
     heart: false,
     noti: false,
