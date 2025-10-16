@@ -1,6 +1,11 @@
 import { CommonModal } from "@components/common";
 import { Now, OrderList, StatusBar } from "@components/seller/order";
-import type { OrderBaseType, OrderResponseType } from "@interface";
+import type {
+  OrderBaseType,
+  OrderResponseType,
+  StoreOperationType,
+} from "@interface";
+import { GetStoreOperation } from "@services";
 import { getStoreOrder } from "@services/seller/order";
 import { useEffect, useMemo, useState } from "react";
 
@@ -8,6 +13,7 @@ const Order = () => {
   const [orders, setOrders] = useState<OrderResponseType | null>();
 
   const [status, setStatus] = useState<string>("reservation");
+  const [op, setOp] = useState<StoreOperationType>([]);
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -28,8 +34,19 @@ const Order = () => {
     }
   };
 
+  const handleGetStoreOperation = async () => {
+    try {
+      const res = await GetStoreOperation();
+      setOp(res);
+    } catch {
+      setModalMsg("운영 정보를 불러오는 것에 실패했습니다.");
+      setShowModal(true);
+    }
+  };
+
   useEffect(() => {
     handleGetOrders();
+    handleGetStoreOperation();
   }, []);
 
   const sortByDateDesc = (a?: string | null, b?: string | null) =>
@@ -74,7 +91,7 @@ const Order = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <Now onRefresh={handleGetOrders} lastUpdated={lastUpdated} />
+      <Now onRefresh={handleGetOrders} lastUpdated={lastUpdated} op={op} />
       <StatusBar status={status} setStatus={setStatus} />
 
       <OrderList orders={nowOrderList} status={status} />
