@@ -1,4 +1,4 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
 import type {
   CustomerDetailType,
   ItemType,
@@ -6,7 +6,9 @@ import type {
   ProductBaseType,
 } from "@interface";
 import PortOne from "@portone/browser-sdk/v2";
-import { confrimPayment, initPayment } from "@services";
+import { cancelPayment, confrimPayment, initPayment } from "@services";
+import { formatErrMsg } from "@utils";
+import { useState } from "react";
 
 type PortOneProps = {
   storeId: string;
@@ -15,6 +17,9 @@ type PortOneProps = {
 };
 
 const Payment = ({ storeId, product, customer }: PortOneProps) => {
+  const [showModal, setShowModal] = useState(false);
+  const [modalMsg, setModalMsg] = useState<string>("");
+
   const item: ItemType = {
     id: product.product_id,
     name: product.product_name,
@@ -32,7 +37,8 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
       console.log("초기화 성공", res);
       return res;
     } catch (err: unknown) {
-      console.error("등록 실패:", err);
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
       return null;
     }
   };
@@ -46,7 +52,9 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
       console.log("결제 확인 성공", confirm);
       return confirm;
     } catch (err: unknown) {
-      console.error("결제 확인 실패", payment_id);
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+      await cancelPayment(payment_id);
       return null;
     }
   };
@@ -62,8 +70,8 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
 
     try {
       const response = await PortOne.requestPayment({
-        storeId: storeId,
-        channelKey: "channel-key-2bde6533-669f-4e5a-ae0c-5a471f10a463",
+        storeId: paymentResult.store_id,
+        channelKey: paymentResult.channel_id,
         paymentId: paymentResult?.payment_id,
         orderName: item.name,
         totalAmount: item.price,
@@ -87,7 +95,8 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
 
       console.log("결제 성공!", response);
     } catch (err: unknown) {
-      console.error("결제 요청 실패:", err);
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
     }
 
     const confirmResult = await handleConfrimPayment(paymentResult.payment_id);
@@ -113,6 +122,16 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
           </>
         )}
       </form>
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="green"
+        />
+      )}
     </div>
   );
 };

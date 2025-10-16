@@ -34,7 +34,7 @@ export const cancelPayment = async (
   paymentId: string
 ): Promise<PaymentConfirmType> => {
   const { data } = await customerPaymentApi.delete<PaymentConfirmType>(
-    `/cancel/${paymentId}`
+    `/init/${paymentId}`
   );
 
   return data;
