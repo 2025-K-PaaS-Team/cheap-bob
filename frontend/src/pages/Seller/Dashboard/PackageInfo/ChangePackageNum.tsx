@@ -64,10 +64,10 @@ const ChangePackageNum = () => {
     }
   };
 
-  if (loading) return <div className="mt-[80px] px-[20px]">로딩중…</div>;
+  if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
 
   return (
-    <div className="mt-[80px] px-[20px] w-full">
+    <div className="flex flex-col mt-[30px] px-[20px]">
       {pkg && (
         <CommonPkgNum
           pkg={pkg}

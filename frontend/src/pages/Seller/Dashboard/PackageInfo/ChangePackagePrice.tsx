@@ -71,10 +71,10 @@ const ChangePackagePrice = () => {
     }
   };
 
-  if (loading) return <div className="mt-[80px] px-[20px]">로딩중…</div>;
+  if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
 
   return (
-    <div className="mt-[80px] px-[20px] w-full">
+    <div className="mt-[30px] px-[20px] w-full">
       {product && (
         <CommonPrice
           pkg={product}

@@ -46,7 +46,7 @@ const ChangeStoreDesc = () => {
   };
 
   return (
-    <div className="mt-[80px] px-[20px] w-full">
+    <div className="mt-[30px] px-[20px] w-full">
       {/* question */}
       <div className="text-[24px]">
         변경할 <span className="font-bold">매장 설명</span>을 <br /> 입력해
