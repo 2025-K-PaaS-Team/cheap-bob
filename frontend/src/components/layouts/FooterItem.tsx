@@ -5,16 +5,17 @@ interface FooterItemProps {
   img?: string;
   to: string;
   className?: string;
+  active?: boolean;
 }
 
-const FooterItem = ({ label, img, to, className }: FooterItemProps) => {
+const FooterItem = ({ label, img, to, className, active }: FooterItemProps) => {
   const navigate = useNavigate();
 
   return (
     <div
       className={`flex flex-col items-center gap-y-1 cursor-pointer ${
-        className || ""
-      }`}
+        active ? "text-custom-black font-bold" : "text-[#393939] hintFont"
+      } ${className || ""}`}
       onClick={() => navigate(to)}
     >
       {img && <img src={img} alt={label} width="30" />}

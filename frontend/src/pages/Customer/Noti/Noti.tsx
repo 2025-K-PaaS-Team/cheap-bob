@@ -5,7 +5,7 @@ const Noti = () => {
     return (
       <div className="flex flex-col w-full h-full justify-center items-center">
         <img
-          src="/icon/saladBowl.svg"
+          src="/icon/angrySalad.svg"
           alt="saladBowlIcon"
           className="pb-[26px] w-[116px]"
         />

@@ -46,7 +46,7 @@ const NowOpStatus = ({ ops }: Props) => {
   const enabledToday = today?.is_open_enabled ?? false;
 
   const statusInfo = useMemo(() => {
-    if (!today) return { title: "지금은 영업 전입니다.", sub: "" };
+    if (!today) return { title: "지금은 영업 전 입니다.", sub: "" };
 
     const o = toMin(today.open_time) ?? 0;
     const c = toMin(today.close_time) ?? 0;
@@ -56,32 +56,38 @@ const NowOpStatus = ({ ops }: Props) => {
     const current = currMin < open ? currMin + 1440 : currMin;
 
     if (!enabledToday) {
-      return { title: "오늘은 휴무입니다.", sub: "" };
+      return { title: "오늘은 휴무 입니다.", sub: "" };
     }
 
+    // 영업 전
     if (current < open) {
       return {
-        title: "지금은 영업 전입니다.",
-        sub: `영업 시작까지 ${fmtDur(open - current)}`,
+        title: "지금은 영업 전 입니다.",
+        sub: `오픈까지 ${fmtDur(open - current)}`,
       };
     }
 
+    // 영업 중
     if (current >= open && current < close) {
       let sub = "";
       if (s != null && e != null) {
         const sN = s < open ? s + 1440 : s;
         const eN = e < open ? e + 1440 : e;
 
-        if (current < sN) sub = `손님 픽업 시간까지 ${fmtDur(sN - current)}`;
+        if (current < sN) sub = `픽업 시간까지 ${fmtDur(sN - current)}`;
         else if (current < eN) sub = `픽업 마감까지 ${fmtDur(eN - current)}`;
-        else sub = "오늘 픽업이 종료되었습니다.";
+        else sub = "오늘의 영업이 끝났습니다.";
       } else {
         sub = `영업 마감까지 ${fmtDur(close - current)}`;
       }
-      return { title: "지금은 영업중입니다.", sub };
+      return { title: "지금은 영업중 입니다.", sub };
     }
 
-    return { title: "지금은 운영 종료입니다.", sub: "" };
+    // 영업 마감 이후
+    return {
+      title: "지금은 영업 마감 입니다.",
+      sub: "오늘의 영업이 끝났습니다.",
+    };
   }, [today, currMin, enabledToday]);
 
   const highlightStatus = (text: string) => {

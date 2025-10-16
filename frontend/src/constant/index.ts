@@ -6,3 +6,4 @@ export * from "./layout";
 export * from "./sellerSignup";
 export * from "./time";
 export * from "./option";
+export * from "./location";

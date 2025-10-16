@@ -25,6 +25,7 @@
   --color-main-pale: oklch(0.9673 0.0809 126.53);
   --color-sub-orange: oklch(0.7516 0.1733 55.62);
   --color-sub-yellow: oklch(0.9075 0.1846 103.79);
+  --color-sub-red: oklch(0.623 0.2165 31.29);
 
   /* custom white & black */
   --color-custom-white: oklch(0.9851 0 0);

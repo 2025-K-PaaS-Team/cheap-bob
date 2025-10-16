@@ -10,3 +10,4 @@ export * from "./customer/payment";
 export * from "./customer/signup";
 export * from "./seller/signup";
 export * from "./customer/option";
+export * from "./seller/withdraw";

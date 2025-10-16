@@ -116,6 +116,14 @@ export const sellerSettlementApi = attachInterceptors(
   })
 );
 
+export const sellerWithdrawApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/seller/withdraw`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
 export const paymentApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/payment`,

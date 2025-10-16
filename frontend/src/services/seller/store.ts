@@ -68,6 +68,13 @@ export const CloseStore = async () => {
   return data;
 };
 
+// GET: Get seller profile all
+export const GetSellerEmail = async () => {
+  const { data } = await sellerStoreProfileApi.get("/me");
+
+  return data;
+};
+
 // PUT: update store name
 export const UpdateStoreName = async (
   store_name: string

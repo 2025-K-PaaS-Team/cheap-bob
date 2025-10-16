@@ -10,21 +10,31 @@ const SellerFooter = () => {
   }
 
   const items = [
-    { label: "주문 관리", to: "order" },
-    { label: "매장 관리", to: "dashboard" },
-    { label: "정산 관리", to: "billing" },
+    { label: "주문 관리", to: "order", icon: "receipt" },
+    { label: "매장 관리", to: "dashboard", icon: "home" },
+    { label: "정산 관리", to: "billing", icon: "user" },
   ];
 
   return (
-    <div className="grid grid-cols-3 items-center text-center p-4 bg-custom-white h-[68px]">
-      {items.map((item) => (
-        <FooterItem
-          key={item.to}
-          label={item.label}
-          to={item.to}
-          className={path.includes(item.to) ? "font-bold" : "font-normal"}
-        />
-      ))}
+    <div className="grid grid-cols-3 items-center text-center p-4 border-t border-black/10 bg-custom-white h-[68px]">
+      {items.map((item) => {
+        const isActive = path.includes(item.to);
+        const iconName = `${item.icon}${isActive ? "Full" : ""}.svg`;
+
+        return (
+          <FooterItem
+            key={item.to}
+            label={item.label}
+            to={`/${item.to}`}
+            img={`/icon/${iconName}`}
+            className={
+              isActive
+                ? "text-custom-black font-bold"
+                : "text-[#393939] hintFont"
+            }
+          />
+        );
+      })}
     </div>
   );
 };
