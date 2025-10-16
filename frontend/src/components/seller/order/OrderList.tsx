@@ -22,7 +22,7 @@ const OrderList = ({ orders, status }: OrderListProps) => {
 
   const cfmLabel = [
     { key: "reservation", title: "픽업 확정하기" },
-    { key: "accepted", title: "픽업 QR 표시" },
+    { key: "accept", title: "픽업 QR 표시" },
   ];
 
   const handleClickCancel = () => {
@@ -62,7 +62,7 @@ const OrderList = ({ orders, status }: OrderListProps) => {
 
   if (orders.length == 0 || !orders) {
     return (
-      <div className="bg-custom-white flex flex-col flex-1 gap-y-[20px] justify-center items-center mx-[20px]">
+      <div className="bg-custom-white flex flex-col flex-1 gap-y-[20px] justify-center items-center px-[20px]">
         <img src="/icon/angrySalad.svg" alt="angrySaladIcon" width="116px" />
         <div>
           <h1>주문 내역이 비어있어요.</h1>

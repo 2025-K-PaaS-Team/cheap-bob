@@ -2,7 +2,7 @@ import type { TimeStamp } from "@interface/common/types";
 
 export type OrderStatusType =
   | "reservation"
-  | "accepted"
+  | "accept"
   | "completed"
   | "canceled";
 

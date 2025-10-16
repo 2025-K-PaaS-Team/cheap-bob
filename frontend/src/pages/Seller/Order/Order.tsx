@@ -40,7 +40,7 @@ const Order = () => {
   const acceptedOrders = useMemo<OrderBaseType[]>(
     () =>
       (orders?.orders ?? [])
-        .filter((o) => o.status === "accepted")
+        .filter((o) => o.status === "accept")
         .sort((a, b) => sortByDateDesc(a.accepted_at, b.accepted_at)),
     [orders]
   );
@@ -57,7 +57,7 @@ const Order = () => {
     switch (status) {
       case "reservation":
         return reservationOrders;
-      case "accepted":
+      case "accept":
         return acceptedOrders;
       case "others":
         return otherOrders;

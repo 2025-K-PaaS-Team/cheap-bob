@@ -6,7 +6,7 @@ interface StatusBarProps {
 const StatusBar = ({ status, setStatus }: StatusBarProps) => {
   const items = [
     { label: "확정 대기중", status: "reservation" },
-    { label: "픽업 확정", status: "accepted" },
+    { label: "픽업 확정", status: "accept" },
     { label: "픽업 완료/취소", status: "others" },
   ];
 
