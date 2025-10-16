@@ -133,12 +133,7 @@ const CommonPuTime = ({
           <div>분 전부터</div>
         </div>
         <div className="text-[14px] mt-[10px]">
-          {baseLabel}요일 기준{" "}
-          <b>
-            {sHH}시 {sMM}분 전부터
-          </b>{" "}
-          사용자들은 매장에 방문하여
-          <br />
+          손님들이 {sHH}시 {sMM}분부터 매장에 방문하여 <br />
           패키지를 픽업할 수 있습니다.
         </div>
       </div>
@@ -176,11 +171,7 @@ const CommonPuTime = ({
           <div>분 전부터</div>
         </div>
         <div className="text-[14px] mt-[10px]">
-          {baseLabel}요일 기준{" "}
-          <b>
-            {dHH}시 {dMM}분 이후
-          </b>{" "}
-          픽업되지 않은 패키지는 <b>폐기합니다</b>.
+          {dHH}시 {dMM}분까지 픽업되지 않은 패키지는 폐기합니다.
         </div>
       </div>
     </>
