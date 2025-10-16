@@ -70,3 +70,8 @@ export type MapBaseType = {
   lng: string;
   lat: string;
 };
+
+export type WithdrawType = {
+  message: string;
+  access_token: string;
+};

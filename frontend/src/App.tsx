@@ -19,6 +19,7 @@ import {
   SellerSignup,
   LoginFail,
   RoleCheck,
+  BillingWithdraw,
 } from "@pages";
 import {
   ChangeOperationInfo,
@@ -115,6 +116,7 @@ const App = () => {
         <Route path="billing" element={<BillingInfo />} />
         <Route path="billing/history" element={<BillingHistory />} />
         <Route path="billing/change" element={<BillingChange />} />
+        <Route path="billing/withdraw" element={<BillingWithdraw />} />
 
         {/* seller fallback */}
         <Route path="*" element={<Navigate to="/s" replace />} />

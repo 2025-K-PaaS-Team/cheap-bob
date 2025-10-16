@@ -35,7 +35,7 @@ const CommonModal = ({
 
         {/* button */}
         <div className="grid grid-cols-3 gap-x-[20px] btnFont">
-          {cancelLabel && onCancelClick && (
+          {onCancelClick && (
             <button
               className="bg-custom-white rounded w-full py-[12px]"
               onClick={() => onCancelClick()}
@@ -45,7 +45,9 @@ const CommonModal = ({
           )}
 
           <button
-            className={`${confrimBtnClass} col-span-2 rounded w-full py-[12px]`}
+            className={`${confrimBtnClass} ${
+              onCancelClick ? "col-span-2" : "col-span-3"
+            } rounded w-full py-[12px]`}
             onClick={() => onConfirmClick()}
           >
             {confirmLabel}

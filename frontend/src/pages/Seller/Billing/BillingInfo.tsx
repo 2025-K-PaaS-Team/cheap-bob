@@ -1,6 +1,10 @@
 import { CommonModal } from "@components/common";
 import type { StoreDetailType } from "@interface";
-import { GetStoreDetail, GetStoreWeekSettlement } from "@services";
+import {
+  GetStoreDetail,
+  GetStoreWeekSettlement,
+  WithdrawSeller,
+} from "@services";
 import { formatErrMsg } from "@utils";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -31,7 +35,20 @@ const BillingInfo = () => {
       const res = await GetStoreDetail();
       setStore(res);
     } catch (err) {
-      console.error(formatErrMsg(err));
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+      return;
+    }
+  };
+
+  const handlePostWithdraw = async () => {
+    try {
+      await WithdrawSeller();
+      navigate("withdraw");
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+      return;
     }
   };
 
@@ -88,7 +105,10 @@ const BillingInfo = () => {
             <div onClick={() => navigate("/s")}>로그아웃</div>
           </div>
           {/* withdraw */}
-          <div className="bodyFont font-bold text-sub-red py-[20px]">
+          <div
+            className="bodyFont font-bold text-sub-red py-[20px]"
+            onClick={handlePostWithdraw}
+          >
             <div>계정 탈퇴</div>
           </div>
         </div>
