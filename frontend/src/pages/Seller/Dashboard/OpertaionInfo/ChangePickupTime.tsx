@@ -137,9 +137,9 @@ const ChangePickupTime = () => {
         setPickupDiscardOffset={setPickupDiscardOffset}
       />
 
-      {/* notice */}
-      <div className="absolute bottom-30 w-[350px] left-1/2 -translate-x-1/2 bg-custom-white rounded-sm h-[57px] px-[10px] flex items-center">
-        변경시 다음 영업일부터 적용됩니다.
+      {/* 공지 */}
+      <div className="w-full bg-[#E7E7E7] rounded-sm px-[10px] h-[57px] flex items-center text-custom-black">
+        변경 시 다음 영업일부터 적용됩니다.
       </div>
 
       {/* btn */}
