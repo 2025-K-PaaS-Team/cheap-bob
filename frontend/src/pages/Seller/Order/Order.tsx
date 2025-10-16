@@ -11,11 +11,17 @@ const Order = () => {
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const [lastUpdated, setLastUpdated] = useState<string>("");
 
   const handleGetOrders = async () => {
     try {
       const res = await getStoreOrder();
       setOrders(res);
+
+      const now = new Date();
+      const hh = now.getHours().toString().padStart(2, "0");
+      const mm = now.getMinutes().toString().padStart(2, "0");
+      setLastUpdated(`${hh}시 ${mm}분`);
     } catch (err) {
       setModalMsg("주문 목록을 불러오는데 실패했습니다.");
       setShowModal(true);
@@ -68,7 +74,7 @@ const Order = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <Now />
+      <Now onRefresh={handleGetOrders} lastUpdated={lastUpdated} />
       <StatusBar status={status} setStatus={setStatus} />
 
       <OrderList orders={nowOrderList} status={status} />
