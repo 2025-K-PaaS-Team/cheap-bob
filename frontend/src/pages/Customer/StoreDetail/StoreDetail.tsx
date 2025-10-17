@@ -1,4 +1,4 @@
-import { CommonModal } from "@components/common";
+import { CommonDesc, CommonModal } from "@components/common";
 import Payment from "@components/Payment/Payment";
 import { idxToDow, NutritionList } from "@constant";
 import type {
@@ -17,6 +17,9 @@ import { formatErrMsg } from "@utils";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
+import "swiper/css";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
 
 const StoreDetail = () => {
   const location = useLocation();
@@ -116,22 +119,50 @@ const StoreDetail = () => {
       {product ? (
         <div className="flex flex-col justify-center">
           {/* store image */}
-          <div className="bg-custom-white h-[290px] relative">
-            <img
-              src={store.images.find((img) => img.is_main)?.image_url}
-              alt="StoreImage"
-              className="w-full h-full object-none"
-            />
-            <div className="absolute bottom-1 left-1 text-center gap-y-[4px] flex flex-col">
-              <div className="bg-custom-white rounded py-[5px] px-[10px]">
+          <div className="bg-custom-white h-[230px] relative">
+            <Swiper
+              loop={false}
+              pagination={{ clickable: true }}
+              modules={[Pagination]}
+              className="mySwiper h-[230px]"
+            >
+              {store.images.map((img) => (
+                <SwiperSlide key={img.image_id}>
+                  <img
+                    src={img.image_url}
+                    alt="StoreImage"
+                    className="w-full h-full object-cover"
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+
+            {/* overlay */}
+            <div className="absolute top-0 left-0 w-full h-full hintFont pointer-events-none">
+              {/* 영업중 / 종료 */}
+              <div className="absolute bottom-14 left-3 z-10 bg-custom-white rounded-lg py-[4px] px-[10px] pointer-events-auto">
                 {store.operation_times.find(
                   (dow) => dow.day_of_week === todayDow
                 )?.is_currently_open
                   ? "영업중"
                   : "영업 종료"}
               </div>
-              <div className="bg-custom-white rounded py-[5px] px-[10px]">
-                {product.products[0].current_stock}개
+
+              {/* 남은 수량 */}
+              <div className="absolute bottom-3 left-3 z-10 bg-[#E7E7E7] rounded py-[5.5px] px-[10px] pointer-events-auto">
+                {store.products[0].current_stock === 0 ? (
+                  <>
+                    패키지{" "}
+                    <span className="text-sub-orange font-bold">품절</span>
+                  </>
+                ) : (
+                  <>
+                    패키지{" "}
+                    <span className="text-main-deep font-bold">
+                      {store.products[0].current_stock}개 남음
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -141,19 +172,26 @@ const StoreDetail = () => {
             <div className="font-bold text-[15px]">
               {product.store_name}
               {/* favor */}
+
               <div
-                className={`rounded-full absolute top-1 right-1 z-10 w-[41px] h-[41px] p-[5px] ${
-                  isFavor ? "bg-red-300" : "bg-custom-white"
-                } flex justify-center items-center`}
+                className="rounded-full absolute top-1 right-1 z-10 w-[41px] h-[41px] flex justify-center items-center"
                 onClick={() =>
                   handleUpdateFavorStore(product.store_id, isFavor)
                 }
               >
-                <img
-                  src="/icon/heart.svg"
-                  alt="FavoriteStore"
-                  className="w-5 h-5"
-                />
+                {isFavor ? (
+                  <img
+                    src="/icon/heartFull.svg"
+                    alt="FavoriteStore"
+                    className="w-5 h-5"
+                  />
+                ) : (
+                  <img
+                    src="/icon/heart.svg"
+                    alt="FavoriteStore"
+                    className="w-5 h-5"
+                  />
+                )}
               </div>
               {/* store logo and map */}
               <div className="flex flex-row gap-x-3 mt-[8px]">
@@ -325,14 +363,7 @@ const StoreDetail = () => {
       )}
 
       {/* show desc modal */}
-      {descOpen && (
-        <CommonModal
-          desc={store.store_introduction}
-          confirmLabel="확인"
-          onConfirmClick={() => setDescOpen(false)}
-          category="green"
-        />
-      )}
+      {descOpen && <CommonDesc desc={store.store_introduction} />}
     </>
   );
 };

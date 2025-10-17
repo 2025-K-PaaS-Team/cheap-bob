@@ -110,10 +110,10 @@ h3 {
 }
 
 .mySwiper {
-  --swiper-pagination-color: #222222;
-  --swiper-pagination-bullet-inactive-color: #bfbfbf;
+  --swiper-pagination-color: #393939;
+  --swiper-pagination-bullet-inactive-color: #e7e7e7;
   --swiper-pagination-bullet-size: 10px;
   --swiper-pagination-bullet-inactive-opacity: 1;
   --swiper-pagination-progressbar-size: 8px;
-  --swiper-pagination-progressbar-bg-color: #d9d9d9;
+  --swiper-pagination-progressbar-bg-color: #e7e7e7;
 }
