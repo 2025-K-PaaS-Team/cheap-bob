@@ -41,6 +41,12 @@ import {
 } from "@pages/Seller/Dashboard";
 import { BillingChange, BillingHistory, BillingInfo } from "@pages/Seller";
 import StorePayment from "@pages/Customer/StorePayment";
+import {
+  ChangeCustomerAllergy,
+  ChangeCustomerInfo,
+  ChangeCustomerMenu,
+  ChangeCustomerTopping,
+} from "@pages/Customer";
 
 const App = () => {
   return (
@@ -76,10 +82,15 @@ const App = () => {
         <Route path="order" element={<Order />} />
         {/* mypage */}
         <Route path="my" element={<My />} />
+        {/* change customer info */}
+        <Route path="change/info" element={<ChangeCustomerInfo />} />
+        <Route path="change/menu" element={<ChangeCustomerMenu />} />
+        <Route path="change/topping" element={<ChangeCustomerTopping />} />
+        <Route path="change/allergy" element={<ChangeCustomerAllergy />} />
+        <Route path="change/nutrition" element={<ChangePackageNutrition />} />
         {/* lab */}
         <Route path="lab" element={<CustomerLab />} />
         <Route path="qr" element={<QrLab />} />
-
         {/* customer fallback */}
         <Route path="*" element={<Navigate to="/c" replace />} />
       </Route>

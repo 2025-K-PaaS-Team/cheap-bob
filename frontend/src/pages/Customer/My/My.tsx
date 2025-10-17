@@ -1,7 +1,9 @@
 import { CommonModal } from "@components/common";
-import { WithdrawCustomer } from "@services";
-import { formatErrMsg } from "@utils";
-import { useState } from "react";
+import { NutritionList } from "@constant";
+import type { PreferNutritionBaseType, CustomerDetailType } from "@interface";
+import { GetCustomerDetail, GetNutrition, WithdrawCustomer } from "@services";
+import { formatErrMsg, getTitleByKey } from "@utils";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 const My = () => {
@@ -9,6 +11,11 @@ const My = () => {
   const [showWarn, setShowWarn] = useState<Boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+
+  const [customer, setCustomer] = useState<CustomerDetailType | null>(null);
+  const [nutrition, setNutrition] = useState<PreferNutritionBaseType[] | null>(
+    null
+  );
 
   const handlePostWithdraw = async () => {
     setShowWarn(false);
@@ -21,44 +28,101 @@ const My = () => {
       return;
     }
   };
+
+  // get customer detail
+  const handleGetCustomerDetail = async () => {
+    try {
+      const res = await GetCustomerDetail();
+      setCustomer(res);
+    } catch (err) {
+      setModalMsg("고객 데이터 가져오기에 실패했습니다.");
+      setShowModal(true);
+    }
+  };
+  // get customer nutrition
+  const handleGetCustomerNutrition = async () => {
+    try {
+      const res = await GetNutrition();
+      setNutrition(res.nutrition_types);
+    } catch (err) {
+      setModalMsg("영양 데이터 가져오기에 실패했습니다.");
+      setShowModal(true);
+    }
+  };
+
+  useEffect(() => {
+    handleGetCustomerDetail();
+    handleGetCustomerNutrition();
+  }, []);
+
   return (
-    <div className="px-[20px] w-full">
-      {/* order history & nutrition goal */}
-      <div className="grid grid-cols-2 gap-x-[10px] pt-[14px] pb-[95px]">
-        <div className="flex flex-col bg-[#717171] p-[15px] text-white rounded-[5px] h-[109px]">
-          <div
-            className="font-semibold text-[15px]"
-            onClick={() => navigate("/c/order")}
-          >
-            주문 내역
-          </div>
-        </div>
-        <div className="flex flex-col bg-[#717171] p-[15px] text-white rounded-[5px] h-[109px]">
-          <div className="font-semibold text-[15px]">영양 목표</div>
-        </div>
-      </div>
-      {/* policy */}
-      <div className="text-[15px] py-[20px] font-bold">약관 및 정책</div>
-      {/* connect to seller */}
+    <div className="px-[20px] w-full flex flex-col gap-y-[31px]">
+      {/* my info */}
       <div
-        className="text-[15px] py-[20px] font-bold"
-        onClick={() => navigate("/s")}
+        onClick={() => navigate("/c/change/info")}
+        className="flex flex-col gap-y-[10px]"
       >
-        사장님으로 접속
+        <div className="titleFont">{customer?.nickname} 님</div>
+        <div className="bodyFont">{customer?.customer_email}</div>
       </div>
-      {/* logout */}
-      <div className="bodyFont font-bold py-[20px] border-b border-black/10">
-        <div onClick={() => navigate("/c")}>로그아웃</div>
-      </div>
-      {/* withdraw */}
+
+      {/* nutrition goal */}
       <div
-        className="bodyFont font-bold text-sub-red py-[20px]"
-        onClick={() => setShowWarn(true)}
+        onClick={() => navigate("/c/change/nutrition")}
+        className="bg-main-pale border border-main-deep rounded w-full py-[20px] px-[15px]"
       >
-        <div>계정 탈퇴</div>
+        <h1 className="pb-[21px]">영양 목표</h1>
+        <div className="flex flex-row">
+          {nutrition?.map((n, idx) => (
+            <div
+              key={idx}
+              className="tagFont font-bold bg-black rounded text-white px-[10px] py-[7px]"
+            >
+              {getTitleByKey(n.nutrition_type, NutritionList)}
+            </div>
+          ))}
+        </div>
       </div>
-      {/* withdraw member */}
-      <div className="text-[15px] py-[20px] font-bold">계정탈퇴</div>
+
+      {/* bottom list */}
+      <div className="flex flex-col">
+        {/* prefer menu */}
+        <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
+          <div onClick={() => navigate("/c/change/menu")}>선호 메뉴</div>
+          <div>&gt;</div>
+        </div>
+        {/* prefer topping */}
+        <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
+          <div onClick={() => navigate("/c/change/topping")}>선호 토핑</div>
+          <div>&gt;</div>
+        </div>
+        {/* allergy */}
+        <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
+          <div onClick={() => navigate("/c/change/allergy")}>못먹는 음식</div>
+          <div>&gt;</div>
+        </div>
+        {/* order */}
+        <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
+          <div onClick={() => navigate("/c/order")}>주문 내역</div>
+          <div>&gt;</div>
+        </div>
+        {/* policy */}
+        <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
+          <div>서비스 이용약관</div>
+          <div>&gt;</div>
+        </div>
+        {/* logout */}
+        <div className="bodyFont font-bold py-[20px] border-b border-black/10">
+          <div onClick={() => navigate("/c")}>로그아웃</div>
+        </div>
+        {/* withdraw */}
+        <div
+          className="bodyFont font-bold text-sub-red py-[20px]"
+          onClick={() => setShowWarn(true)}
+        >
+          <div>계정 탈퇴</div>
+        </div>
+      </div>
 
       {/* show modal */}
       {showModal && (

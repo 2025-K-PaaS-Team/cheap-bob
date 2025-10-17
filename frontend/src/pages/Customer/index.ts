@@ -5,3 +5,4 @@ export * from "./StorePayment";
 export * from "./StoreList";
 export * from "./Signup";
 export * from "./Home";
+export * from "./Change";

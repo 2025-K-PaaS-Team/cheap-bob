@@ -4,7 +4,6 @@ import {
   GetStoreDetail,
   GetStoreWeekSettlement,
   WithdrawCustomer,
-  WithdrawSeller,
 } from "@services";
 import { formatErrMsg } from "@utils";
 import dayjs from "dayjs";
