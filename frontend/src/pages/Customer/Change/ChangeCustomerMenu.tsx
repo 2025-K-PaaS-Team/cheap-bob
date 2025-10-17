@@ -66,7 +66,7 @@ const ChangeCustomerMenu = () => {
       <SelectedGrid
         data={MenuList}
         selected={selected}
-        selectType="nutrition"
+        selectType="menu"
         onClick={handleClick}
       />
 

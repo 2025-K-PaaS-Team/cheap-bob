@@ -58,7 +58,7 @@ const ChangeCustomerTopping = () => {
   return (
     <div className="relative mt-[30px]  px-[20px] w-full flex flex-col gap-y-[20px]">
       <div className="titleFont">
-        선호하는 메뉴를 <br />
+        선호하는 토핑을 <br />
         선택해주세요
       </div>
       <div className="hintFont]">주문할 때 사장님한테 보여져요</div>
@@ -67,7 +67,7 @@ const ChangeCustomerTopping = () => {
         <SelectedGrid
           data={ToppingList}
           selected={selected}
-          selectType="nutrition"
+          selectType="topping"
           onClick={handleClick}
         />
       </div>
