@@ -65,8 +65,8 @@ const ChangeCustomerNutrition = () => {
   return (
     <div className="mt-[30px] px-[20px] w-full flex flex-col gap-y-[20px]">
       <div className="titleFont">
-        변경할 <b>패키지의 영양 특징</b>을 <br />
-        선택해 주세요.
+        영양 목표를 <br />
+        선택해주세요
       </div>
       <div className="hintFont]">최대 3개까지 선택할 수 있어요.</div>
 

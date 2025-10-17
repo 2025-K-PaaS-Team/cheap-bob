@@ -5,8 +5,6 @@ import type {
   CustomerDetailType,
   CustomerRegisterResponseType,
   CustomerRegisterType,
-  MenuBaseType,
-  MenuDeleteType,
   PreferAllergiesType,
   PreferMenuType,
   PreferNutritionType,
@@ -50,17 +48,19 @@ export const GetPreferMenu = async (): Promise<PreferMenuType> => {
 
 // POST: create preferred menus
 export const CreatePreferMenu = async (
-  body: MenuBaseType
+  body: string
 ): Promise<PreferMenuType> => {
-  const { data } = await customerProfileApi.post("/preferred-menus", body);
+  const { data } = await customerProfileApi.post("/preferred-menus", {
+    menu_types: [body],
+  });
 
   return data;
 };
 
 // DELETE: delete preferred menu
-export const DeletePreferMenu = async (body: MenuDeleteType) => {
+export const DeletePreferMenu = async (body: string) => {
   const { data } = await customerProfileApi.delete("/preferred-menus", {
-    data: body,
+    data: { menu_type: body },
   });
 
   return data;
