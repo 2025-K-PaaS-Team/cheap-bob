@@ -1,6 +1,4 @@
 import type {
-  AllergieDeleteType,
-  AllergiesBaseType,
   CustomerDetailBaseType,
   CustomerDetailType,
   CustomerRegisterResponseType,
@@ -9,8 +7,6 @@ import type {
   PreferMenuType,
   PreferNutritionType,
   PreferToppingType,
-  ToppingBaseType,
-  ToppingDeleteType,
 } from "@interface";
 import { customerProfileApi, customerRegisterApi } from "@services/client";
 
@@ -104,17 +100,19 @@ export const GetAllergies = async (): Promise<PreferAllergiesType> => {
 
 // POST: create allergies
 export const CreateAllergies = async (
-  body: AllergiesBaseType
+  body: string
 ): Promise<PreferAllergiesType> => {
-  const { data } = await customerProfileApi.post("/allergies", body);
+  const { data } = await customerProfileApi.post("/allergies", {
+    allergy_types: [body],
+  });
 
   return data;
 };
 
 // DELETE: delete allergy
-export const DeleteAllergies = async (body: AllergieDeleteType) => {
+export const DeleteAllergies = async (body: string) => {
   const { data } = await customerProfileApi.delete("/allergies", {
-    data: body,
+    data: { allergy_type: body },
   });
 
   return data;
@@ -129,17 +127,19 @@ export const GetTopping = async (): Promise<PreferToppingType> => {
 
 // POST: create Topping
 export const CreateTopping = async (
-  body: ToppingBaseType
+  body: string
 ): Promise<PreferToppingType> => {
-  const { data } = await customerProfileApi.post("/topping-types", body);
+  const { data } = await customerProfileApi.post("/topping-types", {
+    topping_types: [body],
+  });
 
   return data;
 };
 
 // DELETE: delete Topping
-export const DeleteTopping = async (body: ToppingDeleteType) => {
+export const DeleteTopping = async (body: string) => {
   const { data } = await customerProfileApi.delete("/topping-types", {
-    data: body,
+    data: { topping_type: body },
   });
 
   return data;
