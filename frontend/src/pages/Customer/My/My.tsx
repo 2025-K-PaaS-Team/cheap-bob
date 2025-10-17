@@ -1,8 +1,26 @@
+import { CommonModal } from "@components/common";
+import { WithdrawCustomer } from "@services";
+import { formatErrMsg } from "@utils";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 
 const My = () => {
   const navigate = useNavigate();
+  const [showWarn, setShowWarn] = useState<Boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
 
+  const handlePostWithdraw = async () => {
+    setShowWarn(false);
+    try {
+      await WithdrawCustomer();
+      navigate("withdraw");
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+      return;
+    }
+  };
   return (
     <div className="px-[20px] w-full">
       {/* order history & nutrition goal */}
@@ -29,14 +47,40 @@ const My = () => {
         사장님으로 접속
       </div>
       {/* logout */}
+      <div className="bodyFont font-bold py-[20px] border-b border-black/10">
+        <div onClick={() => navigate("/c")}>로그아웃</div>
+      </div>
+      {/* withdraw */}
       <div
-        className="text-[15px] py-[20px] font-bold"
-        onClick={() => navigate("/c")}
+        className="bodyFont font-bold text-sub-red py-[20px]"
+        onClick={() => setShowWarn(true)}
       >
-        로그아웃
+        <div>계정 탈퇴</div>
       </div>
       {/* withdraw member */}
       <div className="text-[15px] py-[20px] font-bold">계정탈퇴</div>
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="green"
+        />
+      )}
+
+      {/* show warn modal */}
+      {showWarn && (
+        <CommonModal
+          desc="계정 탈퇴 시, <b>가게 정보는 유지</b>되지만<br/> <b>가게가 더이상 타 사용자에게 노출되지 않습니다.</b> <br/> <br/> 탈퇴하시겠습니까?"
+          confirmLabel="네, 탈퇴합니다."
+          onConfirmClick={handlePostWithdraw}
+          onCancelClick={() => setShowWarn(false)}
+          category="red"
+          className="text-start"
+        />
+      )}
     </div>
   );
 };

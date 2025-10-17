@@ -1,7 +1,7 @@
 import { CommonBtn } from "@components/common";
 import { useNavigate } from "react-router";
 
-const BillingWithdraw = () => {
+const Withdraw = () => {
   const navigate = useNavigate();
 
   return (
@@ -28,4 +28,4 @@ const BillingWithdraw = () => {
   );
 };
 
-export default BillingWithdraw;
+export default Withdraw;

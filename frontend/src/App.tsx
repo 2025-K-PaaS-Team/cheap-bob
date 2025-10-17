@@ -19,7 +19,8 @@ import {
   SellerSignup,
   LoginFail,
   RoleCheck,
-  BillingWithdraw,
+  Withdraw,
+  WithdrawCancel,
 } from "@pages";
 import {
   ChangeOperationInfo,
@@ -50,6 +51,10 @@ const App = () => {
       <Route path="/auth/fail" element={<LoginFail />} />
       {/* role path */}
       <Route path="/auth/role-check" element={<RoleCheck />} />
+      {/* withdraw */}
+      <Route path="/withdraw" element={<Withdraw />} />
+      {/* roleback withdraw */}
+      <Route path="/withdraw/cancel" element={<WithdrawCancel />} />
 
       {/* customer side */}
       <Route path="/c" element={<Layout />}>
@@ -118,7 +123,6 @@ const App = () => {
         <Route path="billing" element={<BillingInfo />} />
         <Route path="billing/history" element={<BillingHistory />} />
         <Route path="billing/change" element={<BillingChange />} />
-        <Route path="billing/withdraw" element={<BillingWithdraw />} />
 
         {/* seller fallback */}
         <Route path="*" element={<Navigate to="/s" replace />} />

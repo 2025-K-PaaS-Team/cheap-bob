@@ -3,6 +3,7 @@ import type { StoreDetailType } from "@interface";
 import {
   GetStoreDetail,
   GetStoreWeekSettlement,
+  WithdrawCustomer,
   WithdrawSeller,
 } from "@services";
 import { formatErrMsg } from "@utils";
@@ -45,7 +46,7 @@ const BillingInfo = () => {
   const handlePostWithdraw = async () => {
     setShowWarn(false);
     try {
-      await WithdrawSeller();
+      await WithdrawCustomer();
       navigate("withdraw");
     } catch (err) {
       setModalMsg(formatErrMsg(err));
