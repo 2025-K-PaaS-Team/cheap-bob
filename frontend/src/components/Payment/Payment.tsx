@@ -118,7 +118,7 @@ const Payment = ({
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="relative h-full flex flex-col">
       <form onSubmit={handleSubmit}>
         {!item ? (
           <div>결제 정보를 불러오는 중입니다.</div>
@@ -129,7 +129,7 @@ const Payment = ({
               category="green"
               width="w-[calc(100%-40px)]"
               notBottom
-              className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
+              className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
               label="결제하기"
             />
           </>
