@@ -14,9 +14,17 @@ type PortOneProps = {
   storeId: string;
   product: ProductBaseType;
   customer: CustomerDetailType;
+  qty: number;
+  selectedPayment: string | null;
 };
 
-const Payment = ({ storeId, product, customer }: PortOneProps) => {
+const Payment = ({
+  storeId,
+  product,
+  customer,
+  qty,
+  selectedPayment,
+}: PortOneProps) => {
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState<string>("");
 
@@ -32,7 +40,7 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
     try {
       const res = await initPayment({
         product_id: product.product_id,
-        quantity: 1,
+        quantity: qty,
       });
       console.log("초기화 성공", res);
       return res;
@@ -61,6 +69,12 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!selectedPayment) {
+      setModalMsg("결제 수단을 선택해주세요.");
+      setShowModal(true);
+      return;
+    }
 
     const paymentResult = await handleInitPayment();
     if (!paymentResult) {
@@ -104,7 +118,7 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
   };
 
   return (
-    <div className="flex flex-col space-y-2 p-2 w-full p-2">
+    <div className="relative h-full flex flex-col">
       <form onSubmit={handleSubmit}>
         {!item ? (
           <div>결제 정보를 불러오는 중입니다.</div>
@@ -112,12 +126,11 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
           <>
             <CommonBtn
               type="submit"
-              category="white"
-              width="w-full"
+              category="green"
+              width="w-[calc(100%-40px)]"
               notBottom
-              label={`${(product.price * product.sale) / 100}원 구매하기 (${
-                product.current_stock
-              }개 남음)`}
+              className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
+              label="결제하기"
             />
           </>
         )}

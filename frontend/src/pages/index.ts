@@ -22,3 +22,5 @@ export * from "./Seller/Billing";
 export { default as CustomerLab } from "./Common/Lab/CustomerLab";
 export { default as PortOneLab } from "../components/Payment/Payment";
 export { default as QrLab } from "./Common/Lab/QrLab";
+export { default as Withdraw } from "./Common/Withdraw";
+export { default as WithdrawCancel } from "./Common/Withdraw/WithdrawCancel";

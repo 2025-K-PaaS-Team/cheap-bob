@@ -19,7 +19,8 @@ import {
   SellerSignup,
   LoginFail,
   RoleCheck,
-  BillingWithdraw,
+  Withdraw,
+  WithdrawCancel,
 } from "@pages";
 import {
   ChangeOperationInfo,
@@ -39,6 +40,14 @@ import {
   ChangeStoreNum,
 } from "@pages/Seller/Dashboard";
 import { BillingChange, BillingHistory, BillingInfo } from "@pages/Seller";
+import StorePayment from "@pages/Customer/StorePayment";
+import {
+  ChangeCustomerAllergy,
+  ChangeCustomerInfo,
+  ChangeCustomerMenu,
+  ChangeCustomerNutrition,
+  ChangeCustomerTopping,
+} from "@pages/Customer";
 
 const App = () => {
   return (
@@ -49,6 +58,10 @@ const App = () => {
       <Route path="/auth/fail" element={<LoginFail />} />
       {/* role path */}
       <Route path="/auth/role-check" element={<RoleCheck />} />
+      {/* withdraw */}
+      <Route path="/withdraw" element={<Withdraw />} />
+      {/* roleback withdraw */}
+      <Route path="/withdraw/cancel" element={<WithdrawCancel />} />
 
       {/* customer side */}
       <Route path="/c" element={<Layout />}>
@@ -59,6 +72,7 @@ const App = () => {
         {/* store */}
         <Route path="stores" element={<StoreList />} />
         <Route path="stores/:storeId" element={<StoreDetail />} />
+        <Route path="stores/:storeId/payment" element={<StorePayment />} />
         {/* location */}
         <Route path="location" element={<Location />} />
         {/* favorite */}
@@ -69,10 +83,15 @@ const App = () => {
         <Route path="order" element={<Order />} />
         {/* mypage */}
         <Route path="my" element={<My />} />
+        {/* change customer info */}
+        <Route path="change/info" element={<ChangeCustomerInfo />} />
+        <Route path="change/menu" element={<ChangeCustomerMenu />} />
+        <Route path="change/topping" element={<ChangeCustomerTopping />} />
+        <Route path="change/allergy" element={<ChangeCustomerAllergy />} />
+        <Route path="change/nutrition" element={<ChangeCustomerNutrition />} />
         {/* lab */}
         <Route path="lab" element={<CustomerLab />} />
         <Route path="qr" element={<QrLab />} />
-
         {/* customer fallback */}
         <Route path="*" element={<Navigate to="/c" replace />} />
       </Route>
@@ -116,7 +135,6 @@ const App = () => {
         <Route path="billing" element={<BillingInfo />} />
         <Route path="billing/history" element={<BillingHistory />} />
         <Route path="billing/change" element={<BillingChange />} />
-        <Route path="billing/withdraw" element={<BillingWithdraw />} />
 
         {/* seller fallback */}
         <Route path="*" element={<Navigate to="/s" replace />} />

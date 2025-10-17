@@ -3,7 +3,7 @@ import type { StoreDetailType } from "@interface";
 import {
   GetStoreDetail,
   GetStoreWeekSettlement,
-  WithdrawSeller,
+  WithdrawCustomer,
 } from "@services";
 import { formatErrMsg } from "@utils";
 import dayjs from "dayjs";
@@ -45,7 +45,7 @@ const BillingInfo = () => {
   const handlePostWithdraw = async () => {
     setShowWarn(false);
     try {
-      await WithdrawSeller();
+      await WithdrawCustomer();
       navigate("withdraw");
     } catch (err) {
       setModalMsg(formatErrMsg(err));

@@ -30,11 +30,7 @@ const attachInterceptors = (instance: AxiosInstance) => {
 
       // 439 Withdrawn user
       if (status === 439) {
-        if (role === "seller") {
-          window.location.href = "/s";
-        } else {
-          window.location.href = "/c";
-        }
+        window.location.href = "/withdraw/cancel";
         return Promise.reject(error);
       }
 
@@ -143,6 +139,14 @@ export const customerSearchApi = attachInterceptors(
 export const customerPaymentApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/payment`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const customerWithdrawApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/customer/withdraw`,
     withCredentials: false,
     headers: { "Content-Type": "application/json" },
   })
