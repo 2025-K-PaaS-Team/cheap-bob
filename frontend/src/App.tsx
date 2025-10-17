@@ -39,6 +39,7 @@ import {
   ChangeStoreNum,
 } from "@pages/Seller/Dashboard";
 import { BillingChange, BillingHistory, BillingInfo } from "@pages/Seller";
+import StorePayment from "@pages/Customer/StorePayment";
 
 const App = () => {
   return (
@@ -59,6 +60,7 @@ const App = () => {
         {/* store */}
         <Route path="stores" element={<StoreList />} />
         <Route path="stores/:storeId" element={<StoreDetail />} />
+        <Route path="stores/:storeId/payment" element={<StorePayment />} />
         {/* location */}
         <Route path="location" element={<Location />} />
         {/* favorite */}

@@ -1,5 +1,4 @@
-import { CommonDesc, CommonModal } from "@components/common";
-import Payment from "@components/Payment/Payment";
+import { CommonBtn, CommonDesc, CommonModal } from "@components/common";
 import { idxToDow, NutritionList } from "@constant";
 import type {
   CustomerDetailType,
@@ -16,12 +15,13 @@ import {
 import { formatErrMsg } from "@utils";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 
 const StoreDetail = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -40,6 +40,7 @@ const StoreDetail = () => {
   });
   const [descOpen, setDescOpen] = useState<boolean>(false);
   const todayDow = (dayjs().day() + 6) % 7;
+  const [openCheckNoti, setOpenCheckNoti] = useState<boolean>(false);
 
   const directionUrl = `http://map.naver.com/index.nhn?slng=${startCoord.lng}&slat=${startCoord.lat}&stext=내위치&elng=${endCoord.endLng}&elat=${endCoord.endLat}&etext=도착가게&menu=route&pathType=1`;
   const handleClickDirection = () => {
@@ -348,10 +349,15 @@ const StoreDetail = () => {
 
             {storeId && customer && (
               <div className="my-[30px]">
-                <Payment
-                  storeId={storeId}
-                  product={product.products[0]}
-                  customer={customer}
+                <CommonBtn
+                  category="green"
+                  width="w-[calc(100%-40px)]"
+                  notBottom
+                  onClick={() => setOpenCheckNoti(true)}
+                  className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
+                  label={`${
+                    (product.products[0].price * product.products[0].sale) / 100
+                  }원 구매하기 (${product.products[0].current_stock}개 남음)`}
                 />
               </div>
             )}
@@ -360,6 +366,7 @@ const StoreDetail = () => {
       ) : (
         <div>로딩중...</div>
       )}
+
       {/* show modal */}
       {showModal && (
         <CommonModal
@@ -372,6 +379,36 @@ const StoreDetail = () => {
 
       {/* show desc modal */}
       {descOpen && <CommonDesc desc={store.store_introduction} />}
+
+      {/* show check modal */}
+      {openCheckNoti && (
+        <CommonModal
+          desc=""
+          confirmLabel="확인"
+          onConfirmClick={() =>
+            navigate("payment", { state: { store, customer } })
+          }
+          category="green"
+          onCancelClick={() => setOpenCheckNoti(false)}
+          cancelLabel="이전"
+        >
+          <div className="flex flex-col text-start p-[10px]">
+            <h3 className="mb-[10px]">구매 전 필수체크</h3>
+            <div className="bodyFont font-bold">1. 메뉴 요구는 금지</div>
+            <div className="hintFont">가게에 따로 메뉴 요청을 할 수 없어요</div>
+            <div className="bodyFont font-bold">2. 픽업 시간 엄수</div>
+            <div className="hintFont">
+              픽업 시간이 지나면 주문이 취소되어 음식이 폐기돼요
+            </div>
+            <div className="bodyFont font-bold">
+              3. 픽업 확정 알림은 꼭 확인!
+            </div>
+            <div className="hintFont">
+              저렴한끼 서비스 또는 이메일로 주문 알림을 확인하세요
+            </div>
+          </div>
+        </CommonModal>
+      )}
     </>
   );
 };
