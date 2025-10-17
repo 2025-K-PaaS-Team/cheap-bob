@@ -2,11 +2,13 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 from loguru import logger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from pytz import timezone as pytz_timezone
 
 from services.scheduler import scheduler as app_scheduler
 from repositories.store_product_info import StockUpdateResult
 from config.settings import settings
 
+KST = pytz_timezone('Asia/Seoul')
 
 class PaymentSchedulerService:
     """결제 시간 제한 관리 서비스"""
@@ -43,7 +45,7 @@ class PaymentSchedulerService:
             scheduler = cls._get_scheduler()
             job_id = f"payment_timeout_{payment_id}"
             
-            run_time = datetime.now(timezone.utc) + timedelta(minutes=cls.PAYMENT_TIMEOUT_MINUTES)
+            run_time = datetime.now(KST) + timedelta(minutes=cls.PAYMENT_TIMEOUT_MINUTES)
             
             async def restore_stock():
                 """재고 복구 작업"""
