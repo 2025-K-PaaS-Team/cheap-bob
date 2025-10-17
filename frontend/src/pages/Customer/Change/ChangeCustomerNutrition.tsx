@@ -5,7 +5,7 @@ import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-const ChangeCustomerMenu = () => {
+const ChangeCustomerNutrition = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -91,4 +91,4 @@ const ChangeCustomerMenu = () => {
   );
 };
 
-export default ChangeCustomerMenu;
+export default ChangeCustomerNutrition;
