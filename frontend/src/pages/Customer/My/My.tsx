@@ -72,7 +72,7 @@ const My = () => {
         className="bg-main-pale border border-main-deep rounded w-full py-[20px] px-[15px]"
       >
         <h1 className="pb-[21px]">영양 목표</h1>
-        <div className="flex flex-row">
+        <div className="flex flex-row gap-x-[5px]">
           {nutrition?.map((n, idx) => (
             <div
               key={idx}

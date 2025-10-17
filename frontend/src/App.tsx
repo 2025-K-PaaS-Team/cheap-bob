@@ -45,6 +45,7 @@ import {
   ChangeCustomerAllergy,
   ChangeCustomerInfo,
   ChangeCustomerMenu,
+  ChangeCustomerNutrition,
   ChangeCustomerTopping,
 } from "@pages/Customer";
 
@@ -87,7 +88,7 @@ const App = () => {
         <Route path="change/menu" element={<ChangeCustomerMenu />} />
         <Route path="change/topping" element={<ChangeCustomerTopping />} />
         <Route path="change/allergy" element={<ChangeCustomerAllergy />} />
-        <Route path="change/nutrition" element={<ChangePackageNutrition />} />
+        <Route path="change/nutrition" element={<ChangeCustomerNutrition />} />
         {/* lab */}
         <Route path="lab" element={<CustomerLab />} />
         <Route path="qr" element={<QrLab />} />

@@ -7,8 +7,6 @@ import type {
   CustomerRegisterType,
   MenuBaseType,
   MenuDeleteType,
-  NutritionBaseType,
-  NutritionDeleteType,
   PreferAllergiesType,
   PreferMenuType,
   PreferNutritionType,
@@ -77,17 +75,21 @@ export const GetNutrition = async (): Promise<PreferNutritionType> => {
 
 // POST: create nutrition types
 export const CrateNutrition = async (
-  body: NutritionBaseType
+  body: string
 ): Promise<PreferNutritionType> => {
-  const { data } = await customerProfileApi.post("/nutrition-types", body);
+  const { data } = await customerProfileApi.post("/nutrition-types", {
+    nutrition_types: [body],
+  });
 
   return data;
 };
 
-// DELETE: delete preferred menu
-export const DeleteNutrition = async (body: NutritionDeleteType) => {
+// DELETE: delete nutrition types
+export const DeleteNutrition = async (body: string) => {
   const { data } = await customerProfileApi.delete("/nutrition-types", {
-    data: body,
+    data: {
+      nutrition_type: body,
+    },
   });
 
   return data;
