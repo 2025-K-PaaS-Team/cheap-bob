@@ -12,6 +12,11 @@ export const pathToLayoutKey = (path: string): LayoutType => {
   if (path === "/c/my") return "My";
   if (path === "/c/order") return "Order";
   if (path === "/c/location") return "SetLoc";
+  if (path === "/c/change/info") return "ChangeInfo";
+  if (path === "/c/change/nutrition") return "ChangeNutrition";
+  if (path === "/c/change/topping") return "ChangeTopping";
+  if (path === "/c/change/allergy") return "ChangeAllergy";
+  if (path === "/c/change/menu") return "ChangeMenu";
   return "default";
 };
 
