@@ -5,7 +5,7 @@ const Footer = () => {
   const location = useLocation();
   const path = location.pathname;
 
-  if (path === "/" || path.includes("login")) {
+  if (path === "/" || path.includes("login") || path.startsWith("/c/stores/")) {
     return null;
   }
 

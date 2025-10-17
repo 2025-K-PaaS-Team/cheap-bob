@@ -104,7 +104,7 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
   };
 
   return (
-    <div className="flex flex-col space-y-2 p-2 w-full p-2">
+    <div className="flex flex-col">
       <form onSubmit={handleSubmit}>
         {!item ? (
           <div>결제 정보를 불러오는 중입니다.</div>
@@ -112,9 +112,10 @@ const Payment = ({ storeId, product, customer }: PortOneProps) => {
           <>
             <CommonBtn
               type="submit"
-              category="white"
-              width="w-full"
+              category="green"
+              width="w-[calc(100%-40px)]"
               notBottom
+              className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
               label={`${(product.price * product.sale) / 100}원 구매하기 (${
                 product.current_stock
               }개 남음)`}

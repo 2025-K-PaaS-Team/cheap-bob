@@ -119,7 +119,7 @@ const StoreDetail = () => {
       {product ? (
         <div className="flex flex-col justify-center">
           {/* store image */}
-          <div className="bg-custom-white h-[230px] relative">
+          <div className="bg-custom-white h-[230px] w-full relative">
             <Swiper
               loop={false}
               pagination={{ clickable: true }}
@@ -168,11 +168,12 @@ const StoreDetail = () => {
           </div>
 
           <div className="flex flex-col mx-[20px] my-[33px] gap-y-[30px] relative">
-            {/* store name */}
-            <div className="font-bold text-[15px]">
-              {product.store_name}
-              {/* favor */}
+            {/* store representation intro */}
+            <div>
+              {/* store name */}
+              <h1> {product.store_name}</h1>
 
+              {/* favor */}
               <div
                 className="rounded-full absolute top-1 right-1 z-10 w-[41px] h-[41px] flex justify-center items-center"
                 onClick={() =>
@@ -220,8 +221,8 @@ const StoreDetail = () => {
 
             {/* store addr */}
             <div className="gap-y-[13px] flex flex-col">
-              <div className="font-bold text-[15px]">가게 주소</div>
-              <div className="bg-[#BFBFBF] text-[11px] w-fit rounded px-[17px] py-[5.5px]">
+              <h3>가게 주소</h3>
+              <div className="bodyFont">
                 {store.address.address} {store.address.detail_address},{" "}
                 {store.address.postal_code}
               </div>
@@ -229,8 +230,8 @@ const StoreDetail = () => {
 
             {/* store op time */}
             <div className="gap-y-[13px] flex flex-col">
-              <div className="font-bold text-[15px]">영업 시간</div>
-              <div className="text-[11px]">
+              <h3>영업 시간</h3>
+              <div className="tagFont">
                 {store.operation_times
                   .sort((a, b) => a.day_of_week - b.day_of_week)
                   .map((dow, idx) => {
@@ -247,19 +248,20 @@ const StoreDetail = () => {
 
             {/* product name */}
             <div className="gap-y-[13px] flex flex-col">
-              <div className="font-bold text-[15px]">
-                {product.products[0].product_name}
-              </div>
+              <h3>{product.products[0].product_name}</h3>
               {/* product desc */}
-              <div className="bg-[#BFBFBF] text-[11px] w-fit rounded px-[17px] py-[5.5px]">
+              <div className="p-[8px] bodyFont border-[#E7E7E7] border rounded text-custom-black">
                 {product.products[0].description}
               </div>
             </div>
 
             {/* nutrition goal */}
-            <div className="gap-y-[13px] flex flex-col">
-              <div className="font-bold text-[15px]">영양 목표</div>
-              <div className="text-[11px] flex flex-row gap-x-[5px]">
+            <div className="gap-y-[20px] flex flex-col">
+              <h3>영양 목표</h3>
+              <div className="tagFont">
+                우리 가게의 패키지에서 제공하는 성분들이에요
+              </div>
+              <div className="tagFont flex flex-row gap-x-[6px]">
                 {product.products[0].nutrition_types.map((n) => {
                   const nutritionLabel = NutritionList.find(
                     (item) => item.key === n
@@ -268,7 +270,7 @@ const StoreDetail = () => {
                   return (
                     <div
                       key={n}
-                      className="bg-[#BFBFBF] w-fit rounded px-[17px] py-[5.5px]"
+                      className="bg-main-pale border border-main-deep text-main-deep font-bold w-fit rounded px-[16px] py-[7px]"
                     >
                       {nutritionLabel.title}
                     </div>
@@ -278,62 +280,66 @@ const StoreDetail = () => {
             </div>
 
             {/* price */}
-            <div className="gap-y-[13px] flex flex-col">
-              <div className="font-bold text-[15px]">가격</div>
+            <div className="gap-y-[20px] flex flex-col">
+              <h3>가격</h3>
               {/* original price */}
-              <div className="text-[11px]">
-                <div className="line-through">
+              <div className="tagFont">
+                <div className="line-through text-[#6C6C6C]">
                   {product.products[0].price}원
                 </div>
-                <div className="text-[16px] font-bold">
-                  {(product.products[0].price * product.products[0].sale) / 100}
-                  원
+                <div className="flex flex-row items-center gap-x-[10px]">
+                  <div className="text-[#6C6C6C]">
+                    {product.products[0].sale}%
+                  </div>
+                  <h1 className="text-[16px] font-bold text-sub-orange">
+                    {(product.products[0].price * product.products[0].sale) /
+                      100}
+                    원
+                  </h1>
                 </div>
               </div>
             </div>
 
             {/* pickup time */}
             <div className="gap-y-[13px] flex flex-col">
-              <div className="font-bold text-[15px]">픽업 시간</div>
+              <h3>픽업 시간</h3>
               {/* pu time */}
-              <div className="flex flex-row gap-x-[15px] items-center justify-center">
-                <div className="bg-[#BFBFBF] text-[16px] font-bold w-fit rounded px-[17px] py-[5.5px]">
+              <div className="flex flex-row gap-x-[15px] items-center justify-center text-center font-bold">
+                <div className="flex items-center text-main-deep justify-center w-[127px] h-[51px] bg-main-pale border border-male-deep rounded btnFont px-[17px] py-[5.5px]">
                   {store.operation_times
                     .find((dow) => dow.day_of_week === todayDow)
                     ?.pickup_start_time.slice(0, 5)}
                 </div>
                 ~
-                <div className="bg-[#BFBFBF] text-[16px] font-bold w-fit rounded px-[17px] py-[5.5px]">
+                <div className="flex items-center text-main-deep justify-center w-[127px] h-[51px] bg-main-pale border border-male-deep rounded btnFont px-[17px] py-[5.5px]">
                   {store.operation_times
                     .find((dow) => dow.day_of_week === todayDow)
                     ?.pickup_end_time.slice(0, 5)}
                 </div>
               </div>
               {/* pu time desc */}
-              <div className="text-[20px] text-center">
+              <h3 className="text-center text-main-deep my-[16px]">
                 픽업 시간까지 1시간29분
-              </div>
+              </h3>
             </div>
 
             {/* notice */}
             <div className="gap-y-[13px] flex flex-col">
-              <div className="font-bold text-[15px]">
-                주문 후, 꼭 지켜주셔야 해요
-              </div>
+              <h3>주문 후 약속</h3>
               {/* desc */}
-              <div className="text-[11px]">
-                <ol className="list-decimal bg-custom-white py-[18px] px-[15px] rounded-[5px] space-y-1">
-                  <li className="ml-2">
+              <div className="hintFont">
+                <ol className="list-decimal bg-custom-white py-[18px] px-[15px] rounded">
+                  <li className="ml-4">
                     오직 픽업 시간에만 가게에서 픽업할 수 있어요.
                   </li>
-                  <li className="ml-2">
+                  <li className="ml-4">
                     사장님께 따로 메뉴 요청을 할 수 없어요.
                   </li>
-                  <li className="ml-2">
+                  <li className="ml-4">
                     픽업 확정 전, 가게 사정에 의해 취소될 수 있어요. 취소사유는
                     구매 내역에서 확인할 수 있어요.
                   </li>
-                  <li className="ml-2">
+                  <li className="ml-4">
                     주문 취소는 가게의 픽업 확정 이후에는 불가능해요.
                   </li>
                 </ol>
@@ -341,11 +347,13 @@ const StoreDetail = () => {
             </div>
 
             {storeId && customer && (
-              <Payment
-                storeId={storeId}
-                product={product.products[0]}
-                customer={customer}
-              />
+              <div className="my-[30px]">
+                <Payment
+                  storeId={storeId}
+                  product={product.products[0]}
+                  customer={customer}
+                />
+              </div>
             )}
           </div>
         </div>
