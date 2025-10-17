@@ -87,23 +87,35 @@ const My = () => {
       {/* bottom list */}
       <div className="flex flex-col">
         {/* prefer menu */}
-        <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
-          <div onClick={() => navigate("/c/change/menu")}>선호 메뉴</div>
+        <div
+          onClick={() => navigate("/c/change/menu")}
+          className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
+        >
+          <div>선호 메뉴</div>
           <div>&gt;</div>
         </div>
         {/* prefer topping */}
-        <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
-          <div onClick={() => navigate("/c/change/topping")}>선호 토핑</div>
+        <div
+          onClick={() => navigate("/c/change/topping")}
+          className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
+        >
+          <div>선호 토핑</div>
           <div>&gt;</div>
         </div>
         {/* allergy */}
-        <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
-          <div onClick={() => navigate("/c/change/allergy")}>못먹는 음식</div>
+        <div
+          onClick={() => navigate("/c/change/allergy")}
+          className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
+        >
+          <div>못먹는 음식</div>
           <div>&gt;</div>
         </div>
         {/* order */}
-        <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
-          <div onClick={() => navigate("/c/order")}>주문 내역</div>
+        <div
+          onClick={() => navigate("/c/order")}
+          className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
+        >
+          <div>주문 내역</div>
           <div>&gt;</div>
         </div>
         {/* policy */}
