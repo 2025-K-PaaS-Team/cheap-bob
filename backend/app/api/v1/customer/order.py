@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
+from datetime import datetime
 
 from utils.qr_generator import validate_qr_data
 from utils.docs_error import create_error_responses
@@ -18,8 +19,9 @@ from schemas.order import (
     OrderListResponse,
     OrderCancelRequest,
     OrderCancelResponse,
-    CustomerPickupCompleteRequest
-    
+    CustomerPickupCompleteRequest,
+    TodayAlarmOrderCard,
+    TodayAlarmResponse
 )
 from services.payment import PaymentService
 from services.email import email_service
@@ -163,6 +165,80 @@ async def get_order_today(
     return OrderListResponse(
         orders=order_responses,
         total=len(order_responses)
+    )
+
+
+@router.get("/today-alarm", response_model=TodayAlarmResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"]
+    })
+)
+async def get_today_alarm(
+    current_user: CurrentCustomerDep,
+    order_repo: OrderCurrentItemRepositoryDep
+):
+    """
+    당일 알림 조회
+    """
+    
+    customer_email = current_user["sub"]
+    
+    orders = await order_repo.get_today_alarm_orders(customer_email)
+    
+    alarm_cards = []
+    
+    for order in orders:
+        
+        today_weekday = datetime.now().weekday()
+        
+        for op_info in order.product.store.operation_info:
+            if op_info.day_of_week == today_weekday:
+                pickup_start_time = op_info.pickup_start_time.strftime("%H:%M") if op_info.pickup_start_time else None
+                pickup_end_time = op_info.pickup_end_time.strftime("%H:%M") if op_info.pickup_end_time else None
+                break
+        
+        # 기본 카드 정보
+        base_card_info = {
+            "payment_id": order.payment_id,
+            "quantity": order.quantity,
+            "price": order.price,
+            "sale": order.sale,
+            "total_amount": order.total_amount,
+            "store_name": order.product.store.store_name,
+            "product_name": order.product.product_name,
+            "pickup_start_time": pickup_start_time,
+            "pickup_end_time": pickup_end_time
+        }
+        
+        if order.reservation_at:
+            alarm_card = TodayAlarmOrderCard(
+                **base_card_info,
+                order_time=order.reservation_at,
+                status=OrderStatus.reservation
+            )
+            alarm_cards.append(alarm_card)
+        
+        if order.accepted_at:
+            alarm_card = TodayAlarmOrderCard(
+                **base_card_info,
+                order_time=order.accepted_at,
+                status=OrderStatus.accept
+            )
+            alarm_cards.append(alarm_card)
+        
+        if order.canceled_at:
+            alarm_card = TodayAlarmOrderCard(
+                **base_card_info,
+                order_time=order.canceled_at,
+                status=OrderStatus.cancel
+            )
+            alarm_cards.append(alarm_card)
+    
+    alarm_cards.sort(key=lambda x: x.order_time, reverse=True)
+    
+    return TodayAlarmResponse(
+        alarm_cards=alarm_cards,
+        total=len(alarm_cards)
     )
 
 

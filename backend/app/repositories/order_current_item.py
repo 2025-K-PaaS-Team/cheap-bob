@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
 from database.models.customer import Customer
+from database.models.store import Store
 from schemas.order import OrderStatus
 from repositories.base import BaseRepository
 
@@ -197,5 +198,22 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
                 )
             )
         )
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+    
+    async def get_today_alarm_orders(self, customer_id: str) -> List[OrderCurrentItem]:
+        """당일 알림용 주문 조회"""
+        stmt = (
+            select(OrderCurrentItem)
+            .where(OrderCurrentItem.customer_id == customer_id)
+            .options(
+                selectinload(OrderCurrentItem.product)
+                .selectinload(StoreProductInfo.store)
+                .selectinload(Store.operation_info),
+                selectinload(OrderCurrentItem.customer)
+                .selectinload(Customer.detail)
+            )
+        )
+        
         result = await self.session.execute(stmt)
         return result.scalars().all()

@@ -97,3 +97,27 @@ class SettlementResponse(BaseModel):
 
 class WeeklyRevenueResponse(BaseModel):
     total_revenue: int = Field(..., description="월요일부터 오늘까지의 총 수익")
+
+
+class TodayAlarmOrderCard(BaseModel):
+    """오늘의 알림용 주문 카드"""
+    payment_id: str = Field(..., description="결제 고유 ID")
+    order_time: datetime = Field(..., description="주문 상태별 시간")
+    quantity: int = Field(..., description="상품 수량")
+    price: int = Field(..., description="상품 가격 (원)")
+    sale: Optional[int] = Field(None, description="상품 세일 정보 (퍼센트)")
+    total_amount: int = Field(..., description="최종 결제 금액")
+    status: OrderStatus = Field(..., description="주문 상태")
+    store_name: str = Field(..., description="가게 이름")
+    product_name: str = Field(..., description="상품 명")
+    pickup_start_time: str = Field(..., description="가게 픽업 시작 시간 (HH:MM)")
+    pickup_end_time: str = Field(..., description="픽업 종료 시간 (HH:MM)")
+
+    class Config:
+        from_attributes = True
+
+
+class TodayAlarmResponse(BaseModel):
+    """오늘의 알림 응답"""
+    alarm_cards: List[TodayAlarmOrderCard] = Field(default_factory=list, description="알림 카드 목록")
+    total: int = Field(..., description="전체 알림 개수")
