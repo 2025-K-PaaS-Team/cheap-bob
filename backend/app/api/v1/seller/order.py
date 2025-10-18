@@ -408,7 +408,8 @@ async def get_order_qr(
 async def get_dashboard(
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep,
+    order_repo: OrderCurrentItemRepositoryDep,
 ):
     """
     대시보드 - 재고 현황 조회
@@ -418,19 +419,31 @@ async def get_dashboard(
     
     store_id = await get_store_id_by_email(seller_email, store_repo)
     
+    store_current_orders = await order_repo.get_by_store_id(store_id)
+    
     # 가게의 모든 상품 조회
     products = await product_repo.get_by_store_id(store_id)
+    
+    product_order_quantities = {}
+    for order in store_current_orders:
+        if order.status != OrderStatus.cancel:
+            if order.product_id not in product_order_quantities:
+                product_order_quantities[order.product_id] = 0
+            product_order_quantities[order.product_id] += order.quantity
     
     # 대시보드 응답 생성
     dashboard_items = []
     for product in products:
+        purchased_stock = product_order_quantities.get(product.product_id, 0)
+        
+        current_stock = product.initial_stock - purchased_stock + product.admin_adjustment
         
         dashboard_item = DashboardStockItem(
             product_id=product.product_id,
             product_name=product.product_name,
-            current_stock=product.current_stock,
+            current_stock=current_stock,
             initial_stock=product.initial_stock,
-            purchased_stock=product.current_stock + product.admin_adjustment - product.initial_stock,
+            purchased_stock=purchased_stock,
             adjustment_stock=product.admin_adjustment
         )
         dashboard_items.append(dashboard_item)
