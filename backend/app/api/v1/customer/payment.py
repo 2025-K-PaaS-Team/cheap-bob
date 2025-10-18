@@ -166,7 +166,8 @@ async def init_payment(
         payment_id=payment_id,
         product_id=request.product_id,
         quantity=request.quantity,
-        product_repo=product_repo
+        product_repo=product_repo,
+        cart_repo=cart_repo
     )
     
     # 장바구니에 등록
