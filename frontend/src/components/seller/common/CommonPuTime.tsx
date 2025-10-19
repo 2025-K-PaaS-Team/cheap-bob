@@ -93,84 +93,86 @@ const CommonPuTime = ({
   const [dHH = "00", dMM = "00"] = discardDisplay.split(":");
 
   return (
-    <>
+    <div className="flex flex-col gap-y-[20px]">
       {/* 픽업 시작 기준 (전부터) */}
-      <div className="text-[14px] font-bold">픽업 시작</div>
-      <div className="text-[14px]">
-        마감 세일을 시작할 시간을 입력해 주세요.
-      </div>
-      <div className="text-center w-full justify-center">
-        <div className="flex flex-row text-[20px] justify-center items-center gap-x-[10px]">
-          <input
-            className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
-            value={pickupStartOffset.hour}
-            onChange={(e) =>
-              setPickupStartOffset(
-                clampNum(e.target.value, 23),
-                pickupStartOffset.min
-              )
-            }
-            inputMode="numeric"
-            placeholder="hh"
-          />
-          <div>시</div>
-          <input
-            className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
-            value={pickupStartOffset.min}
-            onChange={(e) =>
-              setPickupStartOffset(
-                pickupStartOffset.hour,
-                clampNum(e.target.value, 59)
-              )
-            }
-            inputMode="numeric"
-            placeholder="mm"
-          />
-          <div>분 전부터</div>
+      <div className="flex flex-col gap-y-[10px]">
+        <h3>픽업 시간</h3>
+        <div className="bodyFont">마감 세일을 시작할 시간을 입력해주세요.</div>
+        <div className="text-center w-full justify-center">
+          <div className="flex flex-row text-[20px] justify-center items-center gap-x-[10px]">
+            <input
+              className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
+              value={pickupStartOffset.hour}
+              onChange={(e) =>
+                setPickupStartOffset(
+                  clampNum(e.target.value, 23),
+                  pickupStartOffset.min
+                )
+              }
+              inputMode="numeric"
+              placeholder="hh"
+            />
+            <div>시</div>
+            <input
+              className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
+              value={pickupStartOffset.min}
+              onChange={(e) =>
+                setPickupStartOffset(
+                  pickupStartOffset.hour,
+                  clampNum(e.target.value, 59)
+                )
+              }
+              inputMode="numeric"
+              placeholder="mm"
+            />
+            <div>분 전부터</div>
+          </div>
         </div>
-        <div className="text-[14px] mt-[10px]">
+        <div className="text-center hintFont">
           손님들이 {sHH}시 {sMM}분부터 매장에 방문하여 <br />
           패키지를 픽업할 수 있습니다.
         </div>
       </div>
 
       {/* 픽업 마감(폐기) 기준 (전부터 / 이후 폐기) */}
-      <div className="text-[14px] font-bold mt-[40px]">픽업 마감 시간</div>
-      <div className="text-[14px]">픽업을 마감할 시간을 입력해 주세요.</div>
-      <div className="text-center w-full justify-center">
-        <div className="flex flex-row text-[20px] justify-center items-center gap-x-[10px]">
-          <input
-            className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
-            value={pickupDiscardOffset.hour}
-            onChange={(e) =>
-              setPickupDiscardOffset(
-                clampNum(e.target.value, 23),
-                pickupDiscardOffset.min
-              )
-            }
-            inputMode="numeric"
-            placeholder="hh"
-          />
-          <div>시</div>
-          <input
-            className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
-            value={pickupDiscardOffset.min}
-            onChange={(e) =>
-              setPickupDiscardOffset(
-                pickupDiscardOffset.hour,
-                clampNum(e.target.value, 59)
-              )
-            }
-            inputMode="numeric"
-            placeholder="mm"
-          />
-          <div>분 전부터</div>
+      <div className="flex flex-col gap-y-[10px]">
+        <h3>픽업 마감 시간</h3>
+        <div className="bodyFont">픽업을 마감할 시간을 입력해주세요.</div>
+        <div className="text-center w-full justify-center">
+          <div className="flex flex-row text-[20px] justify-center items-center gap-x-[10px]">
+            <input
+              className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
+              value={pickupDiscardOffset.hour}
+              onChange={(e) =>
+                setPickupDiscardOffset(
+                  clampNum(e.target.value, 23),
+                  pickupDiscardOffset.min
+                )
+              }
+              inputMode="numeric"
+              placeholder="hh"
+            />
+            <div>시</div>
+            <input
+              className="bg-custom-white rounded-sm w-[50px] h-[44px] text-center"
+              value={pickupDiscardOffset.min}
+              onChange={(e) =>
+                setPickupDiscardOffset(
+                  pickupDiscardOffset.hour,
+                  clampNum(e.target.value, 59)
+                )
+              }
+              inputMode="numeric"
+              placeholder="mm"
+            />
+            <div>분 전부터</div>
+          </div>
         </div>
-        <div className="text-[14px] mt-[10px]">
+        <div className="hintFont text-center">
           {dHH}시 {dMM}분까지 픽업되지 않은 패키지는 폐기합니다.
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

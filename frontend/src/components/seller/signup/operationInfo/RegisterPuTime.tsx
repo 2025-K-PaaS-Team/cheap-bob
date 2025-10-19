@@ -2,8 +2,7 @@ import { CommonBtn, CommonModal } from "@components/common";
 import { CommonPuTime } from "@components/seller/common";
 import type { SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
-import { validationRules } from "@utils";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const {
@@ -18,9 +17,12 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const [modalMsg, setModalMsg] = useState("");
 
   const handleClickNext = () => {
-    const { storeAddr } = validationRules;
-    if (!form.address_info.address || !form.address_info.postal_code) {
-      setModalMsg(storeAddr.errorMessage);
+    const hasEmptyTime = form.operation_times.some(
+      (t) => !t.pickup_start_time || !t.pickup_end_time
+    );
+
+    if (hasEmptyTime) {
+      setModalMsg("픽업 시간을 설정해 주세요.");
       setShowModal(true);
       return;
     }
@@ -31,18 +33,12 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     setPageIdx(pageIdx - 1);
   };
 
-  useEffect(() => {
-    console.log(form);
-  }, [form]);
-
   return (
-    <div className="flex mx-[20px] flex-col mt-[20px] gap-y-[11px]">
-      <div className="text-[16px]">2/4</div>
-      <div className="titleFont">
-        할인팩 <span className="font-bold">픽업 시간</span>을 <br />{" "}
-        설정해주세요.
-      </div>
+    <div className="flex mx-[20px] flex-col mt-[20px]  gap-y-[20px]">
+      {/* progress */}
+      <div className="text-main-deep font-bold bodyFont">2/2</div>
 
+      {/* pu time */}
       <CommonPuTime
         form={form.operation_times}
         setForm={(times) =>
@@ -73,7 +69,6 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
         className="absolute right-[20px] bottom-[38px]"
         width="w-[250px]"
       />
-
       {/* show modal */}
       {showModal && (
         <CommonModal
