@@ -27,14 +27,9 @@ const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   };
 
   return (
-    <div className="flex mx-[20px] flex-col mt-[20px] gap-y-[11px]">
-      {/* title */}
-      <div className="text-[16px]">1/4</div>
-      <div className="titleFont">
-        매장의
-        <span className="font-bold">오픈 시간</span>과 <br />{" "}
-        <span className="font-bold">매감 시간</span>을 알려주세요.
-      </div>
+    <div className="flex mx-[20px] flex-col mt-[20px] gap-y-[20px]">
+      {/* progress */}
+      <div className="text-main-deep font-bold bodyFont">1/2</div>
 
       {/* opertation Time */}
       <CommonOpTime
