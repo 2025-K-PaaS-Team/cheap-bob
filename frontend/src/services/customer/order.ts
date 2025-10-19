@@ -44,10 +44,7 @@ export const completePickup = async (
   paymentId: string,
   body: QrBaseType
 ): Promise<OrderBaseType> => {
-  const { data } = await customerOrderApi.patch(
-    `/${paymentId}/pickup-complete`,
-    body
-  );
+  const { data } = await customerOrderApi.patch(`/${paymentId}/complete`, body);
 
   return data;
 };

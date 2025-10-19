@@ -95,10 +95,18 @@ const Order = () => {
     }
   };
 
+  const getTimeKey = (status: string) => {
+    if (status == "reservation") {
+      return status + "_at";
+    } else {
+      return status + "ed_at";
+    }
+  };
+
   return (
     <>
       {orders.map((order, idx) => {
-        const timeStampKey = `${order.status.toLowerCase()}_at`;
+        const timeStampKey = getTimeKey(order.status);
         const timeStampValue = order[timeStampKey];
         const orderTime = formatDate(timeStampValue)
           ?.slice(0, 10)
@@ -133,9 +141,9 @@ const Order = () => {
               {/* second row */}
               <div className="grid grid-cols-5 gap-x-[11px]">
                 <img
-                  src=""
+                  src={order.main_image_url}
                   alt="storeImg"
-                  className="bg-main-deep rounded object-cover col-span-2"
+                  className="rounded object-cover col-span-2"
                 />
 
                 <div className="col-span-3 flex flex-col">
@@ -185,6 +193,7 @@ const Order = () => {
                         onResult={(result) => {
                           if (result && !scannedRef.current) {
                             const data = result?.getText();
+                            alert(data);
                             console.log(result, scannedRef.current);
                             if (data && !scannedRef.current) {
                               scannedRef.current = true;

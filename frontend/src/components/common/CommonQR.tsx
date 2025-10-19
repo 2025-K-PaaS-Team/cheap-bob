@@ -8,10 +8,7 @@ interface CommonQRPros {
 }
 
 const CommonQR = ({ onClick, qrData }: CommonQRPros) => {
-  const qrValue = JSON.stringify({
-    payment_id: qrData.payment_id,
-    qr_data: qrData.qr_data,
-  });
+  const qrValue = qrData.qr_data;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
