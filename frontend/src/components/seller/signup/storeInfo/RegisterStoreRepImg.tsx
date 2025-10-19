@@ -5,7 +5,7 @@ import { validateLength, validationRules } from "@utils";
 import { useEffect, useRef, useState } from "react";
 
 const RegisterStoreRepImg = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
-  const { form, setForm } = useSignupStore();
+  const { form } = useSignupStore();
   const { form: imgForm, setForm: setImgForm } = useSignupImageStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -14,6 +14,8 @@ const RegisterStoreRepImg = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   useEffect(() => {
     console.log(imgForm);
   }, [imgForm]);
+
+  console.log(imgForm);
 
   const handleClickNext = () => {
     const { storeDesc } = validationRules;
@@ -41,38 +43,25 @@ const RegisterStoreRepImg = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
-    const remain = Math.max(0, 5 - imgForm.images.length);
-    const selected = Array.from(files).slice(0, remain);
-
+    const file = files[0];
     const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     const MAX = 10 * 1024 * 1024;
-    for (const f of selected) {
-      if (!ALLOWED.includes(f.type)) {
-        setModalMsg("지원 형식: JPG, JPEG, PNG, WEBP");
-        setShowModal(true);
-        return;
-      }
-      if (f.size > MAX) {
-        setModalMsg("최대 크기 10MB를 초과했습니다.");
-        setShowModal(true);
-        return;
-      }
+
+    if (!ALLOWED.includes(file.type)) {
+      setModalMsg("지원 형식: JPG, JPEG, PNG, WEBP");
+      setShowModal(true);
+      return;
     }
 
-    const newItems = selected.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
+    if (file.size > MAX) {
+      setModalMsg("최대 크기 10MB를 초과했습니다.");
+      setShowModal(true);
+      return;
+    }
 
-    setImgForm({ images: [...imgForm.images, ...newItems] });
-  };
-
-  const handleRemovePreview = (index: number) => {
-    const target = imgForm.images[index];
-    if (target) URL.revokeObjectURL(target.preview);
-    setImgForm({ images: imgForm.images.filter((_, i) => i !== index) });
+    setImgForm({ images: [{ file, preview: URL.createObjectURL(file) }] });
   };
 
   useEffect(() => {
@@ -83,24 +72,40 @@ const RegisterStoreRepImg = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
 
   return (
     <div className="mx-[20px] mt-[20px] flex flex-col gap-y-[40px]">
-      <div className="text-main-deep font-bold bodyFont">2/5</div>
+      <div className="text-main-deep font-bold bodyFont">5/5</div>
       <div className="titleFont">
-        <span className="font-bold">매장</span>에 대해{" "}
-        <span className="font-bold">소개</span>해 주세요.
+        <span className="font-bold">매장 대표 이미지</span>를 등록해 주세요.
+        <div className="bodyFont">
+          대표 이미지는 손님들이 가게를 더 잘 찾아오실 수 있도록{" "}
+          <span className="font-bold">가게의 외부 사진</span>을 등록해 주세요.
+        </div>
       </div>
 
-      {/* input box */}
-      <textarea
-        className="w-full h-[145px] rounded border border-[#E7E7E7] text-[16px] mt-[40px] p-[8px]"
-        placeholder="텍스트를 입력하세요"
-        value={form.store_introduction}
-        onChange={(e) => setForm({ store_introduction: e.target.value })}
-      />
+      {/* preview */}
+      {imgForm?.images[0]?.preview ? (
+        <div className="relative h-[125px]">
+          <img
+            src={imgForm?.images[0]?.preview}
+            alt={`storeRepImg`}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div className="relative h-[125px] bg-custom-white">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col">
+            <div className="hintFont text-custom-black">
+              등록된 사진이 없습니다.
+            </div>
+            <div className="tagFont text-[#6C6C6C]">권장 크기 350x125 (px)</div>
+          </div>
+        </div>
+      )}
 
       {/* upload picture button */}
       <div className="w-full flex justify-center">
         <CommonBtn
-          label="(사진 업로드)"
+          label="대표 사진 등록"
+          category="white"
           notBottom
           onClick={handleClickUpload}
           className="border-1 border-[#999999] font-normal"
@@ -114,28 +119,6 @@ const RegisterStoreRepImg = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
         className="hidden"
         onChange={handleFileChange}
       />
-
-      {/* preview */}
-      {imgForm.images.length > 0 && (
-        <div className="grid grid-cols-4 gap-2 mt-[29px]">
-          {imgForm.images.map((img, idx) => (
-            <div key={idx} className="relative">
-              <img
-                src={img.preview}
-                alt={`preview-${idx}`}
-                className="w-full h-[100px] object-contain"
-              />
-              <button
-                type="button"
-                onClick={() => handleRemovePreview(idx)}
-                className="absolute top-0 right-0 text-custom-black text-xs w-5 h-5 flex items-center justify-center rounded-full"
-              >
-                X
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
 
       <CommonBtn
         category="transparent"
