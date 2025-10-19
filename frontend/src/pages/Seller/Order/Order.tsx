@@ -94,7 +94,11 @@ const Order = () => {
       <Now onRefresh={handleGetOrders} lastUpdated={lastUpdated} op={op} />
       <StatusBar status={status} setStatus={setStatus} />
 
-      <OrderList orders={nowOrderList} status={status} />
+      <OrderList
+        orders={nowOrderList}
+        status={status}
+        onRefresh={handleGetOrders}
+      />
 
       {/* show modal */}
       {showModal && (

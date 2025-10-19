@@ -2,19 +2,22 @@ import { CommonBtn, CommonModal, CommonProfile } from "@components/common";
 import CommonQR from "@components/common/CommonQR";
 import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
 import type { GetQrCodeType, OrderBaseType } from "@interface";
-import { GetOrderQr, updateOrderAccept } from "@services";
+import { cancelOrder, GetOrderQr, updateOrderAccept } from "@services";
 import { formatErrMsg, getTitleByKey } from "@utils";
 import { useState } from "react";
 
 interface OrderListProps {
   orders: OrderBaseType[];
   status: string;
+  onRefresh: () => void;
 }
 
-const OrderList = ({ orders, status }: OrderListProps) => {
+const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showAcceptModal, setShowAcceptModal] = useState<boolean>(false);
   const [openQr, setOpenQr] = useState<boolean>(false);
+  const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
+  const [reason, setReason] = useState<string>("");
   const [qrData, setQrData] = useState<GetQrCodeType | null>(null);
   const [modalMsg, setModalMsg] = useState("");
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
@@ -30,8 +33,16 @@ const OrderList = ({ orders, status }: OrderListProps) => {
     { key: "accept", title: "픽업 QR 표시" },
   ];
 
-  const handleClickCancel = () => {
-    console.log("click cancel button");
+  const handleClickCancel = async (paymentId: string, reason: string) => {
+    try {
+      await cancelOrder(paymentId, reason);
+      await onRefresh();
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    } finally {
+      setShowCancelModal(false);
+    }
   };
 
   const handleClickConfirm = async (status: string, payment_id: string) => {
@@ -57,11 +68,13 @@ const OrderList = ({ orders, status }: OrderListProps) => {
     if (!selectedPaymentId) return;
     try {
       const res = await updateOrderAccept(selectedPaymentId);
+      await onRefresh();
       console.log("픽업 확정 완료:", res);
-      setShowAcceptModal(false);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
+    } finally {
+      setShowAcceptModal(false);
     }
   };
 
@@ -152,7 +165,7 @@ const OrderList = ({ orders, status }: OrderListProps) => {
                 notBottom
                 category="white"
                 className="w-full border-none"
-                onClick={handleClickCancel}
+                onClick={() => setShowCancelModal(true)}
               />
               <CommonBtn
                 label={getTitleByKey(status, cfmLabel) ?? ""}
@@ -190,6 +203,30 @@ const OrderList = ({ orders, status }: OrderListProps) => {
           onCancelClick={() => setShowAcceptModal(false)}
           category="green"
         />
+      )}
+
+      {/* show cancel modal */}
+      {showCancelModal && (
+        <CommonModal
+          desc="주문 취소 사유를 입력해 주세요."
+          confirmLabel="주문 취소하기"
+          cancelLabel="취소"
+          onConfirmClick={() =>
+            handleClickCancel(selectedPaymentId ?? "", reason)
+          }
+          onCancelClick={() => setShowCancelModal(false)}
+          category="red"
+        >
+          <div className="w-full border-b border-[#c9c9c9] my-[10px] p-1">
+            <input
+              type="text"
+              placeholder="취소 사유를 입력하세요"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="w-full"
+            />
+          </div>
+        </CommonModal>
       )}
 
       {/* show profile modal */}

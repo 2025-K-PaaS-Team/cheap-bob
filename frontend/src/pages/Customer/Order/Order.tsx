@@ -59,6 +59,9 @@ const Order = () => {
   const handleCompletePickup = async (paymentId: string, qrData: string) => {
     try {
       await completePickup(paymentId, { qr_data: qrData });
+      setQrReaderOpen(false);
+      setModalMsg("픽업이 완료되었습니다!");
+      setShowModal(true);
     } catch (err: any) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
@@ -158,7 +161,7 @@ const Order = () => {
                     onClick={() => setShowCancelModal(true)}
                   />
                 )}
-                {order.status == "accepted" && (
+                {order.status == "accept" && (
                   <CommonBtn
                     label="QR 인증하고 픽업하기"
                     category="green"
@@ -171,24 +174,40 @@ const Order = () => {
                 )}
 
                 {qrReaderOpen && paymentIdToComplete === order.payment_id && (
-                  <div style={{ width: "300px", margin: "auto" }}>
-                    <QrReader
-                      constraints={{ facingMode: "environment" }}
-                      onResult={(result, error) => {
-                        if (result && !scannedRef.current) {
-                          const data = result?.getText();
-                          console.log(result, scannedRef.current);
-                          if (data && !scannedRef.current) {
-                            scannedRef.current = true;
-                            window.alert("qr 코드를 읽었어유");
-                            handleCompletePickup(order.payment_id, data);
+                  <CommonModal>
+                    <div className="flex flex-col gap-y-[20px]">
+                      <div className="bodyFont text-center">
+                        점주가 보여주는 QR코드를 찍으면 <br />
+                        <span className="font-bold">픽업이 완료</span>됩니다.
+                      </div>
+                      <QrReader
+                        constraints={{ facingMode: "environment" }}
+                        onResult={(result) => {
+                          if (result && !scannedRef.current) {
+                            const data = result?.getText();
+                            console.log(result, scannedRef.current);
+                            if (data && !scannedRef.current) {
+                              scannedRef.current = true;
+                              handleCompletePickup(order.payment_id, data);
+                            }
                           }
-                        }
-                        // QR 읽는 중 에러가 있어도 무시 (계속 스캔하도록)
-                        if (error) console.log("qr error", error);
-                      }}
-                    />
-                  </div>
+                        }}
+                        videoStyle={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                      <CommonBtn
+                        label="취소"
+                        category="white"
+                        onClick={() => setQrReaderOpen(false)}
+                        notBottom
+                        width="w-[300px]"
+                        className="border-none text-sub-red"
+                      />
+                    </div>
+                  </CommonModal>
                 )}
               </div>
             </div>
