@@ -15,7 +15,7 @@ const SuccessSetting = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const label = (pageIdx: number): string => {
     if (pageIdx < 7) {
       return "매장";
-    } else if (pageIdx < 11) {
+    } else if (pageIdx < 10) {
       return "영업";
     } else {
       return "패키지";
@@ -35,11 +35,11 @@ const SuccessSetting = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           <div>매장 정보 등록</div>
         </div>
         <div className="flex flex-row gap-x-[10px]">
-          <input type="checkbox" checked={pageIdx > 11 ? true : false} />
+          <input type="checkbox" checked={pageIdx > 9 ? true : false} />
           <div>운영 정보 등록</div>
         </div>
         <div className="flex flex-row gap-x-[10px]">
-          <input type="checkbox" checked={pageIdx > 11 ? true : false} />
+          <input type="checkbox" checked={pageIdx > 15 ? true : false} />
           <div>패키지 등록</div>
         </div>
       </div>

@@ -31,14 +31,14 @@ export const pages: PageComponent[] = [
   RegisterOpTime,
   RegisterPuTime,
   ConfirmOp,
-  SuccessSetting,
+  SuccessSetting, // page Idx 10
   // REGISTER PACKAGE
   RegisterPackageDesc,
   RegisterPackageNutrition,
   RegisterPackagePrice,
   RegisterPackageNum,
   ConfirmPackage,
-  SuccessSetting,
+  SuccessSetting, // page Idx 16
 ];
 
 export const notProgressBarPages: PageComponent[] = [
