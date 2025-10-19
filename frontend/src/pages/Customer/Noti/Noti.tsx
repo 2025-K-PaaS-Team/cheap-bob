@@ -1,11 +1,32 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
+import type { AlarmBaseType } from "@interface/customer/order";
+import { getAlarmToday } from "@services";
+import { formatErrMsg } from "@utils";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 const Noti = () => {
-  const isNoti = false;
+  const [noti, setNoti] = useState<AlarmBaseType[]>([]);
   const navigate = useNavigate();
 
-  if (!isNoti) {
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+
+  const handleGetAlarm = async () => {
+    try {
+      const res = await getAlarmToday();
+      setNoti(res.alarm_cards || []);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
+  };
+
+  useEffect(() => {
+    handleGetAlarm();
+  }, []);
+
+  if (!noti.length) {
     return (
       <div className="flex flex-col w-full h-full justify-center items-center">
         <img
@@ -28,7 +49,64 @@ const Noti = () => {
     );
   }
 
-  return <></>;
+  const getStatusLabel = (status: string) => {
+    if (status == "reservation") {
+      return "주문이 들어갔어요!";
+    }
+    if (status == "accept") {
+      return "픽업이 확정됐어요!";
+    }
+    if (status == "cancel") {
+      return "픽업이 확정됐어요!";
+    } else {
+      return "-";
+    }
+  };
+
+  return (
+    <div className="m-[20px] flex flex-col gap-y-[20px]">
+      {noti.map((n, idx) => (
+        <div
+          key={idx}
+          className="shadow px-[23px] py-[20px] rounded flex flex-col gap-y-[20px]"
+        >
+          {/* first row */}
+          <div className="font-bold flex flex-row justify-between">
+            <div className="tagFont">
+              {n.order_time.slice(0, 16).replaceAll("-", ".").replace("T", " ")}
+            </div>
+            <div className="bodyFont">{n.store_name}</div>
+          </div>
+
+          {/* second row */}
+          <div className="font-bold flex flex-row justify-between">
+            <h3 className={`${n.status == "cancel" ? "text-sub-orange" : ""}`}>
+              {getStatusLabel(n.status)}
+            </h3>
+            <div className="tagFont">{n.product_name}</div>
+          </div>
+
+          {/* thrid row */}
+          <div className="font-bold flex flex-row justify-between">
+            <div className="tagFont">
+              픽업: {n.pickup_start_time} ~ {n.pickup_end_time}
+            </div>
+            <div className="tagFont">{n.total_amount}원</div>
+          </div>
+        </div>
+      ))}
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="green"
+        />
+      )}
+    </div>
+  );
 };
 
 export default Noti;
