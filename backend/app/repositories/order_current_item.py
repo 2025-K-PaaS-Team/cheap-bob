@@ -99,28 +99,13 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         
         return None
     
-    async def get_customer_orders_with_relations(self, customer_id: str) -> List[OrderCurrentItem]:
-        """소비자의 모든 주문 조회 (관련 정보 포함)"""
-        stmt = (
-            select(OrderCurrentItem)
-            .where(OrderCurrentItem.customer_id == customer_id)
-            .options(
-                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store),
-                selectinload(OrderCurrentItem.customer).selectinload(Customer.detail)
-            )
-            .order_by(OrderCurrentItem.reservation_at.desc())
-        )
-        
-        result = await self.session.execute(stmt)
-        return result.scalars().all()
-    
     async def get_customer_current_orders_with_relations(self, customer_id: str) -> List[OrderCurrentItem]:
         """소비자의 당일 주문 조회"""
         stmt = (
             select(OrderCurrentItem)
             .where(OrderCurrentItem.customer_id == customer_id)
             .options(
-                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store),
+                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store).selectinload(Store.images),
                 selectinload(OrderCurrentItem.customer).selectinload(Customer.detail)
             )
             .order_by(OrderCurrentItem.reservation_at.desc())

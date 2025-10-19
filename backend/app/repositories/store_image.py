@@ -1,9 +1,10 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_
 
 from database.models.store_image import StoreImage
 from repositories.base import BaseRepository
-
+from core.object_storage import object_storage
 
 class StoreImageRepository(BaseRepository[StoreImage]):
     """가게 이미지 Repository"""
@@ -126,3 +127,24 @@ class StoreImageRepository(BaseRepository[StoreImage]):
             raise ValueError("대표 이미지는 삭제할 수 없습니다.")
         
         return await self.delete(image_id)
+    
+    async def get_main_images_for_stores(self, store_ids: List[str]) -> Dict[str, Optional[str]]:
+        """여러 가게의 대표 이미지 URL을 한 번에 조회"""
+        if not store_ids:
+            return {}
+        
+        stmt = (
+            select(StoreImage)
+            .where(
+                and_(
+                    StoreImage.store_id.in_(store_ids),
+                    StoreImage.is_main == True
+                )
+            )
+        )
+        result = await self.session.execute(stmt)
+        main_images = result.scalars().all()
+        
+        main_image_dict = {img.store_id: object_storage.get_file_url(img.image_id) for img in main_images}
+        
+        return {store_id: main_image_dict.get(store_id) for store_id in store_ids}

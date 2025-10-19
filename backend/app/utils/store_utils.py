@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from typing import Optional
 
 from api.deps.repository import StoreRepositoryDep
 from services.redis_cache import RedisCache
@@ -128,3 +129,15 @@ def convert_store_to_response(store, is_favorite: bool = False) -> StoreDetailRe
     
     store_data["is_favorite"] = is_favorite
     return StoreDetailResponseForCustomer(**store_data)
+
+
+def get_main_image_url(store) -> Optional[str]:
+    """가게의 대표 이미지 URL을 반환하는 헬퍼 함수"""
+    if not store.images:
+        return None
+    
+    for image in store.images:
+        if image.is_main:
+            return object_storage.get_file_url(image.image_id)
+    
+    return None
