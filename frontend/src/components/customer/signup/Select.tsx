@@ -23,7 +23,7 @@ const Select = ({
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState<string>("");
-  const isLastPage = selectType === "nutrition";
+  const isLastPage = selectType === "allergy";
 
   const handleClick = (key: string) => {
     if (selected.includes(key)) {
@@ -49,7 +49,7 @@ const Select = ({
 
   return (
     <>
-      <div className="flex h-full w-full justify-center items-start pt-[92px]">
+      <div className="flex py-[25px] justify-center items-center">
         {data && (
           <SelectedGrid
             data={data}
@@ -62,6 +62,7 @@ const Select = ({
       {/* 다음 */}
 
       <CommonBtn
+        category={!validate?.(selected) ? "green" : "grey"}
         label={
           selectType === "nutrition"
             ? `다음 (${selected.length}/3)`

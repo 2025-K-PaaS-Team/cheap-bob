@@ -25,7 +25,6 @@ const Enter = ({
       setShowModal(true);
       return;
     }
-    console.log("if error 통과");
     onNext();
   };
 
@@ -36,10 +35,14 @@ const Enter = ({
         placeholder={placeholder}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="border border-[1px] w-[350px] h-[54px] flex items-center justify-center px-[12px] rounded mt-[45px]"
+        className="w-full h-[46px] border-b  border-[#393939] text-[16px] mt-[40px]"
       />
       {/* 다음 */}
-      <CommonBtn label="다음" onClick={handleSubmit} />
+      <CommonBtn
+        label="다음"
+        onClick={handleSubmit}
+        category={!validate(value) ? "green" : "grey"}
+      />
 
       {showModal && (
         <CommonModal

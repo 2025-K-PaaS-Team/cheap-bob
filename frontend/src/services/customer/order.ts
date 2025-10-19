@@ -48,3 +48,10 @@ export const completePickup = async (
 
   return data;
 };
+
+// GET: get today alram
+export const getAlarmToday = async () => {
+  const { data } = await customerOrderApi.get(`/today-alarm`);
+
+  return data;
+};

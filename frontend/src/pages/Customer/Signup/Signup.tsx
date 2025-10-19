@@ -63,7 +63,7 @@ const Signup = () => {
           <SignupSwiper
             title={`어떻게 불러드릴까요?`}
             type="enter"
-            placeholder="7자 이내로 닉네임을 입력하세요"
+            placeholder="7자 이내로 닉네임을 입력"
             validate={(val) =>
               val.length > 7 || val.length < 1
                 ? "7자 이내로 닉네임을 입력해주세요"
@@ -78,9 +78,11 @@ const Signup = () => {
           <SignupSwiper
             title={`전화번호를 입력해주세요`}
             type="enter"
-            placeholder="번호를 입력하세요"
+            placeholder="전화번호 입력"
             validate={(val) =>
-              !/^\d{10,11}$/.test(val) ? "01011112222형식으로 입력해주세요" : ""
+              !/^\d{10,11}$/.test(val)
+                ? "01012345678 형식으로 입력해주세요"
+                : ""
             }
             onNext={handleNext}
             value={phone}
@@ -93,7 +95,7 @@ const Signup = () => {
             data={NutritionList}
             type="select"
             selectType="nutrition"
-            subTitle="내 목표 맞춤형 식사를 추천해드려요."
+            subTitle="최대 3개까지 선택할 수 있어요."
             onNext={handleNext}
             selected={nutrition}
             setSelected={setNutrition}
@@ -109,6 +111,7 @@ const Signup = () => {
         <SwiperSlide>
           <SignupSwiper
             title={`선호하는 메뉴를\n선택해주세요`}
+            subTitle="주문할 때 사장님한테 보여져요"
             data={MenuList}
             type="select"
             selectType="menu"
@@ -120,6 +123,7 @@ const Signup = () => {
         <SwiperSlide>
           <SignupSwiper
             title={`선호하는 토핑을\n선택해주세요`}
+            subTitle="주문할 때 사장님한테 보여져요"
             data={ToppingList}
             type="select"
             selectType="topping"
@@ -131,6 +135,7 @@ const Signup = () => {
         <SwiperSlide>
           <SignupSwiper
             title={`못 먹는 음식을\n선택해주세요`}
+            subTitle="주문할 때 사장님한테 보여져요"
             data={AllergyList}
             type="select"
             selectType="allergy"

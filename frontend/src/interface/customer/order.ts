@@ -1,4 +1,4 @@
-import type { OrderBaseType } from "@interface/common/types";
+import type { OrderBaseType, TimeStamp } from "@interface/common/types";
 
 export type OrderResponseType = {
   orders: OrderBaseType[];
@@ -17,4 +17,18 @@ export type OrderDeleteRequestType = {
 export type OrderDeleteResponseType = {
   payment_id: string;
   refunded_amount: number;
+};
+
+export type AlarmBaseType = {
+  payment_id: string;
+  order_time: TimeStamp;
+  quantity: number;
+  price: number;
+  sale: number;
+  total_amount: number;
+  status: string;
+  store_name: string;
+  product_name: string;
+  pickup_start_time: string;
+  pickup_end_time: string;
 };

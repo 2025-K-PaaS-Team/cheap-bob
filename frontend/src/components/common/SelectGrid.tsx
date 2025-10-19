@@ -12,7 +12,7 @@ const SelectGrid = <T extends string>({
   selectType,
 }: SelectGridProps<T>) => {
   return (
-    <div className="grid grid-cols-2 gap-[10px]">
+    <div className="grid grid-cols-2 w-full gap-[10px]">
       {data.map(({ key, title, desc }) => (
         <div
           key={key}
