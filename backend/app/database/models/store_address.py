@@ -13,6 +13,8 @@ class StoreAddress(Base):
     bname = Column(String(50), nullable=False)  # 읍/면/동
     lat = Column(String(50), nullable=False)  # 위도
     lng = Column(String(50), nullable=False)  # 경도
+    nearest_station = Column(String(100), nullable=True)  # 가장 가까운 역
+    walking_time = Column(Integer, nullable=True)  # 도보 시간 (분)
     
     # Relationships
     stores = relationship("Store", back_populates="address")
