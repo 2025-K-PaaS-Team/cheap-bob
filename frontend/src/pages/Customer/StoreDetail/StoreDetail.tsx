@@ -39,7 +39,19 @@ const StoreDetail = () => {
     endLng: 0,
   });
   const [descOpen, setDescOpen] = useState<boolean>(false);
-  const todayDow = (dayjs().day() + 6) % 7;
+  const now = dayjs();
+  const todayDow = (now.day() + 6) % 7;
+  const todayOp = store.operation_times.find(
+    (dow) => dow.day_of_week === todayDow
+  );
+  const diffTime = todayOp?.pickup_start_time
+    ? dayjs()
+        .set("hour", Number(todayOp.pickup_start_time.slice(0, 2)))
+        .set("minute", Number(todayOp.pickup_start_time.slice(3, 5)))
+        .set("second", Number(todayOp.pickup_start_time.slice(6, 8)))
+        .diff(now, "minute")
+    : null;
+
   const [openCheckNoti, setOpenCheckNoti] = useState<boolean>(false);
 
   const directionUrl = `http://map.naver.com/index.nhn?slng=${startCoord.lng}&slat=${startCoord.lat}&stext=내위치&elng=${endCoord.endLng}&elat=${endCoord.endLat}&etext=도착가게&menu=route&pathType=1`;
@@ -142,11 +154,7 @@ const StoreDetail = () => {
             <div className="absolute top-0 left-0 w-full h-full hintFont pointer-events-none">
               {/* 영업중 / 종료 */}
               <div className="absolute bottom-14 left-3 z-10 bg-custom-white rounded-lg py-[4px] px-[10px] pointer-events-auto">
-                {store.operation_times.find(
-                  (dow) => dow.day_of_week === todayDow
-                )?.is_currently_open
-                  ? "영업중"
-                  : "영업 종료"}
+                {todayOp?.is_currently_open ? "영업중" : "영업 종료"}
               </div>
 
               {/* 남은 수량 */}
@@ -307,20 +315,21 @@ const StoreDetail = () => {
               {/* pu time */}
               <div className="flex flex-row gap-x-[15px] items-center justify-center text-center font-bold">
                 <div className="flex items-center text-main-deep justify-center w-[127px] h-[51px] bg-main-pale border border-male-deep rounded btnFont px-[17px] py-[5.5px]">
-                  {store.operation_times
-                    .find((dow) => dow.day_of_week === todayDow)
-                    ?.pickup_start_time.slice(0, 5)}
+                  {todayOp?.pickup_start_time.slice(0, 5)}
                 </div>
                 ~
                 <div className="flex items-center text-main-deep justify-center w-[127px] h-[51px] bg-main-pale border border-male-deep rounded btnFont px-[17px] py-[5.5px]">
-                  {store.operation_times
-                    .find((dow) => dow.day_of_week === todayDow)
-                    ?.pickup_end_time.slice(0, 5)}
+                  {todayOp?.pickup_end_time.slice(0, 5)}
                 </div>
               </div>
               {/* pu time desc */}
               <h3 className="text-center text-main-deep my-[16px]">
-                픽업 시간까지 1시간29분
+                {diffTime && (
+                  <div>
+                    픽업 시간까지 {Math.floor(diffTime / 60)}시간{" "}
+                    {diffTime % 60}분
+                  </div>
+                )}
               </h3>
             </div>
 
