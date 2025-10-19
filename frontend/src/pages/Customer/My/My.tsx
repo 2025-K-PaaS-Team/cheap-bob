@@ -112,7 +112,7 @@ const My = () => {
         </div>
         {/* order */}
         <div
-          onClick={() => navigate("/c/order")}
+          onClick={() => navigate("/c/order/all")}
           className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
         >
           <div>주문 내역</div>

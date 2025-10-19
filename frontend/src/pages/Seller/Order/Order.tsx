@@ -71,7 +71,7 @@ const Order = () => {
   const otherOrders = useMemo<OrderBaseType[]>(
     () =>
       (orders?.orders ?? [])
-        .filter((o) => o.status === "completed" || o.status === "canceled")
+        .filter((o) => o.status === "complete" || o.status === "cancel")
         .sort((a, b) => sortByDateDesc(a.completed_at, b.completed_at)),
     [orders]
   );

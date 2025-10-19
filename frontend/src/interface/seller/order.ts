@@ -1,10 +1,6 @@
 import type { TimeStamp } from "@interface/common/types";
 
-export type OrderStatusType =
-  | "reservation"
-  | "accept"
-  | "completed"
-  | "canceled";
+export type OrderStatusType = "reservation" | "accept" | "complete" | "cancel";
 
 export type OrderBaseType = {
   payment_id: string;
@@ -19,7 +15,7 @@ export type OrderBaseType = {
   price: number;
   sale: number;
   total_amount: number;
-  status: OrderStatusType;
+  status: string;
   reservation_at: TimeStamp;
   accepted_at: TimeStamp;
   completed_at: TimeStamp;
@@ -29,6 +25,9 @@ export type OrderBaseType = {
   nutrition_types: string[];
   allergies: string[];
   topping_types: string[];
+  main_image_url: string;
+  pickup_start_time: string;
+  pickup_end_time: string;
 };
 
 export type OrderResponseType = {

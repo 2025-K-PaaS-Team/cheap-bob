@@ -1,7 +1,7 @@
 import { CommonBtn } from "@components/common";
 import { OrderCard } from "@components/customer/order";
 import type { OrderBaseType } from "@interface/common/types";
-import { getCurrentOrders } from "@services";
+import { getOrders } from "@services";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -11,7 +11,7 @@ const Order = () => {
 
   const handleGetOrders = async () => {
     try {
-      const res = await getCurrentOrders();
+      const res = await getOrders();
       setOrders(res.orders);
     } catch (err: unknown) {
       console.error("get stores fail", err);
@@ -47,7 +47,7 @@ const Order = () => {
 
   return (
     <>
-      <OrderCard orders={orders} />
+      <OrderCard orders={orders} isAll={true} />
     </>
   );
 };

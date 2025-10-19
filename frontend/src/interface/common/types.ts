@@ -20,10 +20,9 @@ export type StoreBaseType = {
 };
 
 export type OrderStatusBaseType = {
-  status: "reservation" | "accept" | "completed" | "canceled";
+  status: "reservation" | "accept" | "complete" | "cancel";
   reservation_at: TimeStamp;
   accepted_at: TimeStamp;
-  pickup_ready_at: TimeStamp;
   completed_at: TimeStamp;
   canceled_at: TimeStamp;
 };
