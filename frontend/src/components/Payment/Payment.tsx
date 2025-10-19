@@ -9,6 +9,7 @@ import PortOne from "@portone/browser-sdk/v2";
 import { cancelPayment, confrimPayment, initPayment } from "@services";
 import { formatErrMsg } from "@utils";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 type PortOneProps = {
   storeId: string;
@@ -25,6 +26,7 @@ const Payment = ({
   qty,
   selectedPayment,
 }: PortOneProps) => {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState<string>("");
 
@@ -113,8 +115,16 @@ const Payment = ({
       setShowModal(true);
     }
 
-    const confirmResult = await handleConfrimPayment(paymentResult.payment_id);
-    console.log("confirmResult", confirmResult);
+    try {
+      const confirmResult = await handleConfrimPayment(
+        paymentResult.payment_id
+      );
+      console.log("confirmResult", confirmResult);
+      navigate("/c/order");
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
   };
 
   return (

@@ -130,7 +130,7 @@ const StoreDetail = () => {
   return (
     <>
       {product ? (
-        <div className="flex flex-col justify-center">
+        <div className="relative flex flex-col justify-center">
           {/* store image */}
           <div className="bg-custom-white h-[230px] w-full relative">
             <Swiper
@@ -176,7 +176,7 @@ const StoreDetail = () => {
             </div>
           </div>
 
-          <div className="flex flex-col mx-[20px] my-[33px] gap-y-[30px] relative">
+          <div className="relative flex flex-col mx-[20px] my-[33px] gap-y-[30px] relative">
             {/* store representation intro */}
             <div>
               {/* store name */}
@@ -372,7 +372,7 @@ const StoreDetail = () => {
                     width="w-[calc(100%-40px)]"
                     notBottom
                     onClick={() => setOpenCheckNoti(true)}
-                    className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
+                    className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
                     label={`${
                       (product.products[0].price * product.products[0].sale) /
                       100

@@ -2,8 +2,8 @@ type ModalProps = {
   cancelLabel?: string;
   confirmLabel?: string;
   onCancelClick?: () => void;
-  onConfirmClick: () => void;
-  desc: string;
+  onConfirmClick?: () => void;
+  desc?: string;
   category?: "red" | "black" | "green";
   children?: React.ReactNode;
   className?: string;
@@ -27,7 +27,7 @@ const CommonModal = ({
       : "bg-main-deep text-white border-none";
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/10 z-50">
       <div
         className={`${
           className ? className : ""
@@ -54,15 +54,16 @@ const CommonModal = ({
               {cancelLabel}
             </button>
           )}
-
-          <button
-            className={`${confrimBtnClass} ${
-              onCancelClick ? "col-span-2" : "col-span-3"
-            } rounded w-full py-[12px]`}
-            onClick={() => onConfirmClick()}
-          >
-            {confirmLabel}
-          </button>
+          {onConfirmClick && (
+            <button
+              className={`${confrimBtnClass} ${
+                onCancelClick ? "col-span-2" : "col-span-3"
+              } rounded w-full py-[12px]`}
+              onClick={() => onConfirmClick()}
+            >
+              {confirmLabel}
+            </button>
+          )}
         </div>
       </div>
     </div>
