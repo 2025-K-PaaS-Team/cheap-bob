@@ -12,7 +12,7 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
   const todayDow = (dayjs().day() + 6) % 7;
 
   const handleClickStore = (store: StoreSearchBaseType) => {
-    navigate(`${store.store_id}`, { state: { store } });
+    navigate(`/c/stores/${store.store_id}`, { state: { store } });
   };
 
   return (

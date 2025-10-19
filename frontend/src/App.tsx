@@ -21,6 +21,7 @@ import {
   RoleCheck,
   Withdraw,
   WithdrawCancel,
+  StoreSearch,
 } from "@pages";
 import {
   ChangeOperationInfo,
@@ -73,6 +74,8 @@ const App = () => {
         <Route path="stores" element={<StoreList />} />
         <Route path="stores/:storeId" element={<StoreDetail />} />
         <Route path="stores/:storeId/payment" element={<StorePayment />} />
+        {/* store search */}
+        <Route path="stores/search" element={<StoreSearch />} />
         {/* location */}
         <Route path="location" element={<Location />} />
         {/* favorite */}
