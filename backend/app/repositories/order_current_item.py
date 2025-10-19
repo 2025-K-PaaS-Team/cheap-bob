@@ -1,6 +1,6 @@
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, join
 from sqlalchemy.orm import selectinload
 from datetime import datetime, timezone
 
@@ -8,6 +8,7 @@ from database.models.order_current_item import OrderCurrentItem
 from database.models.store_product_info import StoreProductInfo
 from database.models.customer import Customer
 from database.models.store import Store
+from database.models.store_operation_info import StoreOperationInfo
 from schemas.order import OrderStatus
 from repositories.base import BaseRepository
 
@@ -99,7 +100,7 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         
         return None
     
-    async def get_customer_current_orders_with_relations(self, customer_id: str) -> List[OrderCurrentItem]:
+    async def get_customer_current_orders(self, customer_id: str) -> List[OrderCurrentItem]:
         """소비자의 당일 주문 조회"""
         stmt = (
             select(OrderCurrentItem)
@@ -113,6 +114,47 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         
         result = await self.session.execute(stmt)
         return result.scalars().all()
+    
+    async def get_customer_current_orders_with_pickup_time(self, customer_id: str, today_weekday: int) -> List[OrderCurrentItem]:
+        """소비자의 당일 주문 조회 + 오늘 요일의 가게 픽업 시간"""
+        orders_stmt = (
+            select(OrderCurrentItem)
+            .where(OrderCurrentItem.customer_id == customer_id)
+            .options(
+                selectinload(OrderCurrentItem.product)
+                .selectinload(StoreProductInfo.store)
+                .selectinload(Store.images),
+                selectinload(OrderCurrentItem.customer)
+                .selectinload(Customer.detail)
+            )
+            .order_by(OrderCurrentItem.reservation_at.desc())
+        )
+        
+        result = await self.session.execute(orders_stmt)
+        orders = result.scalars().all()
+        
+        if orders:
+            store_ids = list(set(order.product.store_id for order in orders))
+            
+            operation_stmt = (
+                select(StoreOperationInfo)
+                .where(
+                    and_(
+                        StoreOperationInfo.store_id.in_(store_ids),
+                        StoreOperationInfo.day_of_week == today_weekday
+                    )
+                )
+            )
+            
+            operation_result = await self.session.execute(operation_stmt)
+            operation_infos = {op.store_id: op for op in operation_result.scalars().all()}
+            
+            for order in orders:
+                store_id = order.product.store_id
+                if store_id in operation_infos:
+                    order.product.store.today_operation_info = operation_infos[store_id]
+        
+        return orders
     
     async def get_order_with_store_relation(self, payment_id: str) -> Optional[OrderCurrentItem]:
         """주문 상세 정보 조회 (상품 및 가게 정보 포함)"""
@@ -186,19 +228,41 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         result = await self.session.execute(stmt)
         return result.scalars().all()
     
-    async def get_today_alarm_orders(self, customer_id: str) -> List[OrderCurrentItem]:
+    async def get_today_alarm_orders(self, customer_id: str, today_weekday: int) -> List[OrderCurrentItem]:
         """당일 알림용 주문 조회"""
-        stmt = (
+        orders_stmt = (
             select(OrderCurrentItem)
             .where(OrderCurrentItem.customer_id == customer_id)
             .options(
                 selectinload(OrderCurrentItem.product)
-                .selectinload(StoreProductInfo.store)
-                .selectinload(Store.operation_info),
+                .selectinload(StoreProductInfo.store),
                 selectinload(OrderCurrentItem.customer)
                 .selectinload(Customer.detail)
             )
         )
         
-        result = await self.session.execute(stmt)
-        return result.scalars().all()
+        result = await self.session.execute(orders_stmt)
+        orders = result.scalars().all()
+        
+        if orders:
+            store_ids = list(set(order.product.store_id for order in orders))
+            
+            operation_stmt = (
+                select(StoreOperationInfo)
+                .where(
+                    and_(
+                        StoreOperationInfo.store_id.in_(store_ids),
+                        StoreOperationInfo.day_of_week == today_weekday
+                    )
+                )
+            )
+            
+            operation_result = await self.session.execute(operation_stmt)
+            operation_infos = {op.store_id: op for op in operation_result.scalars().all()}
+            
+            for order in orders:
+                store_id = order.product.store_id
+                if store_id in operation_infos:
+                    order.product.store.today_operation_info = operation_infos[store_id]
+        
+        return orders

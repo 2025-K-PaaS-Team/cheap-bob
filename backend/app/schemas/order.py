@@ -40,36 +40,19 @@ class OrderListResponse(BaseModel):
     orders: List[OrderItemResponse] = Field(default_factory=list, description="주문 목록")
     total: int = Field(..., description="전체 주문 수")
 
-class CustomerOrderItemResponse(BaseModel):
-    payment_id: str = Field(..., description="결제 고유 ID")
-    customer_id: str = Field(..., description="소비자 고유 ID")
-    customer_nickname: str = Field(..., description="소비자 이름")
-    customer_phone_number: str = Field(..., description="소비자 핸드폰 번호")
-    product_id: str = Field(..., description="상품 고유 ID")
-    product_name: str = Field(..., description="상품 이름")
-    store_id: str = Field(..., description="가게 고유 ID")
-    store_name: str = Field(..., description="가게 이름")
+class CustomerOrderItemResponse(OrderItemResponse):
     main_image_url: Optional[str] = Field(None, description="대표 이미지 URL")
-    quantity: int = Field(..., description="구매 수량")
-    price: int = Field(..., description="원가 (원)")
-    sale: Optional[int] = Field(None, description="세일 퍼센트")
-    total_amount: int = Field(..., description="총 결제 금액")
-    status: OrderStatus = Field(..., description="주문 상태")
-    reservation_at: datetime = Field(..., description="예약 주문 시간")
-    accepted_at: Optional[datetime] = Field(None, description="주문 수락 시간")
-    completed_at: Optional[datetime] = Field(None, description="픽업 완료 시간")
-    canceled_at: Optional[datetime] = Field(None, description="주문 취소 시간")
-    cancel_reason: Optional[str] = Field(None, description="취소 사유")
-    preferred_menus: Optional[List[str]] = Field(default=None, description="소비자의 선호 메뉴")
-    nutrition_types: Optional[List[str]] = Field(default=None, description="식품 영양 타입")
-    allergies: Optional[List[str]] = Field(default=None, description="알레르기/제약조건")
-    topping_types: Optional[List[str]] = Field(default=None, description="선호 토핑")
-    
-    class Config:
-        from_attributes = True
         
 class CustomerOrderListResponse(BaseModel):
     orders: List[CustomerOrderItemResponse] = Field(default_factory=list, description="주문 목록")
+    total: int = Field(..., description="전체 주문 수")
+    
+class CustomerTodayOrderItemResponse(CustomerOrderItemResponse):
+    pickup_start_time: str = Field(..., description="가게 픽업 시작 시간 (HH:MM)")
+    pickup_end_time: str = Field(..., description="픽업 종료 시간 (HH:MM)")
+        
+class CustomerTodayOrderListResponse(BaseModel):
+    orders: List[CustomerTodayOrderItemResponse] = Field(default_factory=list, description="주문 목록")
     total: int = Field(..., description="전체 주문 수")
 
 class OrderCancelRequest(BaseModel):

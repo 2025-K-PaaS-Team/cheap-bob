@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 from utils.qr_generator import validate_qr_data
 from utils.docs_error import create_error_responses
@@ -18,9 +18,10 @@ from repositories.store_product_info import StockUpdateResult
 from schemas.order import (
     OrderStatus,
     OrderItemResponse,
-    OrderListResponse,
     CustomerOrderItemResponse,
     CustomerOrderListResponse,
+    CustomerTodayOrderItemResponse,
+    CustomerTodayOrderListResponse,
     OrderCancelRequest,
     OrderCancelResponse,
     CustomerPickupCompleteRequest,
@@ -31,6 +32,8 @@ from services.payment import PaymentService
 from services.email import email_service
 from config.settings import settings
 
+# KST 타임존 설정
+KST = timezone(timedelta(hours=9))
 
 router = APIRouter(prefix="/orders", tags=["Customer-Order"])
 
@@ -52,7 +55,7 @@ async def get_order_history(
     customer_email = current_user["sub"]
     
     # 당일 주문 조회
-    current_orders = await order_repo.get_customer_current_orders_with_relations(customer_email)
+    current_orders = await order_repo.get_customer_current_orders(customer_email)
     
     # 과거 주문 조회
     history_orders = await history_repo.get_customer_history(customer_email)
@@ -130,7 +133,7 @@ async def get_order_history(
     )
 
 
-@router.get("/today", response_model=CustomerOrderListResponse,
+@router.get("/today", response_model=CustomerTodayOrderListResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"]
     })
@@ -144,12 +147,18 @@ async def get_order_today(
     """
     customer_email = current_user["sub"]
     
-    # 당일 주문 조회
-    orders = await order_repo.get_customer_current_orders_with_relations(customer_email)
+    today = datetime.now(KST).weekday()
+    
+    orders = await order_repo.get_customer_current_orders_with_pickup_time(customer_email, today)
     
     order_responses = []
+    
     for order in orders:
-        order_response = CustomerOrderItemResponse(
+        
+        pickup_start_time = order.product.store.today_operation_info.pickup_start_time.strftime("%H:%M")
+        pickup_end_time = order.product.store.today_operation_info.pickup_end_time.strftime("%H:%M")
+        
+        order_response = CustomerTodayOrderItemResponse(
             payment_id=order.payment_id,
             customer_id=order.customer_id,
             customer_nickname=order.customer.detail.nickname,
@@ -172,11 +181,13 @@ async def get_order_today(
             preferred_menus=parse_comma_separated_string(order.preferred_menus),
             nutrition_types=parse_comma_separated_string(order.nutrition_types),
             allergies=parse_comma_separated_string(order.allergies),
-            topping_types=parse_comma_separated_string(order.topping_types)
+            topping_types=parse_comma_separated_string(order.topping_types),
+            pickup_start_time=pickup_start_time,
+            pickup_end_time=pickup_end_time
         )
         order_responses.append(order_response)
     
-    return CustomerOrderListResponse(
+    return CustomerTodayOrderListResponse(
         orders=order_responses,
         total=len(order_responses)
     )
@@ -197,19 +208,16 @@ async def get_today_alarm(
     
     customer_email = current_user["sub"]
     
-    orders = await order_repo.get_today_alarm_orders(customer_email)
+    today_weekday = datetime.now(KST).weekday()
+    
+    orders = await order_repo.get_today_alarm_orders(customer_email, today_weekday)
     
     alarm_cards = []
     
     for order in orders:
         
-        today_weekday = datetime.now().weekday()
-        
-        for op_info in order.product.store.operation_info:
-            if op_info.day_of_week == today_weekday:
-                pickup_start_time = op_info.pickup_start_time.strftime("%H:%M") if op_info.pickup_start_time else None
-                pickup_end_time = op_info.pickup_end_time.strftime("%H:%M") if op_info.pickup_end_time else None
-                break
+        pickup_start_time = order.product.store.today_operation_info.pickup_start_time.strftime("%H:%M")
+        pickup_end_time = order.product.store.today_operation_info.pickup_end_time.strftime("%H:%M")
         
         # 기본 카드 정보
         base_card_info = {
