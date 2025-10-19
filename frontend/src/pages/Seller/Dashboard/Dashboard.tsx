@@ -5,11 +5,12 @@ import {
   StoreManage,
 } from "@components/seller/dashboard";
 import type { DashboardResponseType, StoreDetailType } from "@interface";
-import { GetStoreDetail } from "@services";
+import { CheckPaymentInfo, GetStoreDetail } from "@services";
 import { GetDashboard } from "@services/seller/order";
 import { useDashboardStore } from "@store";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 const Dashboard = () => {
   const [data, setData] = useState<StoreDetailType | null>(null);
@@ -18,6 +19,9 @@ const Dashboard = () => {
   );
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const [paymentExist, setPaymentExist] = useState<boolean>(true);
+  const navigate = useNavigate();
+
   // 가게 별 패키지 1개 제한 수정 후 제거 필요
   const repPkg = (remainPkg?.items ?? [])
     .slice()
@@ -28,6 +32,16 @@ const Dashboard = () => {
     try {
       const res = await GetStoreDetail();
       setData(res);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
+  };
+
+  const handleCheckPaymentInfo = async () => {
+    try {
+      const res = await CheckPaymentInfo();
+      setPaymentExist(res.is_exist);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
@@ -47,6 +61,7 @@ const Dashboard = () => {
   useEffect(() => {
     handleGetStore();
     handleGetDashboard();
+    handleCheckPaymentInfo();
   }, []);
 
   useEffect(() => {
@@ -82,6 +97,17 @@ const Dashboard = () => {
           desc={modalMsg}
           confirmLabel="확인"
           onConfirmClick={() => setShowModal(false)}
+          category="green"
+        />
+      )}
+
+      {/* show payment register modal */}
+      {!paymentExist && (
+        <CommonModal
+          desc="정산 정보 등록을 위해서는 <br/> <b>포트원 가입</b>이 필요합니다."
+          confirmLabel="정산 정보 등록하기"
+          cancelLabel="나중에"
+          onConfirmClick={() => navigate("/s/billing/change")}
           category="green"
         />
       )}

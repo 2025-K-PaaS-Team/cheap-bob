@@ -11,6 +11,7 @@ import type {
   ChangeStoreOperationType,
   ImageInfoType,
   OperationReservationType,
+  RegisterPaymentType,
   SignupImageResponseType,
   SignupRequestType,
   SignupResponseType,
@@ -51,6 +52,13 @@ export const registerStoreImg = async (
       headers: { "Content-Type": undefined as any },
     }
   );
+  return data;
+};
+
+// GET: check payment info
+export const CheckPaymentInfo = async () => {
+  const { data } = await sellerStoreApi.get("/register/payment");
+
   return data;
 };
 
@@ -193,6 +201,13 @@ export const UpdateStorePayment = async (
   body: StorePaymentType
 ): Promise<StorePaymentResponseType> => {
   const { data } = await sellerStoreSettingsApi.put("/payment", body);
+
+  return data;
+};
+
+// POST: Register Payment info
+export const RegisterPayment = async (body: RegisterPaymentType) => {
+  const { data } = await sellerStoreApi.post("/register/payment", body);
 
   return data;
 };
