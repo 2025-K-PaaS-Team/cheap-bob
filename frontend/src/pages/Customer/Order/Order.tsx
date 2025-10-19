@@ -106,7 +106,7 @@ const Order = () => {
         const orderState = orderStatus[order.status];
 
         return (
-          <div className="m-[20px]">
+          <div className="m-[20px]" key={idx}>
             <div
               key={idx}
               className="shadow p-[20px] flex flex-col gap-y-[22px]"
