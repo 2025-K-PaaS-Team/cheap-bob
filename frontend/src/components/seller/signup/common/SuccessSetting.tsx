@@ -24,7 +24,7 @@ const SuccessSetting = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
 
   return (
     <div className="min-h-screen mx-[37px] justify-center items-center flex flex-col gap-y-[11px]">
-      <div className="text-[24px]">
+      <div className="titleFont">
         {label(pageIdx)} 정보 설정을 완료했습니다!
       </div>
 

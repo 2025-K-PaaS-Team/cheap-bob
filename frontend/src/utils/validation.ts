@@ -1,8 +1,8 @@
 export const validationRules = {
   storeName: {
     minLength: 1,
-    maxLength: 7,
-    errorMessage: "매장 이름은 1~7자여야 합니다.",
+    maxLength: 20,
+    errorMessage: "매장 이름은 1~20자여야 합니다.",
   },
   storeDesc: {
     minLength: 1,

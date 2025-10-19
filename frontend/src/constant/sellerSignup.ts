@@ -14,6 +14,7 @@ import {
   RegisterPuTime,
   ConfirmPackage,
   SuccessSetting,
+  RegisterStoreRepImg,
 } from "@components/seller/signup";
 import type { PageComponent } from "@interface";
 
@@ -24,6 +25,7 @@ export const pages: PageComponent[] = [
   RegisterDesc,
   RegisterAddr,
   RegisterNum,
+  RegisterStoreRepImg,
   ConfirmStore,
   SuccessSetting,
   // REGISTER OPERATION

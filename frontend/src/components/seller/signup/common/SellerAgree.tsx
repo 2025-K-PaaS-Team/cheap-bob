@@ -10,7 +10,7 @@ const SellerAgree = ({ setPageIdx, pageIdx }: SellerSignupProps) => {
   };
 
   return (
-    <div className="mx-[20px]">
+    <div className="relative min-h-screen mx-[20px]">
       <div className="h-[75px] pt-[15px] grid grid-cols-3 items-center">
         {/* left */}
 
@@ -20,7 +20,7 @@ const SellerAgree = ({ setPageIdx, pageIdx }: SellerSignupProps) => {
           onClick={handleClickBefore}
         />
       </div>
-      <div className="font-bold text-2xl pt-[42px]">
+      <div className="pt-[42px] titleFont">
         서비스 이용 약관에 <br />
         동의해주세요
       </div>

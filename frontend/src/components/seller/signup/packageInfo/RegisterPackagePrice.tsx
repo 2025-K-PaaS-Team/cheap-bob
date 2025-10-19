@@ -30,7 +30,7 @@ const RegisterPackagePrice = ({
   return (
     <div className="flex h-full mx-[20px] flex-col mt-[69px] gap-y-[11px]">
       <div className="text-[16px]">3/4</div>
-      <div className="text-[24px]">패키지의 가격은 얼마인가요?</div>
+      <div className="titleFont">패키지의 가격은 얼마인가요?</div>
 
       <CommonPrice pkg={pkg} setPkg={setPkg} />
 

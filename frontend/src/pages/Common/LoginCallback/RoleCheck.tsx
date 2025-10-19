@@ -16,7 +16,7 @@ const RoleCheck = () => {
   return (
     <div className="flex flex-col h-full items-center justify-center text-center">
       <img src="/icon/error.svg" alt="errorIcon" className="w-15 mb-5" />
-      <div className="text-[24px] font-bold">확인해주세요</div>
+      <div className="titleFont font-bold">확인해주세요</div>
       <div className="text-[16px]">
         현재 {role === "customer" ? "고객" : "점주"} 계정으로 로그인이 되어 있는
         것 같아요

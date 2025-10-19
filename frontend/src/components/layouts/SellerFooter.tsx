@@ -16,7 +16,7 @@ const SellerFooter = () => {
   ];
 
   return (
-    <div className="grid grid-cols-3 items-center text-center p-4 border-t border-black/10 bg-custom-white h-[68px]">
+    <div className="grid grid-cols-3 items-center text-center p-4 border-t border-black/10 bg-white h-[100px]">
       {items.map((item) => {
         const isActive = path.includes(item.to);
         const iconName = `${item.icon}${isActive ? "Full" : ""}.svg`;
@@ -25,7 +25,7 @@ const SellerFooter = () => {
           <FooterItem
             key={item.to}
             label={item.label}
-            to={`/${item.to}`}
+            to={`/s/${item.to}`}
             img={`/icon/${iconName}`}
             className={
               isActive

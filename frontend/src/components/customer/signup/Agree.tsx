@@ -35,8 +35,8 @@ const Agree = ({ onNext }: AgreeProps) => {
   };
 
   return (
-    <div>
-      <div className="absolute bottom-[145px] flex flex-col gap-y-[28px]">
+    <div className="flex flex-col">
+      <div className="absolute bottom-[145px] w-full flex flex-col gap-y-[28px]">
         {/* 서비스 동의 */}
         <div className="flex flex-row gap-x-[10px]">
           <input
@@ -44,8 +44,8 @@ const Agree = ({ onNext }: AgreeProps) => {
             checked={agree.service}
             onChange={(e) => handleChange("service", e.target.checked)}
           />
-          <div className="font-base">(필수) 서비스 이용약관 동의</div>
-          <div className="underline text-[#6C6C6C] fixed right-[20px]">
+          <div className="bodyFont">(필수) 서비스 이용약관 동의</div>
+          <div className="underline text-[#6C6C6C] absolute right-[20px]">
             보기
           </div>
         </div>
@@ -56,8 +56,8 @@ const Agree = ({ onNext }: AgreeProps) => {
             checked={agree.privacy}
             onChange={(e) => handleChange("privacy", e.target.checked)}
           />
-          <div className="font-base">(필수) 개인정보 수집 이용 동의</div>
-          <div className="underline text-[#6C6C6C] fixed right-[20px]">
+          <div className="bodyFont">(필수) 개인정보 수집 이용 동의</div>
+          <div className="underline text-[#6C6C6C] absolute right-[20px]">
             보기
           </div>
         </div>
@@ -68,11 +68,17 @@ const Agree = ({ onNext }: AgreeProps) => {
             checked={allAgree}
             onChange={(e) => handleAllChange(e.target.checked)}
           />
-          <div className="font-bold">모두 동의합니다.</div>
+          <h3>모두 동의합니다.</h3>
         </div>
       </div>
       {/* next */}
-      {onNext && <CommonBtn label="다음" onClick={handleSubmit} />}
+      {onNext && (
+        <CommonBtn
+          label="다음"
+          onClick={handleSubmit}
+          category={allAgree ? "green" : "grey"}
+        />
+      )}
 
       {showModal && (
         <CommonModal

@@ -42,7 +42,7 @@ const RegisterPackageDesc = ({
   return (
     <div className="flex h-full mx-[20px] flex-col mt-[69px] gap-y-[11px]">
       <div className="text-[16px]">1/4</div>
-      <div className="text-[24px]">
+      <div className="titleFont">
         어떤 <span className="font-bold">패키지</span>를 판매하시나요?
       </div>
 

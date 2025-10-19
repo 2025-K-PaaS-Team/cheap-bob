@@ -69,8 +69,8 @@ const ConfirmOp = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
 
   return (
     <div className="flex mx-[37px] flex-col mt-[125px] gap-y-[11px]">
-      <div className="text-[16px]">3/4</div>
-      <div className="text-[24px]">이렇게 설정할까요?</div>
+      <div className="text-main-deep font-bold bodyFont">3/4</div>
+      <div className="titleFont">이렇게 설정할까요?</div>
 
       <div className="flex flex-col items-start mx-[23px] mt-[90px]">
         {shopTimes.map((t, idx) => (
