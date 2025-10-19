@@ -97,6 +97,7 @@ export const layoutMap = {
     heart: false,
     noti: false,
     search: false,
+    searchPlaceholder: "",
   },
   OrderAll: {
     back: true,
