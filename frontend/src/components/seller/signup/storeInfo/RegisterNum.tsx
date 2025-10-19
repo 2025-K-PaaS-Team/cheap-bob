@@ -52,7 +52,7 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     <div className="mx-[20px] mt-[20px] flex flex-col gap-y-[40px]">
       <div className="text-main-deep font-bold bodyFont">3/5</div>
       <div className="titleFont">
-        <span className="font-bold">매장 연락처</span>를 알려주세요.
+        <span className="font-bold">매장 연락처</span>를 입력해 주세요.
       </div>
 
       {/* input box */}

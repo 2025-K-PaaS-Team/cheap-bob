@@ -110,7 +110,7 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
       <div className="flex flex-row gap-x-[10px] h-[37px]">
         {/* road address */}
         <input
-          className="hint w-full h-[37px] p-3 border-b-1 border-black/20"
+          className="hint w-full h-[37px] p-1 border-b  border-[#393939]"
           id="roadAddr"
           readOnly
           value={form.address}
@@ -125,14 +125,14 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
       </div>
       {/* detail address */}
       <input
-        className="hint w-full h-[37px] p-3 border-b-1 border-black/20"
+        className="hint w-full h-[37px] p-1 border-b  border-[#393939]"
         id="detailAddr"
         value={form.detail_address}
         placeholder="상세주소를 입력하세요."
         // set detail addr form
         onChange={(e) => setForm({ detail_address: e.target.value })}
       />
-      <div id="map" style={{ width: "100%", height: "201px" }} />
+      <div id="map" style={{ width: "100%", height: "201px", zIndex: 0 }} />
     </div>
   );
 };

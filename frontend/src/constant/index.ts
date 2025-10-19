@@ -7,3 +7,4 @@ export * from "./sellerSignup";
 export * from "./time";
 export * from "./option";
 export * from "./location";
+export * from "./station";

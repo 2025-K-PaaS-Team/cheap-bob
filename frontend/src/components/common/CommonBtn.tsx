@@ -1,5 +1,12 @@
 type BtnProps = {
-  category?: "transparent" | "white" | "grey" | "black" | "red" | "green";
+  category?:
+    | "transparent"
+    | "white"
+    | "grey"
+    | "black"
+    | "red"
+    | "green"
+    | "pale-green";
   label: string;
   notBottom?: boolean;
   className?: string;
@@ -24,6 +31,7 @@ const CommonBtn = ({
     black: "bg-black text-white border border-black",
     red: "bg-custom-white text-[#FF0000] border border-[#FF0000]",
     green: "bg-main-deep text-white border border-0",
+    "pale-green": "bg-main-pale text-main-deep border border-main-deep",
   }[category];
 
   return (
