@@ -27,7 +27,7 @@ const RegisterPackageNum = ({
     setPageIdx(pageIdx - 1);
   };
   return (
-    <div className="flex min-h-screen mx-[20px] flex-col mt-[69px] gap-y-[11px]">
+    <div className="flex min-h-screen mx-[20px] flex-col mt-[20px] gap-y-[11px]">
       <div className="text-[16px]">4/4</div>
       {/* common pkg num */}
       <CommonPkgNum pkg={pkg} setPkg={setPkg} />

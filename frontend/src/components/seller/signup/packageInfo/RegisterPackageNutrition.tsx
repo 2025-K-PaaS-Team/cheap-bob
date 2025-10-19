@@ -45,7 +45,7 @@ const RegisterPackageNutrition = ({
   };
 
   return (
-    <div className="flex h-full mx-[20px] flex-col mt-[69px] gap-y-[11px]">
+    <div className="flex h-full mx-[20px] flex-col mt-[20px] gap-y-[11px]">
       <div className="text-[16px]">2/4</div>
       <div className="titleFont">
         패키지의 <span className="font-bold">특징</span>은 무엇인가요?

@@ -53,7 +53,7 @@ const ChangeCustomerInfo = () => {
         <h1>닉네임</h1>
         {/* input box */}
         <input
-          className="w-full pb-1 text-[#393939] border-b border-black text-[16px] mt-[30px]"
+          className="w-full  text-[#393939] border-b border-black text-[16px] mt-[30px]"
           value={customer?.nickname}
           onChange={(e) =>
             setCustomer((prev) =>
@@ -73,7 +73,7 @@ const ChangeCustomerInfo = () => {
         <h1>전화번호</h1>
         {/* input box */}
         <input
-          className="w-full pb-1 text-[#393939] border-b border-black text-[16px] mt-[30px]"
+          className="w-full  text-[#393939] border-b border-black text-[16px] mt-[30px]"
           value={customer?.phone_number}
           onChange={(e) =>
             setCustomer((prev) =>
@@ -93,7 +93,7 @@ const ChangeCustomerInfo = () => {
         <h1>이메일 주소</h1>
         {/* input box */}
         <input
-          className="w-full pb-1 text-[#393939] border-b border-black text-[16px] mt-[30px]"
+          className="w-full  text-[#393939] border-b border-black text-[16px] mt-[30px]"
           value={customer?.customer_email}
         />
       </div>

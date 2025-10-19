@@ -30,7 +30,7 @@ const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   };
 
   return (
-    <div className="mx-[20px] mt-[69px] flex flex-col gap-y-[11px]">
+    <div className="mx-[20px] mt-[20px] flex flex-col gap-y-[40px]">
       <div className="text-main-deep font-bold bodyFont">2/5</div>
       <div className="titleFont">
         <span className="font-bold">매장</span>에 대해{" "}

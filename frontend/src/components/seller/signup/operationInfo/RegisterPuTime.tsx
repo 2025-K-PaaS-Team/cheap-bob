@@ -36,7 +36,7 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   }, [form]);
 
   return (
-    <div className="flex mx-[20px] flex-col mt-[69px] gap-y-[11px]">
+    <div className="flex mx-[20px] flex-col mt-[20px] gap-y-[11px]">
       <div className="text-[16px]">2/4</div>
       <div className="titleFont">
         할인팩 <span className="font-bold">픽업 시간</span>을 <br />{" "}

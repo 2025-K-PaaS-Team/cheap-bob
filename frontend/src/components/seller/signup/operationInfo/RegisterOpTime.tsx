@@ -27,7 +27,7 @@ const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   };
 
   return (
-    <div className="flex mx-[20px] flex-col mt-[69px] gap-y-[11px]">
+    <div className="flex mx-[20px] flex-col mt-[20px] gap-y-[11px]">
       {/* title */}
       <div className="text-[16px]">1/4</div>
       <div className="titleFont">

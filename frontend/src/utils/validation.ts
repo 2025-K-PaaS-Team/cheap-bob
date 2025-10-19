@@ -52,12 +52,12 @@ export const validateSelect = (value: number, min: number, max: number) =>
 
 export const validateNum = (value: number, min: number) => value >= min;
 
-export const validateUrl = (raw?: string) => {
-  const s = (raw ?? "").trim();
-  if (!s) return true;
+export const validateUrl = (url: string) => {
+  if (!url) return true;
   try {
-    new URL(/^https?:\/\//i.test(s) ? s : `https://${s}`);
-    return true;
+    const normalized = normalizeUrl(url) ?? "";
+    const urlPattern = /^(https?:\/\/)([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(\/\S*)?$/;
+    return urlPattern.test(normalized);
   } catch {
     return false;
   }
