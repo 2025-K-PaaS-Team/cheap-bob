@@ -358,16 +358,35 @@ const StoreDetail = () => {
 
             {storeId && customer && (
               <div className="my-[30px]">
-                <CommonBtn
-                  category="green"
-                  width="w-[calc(100%-40px)]"
-                  notBottom
-                  onClick={() => setOpenCheckNoti(true)}
-                  className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
-                  label={`${
-                    (product.products[0].price * product.products[0].sale) / 100
-                  }원 구매하기 (${product.products[0].current_stock}개 남음)`}
-                />
+                {!todayOp?.is_currently_open ? (
+                  <CommonBtn
+                    category="grey"
+                    width="w-[calc(100%-40px)]"
+                    notBottom
+                    className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
+                    label="영업시간이 아니예요"
+                  />
+                ) : product.products[0].current_stock > 0 ? (
+                  <CommonBtn
+                    category="green"
+                    width="w-[calc(100%-40px)]"
+                    notBottom
+                    onClick={() => setOpenCheckNoti(true)}
+                    className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
+                    label={`${
+                      (product.products[0].price * product.products[0].sale) /
+                      100
+                    }원 구매하기 (${product.products[0].current_stock}개 남음)`}
+                  />
+                ) : (
+                  <CommonBtn
+                    category="grey"
+                    width="w-[calc(100%-40px)]"
+                    notBottom
+                    className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
+                    label="품절됐어요"
+                  />
+                )}
               </div>
             )}
           </div>

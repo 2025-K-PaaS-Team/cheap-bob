@@ -20,7 +20,7 @@ const CommonBtn = ({
   const colorClass = {
     transparent: "bg-transparent text-custom-black border-0",
     white: "bg-white text-custom-black border border-main-deep",
-    grey: "bg-[#EDEDED] text-custom-black border-0",
+    grey: "bg-[#EDEDED] text-[#6C6C6C] border-0",
     black: "bg-black text-white border border-black",
     red: "bg-custom-white text-[#FF0000] border border-[#FF0000]",
     green: "bg-main-deep text-white border border-0",
