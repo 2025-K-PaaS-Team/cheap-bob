@@ -35,8 +35,8 @@ const Agree = ({ onNext }: AgreeProps) => {
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="absolute bottom-[145px] w-full flex flex-col gap-y-[28px]">
+    <>
+      <div className="absolute bottom-[130px] left-1/2 -translate-x-1/2 flex flex-col w-[calc(100%-40px)] gap-y-[28px]">
         {/* 서비스 동의 */}
         <div className="flex flex-row gap-x-[10px]">
           <input
@@ -71,6 +71,7 @@ const Agree = ({ onNext }: AgreeProps) => {
           <h3>모두 동의합니다.</h3>
         </div>
       </div>
+
       {/* next */}
       {onNext && (
         <CommonBtn
@@ -88,7 +89,7 @@ const Agree = ({ onNext }: AgreeProps) => {
           category="green"
         />
       )}
-    </div>
+    </>
   );
 };
 

@@ -34,47 +34,47 @@ const SignupSwiper = (props: SignupSwiperProps) => {
   const { title, type, onNext, subTitle } = props;
 
   return (
-    <>
-      <div className="relative h-full px-[20px] pt-[42px]">
-        {/* title */}
-        <div className="font-bold text-2xl">
-          {title.split("\n").map((line, idx) => (
-            <p key={idx}>{line}</p>
-          ))}
-          {subTitle && (
-            <p className="text-[#6C6C6C] mt-[25px] text-base font-medium">
-              {subTitle}
-            </p>
+    <div className="flex flex-col h-full">
+      <div className="flex flex-col pt-[42px] pb-[80px] overflow-y-auto">
+        <div className="mx-[20px]">
+          {" "}
+          {/* title */}
+          <div className="titleFont flex-1">
+            {title.split("\n").map((line, idx) => (
+              <div key={idx}>{line}</div>
+            ))}
+            {subTitle && (
+              <p className="text-[#6C6C6C] mt-[25px] text-base font-medium">
+                {subTitle}
+              </p>
+            )}
+          </div>
+          {/* type: agree */}
+          {type === "agree" && <Agree onNext={onNext} />}
+          {/* type: enter */}
+          {type === "enter" && (
+            <Enter
+              placeholder={props.placeholder ?? ""}
+              onNext={onNext}
+              setValue={props.setValue}
+              value={props.value}
+              validate={props.validate}
+            />
+          )}
+          {/* type: select */}
+          {type === "select" && (
+            <Select
+              onNext={onNext}
+              data={props.data}
+              selected={props.selected}
+              setSelected={props.setSelected}
+              selectType={props.selectType}
+              validate={props.validate}
+            />
           )}
         </div>
-
-        {/* type: agree */}
-        {type === "agree" && <Agree onNext={onNext} />}
-
-        {/* type: enter */}
-        {type === "enter" && (
-          <Enter
-            placeholder={props.placeholder ?? ""}
-            onNext={onNext}
-            setValue={props.setValue}
-            value={props.value}
-            validate={props.validate}
-          />
-        )}
-
-        {/* type: select */}
-        {type === "select" && (
-          <Select
-            onNext={onNext}
-            data={props.data}
-            selected={props.selected}
-            setSelected={props.setSelected}
-            selectType={props.selectType}
-            validate={props.validate}
-          />
-        )}
       </div>
-    </>
+    </div>
   );
 };
 
