@@ -84,7 +84,9 @@ class StoreRepository(BaseRepository[Store]):
         sigungu: str,
         bname: str,
         lat: str,
-        lng: str
+        lng: str,
+        nearest_station: Optional[str],
+        walking_time: Optional[int]
     ) -> Store:
         """가게와 주소 정보를 업데이트"""
         
@@ -103,16 +105,20 @@ class StoreRepository(BaseRepository[Store]):
         
         # 2. address_id가 있으면 주소 업데이트
         if store.address_id and all([sido, sigungu, bname, lat, lng]):
+            address_update_values = {
+                "sido": sido,
+                "sigungu": sigungu,
+                "bname": bname,
+                "lat": lat,
+                "lng": lng,
+                "nearest_station": nearest_station,
+                "walking_time": walking_time
+            }
+            
             await self.session.execute(
                 sql_update(StoreAddress)
                 .where(StoreAddress.address_id == store.address_id)
-                .values(
-                    sido=sido,
-                    sigungu=sigungu,
-                    bname=bname,
-                    lat=lat,
-                    lng=lng
-                )
+                .values(**address_update_values)
             )
         
         # 3. 가게 정보 업데이트
@@ -153,6 +159,8 @@ class StoreRepository(BaseRepository[Store]):
         bname: str,
         lat: str,
         lng: str,
+        nearest_station: Optional[str],
+        walking_time: Optional[int],
         # SNS info (optional)
         sns_info: Optional[Dict[str, Optional[str]]],
         # Operation times
@@ -167,7 +175,9 @@ class StoreRepository(BaseRepository[Store]):
                 sigungu=sigungu,
                 bname=bname,
                 lat=lat,
-                lng=lng
+                lng=lng,
+                nearest_station=nearest_station,
+                walking_time=walking_time
             )
             self.session.add(new_address)
             await self.session.flush()  # address_id 생성을 위해 flush

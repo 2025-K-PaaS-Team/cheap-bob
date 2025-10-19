@@ -21,6 +21,8 @@ class StoreAddressInfo(BaseModel):
     bname: str = Field(..., description="읍/면/동", min_length=1, max_length=50)
     lat: str = Field(..., description="위도")
     lng: str = Field(..., description="경도")
+    nearest_station: Optional[str] = Field(None, description="가장 가까운 역", max_length=100)
+    walking_time: Optional[int] = Field(None, description="도보 시간 (분)", ge=0)
 
 
 class StorePaymentInfoCreateRequest(BaseModel):
