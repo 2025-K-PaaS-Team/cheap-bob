@@ -3,53 +3,89 @@ import { BillingStatus } from "@components/seller/billing";
 import type { SettlementType } from "@interface";
 import { GetStoreSettlement } from "@services";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const BillingHistory = () => {
-  const endDate = dayjs();
-  const startDate = endDate.add(-1, "month");
+  const [endDate, setEndDate] = useState(dayjs());
+  const [startDate, setStartDate] = useState(dayjs().add(-1, "month"));
   const [status, setStatus] = useState<string>("all");
   const [settlement, setSettlement] = useState<SettlementType | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleGetSettlement = async (start: string, end: string) => {
     try {
+      setLoading(true);
       const res = await GetStoreSettlement(start, end);
       setSettlement(res);
     } catch (err: unknown) {
       setModalMsg("정산 내역을 불러오는데 실패했습니다.");
       setShowModal(true);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // ✅ 최초 1회 + 날짜 변경될 때마다 자동 호출
   useEffect(() => {
     handleGetSettlement(
       startDate.format("YYYY-MM-DD"),
       endDate.format("YYYY-MM-DD")
     );
-  }, []);
+  }, [startDate, endDate]);
 
-  if (!settlement) {
-    return <div>로딩 중...</div>;
-  }
+  // ✅ 상태별 필터링
+  const filteredSettlements = useMemo(() => {
+    if (!settlement) return [];
+
+    if (status === "all") return settlement.daily_settlements;
+
+    return settlement.daily_settlements
+      .map((day) => ({
+        ...day,
+        items: day.items.filter((item) => {
+          if (status === "complete") return item.status === "complete";
+          if (status === "cancel") return item.status === "cancel";
+          return true;
+        }),
+      }))
+      .filter((day) => day.items.length > 0);
+  }, [settlement, status]);
+
+  // ✅ 총 주문 건수 계산
+  const totalCount = useMemo(() => {
+    return filteredSettlements.reduce((sum, day) => sum + day.items.length, 0);
+  }, [filteredSettlements]);
+
+  if (loading) return <div className="text-center mt-10">로딩 중...</div>;
 
   return (
     <div className="flex flex-col relative h-full">
+      {/* Header */}
       <div className="mx-[33px] flex flex-col gap-y-[15px] mt-[15px]">
-        {/* period */}
-        <div className="flex flex-row text-center gap-x-[10px]">
+        {/* 기간 선택 */}
+        <div className="flex items-center gap-x-[5px]">
           <div className="fontBody font-bold mr-auto">기간</div>
-          <div className="border-b border-black/80 w-[103px] h-[30px] text-custom-black">
-            {startDate.format("YYYY.MM.DD")}
-          </div>
-          <div className="fontBody font-bold">~</div>
-          <div className="border-b border-black/80 w-[103px] h-[30px] text-custom-black">
-            {endDate.format("YYYY.MM.DD")}
-          </div>
+          <input
+            type="date"
+            value={startDate.format("YYYY-MM-DD")}
+            onChange={(e) => setStartDate(dayjs(e.target.value))}
+            onFocus={(e) => e.target.showPicker()}
+            className="w-[130px] h-[36px] text-center flex items-center justify-center border-b border-black/80 hintFont focus:outline-none appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer"
+          />
+
+          <span className="fontBody font-bold">~</span>
+          <input
+            type="date"
+            value={endDate.format("YYYY-MM-DD")}
+            onChange={(e) => setEndDate(dayjs(e.target.value))}
+            onFocus={(e) => e.target.showPicker()}
+            className="w-[130px] h-[36px] text-center flex items-center justify-center border-b border-black/80 hintFont focus:outline-none appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer"
+          />
         </div>
 
-        {/* billing status */}
+        {/* 상태 선택 */}
         <BillingStatus nowStatus={status} setNowStatus={setStatus} />
       </div>
 
@@ -57,27 +93,63 @@ const BillingHistory = () => {
       <hr className="border-0 h-[1px] bg-black/20 mt-[35px]" />
 
       {/* order history */}
-      <div className="flex flex-col flex-1 p-[20px] gap-y-[20px] bg-custom-white">
+      <div className="flex flex-col flex-1 p-[20px] gap-y-[20px] bg-custom-white overflow-y-auto">
         <div className="hintFont">
-          <span className="text-main-deep">
-            {settlement?.daily_settlements[0]?.items[0]?.total_amount ?? 0}
-          </span>
-          건의 주문 내역이 있습니다.
+          총 <span className="text-main-deep font-bold">{totalCount}</span>건의
+          주문 내역이 있습니다.
         </div>
-        <div className="text-[16px] font-bold">25.09.08</div>
-        <div className="bg-white shadow rounded px-[17px] py-[20px] text-[16px] gap-y-[7px] flex flex-col">
-          <div className="justify-between flex-row flex">
-            <div className="font-bold">(패키지 이름)</div>
-            <div>1개</div>
+
+        {filteredSettlements.map((day) => (
+          <div key={day.date} className="flex flex-col gap-y-[10px]">
+            <div className="text-[16px] font-bold mt-[10px]">
+              {dayjs(day.date).format("YY.MM.DD")}
+            </div>
+
+            {day.items.map((item, idx) => (
+              <div
+                key={`${day.date}-${idx}`}
+                className="bg-white shadow rounded p-[16px] text-[16px] flex flex-col gap-y-[10px]"
+              >
+                <div className="flex justify-between">
+                  <h3>{"17:28"}</h3>
+                  <div>
+                    주문 수량:{" "}
+                    <span className="font-bold text-main-deep">
+                      {item.quantity}
+                    </span>
+                    개
+                  </div>
+                </div>
+
+                <div className="flex justify-between bodyFont">
+                  <div
+                    className={`font-bold ${
+                      item.status === "cancel"
+                        ? "text-sub-orange"
+                        : "text-main-deep"
+                    }`}
+                  >
+                    {item.status === "complete"
+                      ? "정산 완료"
+                      : item.status === "cancel"
+                      ? "환불 완료"
+                      : item.status}
+                  </div>
+                  <div>{item.total_amount.toLocaleString()}원</div>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="justify-between flex-row flex">
-            <div>환불 완료</div>
-            <div>0,000원</div>
+        ))}
+
+        {filteredSettlements.length === 0 && (
+          <div className="text-center text-sm text-gray-400 mt-5">
+            해당 상태의 정산 내역이 없습니다.
           </div>
-        </div>
+        )}
       </div>
 
-      {/* show modal */}
+      {/* modal */}
       {showModal && (
         <CommonModal
           desc={modalMsg}

@@ -62,7 +62,7 @@ const BillingInfo = () => {
   return (
     <div className="flex flex-col relative h-full">
       {/* top content */}
-      <div className="mx-[20px]">
+      <div className="mx-[20px] flex flex-1 flex-col">
         {/* greeting */}
         <div className="flex flex-col pb-[31.5px] gap-y-[10px]">
           <div className="titleFont">{store?.store_name} 님, 안녕하세요.</div>
@@ -79,7 +79,7 @@ const BillingInfo = () => {
       </div>
 
       {/* bottom content */}
-      <div className="absolute bottom-5 w-full max-w-[420px] py-[20px] border-t border-black/10">
+      <div className="w-full max-w-[420px] py-[20px] border-t border-black/10">
         <div className="mx-[20px]">
           {/* history */}
           <div
