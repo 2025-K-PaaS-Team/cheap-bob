@@ -8,7 +8,7 @@ const ProgressBar = ({ pageIdx }: ProgressBarProps) => {
   const handleStep = (pageIdx: number): number => {
     if (pageIdx < 7) {
       return 0;
-    } else if (pageIdx < 11) {
+    } else if (pageIdx < 10) {
       return 1;
     } else {
       return 2;

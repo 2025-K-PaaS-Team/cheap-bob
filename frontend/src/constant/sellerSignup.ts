@@ -11,9 +11,9 @@ import {
   RegisterPackageNutrition,
   RegisterPackagePrice,
   RegisterPuTime,
-  ConfirmPackage,
   SuccessSetting,
   RegisterStoreRepImg,
+  RegisterPackageName,
 } from "@components/seller/signup";
 import type { PageComponent } from "@interface";
 
@@ -29,27 +29,26 @@ export const pages: PageComponent[] = [
   // REGISTER OPERATION
   RegisterOpTime,
   RegisterPuTime,
-  SuccessSetting, // page Idx 10
+  SuccessSetting, // page Idx 9
   // REGISTER PACKAGE
+  RegisterPackageName,
   RegisterPackageDesc,
   RegisterPackageNutrition,
   RegisterPackagePrice,
   RegisterPackageNum,
-  ConfirmPackage,
-  SuccessSetting, // page Idx 16
+  SuccessSetting, // page Idx 15
 ];
 
 export const notProgressBarPages: PageComponent[] = [
   SellerAgree,
   ConfirmStore,
-  ConfirmPackage,
   SuccessSetting,
 ];
 
 export const pkgPages: PageComponent[] = [
+  RegisterPackageName,
   RegisterPackageDesc,
   RegisterPackageNutrition,
   RegisterPackagePrice,
   RegisterPackageNum,
-  ConfirmPackage,
 ];

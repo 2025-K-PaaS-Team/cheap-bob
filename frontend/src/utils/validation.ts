@@ -18,8 +18,8 @@ export const validationRules = {
   },
   packageName: {
     minLength: 1,
-    maxLength: 15,
-    errorMessage: "패키지 이름은 1~15자여야 합니다.",
+    maxLength: 20,
+    errorMessage: "패키지 이름은 1~20자여야 합니다.",
   },
   packageDesc: {
     minLength: 1,
@@ -36,16 +36,16 @@ export const validationRules = {
     errorMessage: "패키지의 가격은 1000원 이상이어야 합니다.",
   },
   packageStock: {
-    minStock: 0,
+    minStock: 1,
     errorMessage: "패키지의 초기 수량은 양수여야 합니다.",
   },
 };
 
 export const validateLength = (value: string, min: number, max: number) =>
-  value.length >= min && value.length <= max;
+  value?.length >= min && value?.length <= max;
 
 export const validatePattern = (value: string, pattern: RegExp) =>
-  pattern.test(value);
+  pattern?.test(value);
 
 export const validateSelect = (value: number, min: number, max: number) =>
   value >= min && value <= max;

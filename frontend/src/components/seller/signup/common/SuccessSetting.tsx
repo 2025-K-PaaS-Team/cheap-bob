@@ -39,7 +39,7 @@ const SuccessSetting = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           <div>운영 정보 등록</div>
         </div>
         <div className="flex flex-row gap-x-[10px]">
-          <input type="checkbox" checked={pageIdx > 15 ? true : false} />
+          <input type="checkbox" checked={pageIdx > 14 ? true : false} />
           <div>패키지 등록</div>
         </div>
       </div>
