@@ -1,6 +1,5 @@
 import {
   SellerAgree,
-  ConfirmOp,
   ConfirmStore,
   RegisterAddr,
   RegisterDesc,
@@ -30,7 +29,6 @@ export const pages: PageComponent[] = [
   // REGISTER OPERATION
   RegisterOpTime,
   RegisterPuTime,
-  ConfirmOp,
   SuccessSetting, // page Idx 10
   // REGISTER PACKAGE
   RegisterPackageDesc,
@@ -46,7 +44,6 @@ export const notProgressBarPages: PageComponent[] = [
   ConfirmStore,
   ConfirmPackage,
   SuccessSetting,
-  ConfirmOp,
 ];
 
 export const pkgPages: PageComponent[] = [

@@ -1,7 +1,9 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { CommonPuTime } from "@components/seller/common";
 import type { SellerSignupProps } from "@interface";
-import { useSignupStore } from "@store";
+import { registerStore, registerStoreImg } from "@services";
+import { useSignupImageStore, useSignupStore } from "@store";
+import { formatErrMsg } from "@utils";
 import { useState } from "react";
 
 const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
@@ -15,8 +17,30 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const { form: imgForm } = useSignupImageStore();
 
-  const handleClickNext = () => {
+  const handleRegisterStore = async () => {
+    try {
+      const res = await registerStore(form);
+      console.log("등록 성공:", res);
+    } catch (err: unknown) {
+      console.error("등록 실패:", err);
+      throw err;
+    }
+  };
+
+  const handleRegisterStoreImg = async () => {
+    try {
+      const files = imgForm.images.map((it) => it.file);
+      const res = await registerStoreImg(files);
+      console.log("이미지 업로드 성공:", res);
+    } catch (err: any) {
+      console.error("이미지 업로드 실패:", err);
+      throw err;
+    }
+  };
+
+  const handleClickNext = async () => {
     const hasEmptyTime = form.operation_times.some(
       (t) => !t.pickup_start_time || !t.pickup_end_time
     );
@@ -26,7 +50,16 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       setShowModal(true);
       return;
     }
-    setPageIdx(pageIdx + 1);
+
+    // register api
+    try {
+      await handleRegisterStore();
+      await handleRegisterStoreImg();
+      setPageIdx(pageIdx + 1);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
   };
 
   const handleClickPrev = () => {
