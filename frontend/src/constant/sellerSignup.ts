@@ -26,8 +26,7 @@ export const pages: PageComponent[] = [
   RegisterNum,
   RegisterAddr,
   RegisterStoreRepImg,
-  ConfirmStore,
-  SuccessSetting,
+  SuccessSetting, // page Idx 6
   // REGISTER OPERATION
   RegisterOpTime,
   RegisterPuTime,
