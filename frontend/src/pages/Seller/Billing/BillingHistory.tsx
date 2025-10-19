@@ -72,7 +72,7 @@ const BillingHistory = () => {
             value={startDate.format("YYYY-MM-DD")}
             onChange={(e) => setStartDate(dayjs(e.target.value))}
             onFocus={(e) => e.target.showPicker()}
-            className="w-[130px] h-[36px] text-center flex items-center justify-center border-b border-black/80 hintFont focus:outline-none appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer"
+            className="w-[110px] h-[36px] text-center flex items-center justify-center border-b border-black/80 hintFont focus:outline-none appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer"
           />
 
           <span className="fontBody font-bold">~</span>
@@ -81,7 +81,7 @@ const BillingHistory = () => {
             value={endDate.format("YYYY-MM-DD")}
             onChange={(e) => setEndDate(dayjs(e.target.value))}
             onFocus={(e) => e.target.showPicker()}
-            className="w-[130px] h-[36px] text-center flex items-center justify-center border-b border-black/80 hintFont focus:outline-none appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer"
+            className="w-[110px] h-[36px] text-center flex items-center justify-center border-b border-black/80 hintFont focus:outline-none appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer"
           />
         </div>
 

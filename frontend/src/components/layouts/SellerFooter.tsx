@@ -12,7 +12,7 @@ const SellerFooter = () => {
   const items = [
     { label: "주문 관리", to: "order", icon: "receipt" },
     { label: "매장 관리", to: "dashboard", icon: "home" },
-    { label: "정산 관리", to: "billing", icon: "user" },
+    { label: "마이페이지", to: "billing", icon: "user" },
   ];
 
   return (
