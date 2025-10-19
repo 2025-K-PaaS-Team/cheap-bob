@@ -129,7 +129,7 @@ const RegisterStoreRepImg = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
         width="w-[100px]"
       />
       <CommonBtn
-        category={form.store_introduction ? "green" : "grey"}
+        category={imgForm.images.length > 0 ? "green" : "grey"}
         label="다음"
         onClick={() => handleClickNext()}
         notBottom
