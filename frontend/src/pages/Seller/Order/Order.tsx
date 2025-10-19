@@ -1,5 +1,10 @@
 import { CommonModal } from "@components/common";
-import { Now, OrderList, StatusBar } from "@components/seller/order";
+import {
+  Now,
+  OrderList,
+  OtherOrderList,
+  StatusBar,
+} from "@components/seller/order";
 import type {
   OrderBaseType,
   OrderResponseType,
@@ -94,11 +99,19 @@ const Order = () => {
       <Now onRefresh={handleGetOrders} lastUpdated={lastUpdated} op={op} />
       <StatusBar status={status} setStatus={setStatus} />
 
-      <OrderList
-        orders={nowOrderList}
-        status={status}
-        onRefresh={handleGetOrders}
-      />
+      {status === "others" ? (
+        <OtherOrderList
+          orders={nowOrderList}
+          status={status}
+          onRefresh={handleGetOrders}
+        />
+      ) : (
+        <OrderList
+          orders={nowOrderList}
+          status={status}
+          onRefresh={handleGetOrders}
+        />
+      )}
 
       {/* show modal */}
       {showModal && (
