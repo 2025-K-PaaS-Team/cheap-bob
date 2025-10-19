@@ -115,7 +115,7 @@ const ChangeStoreImg = () => {
   return (
     <div className="mt-[30px] px-[20px] w-full gap-y-[40px] flex flex-col">
       {/* question */}
-      <div className="text-[24px]">
+      <div className="titleFont">
         변경할 <span className="font-bold">이미지</span>를 <br /> 등록해 주세요.
       </div>
 

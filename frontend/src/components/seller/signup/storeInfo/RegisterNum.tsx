@@ -6,6 +6,7 @@ import {
   validationRules,
   validateUrl,
   normalizeUrl,
+  formatPhoneNumber,
 } from "@utils";
 import { useState } from "react";
 
@@ -13,9 +14,9 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const { form, setForm } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const { storePhone } = validationRules;
 
   const handleClickNext = () => {
-    const { storePhone } = validationRules;
     if (!validatePattern(form.store_phone, storePhone.pattern)) {
       setModalMsg(storePhone.errorMessage);
       setShowModal(true);
@@ -24,10 +25,10 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
 
     const { homepage, instagram, facebook, x } = form.sns_info;
     const invalids: string[] = [];
-    if (!validateUrl(homepage)) invalids.push("홈페이지");
-    if (!validateUrl(instagram)) invalids.push("인스타그램");
-    if (!validateUrl(facebook)) invalids.push("페이스북");
-    if (!validateUrl(x)) invalids.push("X(Twitter)");
+    if (!validateUrl(homepage ?? "")) invalids.push("홈페이지");
+    if (!validateUrl(instagram ?? "")) invalids.push("인스타그램");
+    if (!validateUrl(facebook ?? "")) invalids.push("페이스북");
+    if (!validateUrl(x ?? "")) invalids.push("X(Twitter)");
 
     if (invalids.length) {
       setModalMsg(`${invalids.join(", ")} URL을 올바르게 입력해 주세요.`);
@@ -42,33 +43,40 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     setPageIdx(pageIdx - 1);
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, "");
+    setForm({ store_phone: rawValue });
+  };
+
   return (
-    <div className="mx-[20px] mt-[69px] flex flex-col gap-y-[11px]">
-      <div className="text-[16px]">4/4</div>
-      <div className="text-[24px]">
-        <span className="font-bold">매장 연락처</span>를 알려주세요.
+    <div className="mx-[20px] mt-[20px] flex flex-col gap-y-[40px]">
+      <div className="text-main-deep font-bold bodyFont">3/5</div>
+      <div className="titleFont">
+        <span className="font-bold">매장 연락처</span>를 입력해 주세요.
       </div>
-      <div className="text-[16px]">손님에게 연락이 올 수 있어요.</div>
 
       {/* input box */}
       <div className="mt-[40px] gap-y-[11px]">
-        <div className="text-[16px]">매장 전화번호 (*필수)</div>
+        <h3>
+          매장 전화번호 <span className="text-sub-orange">(필수)</span>
+        </h3>
         <input
-          className="w-full h-[46px] text-center bg-custom-white text-[16px]"
-          placeholder="매장 전화번호를 입력해 주세요"
-          value={form.store_phone}
-          onChange={(e) => setForm({ store_phone: e.target.value })}
+          className="w-full h-[46px]  border-b border-[#393939] hintFont"
+          placeholder="텍스트를 입력하세요"
+          value={formatPhoneNumber(form.store_phone)}
+          onChange={handleChange}
         />
       </div>
 
       {/* other sns */}
       <div className="mt-[39px] flex flex-col gap-y-[11px]">
-        <div className="text-[20px]">다른 SNS도 있나요?</div>
+        <h2>다른 SNS도 있나요?</h2>
         <div className="flex flex-row">
-          <div className="text-[14px] w-[97px] flex items-center">홈페이지</div>
+          <div className="bodyFont w-[100px]">홈페이지</div>
           <input
-            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
+            className="h-[33px] flex-1 border-b border-[#393939] hintFont"
             value={form.sns_info.homepage}
+            placeholder="텍스트를 입력하세요"
             onChange={(e) =>
               setForm({
                 sns_info: {
@@ -88,11 +96,10 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           />
         </div>
         <div className="flex flex-row">
-          <div className="text-[14px] w-[97px] flex items-center">
-            인스타그램
-          </div>
+          <div className="bodyFont w-[100px]">인스타그램</div>
           <input
-            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
+            className="h-[33px] flex-1 border-b border-[#393939] hintFont"
+            placeholder="텍스트를 입력하세요"
             value={form.sns_info.instagram}
             onChange={(e) =>
               setForm({
@@ -113,12 +120,11 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           />
         </div>
         <div className="flex flex-row">
-          <div className="text-[14px] w-[97px] flex items-center">
-            X (Twitter)
-          </div>
+          <div className="bodyFont w-[100px]">X (Twitter)</div>
           <input
-            className="w-full h-[40px] text-center bg-custom-white text-[16px]"
+            className="h-[33px] flex-1 border-b border-[#393939] hintFont"
             value={form.sns_info.x}
+            placeholder="텍스트를 입력하세요"
             onChange={(e) =>
               setForm({
                 sns_info: { ...form.sns_info, x: e.target.value },
@@ -137,7 +143,7 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       </div>
 
       <CommonBtn
-        category="grey"
+        category="transparent"
         label="이전"
         onClick={() => handleClickPrev()}
         notBottom
@@ -145,7 +151,11 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
         width="w-[100px]"
       />
       <CommonBtn
-        category="green"
+        category={
+          !validatePattern(form.store_phone, storePhone.pattern)
+            ? "grey"
+            : "green"
+        }
         label="다음"
         onClick={() => handleClickNext()}
         notBottom

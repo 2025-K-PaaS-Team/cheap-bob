@@ -7,7 +7,7 @@ const LoginFail = () => {
   return (
     <div className="flex flex-col h-full items-center justify-center text-center">
       <img src="/icon/error.svg" alt="errorIcon" className="w-15 mb-5" />
-      <div className="text-[24px] font-bold">로그인에 실패했어요</div>
+      <div className="titleFont font-bold">로그인에 실패했어요</div>
       <div className="text-[16px]">
         점주와 고객 계정은 중복 가입이 불가능합니다.
         <br />

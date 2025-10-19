@@ -33,7 +33,7 @@ const StorePayment = () => {
       {/* 내 연락처 */}
       <div className="grid grid-cols-3 bodyFont">
         <div className="font-bold">내 연락처</div>
-        <div className="col-span-2 border-b border-black pb-1">
+        <div className="col-span-2 border-b border-black ">
           {store.store_phone}
         </div>
       </div>

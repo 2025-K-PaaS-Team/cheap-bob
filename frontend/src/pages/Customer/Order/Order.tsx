@@ -1,36 +1,39 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
 import { orderStatus } from "@constant";
 import type { OrderBaseType } from "@interface/common/types";
-import type { OrderDetailResponseType } from "@interface/customer/order";
-import {
-  completePickup,
-  // deleteOrder,
-  getOrderDetail,
-  getOrders,
-} from "@services";
-import { formatDate } from "@utils";
-import { AxiosError } from "axios";
+import { completePickup, deleteOrder, getCurrentOrders } from "@services";
+import { formatDate, formatErrMsg } from "@utils";
 import { useEffect, useRef, useState } from "react";
 import { QrReader } from "react-qr-reader";
 import { useNavigate } from "react-router";
 
 const Order = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderBaseType[] | null>(null);
-  // const [currentOrders, setCurrentOrders] = useState<OrderBaseType[] | null>(
-  //   null
-  // );
-  const [orderDetail, setOrderDetail] =
-    useState<OrderDetailResponseType | null>(null);
-  const [reason, setReason] = useState<string>("");
   const [qrReaderOpen, setQrReaderOpen] = useState<Boolean>(false);
   const [paymentIdToComplete, setPaymentIdToComplete] = useState<string | null>(
     null
   );
   const scannedRef = useRef(false);
-  const isOrder = false;
-  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
 
-  if (!isOrder) {
+  const [modalMsg, setModalMsg] = useState("");
+
+  const handleGetOrders = async () => {
+    try {
+      const res = await getCurrentOrders();
+      setOrders(res.orders);
+    } catch (err: unknown) {
+      console.error("get stores fail", err);
+    }
+  };
+
+  useEffect(() => {
+    handleGetOrders();
+  }, []);
+
+  if (!orders) {
     return (
       <div className="flex flex-col w-full h-full justify-center items-center">
         <img
@@ -53,178 +56,199 @@ const Order = () => {
     );
   }
 
-  const handleGetOrders = async () => {
-    try {
-      const res = await getOrders();
-      console.log("주문 목록 가져오기 성공", res);
-      setOrders(res.orders);
-    } catch (err: unknown) {
-      console.error("get stores fail", err);
-    }
-  };
-
-  // get current orders
-  // const handleGetCurrentOrders = async () => {
-  //   try {
-  //     const res = await getCurrentOrders();
-  //     console.log("현재 주문 목록 가져오기 성공", orders);
-  //     setCurrentOrders(res.orders);
-  //   } catch (err: unknown) {
-  //     console.error("get current stores fail");
-  //   }
-  // };
-
-  useEffect(() => {
-    // get orders
-    handleGetOrders();
-    // get current orders
-    // handleGetCurrentOrders();
-  }, []);
-
-  if (!orders) {
-    return <div>주문 정보를 불러오는 중입니다...</div>;
-  }
-
-  const handleGetOrderDetail = async (paymentId: string) => {
-    try {
-      const res = await getOrderDetail(paymentId);
-      console.log("주문 상세 가져오기 성공", res);
-      setOrderDetail(res);
-    } catch (err: unknown) {
-      console.error("get order detail failed", err);
-    }
-  };
-
-  // const handleDeleteOrder = async (paymentId: string) => {
-  //   try {
-  //     const res = await deleteOrder(paymentId, {
-  //       reason: reason,
-  //     });
-  //     console.log("결제 취소 성공", res);
-  //     window.alert("결제 취소 성공했옹 （づ￣3￣）づ╭❤️～");
-  //   } catch (err: any) {
-  //     console.error("get order detail failed", err);
-  //     window.alert(`결제 취소 실패! ( ⓛ ω ⓛ *) ${err.response.data.detail}`);
-  //   }
-  // };
-
   const handleCompletePickup = async (paymentId: string, qrData: string) => {
     try {
-      const res = await completePickup(paymentId, { qr_data: qrData });
-      console.log("픽업 완료 성공", res);
-      window.alert("픽업 완료 성공했옹 （づ￣3￣）づ╭❤️～");
+      await completePickup(paymentId, { qr_data: qrData });
+      setQrReaderOpen(false);
+      setModalMsg("픽업이 완료되었습니다!");
+      setShowModal(true);
     } catch (err: any) {
-      console.error("픽업 완료 실패", err);
-      const errorMessage =
-        (err instanceof AxiosError && err.response?.data?.detail) ||
-        "픽업 완료 실패!";
-      window.alert(`픽업 완료 실패! ( ⓛ ω ⓛ *) ${errorMessage}`);
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
     } finally {
       setQrReaderOpen(false);
       setPaymentIdToComplete(null);
     }
   };
 
-  const handleClickDetailBtn = (paymentId: string) => {
-    handleGetOrderDetail(paymentId);
+  const handleClickCancelBtn = async (paymentId: string) => {
+    try {
+      await deleteOrder(paymentId);
+      setShowCancelModal(false);
+      getCurrentOrders();
+    } catch (err: any) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
   };
-
-  // const handleClickCancelBtn = (paymentId: string) => {
-  //   handleDeleteOrder(paymentId);
-  // };
 
   const handleClickPickupCompleteBtn = (paymentId: string) => {
     setQrReaderOpen(true);
     setPaymentIdToComplete(paymentId);
   };
 
-  if (orders.length === 0) return <div>주문 내역이 없습니다</div>;
+  const getColorByStautus = (status: string) => {
+    if (status == "reservation") {
+      return "bg-[#E7E7E7]";
+    } else {
+      return "bg-main-pale text-main-deep border-main-deep border";
+    }
+  };
+
   return (
     <>
-      <h1>전체 주문 목록</h1>
       {orders.map((order, idx) => {
         const timeStampKey = `${order.status.toLowerCase()}_at`;
         const timeStampValue = order[timeStampKey];
-        const orderTime = formatDate(timeStampValue);
+        const orderTime = formatDate(timeStampValue)
+          ?.slice(0, 10)
+          .replaceAll("-", ".");
         const orderState = orderStatus[order.status];
 
-        console.log(timeStampKey);
-
         return (
-          <>
+          <div className="m-[20px]" key={idx}>
             <div
               key={idx}
-              className="bg-yellow-200 flex justify-center align-center flex-col text-center items-center p-3 m-3"
+              className="shadow p-[20px] flex flex-col gap-y-[22px]"
             >
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyMNzjqxn4hQQ8bmPj7I1VN8DEWEKf5AsILQ&s"
-                className="flex items-center justify-center w-50"
-                alt="dummyProductImg"
-              />
-              <div>가게 이름: {order.store_name}</div>
-              <div>상품 이름: {order.product_name}</div>
-              <div>수량: {order.quantity}개</div>
-              <div>가격: {order.price}원</div>
-              <div>상태: {orderState}</div>
-              <div>일시: {orderTime}</div>
-              <div className="flex flex-col gap-5">
-                <button
-                  type="button"
-                  onClick={() => handleClickDetailBtn(order.payment_id)}
-                  className="bg-custom-white p-3"
+              {/* first row */}
+              <div className="flex flex-row justify-between">
+                {/* order status */}
+                <div
+                  className={`px-[16px] py-[8px] rounded tagFont ${getColorByStautus(
+                    order.status
+                  )}`}
                 >
-                  주문 상세 보기
-                </button>
-                {orderDetail && (
-                  <>
-                    <div>할인율: {orderDetail.discount_rate}</div>
-                    <div>가격: {orderDetail.price}</div>
-                    <div>unit 가격: {orderDetail.unit_price}</div>
-                  </>
-                )}
-                {/* <button
-                  type="button"
-                  onClick={() => handleClickCancelBtn(order.payment_id)}
-                  className="bg-custom-white p-3"
-                >
-                  주문 취소하기(환불 포함)
-                </button> */}
-                <input
-                  type="text"
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="취소 사유를 입력"
+                  {orderState}
+                </div>
+
+                {/* date */}
+                <div className="tagFont flex flex-row gap-x-[3px]">
+                  <div>{orderTime}</div>
+                  <div>·</div>
+                  <div>{order.quantity}개</div>
+                </div>
+              </div>
+
+              {/* second row */}
+              <div className="grid grid-cols-5 gap-x-[11px]">
+                <img
+                  src=""
+                  alt="storeImg"
+                  className="bg-main-deep rounded object-cover col-span-2"
                 />
-                <button
-                  type="button"
-                  onClick={() => handleClickPickupCompleteBtn(order.payment_id)}
-                  className="bg-custom-white p-3"
-                >
-                  픽업 완료하기(qr)
-                </button>
-                {qrReaderOpen && paymentIdToComplete === order.payment_id && (
-                  <div style={{ width: "300px", margin: "auto" }}>
-                    <QrReader
-                      constraints={{ facingMode: "environment" }}
-                      onResult={(result, error) => {
-                        if (result && !scannedRef.current) {
-                          const data = result?.getText();
-                          console.log(result, scannedRef.current);
-                          if (data && !scannedRef.current) {
-                            scannedRef.current = true;
-                            window.alert("qr 코드를 읽었어유");
-                            handleCompletePickup(order.payment_id, data);
-                          }
-                        }
-                        // QR 읽는 중 에러가 있어도 무시 (계속 스캔하도록)
-                        if (error) console.log("qr error", error);
-                      }}
-                    />
+
+                <div className="col-span-3 flex flex-col">
+                  <div className="bodyFont font-bold pb-[8px]">
+                    {order.store_name}
                   </div>
+                  <div className="tagFont pb-[22px]">
+                    {order.total_amount}원
+                  </div>
+                  <div className="font-bold tagFont">
+                    픽업: {order.pickup_ready_at}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-5">
+                {order.status == "reservation" && (
+                  <CommonBtn
+                    label="주문 취소"
+                    category="red"
+                    notBottom
+                    className="w-full"
+                    onClick={() => setShowCancelModal(true)}
+                  />
+                )}
+                {order.status == "accept" && (
+                  <CommonBtn
+                    label="QR 인증하고 픽업하기"
+                    category="green"
+                    notBottom
+                    className="w-full"
+                    onClick={() =>
+                      handleClickPickupCompleteBtn(order.payment_id)
+                    }
+                  />
+                )}
+
+                {qrReaderOpen && paymentIdToComplete === order.payment_id && (
+                  <CommonModal>
+                    <div className="flex flex-col gap-y-[20px]">
+                      <div className="bodyFont text-center">
+                        점주가 보여주는 QR코드를 찍으면 <br />
+                        <span className="font-bold">픽업이 완료</span>됩니다.
+                      </div>
+                      <QrReader
+                        constraints={{ facingMode: "environment" }}
+                        onResult={(result) => {
+                          if (result && !scannedRef.current) {
+                            const data = result?.getText();
+                            console.log(result, scannedRef.current);
+                            if (data && !scannedRef.current) {
+                              scannedRef.current = true;
+                              handleCompletePickup(order.payment_id, data);
+                            }
+                          }
+                        }}
+                        videoStyle={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                      <CommonBtn
+                        label="취소"
+                        category="white"
+                        onClick={() => setQrReaderOpen(false)}
+                        notBottom
+                        width="w-[300px]"
+                        className="border-none text-sub-red"
+                      />
+                    </div>
+                  </CommonModal>
                 )}
               </div>
             </div>
-          </>
+
+            {/* show cancel modal */}
+            {showCancelModal && (
+              <CommonModal desc="">
+                <div className="flex flex-col text-start gap-y-[20px]">
+                  <h3>주문을 취소하시겠어요?</h3>
+                  <div className="bodyFont">
+                    사장님이 픽업 확정하기 전까지 취소할 수 있어요. <br />
+                    3~5일 내에 환불이 진행돼요.
+                  </div>
+                  <div className="grid grid-cols-2 btnFont text-center">
+                    <div
+                      className="text-sub-red"
+                      onClick={() => handleClickCancelBtn(order.payment_id)}
+                    >
+                      주문 취소
+                    </div>
+                    <div
+                      className="text-custom-black"
+                      onClick={() => setShowCancelModal(false)}
+                    >
+                      뒤로 가기
+                    </div>
+                  </div>
+                </div>
+              </CommonModal>
+            )}
+
+            {/* show modal */}
+            {showModal && (
+              <CommonModal
+                desc={modalMsg}
+                confirmLabel="확인"
+                onConfirmClick={() => setShowModal(false)}
+                category="green"
+              />
+            )}
+          </div>
         );
       })}
     </>

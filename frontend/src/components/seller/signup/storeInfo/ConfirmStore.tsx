@@ -13,7 +13,7 @@ const ConfirmStore = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   return (
     <div>
       <div className="mx-[37px] mt-[155px] flex flex-col gap-y-[11px]">
-        <div className="text-[24px]">이렇게 설정할까요?</div>
+        <div className="titleFont">이렇게 설정할까요?</div>
       </div>
 
       <CommonBtn

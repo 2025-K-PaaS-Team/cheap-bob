@@ -36,7 +36,7 @@ const RemainPkg = ({
 
   return (
     <div className="mx-[20px] flex flex-col mt-[24px] bg-custom-white rounded-sm py-[23px] px-[19px] text-custom-black">
-      <div className="text-[24px] mb-[7px]">
+      <div className="titleFont mb-[7px]">
         현재 패키지 잔여 수량은 <br />{" "}
         <span className="font-bold">{remainPkg.current_stock}개</span> 입니다.
       </div>
@@ -44,7 +44,7 @@ const RemainPkg = ({
         {/* 기본값 */}
         <div className="flex flex-col py-[14px]">
           <div className="text-[14px]">판매 기본값</div>
-          <div className="text-[24px]">{remainPkg.initial_stock}</div>
+          <div className="titleFont">{remainPkg.initial_stock}</div>
         </div>
 
         {/* 마이너스 */}
@@ -53,7 +53,7 @@ const RemainPkg = ({
         {/* 주문 수량 */}
         <div className="flex flex-col py-[14px] ">
           <div className="text-[14px]">주문 수량</div>
-          <div className="text-[24px]">{remainPkg.purchased_stock}</div>
+          <div className="titleFont">{remainPkg.purchased_stock}</div>
         </div>
 
         {/* 플러스 */}
@@ -63,7 +63,7 @@ const RemainPkg = ({
         <div className="relative py-[14px] w-[115px] flex flex-row  bg-main-pale rounded-sm justify-center">
           <div className="flex flex-col justify-center">
             <div className="text-[14px]">일일 조정값</div>
-            <div className="text-[24px]">{remainPkg.adjustment_stock}</div>
+            <div className="titleFont">{remainPkg.adjustment_stock}</div>
           </div>
           <div className="absolute right-[5px] top-[35px] flex flex-col justify-center gap-y-[4px]">
             <div

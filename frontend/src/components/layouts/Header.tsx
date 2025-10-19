@@ -71,6 +71,7 @@ const Header = ({ layout }: HeaderProps) => {
         <div className="border border-1 border-main-deep flex flex-row justify-between px-[18px] py-[16px] h-[54px] mx-[20px] rounded-[50px]">
           <input
             type="text"
+            onClick={() => navigate("/c/stores/search")}
             className="focus:outline-none"
             placeholder={myLayout.searchPlaceholder}
           />

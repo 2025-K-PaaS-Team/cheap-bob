@@ -75,7 +75,7 @@ const ChangePackageDesc = () => {
 
   return (
     <div className="mt-[30px] px-[20px] w-full">
-      <div className="text-[24px]">
+      <div className="titleFont">
         변경할 <span className="font-bold">패키지의 설명</span>을 <br /> 입력해
         주세요.
       </div>

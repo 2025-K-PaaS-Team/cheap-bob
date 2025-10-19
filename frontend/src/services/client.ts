@@ -136,6 +136,14 @@ export const customerSearchApi = attachInterceptors(
   })
 );
 
+export const customerSearchHistoryApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/customer/history/search`,
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
 export const customerPaymentApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/payment`,

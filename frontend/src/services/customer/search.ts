@@ -1,5 +1,5 @@
 import type { StoreSearchType } from "@interface";
-import { customerSearchApi } from "@services/client";
+import { customerSearchApi, customerSearchHistoryApi } from "@services/client";
 
 // GET: get stores products
 export const getStores = async (page: number): Promise<StoreSearchType> => {
@@ -32,6 +32,32 @@ export const RemoveFavoriteStore = async (storeId: string) => {
 // GET: get favorites store
 export const GetFavoriteStore = async () => {
   const { data } = await customerSearchApi.get("/favorites");
+
+  return data;
+};
+
+// GET: get search history
+export const GetSearchHistory = async () => {
+  const { data } = await customerSearchHistoryApi.get("");
+
+  return data;
+};
+
+// DELETE: remove search name
+export const DeleteSearchByName = async (name: string) => {
+  const { data } = await customerSearchHistoryApi.delete(`/${name}`);
+
+  return data;
+};
+
+// GET: get stores by name
+export const GetStoreByName = async (name: string, page: number = 0) => {
+  const { data } = await customerSearchApi("/by-name", {
+    params: {
+      search_name: name,
+      page: page,
+    },
+  });
 
   return data;
 };

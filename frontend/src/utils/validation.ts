@@ -1,8 +1,8 @@
 export const validationRules = {
   storeName: {
     minLength: 1,
-    maxLength: 7,
-    errorMessage: "매장 이름은 1~7자여야 합니다.",
+    maxLength: 20,
+    errorMessage: "매장 이름은 1~20자여야 합니다.",
   },
   storeDesc: {
     minLength: 1,
@@ -18,8 +18,8 @@ export const validationRules = {
   },
   packageName: {
     minLength: 1,
-    maxLength: 15,
-    errorMessage: "패키지 이름은 1~15자여야 합니다.",
+    maxLength: 20,
+    errorMessage: "패키지 이름은 1~20자여야 합니다.",
   },
   packageDesc: {
     minLength: 1,
@@ -36,28 +36,28 @@ export const validationRules = {
     errorMessage: "패키지의 가격은 1000원 이상이어야 합니다.",
   },
   packageStock: {
-    minStock: 0,
+    minStock: 1,
     errorMessage: "패키지의 초기 수량은 양수여야 합니다.",
   },
 };
 
 export const validateLength = (value: string, min: number, max: number) =>
-  value.length >= min && value.length <= max;
+  value?.length >= min && value?.length <= max;
 
 export const validatePattern = (value: string, pattern: RegExp) =>
-  pattern.test(value);
+  pattern?.test(value);
 
 export const validateSelect = (value: number, min: number, max: number) =>
   value >= min && value <= max;
 
 export const validateNum = (value: number, min: number) => value >= min;
 
-export const validateUrl = (raw?: string) => {
-  const s = (raw ?? "").trim();
-  if (!s) return true;
+export const validateUrl = (url: string) => {
+  if (!url) return true;
   try {
-    new URL(/^https?:\/\//i.test(s) ? s : `https://${s}`);
-    return true;
+    const normalized = normalizeUrl(url) ?? "";
+    const urlPattern = /^(https?:\/\/)([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(\/\S*)?$/;
+    return urlPattern.test(normalized);
   } catch {
     return false;
   }

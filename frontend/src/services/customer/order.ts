@@ -15,7 +15,7 @@ export const getOrders = async (): Promise<OrderResponseType> => {
 
 // GET: get current order
 export const getCurrentOrders = async (): Promise<OrderResponseType> => {
-  const { data } = await customerOrderApi.get("/current");
+  const { data } = await customerOrderApi.get("/today");
   return data;
 };
 
@@ -28,17 +28,16 @@ export const getOrderDetail = async (
   return data;
 };
 
-// // DELETE: delete order
-// export const deleteOrder = async (
-//   paymentId: string,
-//   body: CancelOrderRequestType
-// ): Promise<OrderDeleteResponseType> => {
-//   const { data } = await customerOrderApi.delete(`/${paymentId}`, {
-//     data: body,
-//   });
+// DELETE: delete order
+export const deleteOrder = async (paymentId: string) => {
+  const { data } = await customerOrderApi.delete(`/${paymentId}/cancel`, {
+    data: {
+      reason: "형식을 맞추기 위한 reason",
+    },
+  });
 
-//   return data;
-// };
+  return data;
+};
 
 // PATCH: patch pickup complete
 export const completePickup = async (

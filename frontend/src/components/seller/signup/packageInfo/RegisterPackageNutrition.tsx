@@ -12,9 +12,9 @@ const RegisterPackageNutrition = ({
 }: SellerSignupPkgProps) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const { packageSelect } = validationRules;
 
   const handleClickNext = () => {
-    const { packageSelect } = validationRules;
     if (
       !validateSelect(
         pkg.nutrition_types.length,
@@ -45,13 +45,13 @@ const RegisterPackageNutrition = ({
   };
 
   return (
-    <div className="flex h-full mx-[20px] flex-col mt-[69px] gap-y-[11px]">
-      <div className="text-[16px]">2/4</div>
-      <div className="text-[24px]">
-        패키지의 <span className="font-bold">특징</span>은 무엇인가요?
-      </div>
-      <div className="text-[14px] mb-[36px]">
-        최대 3개까지 선택할 수 있어요.
+    <div className="flex flex-col mx-[20px] flex-col mt-[20px] gap-y-[40px]">
+      <div className="text-main-deep font-bold bodyFont">3/5</div>
+      <div className="flex flex-col gap-y-[20px]">
+        <div className="titleFont">
+          <span className="font-bold">패키지의 영양 특징</span>은 무엇인가요?
+        </div>
+        <div className="hintFont">최대 3개까지 선택할 수 있어요.</div>
       </div>
 
       {/* nutrition list */}
@@ -63,7 +63,7 @@ const RegisterPackageNutrition = ({
       />
 
       <CommonBtn
-        category="grey"
+        category="transparent"
         label="이전"
         onClick={() => handleClickPrev()}
         notBottom
@@ -71,7 +71,15 @@ const RegisterPackageNutrition = ({
         width="w-[100px]"
       />
       <CommonBtn
-        category="green"
+        category={
+          validateSelect(
+            pkg.nutrition_types.length,
+            packageSelect.minSelect,
+            packageSelect.maxSelect
+          )
+            ? "green"
+            : "grey"
+        }
         label="다음"
         onClick={() => handleClickNext()}
         notBottom

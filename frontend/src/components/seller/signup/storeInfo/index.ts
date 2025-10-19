@@ -3,3 +3,4 @@ export { default as RegisterDesc } from "./RegisterDesc";
 export { default as RegisterAddr } from "./RegisterAddr";
 export { default as RegisterNum } from "./RegisterNum";
 export { default as ConfirmStore } from "./ConfirmStore";
+export { default as RegisterStoreRepImg } from "./RegisterStoreRepImg";

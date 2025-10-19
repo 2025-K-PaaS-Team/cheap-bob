@@ -8,7 +8,7 @@ const ProgressBar = ({ pageIdx }: ProgressBarProps) => {
   const handleStep = (pageIdx: number): number => {
     if (pageIdx < 7) {
       return 0;
-    } else if (pageIdx < 11) {
+    } else if (pageIdx < 10) {
       return 1;
     } else {
       return 2;
@@ -23,9 +23,9 @@ const ProgressBar = ({ pageIdx }: ProgressBarProps) => {
         <div key={idx} className="flex flex-col items-center">
           <div className="h-[56px] flex items-center">{item}</div>
           {idx === currentStep ? (
-            <hr className="w-full border-0 h-[3px] bg-black" />
+            <hr className="w-full border-0 h-[3px] bg-main-deep" />
           ) : (
-            <hr className="w-full border-0 h-[3px] bg-black/20" />
+            <hr />
           )}
         </div>
       ))}

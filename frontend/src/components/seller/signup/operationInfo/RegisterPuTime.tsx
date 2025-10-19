@@ -1,9 +1,10 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { CommonPuTime } from "@components/seller/common";
 import type { SellerSignupProps } from "@interface";
-import { useSignupStore } from "@store";
-import { validationRules } from "@utils";
-import { useEffect, useState } from "react";
+import { registerStore, registerStoreImg } from "@services";
+import { useSignupImageStore, useSignupStore } from "@store";
+import { formatErrMsg } from "@utils";
+import { useState } from "react";
 
 const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const {
@@ -16,13 +17,48 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const { form: imgForm } = useSignupImageStore();
 
-  const handleClickNext = () => {
-    const { storeAddr } = validationRules;
-    if (!form.address_info.address || !form.address_info.postal_code) {
-      setModalMsg(storeAddr.errorMessage);
+  const handleRegisterStore = async () => {
+    try {
+      const res = await registerStore(form);
+      console.log("등록 성공:", res);
+    } catch (err: unknown) {
+      console.error("등록 실패:", err);
+      throw err;
+    }
+  };
+
+  const handleRegisterStoreImg = async () => {
+    try {
+      const files = imgForm.images.map((it) => it.file);
+      const res = await registerStoreImg(files);
+      console.log("이미지 업로드 성공:", res);
+    } catch (err: any) {
+      console.error("이미지 업로드 실패:", err);
+      throw err;
+    }
+  };
+
+  const handleClickNext = async () => {
+    const hasEmptyTime = form.operation_times.some(
+      (t) => !t.pickup_start_time || !t.pickup_end_time
+    );
+
+    if (hasEmptyTime) {
+      setModalMsg("픽업 시간을 설정해 주세요.");
       setShowModal(true);
       return;
+    }
+
+    // register api
+    try {
+      await handleRegisterStore();
+      await handleRegisterStoreImg();
+      // setPageIdx(pageIdx + 1);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
     }
     setPageIdx(pageIdx + 1);
   };
@@ -31,18 +67,12 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     setPageIdx(pageIdx - 1);
   };
 
-  useEffect(() => {
-    console.log(form);
-  }, [form]);
-
   return (
-    <div className="flex mx-[20px] flex-col mt-[69px] gap-y-[11px]">
-      <div className="text-[16px]">2/4</div>
-      <div className="text-[24px]">
-        할인팩 <span className="font-bold">픽업 시간</span>을 <br />{" "}
-        설정해주세요.
-      </div>
+    <div className="flex mx-[20px] flex-col mt-[20px]  gap-y-[20px]">
+      {/* progress */}
+      <div className="text-main-deep font-bold bodyFont">2/2</div>
 
+      {/* pu time */}
       <CommonPuTime
         form={form.operation_times}
         setForm={(times) =>
@@ -73,7 +103,6 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
         className="absolute right-[20px] bottom-[38px]"
         width="w-[250px]"
       />
-
       {/* show modal */}
       {showModal && (
         <CommonModal

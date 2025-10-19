@@ -65,7 +65,7 @@ const BillingHistory = () => {
           건의 주문 내역이 있습니다.
         </div>
         <div className="text-[16px] font-bold">25.09.08</div>
-        <div className="bg-custom-white rounded-sm px-[17px] py-[20px] text-[16px] gap-y-[7px] flex flex-col">
+        <div className="bg-white shadow rounded px-[17px] py-[20px] text-[16px] gap-y-[7px] flex flex-col">
           <div className="justify-between flex-row flex">
             <div className="font-bold">(패키지 이름)</div>
             <div>1개</div>

@@ -114,7 +114,7 @@ const StoreList = () => {
         setSelected={setSelected}
       />
 
-      <div className="flex flex-col gap-y-[10px] justify-center">
+      <div className="flex flex-col gap-y-[10px] justify-center mb-[30px]">
         {filteredStores ? (
           <StoreBox
             stores={filteredStores}

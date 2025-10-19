@@ -12,7 +12,7 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
   const todayDow = (dayjs().day() + 6) % 7;
 
   const handleClickStore = (store: StoreSearchBaseType) => {
-    navigate(`${store.store_id}`, { state: { store } });
+    navigate(`/c/stores/${store.store_id}`, { state: { store } });
   };
 
   return (
@@ -80,7 +80,7 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
             {/* third row - pkg remian qty */}
             <div className="flex flex-row justify-between tagFont">
               {/* remain qty */}
-              {store.products[0].current_stock == 0 ? (
+              {store.products[0].current_stock < 1 ? (
                 <div className="bg-[#E7E7E7] rounded-sm py-[5.5px] px-[10px]">
                   패키지 <span className="text-sub-orange font-bold">품절</span>
                 </div>

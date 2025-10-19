@@ -110,11 +110,23 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     setForm(next);
   };
 
+  const [rawTimeMap, setRawTimeMap] = useState<
+    Record<number, { open: string; close: string }>
+  >(() => {
+    const initMap: Record<number, { open: string; close: string }> = {};
+    form.forEach((f) => {
+      const [h, m] = parseTimeParts(f.open_time);
+      const [ch, cm] = parseTimeParts(f.close_time);
+      initMap[f.day_of_week] = { open: h + m, close: ch + cm };
+    });
+    return initMap;
+  });
+
   return (
     <div className="flex flex-col gap-y-[20px]">
       {/* operation days */}
-      <div className="flex flex-col gap-y-[10px] mt-[40px] pb-[40px] border-b-1 border-black/10">
-        <h3>운영 요일</h3>
+      <div className="flex flex-col gap-y-[10px]">
+        <h3>영업 요일</h3>
         <div className="bodyFont">
           매장을 운영하는 날짜를 모두 선택해 주세요.
         </div>
@@ -127,7 +139,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
               <div className="flex justify-center" key={day.idx}>
                 <div
                   className={`hintFont font-bold h-[36px] w-[36px] flex justify-center items-center rounded-full cursor-pointer ${
-                    enabled ? "bg-main-deep text-white" : ""
+                    enabled ? "bg-main-deep text-white" : "bg-custom-white"
                   }`}
                   onClick={() => handleClickDays(day.idx)}
                   title={enabled ? "운영" : "휴무"}
@@ -142,30 +154,28 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
 
       {/* operation time */}
       <div className="flex flex-col gap-y-[10px]">
-        <h3>매장 운영 시간</h3>
-        <div className="bodyFont">매장을 운영하는 시간을 입력해 주세요.</div>
+        <h3>영업 시간</h3>
+        <div className="bodyFont">매장이 영업하는 시간을 설정해 주세요.</div>
 
         {/* batch checkbox */}
-        <div className="flex flex-row gap-x-[22px]">
+        <div className="flex flex-row gap-x-[10px]">
           <input
             type="checkbox"
             id="batchTime"
             checked={isBatch}
             onChange={() => setIsBatch((s) => !s)}
           />
-          <span className="bodyFont">시간 일괄 적용 (운영 요일만 적용)</span>
+          <span className="bodyFont">시간 일괄 적용</span>
         </div>
 
         {isBatch ? (
           // 배치 모드
-          <div className="flex flex-col gap-y-[20px] justify-center items-center">
+          <div className="flex flex-col gap-y-[10px] justify-center items-center">
             {/* open */}
-            <span className="w-[70px] font-bold hintFont text-center">
-              매장 오픈
-            </span>
+            <span className="text-custom-black font-bold">매장 오픈</span>
             <div className="flex flex-row gap-x-[10px] items-center justify-center text-[20px]">
               <input
-                className="text-center bg-custom-white rounded-sm w-[50px] h-[44px]"
+                className="text-center bg-[#E7E7E7] rounded-sm w-[50px] h-[44px]"
                 value={batchOpen[0]}
                 onChange={(e) =>
                   handleBatchChange("open", "hour", e.target.value)
@@ -175,7 +185,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
               />
               <span>시</span>
               <input
-                className="text-center bg-custom-white rounded-sm w-[50px] h-[44px]"
+                className="text-center bg-[#E7E7E7] rounded-sm w-[50px] h-[44px]"
                 value={batchOpen[1]}
                 onChange={(e) =>
                   handleBatchChange("open", "min", e.target.value)
@@ -185,14 +195,12 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
               />
               <span>분</span>
             </div>
-
-            <hr className="border-0 h-[1px] bg-black my-[5px]" />
-
+            <hr className="border-0 h-[1px] w-full bg-[#E7E7E7]" />
             {/* close */}
-            <span className="w-[70px] font-bold">매장 마감</span>
+            <span className="text-custom-black font-bold">매장 마감</span>
             <div className="flex flex-row gap-x-[10px] items-center justify-center text-[20px]">
               <input
-                className="text-center bg-custom-white rounded-sm w-[50px] h-[44px]"
+                className="text-center bg-[#E7E7E7] rounded-sm w-[50px] h-[44px]"
                 value={batchClose[0]}
                 onChange={(e) =>
                   handleBatchChange("close", "hour", e.target.value)
@@ -202,7 +210,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
               />
               <span>시</span>
               <input
-                className="text-center bg-custom-white rounded-sm w-[50px] h-[44px]"
+                className="text-center bg-[#E7E7E7] rounded-sm w-[50px] h-[44px]"
                 value={batchClose[1]}
                 onChange={(e) =>
                   handleBatchChange("close", "min", e.target.value)
@@ -215,97 +223,121 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
           </div>
         ) : (
           // 일반 모드
-          <div className="flex flex-col items-center w-full">
-            {sortedForm.map((day) => {
-              const [openHour, openMin] = parseTimeParts(day.open_time);
-              const [closeHour, closeMin] = parseTimeParts(day.close_time);
-              const disabled = !day.is_open_enabled;
+          <div className="flex flex-col">
+            <div className="grid grid-cols-8 w-full items-center">
+              <div className="col-span-2"></div>
+              <div className="font-bold col-span-2">매장 오픈</div>
+              <div className="col-span-2"></div>
+              <div className="font-bold col-span-2">매장 마감</div>
+            </div>
+            <div className="flex flex-col items-center w-full">
+              {sortedForm
+                .filter((day) => day.is_open_enabled)
+                .map((day) => {
+                  const disabled = !day.is_open_enabled;
 
-              return (
-                <div
-                  key={day.day_of_week}
-                  className="grid grid-cols-8 w-full items-center"
-                >
-                  <div className="font-bold text-[14px] h-[40px] flex items-center justify-center">
-                    {daysOfWeek[day.day_of_week].label}
-                  </div>
+                  const formatWithColon = (val: string) => {
+                    const numbers = val.replace(/\D/g, "").slice(0, 4);
+                    if (numbers.length <= 2) return numbers; // 시만 입력
+                    return numbers.slice(0, 2) + ":" + numbers.slice(2); // 시+분
+                  };
 
-                  {/* Open time */}
-                  <div className="col-span-3 text-center flex flex-row gap-x-[5px] justify-center">
-                    <input
-                      className="w-[36px] text-center bg-custom-white rounded disabled:opacity-50"
-                      value={openHour}
-                      onChange={(e) =>
-                        handleSingleChange(
-                          day.day_of_week,
-                          "open",
-                          "hour",
-                          e.target.value
-                        )
-                      }
-                      inputMode="numeric"
-                      placeholder="hh"
-                      disabled={disabled}
-                    />
-                    <div>시</div>
-                    <input
-                      className="w-[36px] text-center bg-custom-white rounded disabled:opacity-50"
-                      value={openMin}
-                      onChange={(e) =>
-                        handleSingleChange(
-                          day.day_of_week,
-                          "open",
-                          "min",
-                          e.target.value
-                        )
-                      }
-                      inputMode="numeric"
-                      placeholder="mm"
-                      disabled={disabled}
-                    />
-                    <div>분</div>
-                  </div>
+                  return (
+                    <div className="flex flex-col w-full hintFont">
+                      <div
+                        key={day.day_of_week}
+                        className="grid grid-cols-8 w-full items-center"
+                      >
+                        <div className="font-bold text-[14px] h-[40px] flex items-center justify-center">
+                          {daysOfWeek[day.day_of_week].label}
+                        </div>
 
-                  <div className="text-center font-bold">~</div>
+                        {/* Open time */}
+                        <div className="col-span-3 text-center flex flex-row justify-center border-b border-[#393939]">
+                          <input
+                            className="w-[50px] text-center"
+                            value={formatWithColon(
+                              rawTimeMap[day.day_of_week]?.open || ""
+                            )}
+                            onChange={(e) => {
+                              const onlyNum = e.target.value
+                                .replace(/\D/g, "")
+                                .slice(0, 4);
+                              setRawTimeMap((prev) => ({
+                                ...prev,
+                                [day.day_of_week]: {
+                                  ...prev[day.day_of_week],
+                                  open: onlyNum,
+                                },
+                              }));
 
-                  {/* Close time */}
-                  <div className="col-span-3 text-center flex flex-row gap-x-[5px] justify-center">
-                    <input
-                      className="w-[36px] text-center bg-custom-white rounded disabled:opacity-50"
-                      value={closeHour}
-                      onChange={(e) =>
-                        handleSingleChange(
-                          day.day_of_week,
-                          "close",
-                          "hour",
-                          e.target.value
-                        )
-                      }
-                      inputMode="numeric"
-                      placeholder="hh"
-                      disabled={disabled}
-                    />
-                    <div>시</div>
-                    <input
-                      className="w-[36px] text-center bg-custom-white rounded disabled:opacity-50"
-                      value={closeMin}
-                      onChange={(e) =>
-                        handleSingleChange(
-                          day.day_of_week,
-                          "close",
-                          "min",
-                          e.target.value
-                        )
-                      }
-                      inputMode="numeric"
-                      placeholder="mm"
-                      disabled={disabled}
-                    />
-                    <div>분</div>
-                  </div>
-                </div>
-              );
-            })}
+                              const hh = onlyNum.slice(0, 2).padStart(2, "0");
+                              const mm = onlyNum.slice(2).padEnd(2, "0");
+                              handleSingleChange(
+                                day.day_of_week,
+                                "open",
+                                "hour",
+                                hh
+                              );
+                              handleSingleChange(
+                                day.day_of_week,
+                                "open",
+                                "min",
+                                mm
+                              );
+                            }}
+                            inputMode="numeric"
+                            placeholder="hhmm"
+                            disabled={disabled}
+                          />
+                        </div>
+
+                        <div className="text-center font-bold">~</div>
+
+                        {/* Close time */}
+                        <div className="col-span-3 text-center flex flex-row justify-center border-b border-[#393939]">
+                          <input
+                            className="w-[50px] text-center"
+                            value={formatWithColon(
+                              rawTimeMap[day.day_of_week]?.close || ""
+                            )}
+                            onChange={(e) => {
+                              const onlyNum = e.target.value
+                                .replace(/\D/g, "")
+                                .slice(0, 4);
+                              setRawTimeMap((prev) => ({
+                                ...prev,
+                                [day.day_of_week]: {
+                                  ...prev[day.day_of_week],
+                                  close: onlyNum,
+                                },
+                              }));
+
+                              const hh = onlyNum.slice(0, 2).padStart(2, "0");
+                              const mm = onlyNum.slice(2).padEnd(2, "0");
+                              handleSingleChange(
+                                day.day_of_week,
+                                "close",
+                                "hour",
+                                hh
+                              );
+                              handleSingleChange(
+                                day.day_of_week,
+                                "close",
+                                "min",
+                                mm
+                              );
+                            }}
+                            inputMode="numeric"
+                            placeholder="hhmm"
+                            disabled={disabled}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
           </div>
         )}
       </div>

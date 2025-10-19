@@ -54,6 +54,10 @@ export type StorePaymentType = {
   portone_channel_id: string;
 };
 
+export type RegisterPaymentType = StorePaymentType & {
+  portone_secret_key: string;
+};
+
 export type StorePaymentResponseType = StorePaymentType & {
   store_id: string;
 };

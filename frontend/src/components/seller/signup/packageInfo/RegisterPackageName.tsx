@@ -3,7 +3,7 @@ import type { SellerSignupPkgProps } from "@interface";
 import { validateLength, validationRules } from "@utils";
 import { useState } from "react";
 
-const RegisterPackageDesc = ({
+const RegisterPackageName = ({
   pageIdx,
   setPageIdx,
   pkg,
@@ -11,57 +11,49 @@ const RegisterPackageDesc = ({
 }: SellerSignupPkgProps) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
-  const { packageDesc } = validationRules;
+  const { packageName } = validationRules;
 
   const handleClickNext = () => {
     if (
       !validateLength(
-        pkg?.description,
-        packageDesc.minLength,
-        packageDesc.maxLength
+        pkg?.product_name,
+        packageName.minLength,
+        packageName.maxLength
       )
     ) {
-      setModalMsg(packageDesc.errorMessage);
+      setModalMsg(packageName.errorMessage);
       setShowModal(true);
       return;
     }
+
     setPageIdx(pageIdx + 1);
   };
 
-  const handleClickPrev = () => {
-    setPageIdx(pageIdx - 1);
-  };
+  console.log(pkg);
 
   return (
     <div className="flex h-full mx-[20px] flex-col mt-[20px] gap-y-[11px]">
-      <div className="text-main-deep font-bold bodyFont">2/5</div>
+      <div className="text-main-deep font-bold bodyFont">1/5</div>
       <div className="titleFont">
-        <span className="font-bold">패키지 소개</span>를<br /> 입력해 주세요.
+        <span className="font-bold">패키지 이름</span>을<br /> 입력해 주세요.
       </div>
+
       {/* input box */}
-      <textarea
-        className="w-full h-[145px] rounded border border-[#E7E7E7] text-[16px] mt-[40px] p-[8px]"
+      <input
+        className="w-full h-[46px] border-b  border-[#393939] hintFont mt-[40px]"
         placeholder="텍스트를 입력하세요"
-        value={pkg?.description}
+        value={pkg?.product_name}
         onChange={(e) =>
-          setPkg((prev) => ({ ...prev, description: e.target.value }))
+          setPkg((prev) => ({ ...prev, product_name: e.target.value }))
         }
       />
 
       <CommonBtn
-        category="transparent"
-        label="이전"
-        onClick={() => handleClickPrev()}
-        notBottom
-        className="absolute left-[20px] bottom-[38px]"
-        width="w-[100px]"
-      />
-      <CommonBtn
         category={
           validateLength(
-            pkg?.description,
-            packageDesc.minLength,
-            packageDesc.maxLength
+            pkg?.product_name,
+            packageName.minLength,
+            packageName.maxLength
           )
             ? "green"
             : "grey"
@@ -83,4 +75,4 @@ const RegisterPackageDesc = ({
   );
 };
 
-export default RegisterPackageDesc;
+export default RegisterPackageName;

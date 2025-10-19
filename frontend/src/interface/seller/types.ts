@@ -43,13 +43,6 @@ export type GetStoreOrderType = {
 
 export type UpdateOrderAcceptType = OrderBaseType;
 
-export type CancelOrderResponseType = {
-  payment_id: string;
-  status: string;
-  message: string;
-  refunded_amount: number;
-};
-
 export type GetQrCodeType = QrBaseType & {
   payment_id: string;
   created_at: TimeStamp;

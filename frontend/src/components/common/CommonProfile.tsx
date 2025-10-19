@@ -33,45 +33,55 @@ const CommonProfile = ({
       <div className="bg-custom-white rounded-b flex flex-col w-[322px] px-[16px] py-[20px] justify-start gap-y-[8px]">
         {/* nutrition_part */}
         <div className="bodyFont text-custom-black">영양 목표</div>
-        {nutrition_goal.map((part, idx) => (
-          <div
-            key={idx}
-            className="bg-main-pale text-main-deep w-fit border border-main-deep rounded py-[7px] px-[16px] tagFont font-bold"
-          >
-            {part}
-          </div>
-        ))}
+        <div className="flex flex-row flex-wrap gap-x-[10px] gap-y-[10px]">
+          {nutrition_goal.map((part, idx) => (
+            <div
+              key={idx}
+              className="bg-main-pale text-main-deep w-fit border border-main-deep rounded py-[7px] px-[16px] tagFont font-bold"
+            >
+              {part}
+            </div>
+          ))}
+        </div>
+
         {/* prefer_menu */}
         <div className="bodyFont text-custom-black">선호 메뉴</div>
-        {prefer_menu.map((part, idx) => (
-          <div
-            key={idx}
-            className="bg-main-pale text-main-deep w-fit border border-main-deep rounded py-[7px] px-[16px] tagFont font-bold"
-          >
-            {part}
-          </div>
-        ))}
+        <div className="flex flex-row flex-wrap gap-x-[10px] gap-y-[10px]">
+          {prefer_menu.map((part, idx) => (
+            <div
+              key={idx}
+              className="bg-main-pale text-main-deep w-fit border border-main-deep rounded py-[7px] px-[16px] tagFont font-bold"
+            >
+              {part}
+            </div>
+          ))}
+        </div>
+
         {/* prefer_topping */}
         <div className="bodyFont text-custom-black">선호 토핑</div>
-        {prefer_topping.map((part, idx) => (
-          <div
-            key={idx}
-            className="bg-main-pale text-main-deep w-fit border border-main-deep rounded py-[7px] px-[16px] tagFont font-bold"
-          >
-            {part}
-          </div>
-        ))}
+        <div className="flex flex-row flex-wrap gap-x-[10px] gap-y-[10px]">
+          {prefer_topping.map((part, idx) => (
+            <div
+              key={idx}
+              className="bg-main-pale text-main-deep w-fit border border-main-deep rounded py-[7px] px-[16px] tagFont font-bold"
+            >
+              {part}
+            </div>
+          ))}
+        </div>
 
         {/* allergy */}
         <div className="bodyFont text-custom-black">알레르기</div>
-        {allergy.map((part, idx) => (
-          <div
-            key={idx}
-            className="bg-[#e7e7e7] text-custom-black w-fit rounded py-[7px] px-[16px] tagFont font-bold"
-          >
-            {part}
-          </div>
-        ))}
+        <div className="flex flex-row flex-wrap gap-x-[10px] gap-y-[10px]">
+          {allergy.map((part, idx) => (
+            <div
+              key={idx}
+              className="bg-[#e7e7e7] text-custom-black w-fit rounded py-[7px] px-[16px] tagFont font-bold"
+            >
+              {part}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

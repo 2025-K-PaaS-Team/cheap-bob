@@ -1,4 +1,4 @@
-import { CommonModal } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
 import { StoreBox } from "@components/customer/storeList";
 import type { StoreSearchBaseType } from "@interface";
 import {
@@ -8,8 +8,10 @@ import {
 } from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 const Favorite = () => {
+  const navigate = useNavigate();
   const [stores, setStores] = useState<StoreSearchBaseType[]>();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -59,9 +61,14 @@ const Favorite = () => {
         <div className="text-[20px] pb-[17px] font-bold">
           관심 가게가 비어있어요.
         </div>
-        <div className="text-[12px] font-base">
+        <div className="text-[12px] font-base pb-[46px]">
           다양한 랜덤팩을 주문하고 픽업해보세요.
         </div>
+        <CommonBtn
+          label="실시간 랜덤팩 보러가기"
+          notBottom={true}
+          onClick={() => navigate("/c/stores")}
+        />
       </div>
     );
   }

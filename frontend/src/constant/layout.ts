@@ -91,7 +91,7 @@ export const layoutMap = {
   },
   Order: {
     back: false,
-    title: "주문 현황",
+    title: "주문 내역",
     centerIcon: false,
     loc: false,
     heart: false,
