@@ -148,7 +148,7 @@ const ChangeOperationInfo = () => {
             {item.label}
           </div>
           {reservation.length !== 0 && item.label === "운영 시간 변경" && (
-            <div className="tagFont h-fit bg-main-pale border border-main-deep font-main-deep rounded-sm py-[8px] px-[16px]">
+            <div className="tagFont font-bold bg-main-pale border border-main-deep text-main-deep rounded-sm py-[8px] px-[16px]">
               변경 예약중
             </div>
           )}
