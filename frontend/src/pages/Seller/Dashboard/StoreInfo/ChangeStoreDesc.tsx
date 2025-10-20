@@ -54,7 +54,7 @@ const ChangeStoreDesc = () => {
       </div>
       {/* input box */}
       <textarea
-        className="w-full h-[100px] p-5 text-start bg-custom-white text-[16px] mt-[40px]"
+        className="w-full h-[145px] rounded border border-[#E7E7E7] text-[16px] mt-[40px] p-[8px]"
         placeholder="매장 설명을 입력해 주세요"
         value={value}
         onChange={(e) => setValue(e.target.value)}

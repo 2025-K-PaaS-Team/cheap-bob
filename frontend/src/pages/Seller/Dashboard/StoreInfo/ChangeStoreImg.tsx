@@ -141,7 +141,7 @@ const ChangeStoreImg = () => {
       </div>
 
       {/* notice */}
-      <div className="hint bg-[#E7E7E7] rounded py-[20px] px-[8px]">
+      <div className="hintFont bg-[#E7E7E7] rounded py-[20px] px-[8px]">
         <span className="font-bold">가게 외부 사진</span>을 대표 사진으로
         등록하면
         <br /> 손님들이 가게를 더 잘 찾아오실 수 있어요.
@@ -151,7 +151,7 @@ const ChangeStoreImg = () => {
       <div className="flex flex-col gap-y-[20px]">
         <h2>다른 사진도 있나요?</h2>
         {/* preview */}
-        {imgs.length > 0 && (
+        {imgs.length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
             {imgs.slice(1).map((img, idx) => (
               <div className="relative" key={idx}>
@@ -171,6 +171,14 @@ const ChangeStoreImg = () => {
               </div>
             ))}
           </div>
+        ) : (
+          <div className="relative h-[100px] bg-custom-white">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col">
+              <div className="hintFont text-custom-black">
+                등록된 사진이 없어요.
+              </div>
+            </div>
+          </div>
         )}
         {/* upload picture button */}
         <div className="w-full flex justify-center">
@@ -178,7 +186,7 @@ const ChangeStoreImg = () => {
             label={`제품 사진 등록 (${imgs.length - 1}/10)`}
             notBottom
             onClick={() => handleClickUpload(false)}
-            className="font-normal"
+            className="btnFont"
             category="white"
           />
         </div>

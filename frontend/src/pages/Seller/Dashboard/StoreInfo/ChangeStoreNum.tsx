@@ -80,9 +80,11 @@ const ChangeStoreNum = () => {
       </div>
       {/* input box */}
       <div className="mt-[40px] gap-y-[11px]">
-        <div className="text-[16px]">매장 전화번호 (*필수)</div>
+        <h3>
+          매장 전화번호 <span className="text-sub-orange">(필수)</span>
+        </h3>
         <input
-          className="w-full h-[46px] text-center bg-custom-white text-[16px]"
+          className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
           placeholder="매장 전화번호를 입력해 주세요"
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -91,11 +93,11 @@ const ChangeStoreNum = () => {
 
       {/* other sns */}
       <div className="mt-[39px] flex flex-col gap-y-[11px]">
-        <div className="text-[20px]">다른 SNS도 있나요?</div>
+        <div className="text-[20px]">다른 연락처도 있나요?</div>
         <div className="flex flex-row">
           <div className="text-[14px] w-[97px] flex items-center">홈페이지</div>
           <input
-            className="w-full h-[40px] p-3 text-center bg-custom-white text-[16px]"
+            className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
             value={sns?.homepage}
             onChange={(e) =>
               setSns((prev) => ({ ...prev, homepage: e.target.value }))
@@ -113,7 +115,7 @@ const ChangeStoreNum = () => {
             인스타그램
           </div>
           <input
-            className="w-full h-[40px] p-3 text-center bg-custom-white text-[16px]"
+            className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
             value={sns?.instagram}
             onChange={(e) =>
               setSns((prev) => ({ ...prev, instagram: e.target.value }))
@@ -131,7 +133,7 @@ const ChangeStoreNum = () => {
             X (Twitter)
           </div>
           <input
-            className="w-full h-[40px] p-3 text-center bg-custom-white text-[16px]"
+            className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
             value={sns?.x}
             onChange={(e) => setSns((prev) => ({ ...prev, x: e.target.value }))}
             onBlur={(e) =>
