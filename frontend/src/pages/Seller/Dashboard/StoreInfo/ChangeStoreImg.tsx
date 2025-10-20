@@ -75,23 +75,33 @@ const ChangeStoreImg = () => {
     const oldImgs = [...imgs];
 
     // 업로드
-    const res = await AddStoreImg(files);
-    const newImgs = res.images ?? [];
-    setImgs(newImgs);
+    try {
+      const res = await AddStoreImg(files);
+      const newImgs = res.images ?? [];
+      setImgs(newImgs);
 
-    // 선택한 파일이 대표 사진 변경용이면 새로 추가된 이미지 찾기
-    if (fileInputRef.current?.dataset.isMain === "true") {
-      const newImage = newImgs.find(
-        (img) => !oldImgs.some((old) => old.image_id === img.image_id)
-      );
-      if (newImage) {
-        await ChangeStoreMainImg(newImage.image_id);
-        // 다시 전체 이미지 가져오기
-        await handleGetStoreImg();
+      // 선택한 파일이 대표 사진 변경용이면 새로 추가된 이미지 찾기
+      if (fileInputRef.current?.dataset.isMain === "true") {
+        const newImage = newImgs.find(
+          (img) => !oldImgs.some((old) => old.image_id === img.image_id)
+        );
+        if (newImage) {
+          try {
+            await ChangeStoreMainImg(newImage.image_id);
+            await handleGetStoreImg();
+          } catch (err) {
+            setModalMsg(formatErrMsg(err));
+            setShowModal(true);
+          }
+        }
       }
+    } catch (err) {
+      console.log(err);
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    } finally {
+      e.target.value = "";
     }
-
-    e.target.value = "";
   };
 
   const handleClickDelete = async (image_id: string) => {
@@ -134,7 +144,7 @@ const ChangeStoreImg = () => {
             label="대표 사진 변경"
             notBottom
             onClick={() => handleClickUpload(true)}
-            className="font-normal"
+            className="btnFont"
             category="white"
           />
         </div>

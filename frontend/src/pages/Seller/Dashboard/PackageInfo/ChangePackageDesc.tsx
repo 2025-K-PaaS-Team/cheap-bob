@@ -74,21 +74,28 @@ const ChangePackageDesc = () => {
   if (loading) return <div className="mt-[30px] px-[20px]">로딩중...</div>;
 
   return (
-    <div className="mt-[30px] px-[20px] w-full">
-      <div className="titleFont">
-        변경할 <span className="font-bold">패키지의 설명</span>을 <br /> 입력해
-        주세요.
+    <div className="my-[30px] px-[20px] w-full flex flex-1 flex-col gap-y-[20px]">
+      <div className="flex flex-col flex-1 gap-y-[40px]">
+        <div className="titleFont">
+          변경할 <span className="font-bold">패키지의 설명</span>을 <br />{" "}
+          입력해 주세요.
+        </div>
+
+        <textarea
+          className="w-full h-[145px] rounded border border-[#E7E7E7] text-[16px] p-[8px]"
+          placeholder="패키지의 설명을 입력해 주세요"
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+          maxLength={200}
+        />
       </div>
 
-      <textarea
-        className="w-full h-[145px] rounded border border-[#E7E7E7] text-[16px] mt-[40px] p-[8px]"
-        placeholder="패키지의 설명을 입력해 주세요"
-        value={desc}
-        onChange={(e) => setDesc(e.target.value)}
-        maxLength={200}
+      <CommonBtn
+        label={"저장"}
+        onClick={handleSubmit}
+        notBottom
+        category="green"
       />
-
-      <CommonBtn label={"저장"} onClick={handleSubmit} category="green" />
 
       {showModal && (
         <CommonModal

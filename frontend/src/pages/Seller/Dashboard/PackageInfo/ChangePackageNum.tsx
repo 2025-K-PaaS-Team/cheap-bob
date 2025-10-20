@@ -67,20 +67,27 @@ const ChangePackageNum = () => {
   if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
 
   return (
-    <div className="flex flex-col mt-[30px] px-[20px]">
-      {pkg && (
-        <CommonPkgNum
-          pkg={pkg}
-          setPkg={(next) =>
-            setPkg((prev) =>
-              typeof next === "function" ? (next as any)(prev) : next
-            )
-          }
-        />
-      )}
+    <div className="flex flex-col flex-1 my-[30px] px-[20px] gap-y-[40px]">
+      <div className="flex-1 flex">
+        {pkg && (
+          <CommonPkgNum
+            pkg={pkg}
+            setPkg={(next) =>
+              setPkg((prev) =>
+                typeof next === "function" ? (next as any)(prev) : next
+              )
+            }
+          />
+        )}
+      </div>
 
       {/* save */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
+      <CommonBtn
+        label="저장"
+        onClick={handleSubmit}
+        notBottom
+        category="green"
+      />
 
       {/* show modal */}
       {showModal && (
