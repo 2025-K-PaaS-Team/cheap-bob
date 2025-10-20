@@ -22,6 +22,7 @@ import { Pagination } from "swiper/modules";
 
 const StoreDetail = () => {
   const navigate = useNavigate();
+  const [activeSlide, setActiveSlide] = useState(1);
   const location = useLocation();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -134,9 +135,8 @@ const StoreDetail = () => {
           {/* store image */}
           <div className="bg-custom-white h-[230px] w-full relative">
             <Swiper
-              loop={false}
-              pagination={{ clickable: true }}
-              modules={[Pagination]}
+              loop={true}
+              onSlideChange={(swiper) => setActiveSlide(swiper.realIndex + 1)}
               className="mySwiper h-[230px]"
             >
               {store.images.map((img) => (
@@ -146,12 +146,17 @@ const StoreDetail = () => {
                     alt="StoreImage"
                     className="w-full h-full object-cover"
                   />
+                  <div className="absolute inset-0 bg-black/30" />
                 </SwiperSlide>
               ))}
             </Swiper>
 
             {/* overlay */}
             <div className="absolute top-0 left-0 w-full h-full hintFont pointer-events-none">
+              {/* img idx  */}
+              <div className="absolute top-3 right-3 z-10 bg-[#0A0A0A]/50 btnFont text-white rounded-lg py-[4px] px-[10px] pointer-events-auto">
+                {activeSlide} / {store.images.length}
+              </div>
               {/* 영업중 / 종료 */}
               <div className="absolute bottom-14 left-3 z-10 bg-custom-white rounded-lg py-[4px] px-[10px] pointer-events-auto">
                 {todayOp?.is_currently_open ? "영업중" : "영업 종료"}
