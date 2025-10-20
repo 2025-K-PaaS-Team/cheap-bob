@@ -77,7 +77,12 @@ const StorePayment = () => {
       {/* 최종 결제 금액 */}
       <h3 className="absolute bottom-30 right-5">
         최종 결제금액:{" "}
-        {(store.products[0].price * store.products[0].sale) / 100}원
+        {Math.floor(
+          ((store.products[0].price * (100 - store.products[0].sale)) / 100 +
+            9) /
+            10
+        ) * 10}
+        원
       </h3>
 
       <Payment

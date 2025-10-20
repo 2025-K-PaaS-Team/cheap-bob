@@ -82,7 +82,7 @@ const CommonPrice = ({ pkg, setPkg }: PriceProps) => {
         <div className="btnFont">패키지 판매가</div>
         <div className="titleFont font-bold">
           <span className="text-main-deep">
-            {pkg.price - pkg.price * pkg.sale * 0.01}
+            {Math.floor(((pkg.price * (100 - pkg.sale)) / 100 + 9) / 10) * 10}
           </span>{" "}
           원
         </div>
