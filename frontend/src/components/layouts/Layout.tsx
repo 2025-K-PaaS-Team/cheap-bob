@@ -59,20 +59,30 @@ const Layout = () => {
   const swiperRef = useRef<any>(null);
 
   return (
-    <>
-      <Wrapper>
-        {!notHeader &&
-          (isCustomer ? (
-            <Header layout={pathToLayoutKey(path)} swiperRef={swiperRef} />
-          ) : (
-            <SellerHeader layout={pathToSellerLayoutKey(path)} />
-          ))}
-        <Main>
-          <Outlet context={{ swiperRef }} />
-        </Main>
-        {!notFooter && (isCustomer ? <Footer /> : <SellerFooter />)}
-      </Wrapper>
-    </>
+    <div className="app-layout">
+      <aside className="app-intro">
+        <img src="/cheapbop.svg" alt="Logo" className="app-logo" />
+        <h1 className="app-title">저렴한끼</h1>
+        <div className="app-desc">
+          건강한 식사, <br />
+          저렴하게 해결하세요
+        </div>
+      </aside>{" "}
+      <div className="app-frame">
+        <Wrapper>
+          {!notHeader &&
+            (isCustomer ? (
+              <Header layout={pathToLayoutKey(path)} swiperRef={swiperRef} />
+            ) : (
+              <SellerHeader layout={pathToSellerLayoutKey(path)} />
+            ))}
+          <Main className="app-scroll">
+            <Outlet context={{ swiperRef }} />
+          </Main>
+          {!notFooter && (isCustomer ? <Footer /> : <SellerFooter />)}
+        </Wrapper>
+      </div>
+    </div>
   );
 };
 

@@ -27,7 +27,7 @@ const Header = ({ layout, swiperRef }: HeaderProps) => {
 
   return (
     <>
-      <div className="h-[60px] mt-[10px] px-[20px] grid grid-cols-3 items-center">
+      <div className="min-h-[60px] mt-[10px] px-[20px] grid grid-cols-3 items-center">
         {/* left */}
         {myLayout.back ? (
           <img
