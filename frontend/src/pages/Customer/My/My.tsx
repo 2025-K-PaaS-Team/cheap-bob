@@ -117,7 +117,10 @@ const My = () => {
           <div>&gt;</div>
         </div>
         {/* policy */}
-        <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
+        <div
+          className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
+          onClick={() => navigate("/docs/tos")}
+        >
           <div>서비스 이용약관</div>
           <div>&gt;</div>
         </div>
