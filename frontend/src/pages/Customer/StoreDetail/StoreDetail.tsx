@@ -18,7 +18,6 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
 
 const StoreDetail = () => {
   const navigate = useNavigate();
