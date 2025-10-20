@@ -56,14 +56,13 @@ const ChangeCustomerAllergy = () => {
   if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
 
   return (
-    <div className="relative mt-[30px]  px-[20px] w-full flex flex-col gap-y-[20px]">
-      <div className="titleFont">
-        못 먹는 음식을 <br />
-        선택해주세요
-      </div>
-      <div className="hintFont]">주문할 때 사장님한테 보여져요</div>
-
-      <div className="mb-[130px]">
+    <div className="my-[30px] px-[20px] w-full flex flex-col flex-1 justify-between gap-y-[20px]">
+      <div className="flex flex-col gap-y-[20px]">
+        <div className="titleFont">
+          못 먹는 음식을 <br />
+          선택해주세요
+        </div>
+        <div className="hintFont]">주문할 때 사장님한테 보여져요</div>
         <SelectedGrid
           data={AllergyList}
           selected={selected}
@@ -72,7 +71,12 @@ const ChangeCustomerAllergy = () => {
         />
       </div>
 
-      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
+      <CommonBtn
+        label="저장"
+        onClick={handleSubmit}
+        category="green"
+        notBottom
+      />
 
       {showModal && (
         <CommonModal
