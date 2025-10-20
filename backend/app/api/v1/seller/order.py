@@ -332,7 +332,7 @@ async def cancel_order(
     
     # 판매자 주문 취소 이메일 서비스
     if email_service.is_configured():
-        store = await store_repo.get_by_seller_email(store_id)
+        store = await store_repo.get_by_store_id(store_id)
         email_service.send_template(
             recipient_email=order.customer_id,
             store_name=store.store_name,

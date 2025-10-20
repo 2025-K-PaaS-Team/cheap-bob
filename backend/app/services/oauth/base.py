@@ -36,7 +36,12 @@ class OAuthClient(ABC):
             params["scope"] = self.config.scope
         
         # 로그인 캐쉬 안 되게 수정
-        params["prompt"] = "select_account"
+        if self.provider == OAuthProvider.GOOGLE:
+            params["prompt"] = "select_account"
+        elif self.provider == OAuthProvider.KAKAO:
+            params["prompt"] = "login"
+        elif self.provider == OAuthProvider.NAVER:
+            params["auth_type"] = "reauthenticate"
         
         query_string = "&".join(f"{k}={v}" for k, v in params.items())
         return f"{self.config.authorize_url}?{query_string}"

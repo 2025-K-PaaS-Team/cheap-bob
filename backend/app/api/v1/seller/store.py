@@ -73,7 +73,9 @@ async def get_store_detail(
             sigungu=store.address.sigungu,
             bname=store.address.bname,
             lat=store.address.lat,
-            lng=store.address.lng
+            lng=store.address.lng,
+            nearest_station=store.address.nearest_station,
+            walking_time=store.address.walking_time
         )
 
         

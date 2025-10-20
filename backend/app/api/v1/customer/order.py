@@ -1,35 +1,44 @@
 from fastapi import APIRouter, HTTPException, status
+from datetime import datetime, timezone, timedelta
 
 from utils.qr_generator import validate_qr_data
 from utils.docs_error import create_error_responses
 from utils.string_utils import parse_comma_separated_string
+from utils.store_utils import get_main_image_url
 from api.deps.auth import CurrentCustomerDep
 from api.deps.repository import (
     OrderCurrentItemRepositoryDep,
     OrderHistoryItemRepositoryDep,
     StoreProductInfoRepositoryDep,
     StorePaymentInfoRepositoryDep,
-    StoreRepositoryDep
+    StoreRepositoryDep,
+    StoreImageRepositoryDep
 )
 from repositories.store_product_info import StockUpdateResult
 from schemas.order import (
     OrderStatus,
     OrderItemResponse,
-    OrderListResponse,
+    CustomerOrderItemResponse,
+    CustomerOrderListResponse,
+    CustomerTodayOrderItemResponse,
+    CustomerTodayOrderListResponse,
     OrderCancelRequest,
     OrderCancelResponse,
-    CustomerPickupCompleteRequest
-    
+    CustomerPickupCompleteRequest,
+    TodayAlarmOrderCard,
+    TodayAlarmResponse
 )
 from services.payment import PaymentService
 from services.email import email_service
 from config.settings import settings
 
+# KST 타임존 설정
+KST = timezone(timedelta(hours=9))
 
 router = APIRouter(prefix="/orders", tags=["Customer-Order"])
 
 
-@router.get("", response_model=OrderListResponse,
+@router.get("", response_model=CustomerOrderListResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"]
     })
@@ -37,7 +46,8 @@ router = APIRouter(prefix="/orders", tags=["Customer-Order"])
 async def get_order_history(
     current_user: CurrentCustomerDep,
     order_repo: OrderCurrentItemRepositoryDep,
-    history_repo: OrderHistoryItemRepositoryDep
+    history_repo: OrderHistoryItemRepositoryDep,
+    image_repo: StoreImageRepositoryDep
 ):
     """
     주문 내역 조회 - 모든 주문 조회 (당일 + 과거)
@@ -45,7 +55,7 @@ async def get_order_history(
     customer_email = current_user["sub"]
     
     # 당일 주문 조회
-    current_orders = await order_repo.get_customer_orders_with_relations(customer_email)
+    current_orders = await order_repo.get_customer_current_orders(customer_email)
     
     # 과거 주문 조회
     history_orders = await history_repo.get_customer_history(customer_email)
@@ -54,7 +64,7 @@ async def get_order_history(
     
     # 당일 주문 처리
     for order in current_orders:
-        order_response = OrderItemResponse(
+        order_response = CustomerOrderItemResponse(
             payment_id=order.payment_id,
             customer_id=order.customer_id,
             customer_nickname=order.customer.detail.nickname,
@@ -63,6 +73,7 @@ async def get_order_history(
             product_name=order.product.product_name,
             store_id=order.product.store_id,
             store_name=order.product.store.store_name,
+            main_image_url=get_main_image_url(order.product.store),
             quantity=order.quantity,
             price=order.price,
             sale=order.sale,
@@ -80,10 +91,16 @@ async def get_order_history(
         )
         order_responses.append(order_response)
     
+    history_store_ids = list(set(order.store_id for order in history_orders))
+    
+    store_main_images = await image_repo.get_main_images_for_stores(history_store_ids)
+    
     # 과거 주문 처리
     for history_order in history_orders:
         
-        order_response = OrderItemResponse(
+        main_image_url = store_main_images.get(history_order.store_id)
+        
+        order_response = CustomerOrderItemResponse(
             payment_id=history_order.payment_id,
             customer_id=history_order.customer_id,
             customer_nickname=history_order.customer_nickname,
@@ -92,6 +109,7 @@ async def get_order_history(
             product_name=history_order.product_name,
             store_id=history_order.store_id,
             store_name=history_order.store_name,
+            main_image_url=main_image_url,
             quantity=history_order.quantity,
             price=history_order.price,
             sale=history_order.sale,
@@ -109,13 +127,13 @@ async def get_order_history(
         )
         order_responses.append(order_response)
     
-    return OrderListResponse(
+    return CustomerOrderListResponse(
         orders=order_responses,
         total=len(order_responses)
     )
 
 
-@router.get("/today", response_model=OrderListResponse,
+@router.get("/today", response_model=CustomerTodayOrderListResponse,
     responses=create_error_responses({
         401:["인증 정보가 없음", "토큰 만료"]
     })
@@ -129,12 +147,18 @@ async def get_order_today(
     """
     customer_email = current_user["sub"]
     
-    # 당일 주문 조회
-    orders = await order_repo.get_customer_current_orders_with_relations(customer_email)
+    today = datetime.now(KST).weekday()
+    
+    orders = await order_repo.get_customer_current_orders_with_pickup_time(customer_email, today)
     
     order_responses = []
+    
     for order in orders:
-        order_response = OrderItemResponse(
+        
+        pickup_start_time = order.product.store.today_operation_info.pickup_start_time.strftime("%H:%M")
+        pickup_end_time = order.product.store.today_operation_info.pickup_end_time.strftime("%H:%M")
+        
+        order_response = CustomerTodayOrderItemResponse(
             payment_id=order.payment_id,
             customer_id=order.customer_id,
             customer_nickname=order.customer.detail.nickname,
@@ -143,6 +167,7 @@ async def get_order_today(
             product_name=order.product.product_name,
             store_id=order.product.store_id,
             store_name=order.product.store.store_name,
+            main_image_url=get_main_image_url(order.product.store),
             quantity=order.quantity,
             price=order.price,
             sale=order.sale,
@@ -156,13 +181,86 @@ async def get_order_today(
             preferred_menus=parse_comma_separated_string(order.preferred_menus),
             nutrition_types=parse_comma_separated_string(order.nutrition_types),
             allergies=parse_comma_separated_string(order.allergies),
-            topping_types=parse_comma_separated_string(order.topping_types)
+            topping_types=parse_comma_separated_string(order.topping_types),
+            pickup_start_time=pickup_start_time,
+            pickup_end_time=pickup_end_time
         )
         order_responses.append(order_response)
     
-    return OrderListResponse(
+    return CustomerTodayOrderListResponse(
         orders=order_responses,
         total=len(order_responses)
+    )
+
+
+@router.get("/today-alarm", response_model=TodayAlarmResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"]
+    })
+)
+async def get_today_alarm(
+    current_user: CurrentCustomerDep,
+    order_repo: OrderCurrentItemRepositoryDep
+):
+    """
+    당일 알림 조회
+    """
+    
+    customer_email = current_user["sub"]
+    
+    today_weekday = datetime.now(KST).weekday()
+    
+    orders = await order_repo.get_today_alarm_orders(customer_email, today_weekday)
+    
+    alarm_cards = []
+    
+    for order in orders:
+        
+        pickup_start_time = order.product.store.today_operation_info.pickup_start_time.strftime("%H:%M")
+        pickup_end_time = order.product.store.today_operation_info.pickup_end_time.strftime("%H:%M")
+        
+        # 기본 카드 정보
+        base_card_info = {
+            "payment_id": order.payment_id,
+            "quantity": order.quantity,
+            "price": order.price,
+            "sale": order.sale,
+            "total_amount": order.total_amount,
+            "store_name": order.product.store.store_name,
+            "product_name": order.product.product_name,
+            "pickup_start_time": pickup_start_time,
+            "pickup_end_time": pickup_end_time
+        }
+        
+        if order.reservation_at:
+            alarm_card = TodayAlarmOrderCard(
+                **base_card_info,
+                order_time=order.reservation_at,
+                status=OrderStatus.reservation
+            )
+            alarm_cards.append(alarm_card)
+        
+        if order.accepted_at:
+            alarm_card = TodayAlarmOrderCard(
+                **base_card_info,
+                order_time=order.accepted_at,
+                status=OrderStatus.accept
+            )
+            alarm_cards.append(alarm_card)
+        
+        if order.canceled_at:
+            alarm_card = TodayAlarmOrderCard(
+                **base_card_info,
+                order_time=order.canceled_at,
+                status=OrderStatus.cancel
+            )
+            alarm_cards.append(alarm_card)
+    
+    alarm_cards.sort(key=lambda x: x.order_time, reverse=True)
+    
+    return TodayAlarmResponse(
+        alarm_cards=alarm_cards,
+        total=len(alarm_cards)
     )
 
 
@@ -401,7 +499,7 @@ async def cancel_order(
     
     # 소비자 주문 취소 이메일 서비스
     if email_service.is_configured():
-        store = await store_repo.get_by_seller_email(order.product.store_id)
+        store = await store_repo.get_by_store_id(order.product.store_id)
         email_service.send_template(
             recipient_email=customer_email,
             store_name=store.store_name,

@@ -54,7 +54,9 @@ async def update_store_address(
             sigungu=request.sigungu,
             bname=request.bname,
             lat=request.lat,
-            lng=request.lng
+            lng=request.lng,
+            nearest_station=request.nearest_station,
+            walking_time=request.walking_time
         )
         
         if not store:
@@ -72,7 +74,9 @@ async def update_store_address(
             sigungu=request.sigungu,
             bname=request.bname,
             lat=request.lat,
-            lng=request.lng
+            lng=request.lng,
+            nearest_station=request.nearest_station,
+            walking_time=request.walking_time
         )
             
     except Exception as e:

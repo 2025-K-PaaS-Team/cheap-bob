@@ -37,19 +37,13 @@ class PortOneClient:
     def extract_payment_details(payment: portone.payment.PaidPayment) -> dict:
  
         # 금액 정보
-        amount = payment.amount.paid if payment.amount else 0
+        amount = payment.amount
 
         # 상품 이름
-        good_name = getattr(payment, 'order_name', None)
+        good_name = payment.order_name
         
         # 결제 수단 정보
-        payment_method = "카카오페이" 
-        if hasattr(payment, 'method') and payment.method:
-            if hasattr(payment.method, 'type'):
-                payment_method = payment.method.type
-            if hasattr(payment.method, 'easy_pay') and payment.method.easy_pay:
-                if hasattr(payment.method.easy_pay, 'provider'):
-                    payment_method = f"{payment.method.easy_pay.provider}"
+        payment_method = payment.method
         
         return {
             "amount": amount,

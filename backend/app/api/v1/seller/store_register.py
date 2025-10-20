@@ -90,6 +90,8 @@ async def register_seller_store(
             bname=request.address_info.bname,
             lat=request.address_info.lat,
             lng=request.address_info.lng,
+            nearest_station=request.address_info.nearest_station,
+            walking_time=request.address_info.walking_time,
             # Optional info
             sns_info=sns_info,
             operation_times=operation_times_dict
