@@ -247,7 +247,7 @@ const StoreDetail = () => {
                   .map((dow, idx) => {
                     const todayDow = idxToDow[idx];
                     return (
-                      <div>
+                      <div key={idx}>
                         {todayDow} {dow.open_time.slice(0, 5)} ~{" "}
                         {dow.close_time.slice(0, 5)}
                       </div>
