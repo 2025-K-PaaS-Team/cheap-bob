@@ -1,4 +1,5 @@
 import type { ProductBase, ProductRequestType } from "@interface";
+import { getRoundedPrice } from "@utils";
 
 interface PriceProps {
   pkg: ProductRequestType | ProductBase;
@@ -82,7 +83,7 @@ const CommonPrice = ({ pkg, setPkg }: PriceProps) => {
         <div className="btnFont">패키지 판매가</div>
         <div className="titleFont font-bold">
           <span className="text-main-deep">
-            {Math.floor(((pkg.price * (100 - pkg.sale)) / 100 + 9) / 10) * 10}
+            {getRoundedPrice(pkg.price, pkg.sale).toLocaleString()}
           </span>{" "}
           원
         </div>

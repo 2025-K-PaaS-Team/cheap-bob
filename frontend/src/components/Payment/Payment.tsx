@@ -7,7 +7,7 @@ import type {
 } from "@interface";
 import PortOne from "@portone/browser-sdk/v2";
 import { cancelPayment, confrimPayment, initPayment } from "@services";
-import { formatErrMsg } from "@utils";
+import { formatErrMsg, getRoundedPrice } from "@utils";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -29,12 +29,12 @@ const Payment = ({
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState<string>("");
+  const roundedPrice = getRoundedPrice(product.price, product.sale);
 
   const item: ItemType = {
     id: product.product_id,
     name: product.product_name,
-    price:
-      Math.floor(((product.price * (100 - product.sale)) / 100 + 9) / 10) * 10,
+    price: roundedPrice,
     currency: "KRW",
     currencyLabel: "원",
   };

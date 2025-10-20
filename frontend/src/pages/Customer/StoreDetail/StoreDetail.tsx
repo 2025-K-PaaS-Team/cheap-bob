@@ -12,7 +12,7 @@ import {
   getStoreProduct,
   RemoveFavoriteStore,
 } from "@services";
-import { formatErrMsg } from "@utils";
+import { formatErrMsg, getRoundedPrice } from "@utils";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
@@ -302,14 +302,9 @@ const StoreDetail = () => {
                     {product.products[0].sale}%
                   </div>
                   <h1 className="text-[16px] font-bold text-sub-orange">
-                    {(
-                      Math.floor(
-                        ((store.products[0].price *
-                          (100 - store.products[0].sale)) /
-                          100 +
-                          9) /
-                          10
-                      ) * 10
+                    {getRoundedPrice(
+                      store.products[0].price,
+                      store.products[0].sale
                     ).toLocaleString()}
                     원
                   </h1>
@@ -381,14 +376,9 @@ const StoreDetail = () => {
                     notBottom
                     onClick={() => setOpenCheckNoti(true)}
                     className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
-                    label={`${(
-                      Math.floor(
-                        ((store.products[0].price *
-                          (100 - store.products[0].sale)) /
-                          100 +
-                          9) /
-                          10
-                      ) * 10
+                    label={`${getRoundedPrice(
+                      store.products[0].price,
+                      store.products[0].sale
                     ).toLocaleString()}원 구매하기 (${
                       product.products[0].current_stock
                     }개 남음)`}
