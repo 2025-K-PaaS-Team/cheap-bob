@@ -4,6 +4,7 @@ import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
 import { CreateCustomerRegister } from "@services";
 import { formatErrMsg } from "@utils";
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
@@ -17,13 +18,15 @@ const Signup = () => {
   const [allergy, setAllergy] = useState<string[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState<string>("");
+  const navigate = useNavigate();
 
   const handleNext = async () => {
     const swiper = swiperRef.current;
-
     if (!swiper) return;
 
-    if (swiper.isEnd) {
+    const isLastSlide = swiper.activeIndex === swiper.slides.length - 1;
+
+    if (isLastSlide) {
       try {
         await CreateCustomerRegister({
           nickname,
@@ -33,6 +36,7 @@ const Signup = () => {
           allergies: allergy,
           topping_types: topping,
         });
+        navigate("/c/stores");
       } catch (err: unknown) {
         setModalMsg(formatErrMsg(err));
         setShowModal(true);
