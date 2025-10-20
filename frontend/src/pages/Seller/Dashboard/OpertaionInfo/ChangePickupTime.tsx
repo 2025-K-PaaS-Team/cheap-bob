@@ -136,13 +136,11 @@ const ChangePickupTime = () => {
           pickupDiscardOffset={pickupDiscardOffset}
           setPickupDiscardOffset={setPickupDiscardOffset}
         />
-
-        {/* 공지 */}
-        <div className="w-full bg-[#E7E7E7] rounded-sm px-[10px] h-[57px] flex items-center text-custom-black">
-          변경 시 다음 영업일부터 적용됩니다.
-        </div>
       </div>
-
+      {/* 공지 */}
+      <div className="w-full hintFont bg-[#E7E7E7] rounded px-[10px] h-[57px] flex items-center text-custom-black">
+        변경사항은 다음 영업일부터 적용됩니다.
+      </div>
       {/* btn */}
       <CommonBtn
         label="저장"

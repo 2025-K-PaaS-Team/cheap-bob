@@ -126,12 +126,12 @@ const ChangeOperationTime = () => {
       <div className="flex flex-col flex-1 gap-y-[20px]">
         {/* 기존값으로 초기화된 폼을 CommonOpTime에 연결 */}
         <CommonOpTime form={form} setForm={setForm} />
-        {/* 공지 */}
-        <div className="w-full hintFont bg-[#E7E7E7] rounded px-[10px] h-[57px] flex items-center text-custom-black">
-          변경사항은 다음 영업일부터 적용됩니다.
-        </div>
       </div>
 
+      {/* 공지 */}
+      <div className="w-full hintFont bg-[#E7E7E7] rounded px-[10px] h-[57px] flex items-center text-custom-black">
+        변경사항은 다음 영업일부터 적용됩니다.
+      </div>
       {/* 저장 */}
       <CommonBtn
         label="저장"

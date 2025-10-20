@@ -7,7 +7,7 @@ interface BillingStatusProps {
 
 const BillingStatus = ({ nowStatus, setNowStatus }: BillingStatusProps) => {
   return (
-    <div className="flex flex-row items-center gap-x-[10px]">
+    <div className="flex flex-row items-center gap-x-[10px] text-nowrap">
       <div className="font-bold mr-auto">상태</div>
 
       {BillingOption.map((status, idx) => (
