@@ -9,8 +9,8 @@ import { useState } from "react";
 const RegisterAddr = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const { form } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [openStation, setOpenStation] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const [openStation, setOpenStation] = useState<boolean>(false);
   const [selectedStation, setSelectStation] = useState<string>("");
   const [stationTime, setStationTime] = useState<string>("");
   const { storeAddr } = validationRules;
