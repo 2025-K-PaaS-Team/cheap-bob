@@ -56,7 +56,7 @@ const My = () => {
   }, []);
 
   return (
-    <div className="px-[20px] w-full flex flex-col gap-y-[31px]">
+    <div className="px-[20px] w-full h-full flex flex-col gap-y-[31px]">
       {/* my info */}
       <div
         onClick={() => navigate("/c/change/info")}
@@ -65,7 +65,6 @@ const My = () => {
         <div className="titleFont">{customer?.nickname} 님</div>
         <div className="bodyFont">{customer?.customer_email}</div>
       </div>
-
       {/* nutrition goal */}
       <div
         onClick={() => navigate("/c/change/nutrition")}
@@ -83,7 +82,6 @@ const My = () => {
           ))}
         </div>
       </div>
-
       {/* bottom list */}
       <div className="flex flex-col">
         {/* prefer menu */}
@@ -135,7 +133,6 @@ const My = () => {
           <div>계정 탈퇴</div>
         </div>
       </div>
-
       {/* show modal */}
       {showModal && (
         <CommonModal
@@ -145,7 +142,6 @@ const My = () => {
           category="green"
         />
       )}
-
       {/* show warn modal */}
       {showWarn && (
         <CommonModal

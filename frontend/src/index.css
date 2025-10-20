@@ -1,25 +1,213 @@
 @import url("https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard.css");
 @import "tailwindcss";
 
+/* ====== Layout Vars ====== */
+:root {
+  --frame-padding: 20px;
+  --layout-vpad: 20px;
+}
+
+/* ====== Base (page wrapper) ====== */
 @layer base {
   html,
-  body,
-  #root {
-    max-width: 420px;
+  body {
     height: 100%;
     margin: 0;
-    padding: 0;
+    overflow: hidden;
   }
-
-  body {
-    font-family: "Pretendard", sans-serif;
+  #root {
+    height: 100svh;
+    width: 100%;
     box-sizing: border-box;
-    font-synthesis-weight: none;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    padding: var(--frame-padding);
+    background: rgba(230, 255, 196, 0.5);
+    overflow: hidden;
+  }
+  @supports (height: 100dvh) {
+    #root {
+      height: 100dvh;
+    }
   }
 }
 
+/* ====== App Frame ====== */
+.app-frame {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 100%;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-frame::before,
+.app-frame::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 16px;
+  pointer-events: none;
+  z-index: 1;
+}
+.app-frame::before {
+  top: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0)
+  );
+}
+.app-frame::after {
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0)
+  );
+}
+
+/* ====== Scroll Area ====== */
+.app-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable both-edges;
+
+  scrollbar-width: none;
+  scrollbar-color: transparent transparent;
+}
+.app-scroll::-webkit-scrollbar {
+  display: none;
+}
+.app-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.app-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.app-scroll:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+/* ====== Desktop Two-Column Layout ====== */
+.app-layout {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.app-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  color: #222;
+}
+
+.app-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.app-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #222;
+}
+
+.app-desc {
+  font-size: 16px;
+  line-height: 1.4;
+  color: #555;
+}
+
+/* ====== Desktop Two-Column Layout ====== */
+@media (min-width: 901px) {
+  @supports (height: 100dvh) {
+    .app-frame {
+      height: calc(100dvh - (var(--frame-padding) * 2));
+    }
+  }
+
+  .app-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 60px;
+  }
+
+  .app-intro {
+    display: flex; /* 데스크톱에서만 보이게 */
+    flex: 0 0 360px;
+    min-width: 150px;
+    white-space: nowrap; /* 줄바꿈 방지 */
+  }
+
+  .app-frame {
+    flex: 0 0 420px;
+    max-width: 420px;
+    min-width: 0;
+  }
+}
+
+/* ====== Mobile (intro 제거) ====== */
+@media (max-width: 900px) {
+  #root {
+    padding: 0;
+    background: #fff;
+    height: 100svh;
+    box-sizing: border-box;
+  }
+  @supports (height: 100dvh) {
+    #root {
+      height: 100dvh;
+    }
+  }
+
+  .app-layout {
+    height: 100%;
+    min-height: 100%;
+    padding: 0;
+    gap: 0;
+    justify-content: stretch;
+    align-items: stretch;
+  }
+
+  .app-intro {
+    display: none !important;
+  }
+
+  .app-frame {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+    flex: 1 1 auto;
+  }
+}
+
+/* ====== Theme Tokens ====== */
 @theme {
-  /* main & sub color */
   --color-main-normal: oklch(0.9098 0.236 131.12);
   --color-main-deep: oklch(0.7311 0.1852 130.73);
   --color-main-pale: oklch(0.9673 0.0809 126.53);
@@ -27,11 +215,9 @@
   --color-sub-yellow: oklch(0.9075 0.1846 103.79);
   --color-sub-red: oklch(0.623 0.2165 31.29);
 
-  /* custom white & black */
   --color-custom-white: oklch(0.9851 0 0);
   --color-custom-black: oklch(0.3211 0 0);
 
-  /* rounded */
   --radius-sm: 8px;
   --radius: 10px;
   --radius-md: 12px;
@@ -40,47 +226,37 @@
   --custom-shadow: 0 4px 12px oklch(0 0 0 / 0.12);
 }
 
+/* ====== Typography ====== */
 .titleFont {
-  /* font-weight: 400; */
   font-size: 24px;
 }
-
 h1 {
   font-weight: 700;
   font-size: 20px;
 }
-
 h2 {
-  /* font-weight: 400; */
   font-size: 18px;
 }
-
 h3 {
   font-weight: 700;
   font-size: 18px;
 }
-
 .bodyFont {
-  /* font-weight: 400; */
   font-size: 16px;
   letter-spacing: -0.02em;
 }
-
 .hintFont {
-  /* font-weight: 400; */
   font-size: 14px;
 }
-
 .tagFont {
-  /* font-weight: 400; */
   font-size: 12px;
 }
-
 .btnFont {
   font-weight: 700;
   font-size: 16px;
 }
 
+/* ====== Controls ====== */
 [type="checkbox"] {
   width: 20px;
   height: 20px;
@@ -91,12 +267,10 @@ h3 {
   position: relative;
   transition: all 0.2s ease;
 }
-
 [type="checkbox"]:checked {
   background-color: #7ebe27;
   border-color: #7ebe27;
 }
-
 [type="checkbox"]:checked::after {
   content: "";
   position: absolute;
@@ -104,11 +278,12 @@ h3 {
   left: 7px;
   width: 5px;
   height: 10px;
-  border: solid white;
+  border: solid #fff;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
+/* ====== Swiper Theme ====== */
 .mySwiper {
   --swiper-pagination-color: #393939;
   --swiper-pagination-bullet-inactive-color: #e7e7e7;
@@ -117,7 +292,6 @@ h3 {
   --swiper-pagination-progressbar-size: 8px;
   --swiper-pagination-progressbar-bg-color: #e7e7e7;
 }
-
 .swiper-pagination-progressbar-fill {
   background-color: oklch(0.7311 0.1852 130.73) !important;
 }

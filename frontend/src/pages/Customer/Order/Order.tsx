@@ -22,7 +22,7 @@ const Order = () => {
     handleGetOrders();
   }, []);
 
-  if (!orders) {
+  if (!orders || orders.length == 0) {
     return (
       <div className="flex flex-col w-full h-full justify-center items-center">
         <img

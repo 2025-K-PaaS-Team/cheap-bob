@@ -1,4 +1,4 @@
-import { CommonBtn, CommonDesc, CommonModal } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
 import { idxToDow, NutritionList } from "@constant";
 import type {
   CustomerDetailType,
@@ -38,7 +38,6 @@ const StoreDetail = () => {
     endLat: 0,
     endLng: 0,
   });
-  const [descOpen, setDescOpen] = useState<boolean>(false);
   const now = dayjs();
   const todayDow = (now.day() + 6) % 7;
   const todayOp = store.operation_times.find(
@@ -223,7 +222,9 @@ const StoreDetail = () => {
             {/* store desc */}
             <div
               className="text-[12px] font-[#6c6c6c]"
-              onClick={() => setDescOpen(true)}
+              onClick={() =>
+                navigate("desc", { state: store.store_introduction })
+              }
             >
               매장 설명 보기 &gt;
             </div>
@@ -246,7 +247,7 @@ const StoreDetail = () => {
                   .map((dow, idx) => {
                     const todayDow = idxToDow[idx];
                     return (
-                      <div>
+                      <div key={idx}>
                         {todayDow} {dow.open_time.slice(0, 5)} ~{" "}
                         {dow.close_time.slice(0, 5)}
                       </div>
@@ -294,15 +295,22 @@ const StoreDetail = () => {
               {/* original price */}
               <div className="tagFont">
                 <div className="line-through text-[#6C6C6C]">
-                  {product.products[0].price}원
+                  {product.products[0].price.toLocaleString()}원
                 </div>
                 <div className="flex flex-row items-center gap-x-[10px]">
                   <div className="text-[#6C6C6C]">
                     {product.products[0].sale}%
                   </div>
                   <h1 className="text-[16px] font-bold text-sub-orange">
-                    {(product.products[0].price * product.products[0].sale) /
-                      100}
+                    {(
+                      Math.floor(
+                        ((store.products[0].price *
+                          (100 - store.products[0].sale)) /
+                          100 +
+                          9) /
+                          10
+                      ) * 10
+                    ).toLocaleString()}
                     원
                   </h1>
                 </div>
@@ -373,10 +381,17 @@ const StoreDetail = () => {
                     notBottom
                     onClick={() => setOpenCheckNoti(true)}
                     className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
-                    label={`${
-                      (product.products[0].price * product.products[0].sale) /
-                      100
-                    }원 구매하기 (${product.products[0].current_stock}개 남음)`}
+                    label={`${(
+                      Math.floor(
+                        ((store.products[0].price *
+                          (100 - store.products[0].sale)) /
+                          100 +
+                          9) /
+                          10
+                      ) * 10
+                    ).toLocaleString()}원 구매하기 (${
+                      product.products[0].current_stock
+                    }개 남음)`}
                   />
                 ) : (
                   <CommonBtn
@@ -404,9 +419,6 @@ const StoreDetail = () => {
           category="green"
         />
       )}
-
-      {/* show desc modal */}
-      {descOpen && <CommonDesc desc={store.store_introduction} />}
 
       {/* show check modal */}
       {openCheckNoti && (

@@ -33,7 +33,8 @@ const Payment = ({
   const item: ItemType = {
     id: product.product_id,
     name: product.product_name,
-    price: product.price,
+    price:
+      Math.floor(((product.price * (100 - product.sale)) / 100 + 9) / 10) * 10,
     currency: "KRW",
     currencyLabel: "원",
   };
@@ -78,6 +79,15 @@ const Payment = ({
       return;
     }
 
+    const phoneRegex = /^01\d-\d{3,4}-\d{4}$/;
+    if (!phoneRegex.test(customer.phone_number)) {
+      setModalMsg("010-1234-5678 형식으로 입력해주세요");
+      setShowModal(true);
+      return;
+    }
+
+    const sanitizedPhone = customer.phone_number.replace(/-/g, "");
+
     const paymentResult = await handleInitPayment();
     if (!paymentResult) {
       console.log("paymentResult is not existed", paymentResult);
@@ -100,7 +110,7 @@ const Payment = ({
         customer: {
           fullName: customer.nickname,
           email: customer.customer_email,
-          phoneNumber: customer.phone_number,
+          phoneNumber: sanitizedPhone,
         },
         customData: {
           productId: product.product_id,

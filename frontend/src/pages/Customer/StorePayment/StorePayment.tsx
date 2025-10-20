@@ -1,6 +1,6 @@
 import Payment from "@components/Payment/Payment";
 import type { CustomerDetailType, StoreSearchBaseType } from "@interface";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 
 const StorePayment = () => {
@@ -9,8 +9,21 @@ const StorePayment = () => {
   const { customer } = location.state as { customer: CustomerDetailType };
 
   const [qty, setQty] = useState<number>(1);
-
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
+  const [myPhone, setMyPhone] = useState<string>("");
+
+  useEffect(() => {
+    const digits = customer.phone_number.replace(/-/g, "").slice(0, 11);
+    let formatted = digits;
+    if (digits.length > 3 && digits.length <= 7) {
+      formatted = `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    } else if (digits.length > 7) {
+      formatted = `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(
+        7
+      )}`;
+    }
+    setMyPhone(formatted);
+  }, []);
 
   return (
     <div className="relative h-full flex flex-col p-[20px] gap-y-[39px]">
@@ -33,9 +46,26 @@ const StorePayment = () => {
       {/* 내 연락처 */}
       <div className="grid grid-cols-3 bodyFont">
         <div className="font-bold">내 연락처</div>
-        <div className="col-span-2 border-b border-black ">
-          {store.store_phone}
-        </div>
+        <input
+          className="col-span-2 border-b border-black"
+          value={myPhone}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (/^[0-9-]*$/.test(val)) {
+              const digits = val.replace(/-/g, "").slice(0, 11);
+              let formatted = digits;
+              if (digits.length > 3 && digits.length <= 7) {
+                formatted = `${digits.slice(0, 3)}-${digits.slice(3)}`;
+              } else if (digits.length > 7) {
+                formatted = `${digits.slice(0, 3)}-${digits.slice(
+                  3,
+                  7
+                )}-${digits.slice(7)}`;
+              }
+              setMyPhone(formatted);
+            }
+          }}
+        />
       </div>
 
       {/* 패키지 명 */}
@@ -77,13 +107,18 @@ const StorePayment = () => {
       {/* 최종 결제 금액 */}
       <h3 className="absolute bottom-30 right-5">
         최종 결제금액:{" "}
-        {(store.products[0].price * store.products[0].sale) / 100}원
+        {Math.floor(
+          ((store.products[0].price * (100 - store.products[0].sale)) / 100 +
+            9) /
+            10
+        ) * 10}
+        원
       </h3>
 
       <Payment
         storeId={store.store_id}
         product={store.products[0]}
-        customer={customer}
+        customer={{ ...customer, phone_number: myPhone }}
         qty={qty}
         selectedPayment={selectedPayment}
       />

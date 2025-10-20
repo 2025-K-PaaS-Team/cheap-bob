@@ -4,19 +4,30 @@ import { useNavigate } from "react-router";
 
 interface HeaderProps {
   layout: LayoutType;
+  swiperRef: React.RefObject<any>;
 }
 
-const Header = ({ layout }: HeaderProps) => {
+const Header = ({ layout, swiperRef }: HeaderProps) => {
   const navigate = useNavigate();
   const handleClickBefore = () => {
-    navigate(-1);
+    if (layout === "onBoarding" && swiperRef?.current) {
+      const swiper = swiperRef.current;
+
+      if (swiper.activeIndex > 0) {
+        swiper.slidePrev();
+      } else {
+        navigate("/c", { replace: true });
+      }
+    } else {
+      navigate(-1);
+    }
   };
 
   const myLayout = layoutMap[layout];
 
   return (
     <>
-      <div className="h-[60px] mt-[10px] px-[20px] grid grid-cols-3 items-center">
+      <div className="min-h-[60px] mt-[10px] px-[20px] grid grid-cols-3 items-center">
         {/* left */}
         {myLayout.back ? (
           <img
