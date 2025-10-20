@@ -12,7 +12,11 @@ const Order = () => {
   const handleGetOrders = async () => {
     try {
       const res = await getOrders();
-      setOrders(res.orders);
+      const filteredOrders = res.orders.filter(
+        (order: OrderBaseType) =>
+          order.status === "complete" || order.status === "cancel"
+      );
+      setOrders(filteredOrders);
     } catch (err: unknown) {
       console.error("get stores fail", err);
     }
@@ -22,7 +26,7 @@ const Order = () => {
     handleGetOrders();
   }, []);
 
-  if (!orders) {
+  if (!orders || orders.length == 0) {
     return (
       <div className="flex flex-col w-full h-full justify-center items-center">
         <img
