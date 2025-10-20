@@ -48,19 +48,25 @@ const Enter = ({
 
   return (
     <>
-      <input
-        type="text"
-        placeholder={placeholder}
-        value={value}
-        onChange={handleChange}
-        className="w-full h-[46px] border-b  border-[#393939] text-[16px] mt-[40px]"
-      />
+      <div className="flex flex-1 justify-center mx-[20px]">
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={value}
+          onChange={handleChange}
+          className="w-full h-[46px] border-b  border-[#393939] text-[16px] mt-[40px]"
+        />
+      </div>
+
       {/* 다음 */}
-      <CommonBtn
-        label="다음"
-        onClick={handleSubmit}
-        category={!validate(value) ? "green" : "grey"}
-      />
+      <div className="mx-[20px]">
+        <CommonBtn
+          label="다음"
+          notBottom
+          onClick={handleSubmit}
+          category={!validate(value) ? "green" : "grey"}
+        />
+      </div>
 
       {showModal && (
         <CommonModal

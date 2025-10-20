@@ -36,6 +36,17 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
       ? numbers
       : numbers.slice(0, 2) + ":" + numbers.slice(2);
   };
+  const clamp = (n: number, min: number, max: number) =>
+    Math.max(min, Math.min(max, n));
+
+  const makeTimeOrBlank = (hhRaw: string, mmRaw: string) => {
+    const hStr = hhRaw.replace(/\D/g, "").slice(0, 2);
+    const mStr = mmRaw.replace(/\D/g, "").slice(0, 2);
+    if (!hStr && !mStr) return "";
+    const h = clamp(parseInt(hStr || "0", 10) || 0, 0, 23);
+    const m = clamp(parseInt(mStr || "0", 10) || 0, 0, 59);
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
+  };
 
   // --- 요일 토글 ---
   const handleClickDays = (idx: number) => {
@@ -63,6 +74,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
 
   // form이 바뀌면 raw 버퍼 동기화
   useEffect(() => {
+    console.log(form);
     const next: Record<number, { open: string; close: string }> = {};
     form.forEach((f) => {
       const [oh, om] = parseTimeParts(f.open_time);
@@ -94,12 +106,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     }
     let hh = raw.slice(0, 2);
     let mm = raw.slice(2, 4) || "";
-    const h = Math.max(0, Math.min(23, parseInt(hh || "0", 10)));
-    const m = Math.max(0, Math.min(59, parseInt(mm || "0", 10)));
-    hh = String(isNaN(h) ? 0 : h).padStart(2, "0");
-    mm = String(isNaN(m) ? 0 : m).padStart(2, "0");
-
-    const timeStr = `${hh}:${mm}:00`;
+    const timeStr = makeTimeOrBlank(hh, mm);
     setForm(
       form.map((f) =>
         f.day_of_week === dayIdx
@@ -136,7 +143,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     if (e.key === "Enter") e.currentTarget.blur();
   };
 
-  // --- 배치 입력: 로컬 버퍼 + 적용 버튼 ---
+  // --- 배치 입력: "입력 즉시" 운영 요일에 반영 ---
   const [batchOpen, setBatchOpen] = useState<[string, string]>(["", ""]);
   const [batchClose, setBatchClose] = useState<[string, string]>(["", ""]);
 
@@ -146,35 +153,30 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     rawValue: string
   ) => {
     const v = rawValue.replace(/\D/g, "").slice(0, 2);
+
     if (type === "open") {
       const next: [string, string] = [...batchOpen];
       next[part === "hour" ? 0 : 1] = v;
       setBatchOpen(next);
+
+      // 입력 즉시 반영
+      const openStr = makeTimeOrBlank(next[0], next[1]);
+      setForm(
+        form.map((f) => (f.is_open_enabled ? { ...f, open_time: openStr } : f))
+      );
     } else {
       const next: [string, string] = [...batchClose];
       next[part === "hour" ? 0 : 1] = v;
       setBatchClose(next);
+
+      // 입력 즉시 반영
+      const closeStr = makeTimeOrBlank(next[0], next[1]);
+      setForm(
+        form.map((f) =>
+          f.is_open_enabled ? { ...f, close_time: closeStr } : f
+        )
+      );
     }
-  };
-
-  const normalizePair = (pair: [string, string]) => {
-    const H = Math.max(0, Math.min(23, parseInt(pair[0] || "0", 10)));
-    const M = Math.max(0, Math.min(59, parseInt(pair[1] || "0", 10)));
-    const hh = String(isNaN(H) ? 0 : H).padStart(2, "0");
-    const mm = String(isNaN(M) ? 0 : M).padStart(2, "0");
-    return `${hh}:${mm}:00`;
-  };
-
-  const applyBatch = () => {
-    const openStr = normalizePair(batchOpen);
-    const closeStr = normalizePair(batchClose);
-    setForm(
-      form.map((f) =>
-        f.is_open_enabled
-          ? { ...f, open_time: openStr, close_time: closeStr }
-          : f
-      )
-    );
   };
 
   // --- 초기화(초기 스냅샷 복원) ---
@@ -201,8 +203,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     });
     setForm(next);
   };
-
-  const hasAnyOpen = form.some((f) => f.is_open_enabled);
 
   return (
     <div className="flex flex-col gap-y-[20px]">
@@ -266,7 +266,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
         </div>
 
         {isBatch ? (
-          // 배치 모드
+          // 배치 모드 (입력 즉시 반영)
           <div className="flex flex-col gap-y-[10px] justify-center items-center">
             <span className="text-custom-black font-bold">매장 오픈</span>
             <div className="flex flex-row gap-x-[10px] items-center justify-center text-[20px]">
@@ -311,23 +311,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
               />
               <span>분</span>
             </div>
-
-            <button
-              type="button"
-              className={`mt-2 px-3 py-1 rounded ${
-                hasAnyOpen
-                  ? "bg-main-deep text-white"
-                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
-              }`}
-              onClick={hasAnyOpen ? applyBatch : undefined}
-              title={
-                !hasAnyOpen
-                  ? "운영 요일이 선택되어야 적용됩니다"
-                  : "운영 중인 요일에 일괄 적용"
-              }
-            >
-              일괄 적용
-            </button>
           </div>
         ) : (
           // 일반 모드
@@ -407,9 +390,8 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
         <div className="flex justify-end btnFont">
           <button
             type="button"
-            className="text-main-deep disabled:text-gray-400"
+            className="text-main-deep"
             onClick={handleResetTimesOnly}
-            disabled={!sortedForm.some((d) => d.is_open_enabled)}
           >
             초기화
           </button>

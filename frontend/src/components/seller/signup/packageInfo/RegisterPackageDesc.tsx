@@ -33,42 +33,51 @@ const RegisterPackageDesc = ({
   };
 
   return (
-    <div className="flex h-full mx-[20px] flex-col mt-[20px] gap-y-[11px]">
-      <div className="text-main-deep font-bold bodyFont">2/5</div>
-      <div className="titleFont">
-        <span className="font-bold">패키지 소개</span>를<br /> 입력해 주세요.
+    <div className="mx-[20px] my-[20px] flex flex-col flex-1 gap-y-[40px]">
+      <div className="flex flex-1 flex-col gap-y-[40px]">
+        <div className="flex flex-1 flex-col gap-y-[20px]">
+          <div className="text-main-deep font-bold bodyFont">2/5</div>
+          <div className="titleFont">
+            <span className="font-bold">패키지 소개</span>를<br /> 입력해
+            주세요.
+          </div>
+          {/* input box */}
+          <textarea
+            className="w-full h-[145px] rounded border border-[#E7E7E7] text-[16px] mt-[40px] p-[8px]"
+            placeholder="텍스트를 입력하세요"
+            value={pkg?.description}
+            onChange={(e) =>
+              setPkg((prev) => ({ ...prev, description: e.target.value }))
+            }
+          />
+        </div>
       </div>
-      {/* input box */}
-      <textarea
-        className="w-full h-[145px] rounded border border-[#E7E7E7] text-[16px] mt-[40px] p-[8px]"
-        placeholder="텍스트를 입력하세요"
-        value={pkg?.description}
-        onChange={(e) =>
-          setPkg((prev) => ({ ...prev, description: e.target.value }))
-        }
-      />
 
-      <CommonBtn
-        category="transparent"
-        label="이전"
-        onClick={() => handleClickPrev()}
-        notBottom
-        className="absolute left-[20px] bottom-[38px]"
-        width="w-[100px]"
-      />
-      <CommonBtn
-        category={
-          validateLength(
-            pkg?.description,
-            packageDesc.minLength,
-            packageDesc.maxLength
-          )
-            ? "green"
-            : "grey"
-        }
-        label="다음"
-        onClick={() => handleClickNext()}
-      />
+      <div className="grid grid-cols-3 my-[20px]">
+        <CommonBtn
+          category="transparent"
+          label="이전"
+          onClick={() => handleClickPrev()}
+          notBottom
+          width="w-[100px]"
+        />
+        <CommonBtn
+          category={
+            validateLength(
+              pkg?.description,
+              packageDesc.minLength,
+              packageDesc.maxLength
+            )
+              ? "green"
+              : "grey"
+          }
+          label="다음"
+          onClick={() => handleClickNext()}
+          width="w-[250px]"
+          className="col-span-2"
+          notBottom
+        />
+      </div>
 
       {/* show modal */}
       {showModal && (

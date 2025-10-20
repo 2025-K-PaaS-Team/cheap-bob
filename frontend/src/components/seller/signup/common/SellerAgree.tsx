@@ -10,19 +10,21 @@ const SellerAgree = ({ setPageIdx, pageIdx }: SellerSignupProps) => {
   };
 
   return (
-    <div className="relative min-h-screen mx-[20px]">
-      <div className="h-[75px] pt-[15px] grid grid-cols-3 items-center">
+    <div className="flex flex-1 flex-col h-full pb-[42px]">
+      <div className="flex flex-col flex-1 gap-y-[42px] mx-[20px] titleFont">
         {/* left */}
-
         <img
           src="/icon/before.svg"
           alt="beforeArrowIcon"
           onClick={handleClickBefore}
+          className="h-[75px]"
+          width="12px"
         />
-      </div>
-      <div className="pt-[42px] titleFont">
-        서비스 이용 약관에 <br />
-        동의해주세요
+
+        <div className="titleFont pb-[20px]">
+          서비스 이용 약관에 <br />
+          동의해주세요
+        </div>
       </div>
 
       {/* common agree component */}

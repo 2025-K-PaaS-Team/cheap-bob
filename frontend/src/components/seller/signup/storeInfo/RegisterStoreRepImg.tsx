@@ -71,71 +71,71 @@ const RegisterStoreRepImg = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   }, []);
 
   return (
-    <div className="mx-[20px] mt-[20px] flex flex-col gap-y-[40px]">
-      <div className="text-main-deep font-bold bodyFont">5/5</div>
-      <div className="titleFont">
-        <span className="font-bold">매장 대표 이미지</span>를 등록해 주세요.
-        <div className="bodyFont">
-          대표 이미지는 손님들이 가게를 더 잘 찾아오실 수 있도록{" "}
-          <span className="font-bold">가게의 외부 사진</span>을 등록해 주세요.
-        </div>
-      </div>
-
-      {/* preview */}
-      {imgForm?.images[0]?.preview ? (
-        <div className="relative h-[125px]">
-          <img
-            src={imgForm?.images[0]?.preview}
-            alt={`storeRepImg`}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      ) : (
-        <div className="relative h-[125px] bg-custom-white">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col">
-            <div className="hintFont text-custom-black">
-              등록된 사진이 없습니다.
-            </div>
-            <div className="tagFont text-[#6C6C6C]">권장 크기 350x125 (px)</div>
+    <div className="mx-[20px] my-[20px] flex flex-col flex-1 gap-y-[40px]">
+      <div className="flex flex-1 flex-col gap-y-[40px]">
+        <div className="text-main-deep font-bold bodyFont">5/5</div>
+        <div className="titleFont">
+          <span className="font-bold">매장 대표 이미지</span>를 등록해 주세요.
+          <div className="bodyFont pt-[10px]">
+            대표 이미지는 손님들이 가게를 더 잘 찾아오실 수 있도록{" "}
+            <span className="font-bold">가게의 외부 사진</span>을 등록해 주세요.
           </div>
         </div>
-      )}
-
-      {/* upload picture button */}
-      <div className="w-full flex justify-center">
-        <CommonBtn
-          label="대표 사진 등록"
-          category="white"
-          notBottom
-          onClick={handleClickUpload}
-          className="border-1 border-[#999999] font-normal"
+        {/* preview */}
+        {imgForm?.images[0]?.preview ? (
+          <div className="relative h-[125px]">
+            <img
+              src={imgForm?.images[0]?.preview}
+              alt={`storeRepImg`}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="relative h-[125px] bg-custom-white">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col">
+              <div className="hintFont text-custom-black">
+                등록된 사진이 없습니다.
+              </div>
+              <div className="tagFont text-[#6C6C6C]">
+                권장 크기 350x125 (px)
+              </div>
+            </div>
+          </div>
+        )}
+        {/* upload picture button */}
+        <div className="w-full flex justify-center">
+          <CommonBtn
+            label="대표 사진 등록"
+            category="white"
+            notBottom
+            onClick={handleClickUpload}
+            className="border-1 border-[#999999] font-normal"
+          />
+        </div>
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          className="hidden"
+          onChange={handleFileChange}
         />
       </div>
 
-      <input
-        type="file"
-        accept="image/*"
-        ref={fileInputRef}
-        className="hidden"
-        onChange={handleFileChange}
-      />
-
-      <CommonBtn
-        category="transparent"
-        label="이전"
-        onClick={() => handleClickPrev()}
-        notBottom
-        className="absolute left-[20px] bottom-[38px]"
-        width="w-[100px]"
-      />
-      <CommonBtn
-        category={imgForm.images.length > 0 ? "green" : "grey"}
-        label="다음"
-        onClick={() => handleClickNext()}
-        notBottom
-        className="absolute right-[20px] bottom-[38px]"
-        width="w-[250px]"
-      />
+      <div className="grid grid-cols-3">
+        <CommonBtn
+          category="transparent"
+          label="이전"
+          onClick={() => handleClickPrev()}
+          notBottom
+        />
+        <CommonBtn
+          category={imgForm.images.length > 0 ? "green" : "grey"}
+          label="다음"
+          onClick={() => handleClickNext()}
+          className="col-span-2"
+          notBottom
+        />
+      </div>
 
       {/* show modal */}
       {showModal && (

@@ -68,41 +68,43 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   };
 
   return (
-    <div className="flex mx-[20px] flex-col mt-[20px]  gap-y-[20px]">
-      {/* progress */}
-      <div className="text-main-deep font-bold bodyFont">2/2</div>
+    <div className="flex mx-[20px] flex-col my-[20px]  gap-y-[20px]">
+      <div className="flex flex-1 flex-col gap-y-[40px]">
+        {/* progress */}
+        <div className="text-main-deep font-bold bodyFont">2/2</div>
+        {/* pu time */}
+        <CommonPuTime
+          form={form.operation_times}
+          setForm={(times) =>
+            setForm((prev) => ({
+              ...prev,
+              operation_times: times,
+            }))
+          }
+          pickupStartOffset={pickupStartOffset}
+          setPickupStartOffset={setPickupStartOffset}
+          pickupDiscardOffset={pickupDiscardOffset}
+          setPickupDiscardOffset={setPickupDiscardOffset}
+        />
+      </div>
 
-      {/* pu time */}
-      <CommonPuTime
-        form={form.operation_times}
-        setForm={(times) =>
-          setForm((prev) => ({
-            ...prev,
-            operation_times: times,
-          }))
-        }
-        pickupStartOffset={pickupStartOffset}
-        setPickupStartOffset={setPickupStartOffset}
-        pickupDiscardOffset={pickupDiscardOffset}
-        setPickupDiscardOffset={setPickupDiscardOffset}
-      />
+      <div className="grid grid-cols-3">
+        <CommonBtn
+          category="transparent"
+          label="이전"
+          onClick={() => handleClickPrev()}
+          notBottom
+          width="w-[100px]"
+        />
+        <CommonBtn
+          label="다음"
+          onClick={() => handleClickNext()}
+          width="w-[250px]"
+          className="col-span-2"
+          notBottom
+        />
+      </div>
 
-      <CommonBtn
-        category="grey"
-        label="이전"
-        onClick={() => handleClickPrev()}
-        notBottom
-        className="absolute left-[20px] bottom-[38px]"
-        width="w-[100px]"
-      />
-      <CommonBtn
-        category="green"
-        label="다음"
-        onClick={() => handleClickNext()}
-        notBottom
-        className="absolute right-[20px] bottom-[38px]"
-        width="w-[250px]"
-      />
       {/* show modal */}
       {showModal && (
         <CommonModal

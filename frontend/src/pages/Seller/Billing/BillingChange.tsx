@@ -6,8 +6,10 @@ import {
 } from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 const BillingChange = () => {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const [chId, setChId] = useState<string>("");
@@ -34,6 +36,7 @@ const BillingChange = () => {
           portone_store_id: storeId,
           portone_secret_key: secretKey,
         });
+        navigate(-1);
       } catch (err) {
         setModalMsg(formatErrMsg(err));
         setShowModal(true);
@@ -45,6 +48,7 @@ const BillingChange = () => {
           portone_channel_id: chId,
           portone_store_id: storeId,
         });
+        navigate(-1);
       } catch (err) {
         setModalMsg(formatErrMsg(err));
         setShowModal(true);
@@ -63,9 +67,9 @@ const BillingChange = () => {
   }
 
   return (
-    <div className="relative h-full flex flex-col mx-[37px] gap-y-[10px]">
+    <div className="relative h-full flex flex-col m-[20px] gap-y-[10px]">
       {/* id */}
-      <>
+      <div className="flex flex-1 flex-col">
         <div className="bodyFont font-bold mt-[50px]">대표 상점 아이디</div>
         {/* input box */}
         <input
@@ -77,9 +81,7 @@ const BillingChange = () => {
         <div className="hintFont text-[#6C6C6C]">
           연동 정보 페이지 상단에서 확인할 수 있어요.
         </div>
-      </>
 
-      <>
         {/* channel key */}
         <div className="bodyFont font-bold mt-[15px]">채널 키</div>
         {/* input box */}
@@ -92,7 +94,7 @@ const BillingChange = () => {
         <div className="hintFont text-[#6C6C6C]">
           연동 정보 &gt; 채널 관리 탭에서 확인할 수 있어요.
         </div>
-      </>
+      </div>
 
       {!paymentExist ? (
         <div className="flex flex-col">
@@ -114,7 +116,7 @@ const BillingChange = () => {
         </div>
       ) : (
         // notice
-        <div className="absolute bottom-50 w-full hintFont bg-[#E7E7E7] rounded py-[20px] px-[8px]">
+        <div className="w-full hintFont bg-[#E7E7E7] rounded py-[20px] px-[8px]">
           <b>시크릿 V2 API 키 변경</b>이 필요한 경우 <br />
           cheapbob2025@gmail.com으로 문의해 주세요.
         </div>
@@ -125,6 +127,7 @@ const BillingChange = () => {
         label="저장"
         onClick={() => handleUpdatePayment()}
         category="green"
+        notBottom
       />
 
       {/* show modal */}

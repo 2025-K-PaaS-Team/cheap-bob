@@ -49,119 +49,119 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   };
 
   return (
-    <div className="mx-[20px] mt-[20px] flex flex-col gap-y-[40px]">
-      <div className="text-main-deep font-bold bodyFont">3/5</div>
-      <div className="titleFont">
-        <span className="font-bold">매장 연락처</span>를 입력해 주세요.
+    <div className="mx-[20px] my-[20px] flex flex-col flex-1 gap-y-[40px]">
+      <div className="flex flex-1 flex-col gap-y-[40px]">
+        {" "}
+        <div className="text-main-deep font-bold bodyFont">3/5</div>
+        <div className="titleFont">
+          <span className="font-bold">매장 연락처</span>를 입력해 주세요.
+        </div>
+        {/* input box */}
+        <div className="gap-y-[11px]">
+          <h3>
+            매장 전화번호 <span className="text-sub-orange">(필수)</span>
+          </h3>
+          <input
+            className="w-full h-[46px]  border-b border-[#393939] hintFont"
+            placeholder="텍스트를 입력하세요"
+            value={formatPhoneNumber(form.store_phone)}
+            onChange={handleChange}
+          />
+        </div>
+        {/* other sns */}
+        <div className="mt-[39px] flex flex-col gap-y-[11px]">
+          <h2>다른 SNS도 있나요?</h2>
+          <div className="flex flex-row">
+            <div className="bodyFont w-[100px]">홈페이지</div>
+            <input
+              className="h-[33px] flex-1 border-b border-[#393939] hintFont"
+              value={form.sns_info.homepage}
+              placeholder="텍스트를 입력하세요"
+              onChange={(e) =>
+                setForm({
+                  sns_info: {
+                    ...form.sns_info,
+                    homepage: e.target.value,
+                  },
+                })
+              }
+              onBlur={(e) =>
+                setForm({
+                  sns_info: {
+                    ...form.sns_info,
+                    homepage: normalizeUrl(e.target.value),
+                  },
+                })
+              }
+            />
+          </div>
+          <div className="flex flex-row">
+            <div className="bodyFont w-[100px]">인스타그램</div>
+            <input
+              className="h-[33px] flex-1 border-b border-[#393939] hintFont"
+              placeholder="텍스트를 입력하세요"
+              value={form.sns_info.instagram}
+              onChange={(e) =>
+                setForm({
+                  sns_info: {
+                    ...form.sns_info,
+                    instagram: e.target.value,
+                  },
+                })
+              }
+              onBlur={(e) =>
+                setForm({
+                  sns_info: {
+                    ...form.sns_info,
+                    instagram: normalizeUrl(e.target.value),
+                  },
+                })
+              }
+            />
+          </div>
+          <div className="flex flex-row">
+            <div className="bodyFont w-[100px]">X (Twitter)</div>
+            <input
+              className="h-[33px] flex-1 border-b border-[#393939] hintFont"
+              value={form.sns_info.x}
+              placeholder="텍스트를 입력하세요"
+              onChange={(e) =>
+                setForm({
+                  sns_info: { ...form.sns_info, x: e.target.value },
+                })
+              }
+              onBlur={(e) =>
+                setForm({
+                  sns_info: {
+                    ...form.sns_info,
+                    x: normalizeUrl(e.target.value),
+                  },
+                })
+              }
+            />
+          </div>
+        </div>
       </div>
 
-      {/* input box */}
-      <div className="mt-[40px] gap-y-[11px]">
-        <h3>
-          매장 전화번호 <span className="text-sub-orange">(필수)</span>
-        </h3>
-        <input
-          className="w-full h-[46px]  border-b border-[#393939] hintFont"
-          placeholder="텍스트를 입력하세요"
-          value={formatPhoneNumber(form.store_phone)}
-          onChange={handleChange}
+      <div className="grid grid-cols-3">
+        <CommonBtn
+          category="transparent"
+          label="이전"
+          onClick={() => handleClickPrev()}
+          notBottom
+        />
+        <CommonBtn
+          category={
+            !validatePattern(form.store_phone, storePhone.pattern)
+              ? "grey"
+              : "green"
+          }
+          label="다음"
+          onClick={() => handleClickNext()}
+          className="col-span-2"
+          notBottom
         />
       </div>
-
-      {/* other sns */}
-      <div className="mt-[39px] flex flex-col gap-y-[11px]">
-        <h2>다른 SNS도 있나요?</h2>
-        <div className="flex flex-row">
-          <div className="bodyFont w-[100px]">홈페이지</div>
-          <input
-            className="h-[33px] flex-1 border-b border-[#393939] hintFont"
-            value={form.sns_info.homepage}
-            placeholder="텍스트를 입력하세요"
-            onChange={(e) =>
-              setForm({
-                sns_info: {
-                  ...form.sns_info,
-                  homepage: e.target.value,
-                },
-              })
-            }
-            onBlur={(e) =>
-              setForm({
-                sns_info: {
-                  ...form.sns_info,
-                  homepage: normalizeUrl(e.target.value),
-                },
-              })
-            }
-          />
-        </div>
-        <div className="flex flex-row">
-          <div className="bodyFont w-[100px]">인스타그램</div>
-          <input
-            className="h-[33px] flex-1 border-b border-[#393939] hintFont"
-            placeholder="텍스트를 입력하세요"
-            value={form.sns_info.instagram}
-            onChange={(e) =>
-              setForm({
-                sns_info: {
-                  ...form.sns_info,
-                  instagram: e.target.value,
-                },
-              })
-            }
-            onBlur={(e) =>
-              setForm({
-                sns_info: {
-                  ...form.sns_info,
-                  instagram: normalizeUrl(e.target.value),
-                },
-              })
-            }
-          />
-        </div>
-        <div className="flex flex-row">
-          <div className="bodyFont w-[100px]">X (Twitter)</div>
-          <input
-            className="h-[33px] flex-1 border-b border-[#393939] hintFont"
-            value={form.sns_info.x}
-            placeholder="텍스트를 입력하세요"
-            onChange={(e) =>
-              setForm({
-                sns_info: { ...form.sns_info, x: e.target.value },
-              })
-            }
-            onBlur={(e) =>
-              setForm({
-                sns_info: {
-                  ...form.sns_info,
-                  x: normalizeUrl(e.target.value),
-                },
-              })
-            }
-          />
-        </div>
-      </div>
-
-      <CommonBtn
-        category="transparent"
-        label="이전"
-        onClick={() => handleClickPrev()}
-        notBottom
-        className="absolute left-[20px] bottom-[38px]"
-        width="w-[100px]"
-      />
-      <CommonBtn
-        category={
-          !validatePattern(form.store_phone, storePhone.pattern)
-            ? "grey"
-            : "green"
-        }
-        label="다음"
-        onClick={() => handleClickNext()}
-        notBottom
-        className="absolute right-[20px] bottom-[38px]"
-        width="w-[250px]"
-      />
 
       {/* show modal */}
       {showModal && (

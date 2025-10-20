@@ -36,12 +36,15 @@ const SignupSwiper = (props: SignupSwiperProps) => {
   const { title, type, onNext, subTitle } = props;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex flex-col pt-[42px] pb-[80px] overflow-y-auto">
-        <div className="mx-[20px]">
-          {" "}
+    <div className="flex flex-col flex-1 h-full">
+      <div className="flex flex-col flex-1 py-[42px] overflow-y-auto">
+        <div className="flex flex-col flex-1">
           {/* title */}
-          <div className="titleFont flex-1">
+          <div
+            className={`${
+              type === "agree" ? "flex-1" : ""
+            } flex flex-col titleFont mx-[20px]`}
+          >
             {title.split("\n").map((line, idx) => (
               <div key={idx}>{line}</div>
             ))}
