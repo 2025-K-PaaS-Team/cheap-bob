@@ -74,7 +74,7 @@ const BillingInfo = () => {
           <div className="hintFont">
             {endDate.format("YYYY.MM.DD")} ~ {today.format("MM.DD")}
           </div>
-          <h2>{weekRevenue ?? 0} 원</h2>
+          <h2>{weekRevenue.toLocaleString() ?? 0} 원</h2>
         </div>
       </div>
 

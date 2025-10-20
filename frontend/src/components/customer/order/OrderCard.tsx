@@ -121,7 +121,7 @@ const OrderCard = ({ orders, isAll = false }: OrderCardProps) => {
                     {order.store_name}
                   </div>
                   <div className="tagFont pb-[22px]">
-                    {order.total_amount}원
+                    {Number(order.total_amount).toLocaleString()}원
                   </div>
                   {isAll ? (
                     <div className="font-bold tagFont">

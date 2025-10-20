@@ -97,7 +97,7 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
             {/* absolute position - price */}
             <div className="absolute right-3 bottom-3 text-end">
               <div className="tagFont text-[#9D9D9D] line-through">
-                {store.products[0].price}
+                {store.products[0].price.toLocaleString()}
               </div>
               <h1
                 className={`${
@@ -106,12 +106,15 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
                     : "text-sub-orange"
                 }`}
               >
-                {Math.floor(
-                  ((store.products[0].price * (100 - store.products[0].sale)) /
-                    100 +
-                    9) /
-                    10
-                ) * 10}
+                {(
+                  Math.floor(
+                    ((store.products[0].price *
+                      (100 - store.products[0].sale)) /
+                      100 +
+                      9) /
+                      10
+                  ) * 10
+                ).toLocaleString()}
                 원
               </h1>
             </div>

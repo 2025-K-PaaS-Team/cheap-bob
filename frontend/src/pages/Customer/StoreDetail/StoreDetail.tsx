@@ -295,20 +295,22 @@ const StoreDetail = () => {
               {/* original price */}
               <div className="tagFont">
                 <div className="line-through text-[#6C6C6C]">
-                  {product.products[0].price}원
+                  {product.products[0].price.toLocaleString()}원
                 </div>
                 <div className="flex flex-row items-center gap-x-[10px]">
                   <div className="text-[#6C6C6C]">
                     {product.products[0].sale}%
                   </div>
                   <h1 className="text-[16px] font-bold text-sub-orange">
-                    {Math.floor(
-                      ((store.products[0].price *
-                        (100 - store.products[0].sale)) /
-                        100 +
-                        9) /
-                        10
-                    ) * 10}
+                    {(
+                      Math.floor(
+                        ((store.products[0].price *
+                          (100 - store.products[0].sale)) /
+                          100 +
+                          9) /
+                          10
+                      ) * 10
+                    ).toLocaleString()}
                     원
                   </h1>
                 </div>
@@ -379,7 +381,7 @@ const StoreDetail = () => {
                     notBottom
                     onClick={() => setOpenCheckNoti(true)}
                     className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
-                    label={`${
+                    label={`${(
                       Math.floor(
                         ((store.products[0].price *
                           (100 - store.products[0].sale)) /
@@ -387,7 +389,9 @@ const StoreDetail = () => {
                           9) /
                           10
                       ) * 10
-                    }원 구매하기 (${product.products[0].current_stock}개 남음)`}
+                    ).toLocaleString()}원 구매하기 (${
+                      product.products[0].current_stock
+                    }개 남음)`}
                   />
                 ) : (
                   <CommonBtn

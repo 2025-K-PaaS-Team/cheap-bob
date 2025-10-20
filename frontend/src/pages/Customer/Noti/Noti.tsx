@@ -91,7 +91,9 @@ const Noti = () => {
             <div className="tagFont">
               픽업: {n.pickup_start_time} ~ {n.pickup_end_time}
             </div>
-            <div className="tagFont">{n.total_amount}원</div>
+            <div className="tagFont">
+              {Number(n.total_amount).toLocaleString()}원
+            </div>
           </div>
         </div>
       ))}
