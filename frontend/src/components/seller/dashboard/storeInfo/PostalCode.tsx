@@ -23,6 +23,7 @@ interface PostalCodeProps {
 
 const PostalCode = ({ form, setForm }: PostalCodeProps) => {
   const mapRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
 
   // load postal code
   const loadDaumPostcode = () => {
@@ -47,6 +48,26 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
       const newCenter = new window.naver.maps.LatLng(coor.lat, coor.lng);
       mapRef.current.setCenter(newCenter);
       mapRef.current.setZoom(17, true);
+
+      // marker
+      const icon = {
+        url: "/icon/greenLocation.svg",
+        size: new window.naver.maps.Size(40, 40),
+        origin: new window.naver.maps.Point(0, 0),
+        anchor: new window.naver.maps.Point(20, 40), // 40x40 기준 하단 중앙
+      };
+
+      if (!markerRef.current) {
+        markerRef.current = new window.naver.maps.Marker({
+          position: newCenter,
+          map: mapRef.current,
+          icon,
+        });
+      } else {
+        markerRef.current.setPosition(newCenter);
+        markerRef.current.setIcon(icon);
+      }
+
       // set form
       setForm({
         postal_code: data.zonecode,
@@ -92,9 +113,13 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
     };
 
     const initMap = () => {
+      const centerLat = form?.lat || 37.5666805;
+      const centerLng = form?.lng || 126.9784147;
+
+      console.log(centerLat);
       mapRef.current = new window.naver.maps.Map("map", {
-        center: new window.naver.maps.LatLng(37.5666805, 126.9784147),
-        zoom: 10,
+        center: new window.naver.maps.LatLng(centerLat, centerLng),
+        zoom: 17,
         mapTypeId: window.naver.maps.MapTypeId.NORMAL,
       });
     };
@@ -105,7 +130,7 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
   }, []);
 
   return (
-    <div className="flex flex-col mt-[37px] gap-y-[11px]">
+    <div className="flex flex-col gap-y-[11px]">
       {/* postal code */}
       <div className="flex flex-row gap-x-[10px] h-[37px]">
         {/* road address */}

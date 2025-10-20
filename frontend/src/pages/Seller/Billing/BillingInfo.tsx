@@ -79,7 +79,7 @@ const BillingInfo = () => {
       </div>
 
       {/* bottom content */}
-      <div className="w-full max-w-[420px] py-[20px] border-t border-black/10">
+      <div className="flex flex-col py-[20px] border-t border-black/10">
         <div className="mx-[20px]">
           {/* history */}
           <div

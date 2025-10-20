@@ -74,21 +74,28 @@ const ChangePackageName = () => {
   if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
 
   return (
-    <div className="mt-[30px] px-[20px] w-full">
-      <div className="titleFont">
-        변경할 <span className="font-bold">패키지의 이름</span>을 <br /> 입력해
-        주세요.
+    <div className="my-[30px] px-[20px] w-full flex flex-col flex-1">
+      <div className="flex flex-col flex-1 gap-y-[40px]">
+        <div className="titleFont">
+          변경할 <span className="font-bold">패키지의 이름</span>을 <br />{" "}
+          입력해 주세요.
+        </div>
+
+        <input
+          className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
+          placeholder="패키지의 이름을 입력해 주세요"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={15}
+        />
       </div>
 
-      <input
-        className="w-full h-[46px] border-b  border-[#393939] text-[16px] mt-[40px]"
-        placeholder="패키지의 이름을 입력해 주세요"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        maxLength={15}
+      <CommonBtn
+        label="저장"
+        notBottom
+        onClick={() => handleSubmit()}
+        category="green"
       />
-
-      <CommonBtn label="저장" onClick={() => handleSubmit()} category="green" />
 
       {showModal && (
         <CommonModal

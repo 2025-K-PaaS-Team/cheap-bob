@@ -74,19 +74,26 @@ const ChangePackagePrice = () => {
   if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
 
   return (
-    <div className="mt-[30px] px-[20px] w-full">
-      {product && (
-        <CommonPrice
-          pkg={product}
-          setPkg={(next) =>
-            setProduct((prev) =>
-              typeof next === "function" ? (next as any)(prev) : next
-            )
-          }
-        />
-      )}
+    <div className="my-[30px] px-[20px] w-full flex flex-1 flex-col gap-y-[20px]">
+      <div className="flex flex-col flex-1">
+        {product && (
+          <CommonPrice
+            pkg={product}
+            setPkg={(next) =>
+              setProduct((prev) =>
+                typeof next === "function" ? (next as any)(prev) : next
+              )
+            }
+          />
+        )}
+      </div>
 
-      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
+      <CommonBtn
+        label="저장"
+        onClick={handleSubmit}
+        notBottom
+        category="green"
+      />
 
       {showModal && (
         <CommonModal

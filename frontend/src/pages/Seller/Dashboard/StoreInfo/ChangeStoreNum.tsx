@@ -72,82 +72,92 @@ const ChangeStoreNum = () => {
   };
 
   return (
-    <div className="mt-[30px] px-[20px] w-full">
-      {/* question */}
-      <div className="titleFont">
-        변경할 <span className="font-bold">매장 연락처</span>를 <br /> 입력해
-        주세요.
-      </div>
-      {/* input box */}
-      <div className="mt-[40px] gap-y-[11px]">
-        <h3>
-          매장 전화번호 <span className="text-sub-orange">(필수)</span>
-        </h3>
-        <input
-          className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
-          placeholder="매장 전화번호를 입력해 주세요"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-      </div>
-
-      {/* other sns */}
-      <div className="mt-[39px] flex flex-col gap-y-[11px]">
-        <div className="text-[20px]">다른 연락처도 있나요?</div>
-        <div className="flex flex-row">
-          <div className="text-[14px] w-[97px] flex items-center">홈페이지</div>
+    <div className="my-[30px] px-[20px] w-full flex flex-col flex-1">
+      <div className="flex flex-col flex-1 gap-y-[40px]">
+        {/* question */}
+        <div className="titleFont">
+          변경할 <span className="font-bold">매장 연락처</span>를 <br /> 입력해
+          주세요.
+        </div>
+        {/* input box */}
+        <div className="gap-y-[10px]">
+          <h3>
+            매장 전화번호 <span className="text-sub-orange">(필수)</span>
+          </h3>
           <input
             className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
-            value={sns?.homepage}
-            onChange={(e) =>
-              setSns((prev) => ({ ...prev, homepage: e.target.value }))
-            }
-            onBlur={(e) =>
-              setSns((prev) => ({
-                ...prev,
-                homepage: normalizeUrl(e.target.value),
-              }))
-            }
+            placeholder="매장 전화번호를 입력해 주세요"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
           />
         </div>
-        <div className="flex flex-row">
-          <div className="text-[14px] w-[97px] flex items-center">
-            인스타그램
+        {/* other sns */}
+        <div className="flex flex-col gap-y-[10px]">
+          <div className="text-[20px]">다른 연락처도 있나요?</div>
+          <div className="flex flex-row">
+            <div className="text-[14px] w-[97px] flex items-center">
+              홈페이지
+            </div>
+            <input
+              className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
+              value={sns?.homepage}
+              onChange={(e) =>
+                setSns((prev) => ({ ...prev, homepage: e.target.value }))
+              }
+              onBlur={(e) =>
+                setSns((prev) => ({
+                  ...prev,
+                  homepage: normalizeUrl(e.target.value),
+                }))
+              }
+            />
           </div>
-          <input
-            className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
-            value={sns?.instagram}
-            onChange={(e) =>
-              setSns((prev) => ({ ...prev, instagram: e.target.value }))
-            }
-            onBlur={(e) =>
-              setSns((prev) => ({
-                ...prev,
-                instagram: normalizeUrl(e.target.value),
-              }))
-            }
-          />
-        </div>
-        <div className="flex flex-row">
-          <div className="text-[14px] w-[97px] flex items-center">
-            X (Twitter)
+          <div className="flex flex-row">
+            <div className="text-[14px] w-[97px] flex items-center">
+              인스타그램
+            </div>
+            <input
+              className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
+              value={sns?.instagram}
+              onChange={(e) =>
+                setSns((prev) => ({ ...prev, instagram: e.target.value }))
+              }
+              onBlur={(e) =>
+                setSns((prev) => ({
+                  ...prev,
+                  instagram: normalizeUrl(e.target.value),
+                }))
+              }
+            />
           </div>
-          <input
-            className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
-            value={sns?.x}
-            onChange={(e) => setSns((prev) => ({ ...prev, x: e.target.value }))}
-            onBlur={(e) =>
-              setSns((prev) => ({
-                ...prev,
-                x: normalizeUrl(e.target.value),
-              }))
-            }
-          />
+          <div className="flex flex-row">
+            <div className="text-[14px] w-[97px] flex items-center">
+              X (Twitter)
+            </div>
+            <input
+              className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
+              value={sns?.x}
+              onChange={(e) =>
+                setSns((prev) => ({ ...prev, x: e.target.value }))
+              }
+              onBlur={(e) =>
+                setSns((prev) => ({
+                  ...prev,
+                  x: normalizeUrl(e.target.value),
+                }))
+              }
+            />
+          </div>
         </div>
       </div>
 
       {/* save */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
+      <CommonBtn
+        label="저장"
+        onClick={handleSubmit}
+        notBottom
+        category="green"
+      />
 
       {/* show modal */}
       {showModal && (

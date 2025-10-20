@@ -47,33 +47,6 @@
   flex-direction: column;
 }
 
-.app-frame::before,
-.app-frame::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 16px;
-  pointer-events: none;
-  z-index: 1;
-}
-.app-frame::before {
-  top: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.9),
-    rgba(255, 255, 255, 0)
-  );
-}
-.app-frame::after {
-  bottom: 0;
-  background: linear-gradient(
-    to top,
-    rgba(255, 255, 255, 0.9),
-    rgba(255, 255, 255, 0)
-  );
-}
-
 /* ====== Scroll Area ====== */
 .app-scroll {
   flex: 1 1 auto;

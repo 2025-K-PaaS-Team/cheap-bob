@@ -65,7 +65,7 @@ const BillingHistory = () => {
       {/* Header */}
       <div className="mx-[33px] flex flex-col gap-y-[15px] mt-[15px]">
         {/* 기간 선택 */}
-        <div className="flex items-center gap-x-[5px]">
+        <div className="flex items-center gap-x-[5px] text-nowrap">
           <div className="fontBody font-bold mr-auto">기간</div>
           <input
             type="date"

@@ -1,7 +1,6 @@
 import { CommonBtn, CommonModal } from "@components/common";
-import { PostalCode } from "@components/seller/dashboard";
-import { NearStationList } from "@constant";
-import type { SellerSignupProps } from "@interface";
+import { NearStation, PostalCode } from "@components/seller/dashboard";
+import type { AddressInfoType, SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
 import { validationRules } from "@utils";
 import { useState } from "react";
@@ -9,11 +8,21 @@ import { useState } from "react";
 const RegisterAddr = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const { form } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [openStation, setOpenStation] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const [selectedStation, setSelectStation] = useState<string>("");
   const [stationTime, setStationTime] = useState<string>("");
   const { storeAddr } = validationRules;
+
+  const setAddr: React.Dispatch<React.SetStateAction<AddressInfoType>> = (
+    next
+  ) => {
+    useSignupStore.getState().setForm((prev) => ({
+      address_info:
+        typeof next === "function"
+          ? (next as (p: AddressInfoType) => AddressInfoType)(prev.address_info)
+          : { ...prev.address_info, ...next },
+    }));
+  };
 
   const handleClickNext = () => {
     if (!form.address_info.address || !form.address_info.postal_code) {
@@ -58,40 +67,13 @@ const RegisterAddr = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       />
 
       {/* near station */}
-      <div className="flex flex-col gap-y-[20px]">
-        <h2>가장 가까운 역은 어디인가요?</h2>
-        {selectedStation ? (
-          <div className="flex flex-row gap-x-[5px] items-center">
-            <CommonBtn
-              notBottom
-              label={selectedStation}
-              category="pale-green"
-              className="w-fit h-fit px-[16px] py-[8px] tagFont rounded-sm"
-            />
-            <div>에서 도보로</div>
-            <div className="border-b border-[#393939] w-[30px]">
-              <input
-                type="text"
-                value={stationTime}
-                onChange={(e) => setStationTime(e.target.value)}
-                className="w-full text-center"
-                maxLength={2}
-                pattern="[0-9]*"
-              />
-            </div>
-
-            <div>분 걸려요.</div>
-          </div>
-        ) : (
-          <CommonBtn
-            notBottom
-            label="역을 선택해주세요."
-            category="pale-green"
-            className="w-fit h-fit px-[16px] py-[8px] tagFont rounded-sm"
-            onClick={() => setOpenStation(true)}
-          />
-        )}
-      </div>
+      <NearStation
+        setAddr={setAddr}
+        setStationTime={setStationTime}
+        stationTime={stationTime}
+        selectedStation={selectedStation}
+        setSelectStation={setSelectStation}
+      />
 
       <CommonBtn
         category="transparent"
@@ -116,31 +98,6 @@ const RegisterAddr = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
         className="absolute right-[20px] bottom-[38px]"
         width="w-[250px]"
       />
-
-      {/* show station modal */}
-      {openStation && (
-        <CommonModal
-          desc="역을 선택해주세요."
-          confirmLabel="확인"
-          onConfirmClick={() => setOpenStation(false)}
-          category="green"
-          className="text-start"
-        >
-          <div className="flex flex-col max-h-[150px] mt-[5px] overflow-y-auto bodyFont">
-            {NearStationList.map((station, idx) => (
-              <div
-                key={idx}
-                onClick={() => setSelectStation(station)}
-                className={`min-h-[36px] p-1 ${
-                  station === selectedStation && "font-bold bg-custom-white"
-                }`}
-              >
-                {station}
-              </div>
-            ))}
-          </div>
-        </CommonModal>
-      )}
 
       {/* show modal */}
       {showModal && (

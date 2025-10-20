@@ -23,6 +23,7 @@ const Select = ({
   const [modalMsg, setModalMsg] = useState<string>("");
 
   const handleClick = (key: string) => {
+    console.log(selected.length);
     if (selected.includes(key)) {
       setSelected(selected.filter((item) => item != key));
     } else {
@@ -52,8 +53,8 @@ const Select = ({
           />
         )}
       </div>
-      {/* 다음 */}
 
+      {/* 다음 */}
       <CommonBtn
         category={!validate?.(selected) ? "green" : "grey"}
         label={
@@ -61,11 +62,12 @@ const Select = ({
             ? `다음 (${selected.length}/3)`
             : selectType === "allergy"
             ? "랜덤팩 고르러 가기"
+            : selected.length > 0
+            ? "다음"
             : "건너뛰기"
         }
         onClick={() => handleSubmit()}
       />
-
       {showModal && (
         <CommonModal
           desc={modalMsg}

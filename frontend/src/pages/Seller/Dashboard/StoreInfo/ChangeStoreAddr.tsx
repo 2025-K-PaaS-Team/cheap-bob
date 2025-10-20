@@ -1,6 +1,6 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { useEffect, useState } from "react";
-import { PostalCode } from "@components/seller/dashboard";
+import { NearStation, PostalCode } from "@components/seller/dashboard";
 import { useNavigate } from "react-router";
 import { GetStoreDetail, UpdateStoreAddr } from "@services";
 import { formatErrMsg } from "@utils";
@@ -16,22 +16,31 @@ const ChangeStoreAddr = () => {
     bname: "",
     lat: "",
     lng: "",
+    nearest_station: "",
+    walking_time: 0,
   };
+
   const navigate = useNavigate();
   const [addr, setAddr] = useState<AddressInfoType>(initialAddr);
+
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+
+  const [selectedStation, setSelectStation] = useState<string>("");
+  const [stationTime, setStationTime] = useState<string>("");
 
   useEffect(() => {
     const handleGetStore = async () => {
       try {
         const res = await GetStoreDetail();
-        setAddr(res.address);
+        const a: AddressInfoType = res.address ?? initialAddr;
+        setAddr(a);
+        setSelectStation(a.nearest_station || "");
+        setStationTime(a.walking_time ? String(a.walking_time) : "");
       } catch (err) {
         console.error(formatErrMsg(err));
       }
     };
-
     handleGetStore();
   }, []);
 
@@ -50,9 +59,16 @@ const ChangeStoreAddr = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateAddr(addr)) return;
+    const payload: AddressInfoType = {
+      ...addr,
+      nearest_station: selectedStation || "",
+      walking_time: stationTime ? Number(stationTime) : 0,
+    };
+
+    if (!validateAddr(payload)) return;
+
     try {
-      await UpdateStoreAddr(addr);
+      await UpdateStoreAddr(payload);
       navigate(-1);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
@@ -61,27 +77,44 @@ const ChangeStoreAddr = () => {
   };
 
   return (
-    <div className="mt-[30px] px-[20px] w-full">
-      {/* question */}
-      <div className="titleFont">
-        변경할 <span className="font-bold">매장 주소</span>를 <br /> 입력해
-        주세요.
+    <div className="my-[30px] px-[20px] w-full flex flex-col flex-1">
+      <div className="flex flex-col gap-y-[40px] flex-1">
+        {/* question */}
+        <div className="titleFont">
+          변경할 <span className="font-bold">매장 주소</span>를 <br /> 입력해
+          주세요.
+        </div>
+
+        {/* postal code */}
+        <PostalCode
+          form={addr}
+          setForm={(next) =>
+            setAddr((prev) => ({
+              ...prev,
+              ...(typeof next === "function"
+                ? next(prev ?? ({} as AddressInfoType))
+                : next),
+            }))
+          }
+        />
+
+        <NearStation
+          setAddr={setAddr}
+          setStationTime={setStationTime}
+          stationTime={stationTime}
+          selectedStation={selectedStation}
+          setSelectStation={setSelectStation}
+        />
       </div>
-      {/* postal code */}
-      <PostalCode
-        form={addr}
-        setForm={(next) =>
-          setAddr((prev) => ({
-            ...prev,
-            ...(typeof next === "function" ? next(prev ?? {}) : next),
-          }))
-        }
-      />
 
       {/* save */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
+      <CommonBtn
+        label="저장"
+        onClick={handleSubmit}
+        notBottom
+        category="green"
+      />
 
-      {/* show modal */}
       {showModal && (
         <CommonModal
           desc={modalMsg}

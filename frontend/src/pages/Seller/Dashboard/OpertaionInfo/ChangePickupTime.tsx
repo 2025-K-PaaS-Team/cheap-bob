@@ -126,24 +126,28 @@ const ChangePickupTime = () => {
   }
 
   return (
-    <div className="flex flex-col gap-y-[10px] mx-[20px]">
-      {/* Pickup 편집: 오프셋으로 모든 요일의 pickup_* 자동 계산 */}
-      <CommonPuTime
-        form={form}
-        setForm={setForm}
-        pickupStartOffset={pickupStartOffset}
-        setPickupStartOffset={setPickupStartOffset}
-        pickupDiscardOffset={pickupDiscardOffset}
-        setPickupDiscardOffset={setPickupDiscardOffset}
-      />
-
-      {/* 공지 */}
-      <div className="w-full bg-[#E7E7E7] rounded-sm px-[10px] h-[57px] flex items-center text-custom-black">
-        변경 시 다음 영업일부터 적용됩니다.
+    <div className="flex flex-col flex-1 gap-y-[20px] p-[20px]">
+      <div className="flex flex-1 flex-col gap-y-[20px]">
+        <CommonPuTime
+          form={form}
+          setForm={setForm}
+          pickupStartOffset={pickupStartOffset}
+          setPickupStartOffset={setPickupStartOffset}
+          pickupDiscardOffset={pickupDiscardOffset}
+          setPickupDiscardOffset={setPickupDiscardOffset}
+        />
       </div>
-
+      {/* 공지 */}
+      <div className="w-full hintFont bg-[#E7E7E7] rounded px-[10px] h-[57px] flex items-center text-custom-black">
+        변경사항은 다음 영업일부터 적용됩니다.
+      </div>
       {/* btn */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
+      <CommonBtn
+        label="저장"
+        onClick={handleSubmit}
+        notBottom
+        category="green"
+      />
 
       {showModal && (
         <CommonModal

@@ -22,6 +22,8 @@ export type AddressInfoType = {
   bname: string;
   lat: string;
   lng: string;
+  nearest_station: string;
+  walking_time: number;
 };
 
 export type OperationTimeType = {

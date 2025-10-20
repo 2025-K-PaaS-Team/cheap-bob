@@ -18,10 +18,10 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
 
 const StoreDetail = () => {
   const navigate = useNavigate();
+  const [activeSlide, setActiveSlide] = useState(1);
   const location = useLocation();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -43,13 +43,14 @@ const StoreDetail = () => {
   const todayOp = store.operation_times.find(
     (dow) => dow.day_of_week === todayDow
   );
-  const diffTime = todayOp?.pickup_start_time
-    ? dayjs()
+  const pickupTime = todayOp?.pickup_start_time
+    ? dayjs(now)
         .set("hour", Number(todayOp.pickup_start_time.slice(0, 2)))
         .set("minute", Number(todayOp.pickup_start_time.slice(3, 5)))
         .set("second", Number(todayOp.pickup_start_time.slice(6, 8)))
-        .diff(now, "minute")
     : null;
+
+  const diffTime = pickupTime ? pickupTime.diff(now, "minute") : null;
 
   const [openCheckNoti, setOpenCheckNoti] = useState<boolean>(false);
 
@@ -129,13 +130,12 @@ const StoreDetail = () => {
   return (
     <>
       {product ? (
-        <div className="relative flex flex-col justify-center">
+        <div className="relative flex flex-col justify-center mb-[50px]">
           {/* store image */}
           <div className="bg-custom-white h-[230px] w-full relative">
             <Swiper
-              loop={false}
-              pagination={{ clickable: true }}
-              modules={[Pagination]}
+              loop={true}
+              onSlideChange={(swiper) => setActiveSlide(swiper.realIndex + 1)}
               className="mySwiper h-[230px]"
             >
               {store.images.map((img) => (
@@ -145,12 +145,17 @@ const StoreDetail = () => {
                     alt="StoreImage"
                     className="w-full h-full object-cover"
                   />
+                  <div className="absolute inset-0 bg-black/30" />
                 </SwiperSlide>
               ))}
             </Swiper>
 
             {/* overlay */}
             <div className="absolute top-0 left-0 w-full h-full hintFont pointer-events-none">
+              {/* img idx  */}
+              <div className="absolute top-3 right-3 z-10 bg-[#0A0A0A]/50 btnFont text-white rounded-lg py-[4px] px-[10px] pointer-events-auto">
+                {activeSlide} / {store.images.length}
+              </div>
               {/* 영업중 / 종료 */}
               <div className="absolute bottom-14 left-3 z-10 bg-custom-white rounded-lg py-[4px] px-[10px] pointer-events-auto">
                 {todayOp?.is_currently_open ? "영업중" : "영업 종료"}
@@ -327,11 +332,13 @@ const StoreDetail = () => {
               </div>
               {/* pu time desc */}
               <h3 className="text-center text-main-deep my-[16px]">
-                {diffTime && (
+                {diffTime !== null && diffTime > 0 ? (
                   <div>
                     픽업 시간까지 {Math.floor(diffTime / 60)}시간{" "}
                     {diffTime % 60}분
                   </div>
+                ) : (
+                  <div>픽업 시간이 지났습니다</div>
                 )}
               </h3>
             </div>
@@ -360,22 +367,18 @@ const StoreDetail = () => {
             </div>
 
             {storeId && customer && (
-              <div className="my-[30px]">
+              <div className="">
                 {!todayOp?.is_currently_open ? (
                   <CommonBtn
                     category="grey"
                     width="w-[calc(100%-40px)]"
-                    notBottom
-                    className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
                     label="영업시간이 아니예요"
                   />
                 ) : product.products[0].current_stock > 0 ? (
                   <CommonBtn
                     category="green"
                     width="w-[calc(100%-40px)]"
-                    notBottom
                     onClick={() => setOpenCheckNoti(true)}
-                    className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
                     label={`${getRoundedPrice(
                       store.products[0].price,
                       store.products[0].sale
@@ -387,8 +390,6 @@ const StoreDetail = () => {
                   <CommonBtn
                     category="grey"
                     width="w-[calc(100%-40px)]"
-                    notBottom
-                    className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
                     label="품절됐어요"
                   />
                 )}
