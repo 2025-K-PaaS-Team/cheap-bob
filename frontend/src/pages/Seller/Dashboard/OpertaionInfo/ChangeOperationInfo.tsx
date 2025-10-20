@@ -86,7 +86,7 @@ const ChangeOperationInfo = () => {
                 <button
                   key={dow}
                   type="button"
-                  className={`w-[32px] h-[32px] rounded-full flex items-center justify-center
+                  className={`font-bold hintFont w-[32px] h-[32px] rounded-full flex items-center justify-center
                       ${
                         isSelected
                           ? "bg-main-deep text-white"
@@ -107,24 +107,24 @@ const ChangeOperationInfo = () => {
         <div className="bg-[#E7E7E7] hintFont rounded-sm my-[8px] flex flex-col py-[15px] px-[23px] space-y-[10px]">
           {selectedOp ? (
             <>
-              <div className="grid grid-cols-3 items-center">
-                <div>오픈 시간</div>
+              <div className="flex flex-row">
+                <div className="w-[120px]">오픈 시간</div>
                 <div className="text-center">{hhmm(selectedOp.open_time)}</div>
               </div>
-              <div className="grid grid-cols-3 items-center">
-                <div>픽업 확정 시간</div>
+              <div className="flex flex-row">
+                <div className="w-[120px]">픽업 확정 시간</div>
                 <div className="text-center">
                   {hhmm(selectedOp.pickup_start_time)}
                 </div>
               </div>
-              <div className="grid grid-cols-3 items-center">
-                <div>픽업 마감 시간</div>
+              <div className="flex flex-row">
+                <div className="w-[120px]">픽업 마감 시간</div>
                 <div className="text-center">
                   {hhmm(selectedOp.pickup_end_time)}
                 </div>
               </div>
-              <div className="grid grid-cols-3 items-center">
-                <div>마감 시간</div>
+              <div className="flex flex-row">
+                <div className="w-[120px]">마감 시간</div>
                 <div className="text-center">{hhmm(selectedOp.close_time)}</div>
               </div>
             </>
