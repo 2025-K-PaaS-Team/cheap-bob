@@ -23,6 +23,7 @@ import {
   WithdrawCancel,
   StoreSearch,
   OrderAll,
+  StoreDesc,
 } from "@pages";
 import {
   ChangeOperationInfo,
@@ -74,6 +75,7 @@ const App = () => {
         {/* store */}
         <Route path="stores" element={<StoreList />} />
         <Route path="stores/:storeId" element={<StoreDetail />} />
+        <Route path="stores/:storeId/desc" element={<StoreDesc />} />
         <Route path="stores/:storeId/payment" element={<StorePayment />} />
         {/* store search */}
         <Route path="stores/search" element={<StoreSearch />} />

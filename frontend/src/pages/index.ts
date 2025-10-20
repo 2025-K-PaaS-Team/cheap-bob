@@ -1,5 +1,6 @@
 export { default as My } from "./Customer/My";
 export { default as StoreDetail } from "./Customer/StoreDetail";
+export { default as StoreDesc } from "./Customer/StoreDetail/StoreDesc";
 export { default as StoreList } from "./Customer/StoreList";
 export { default as StoreSearch } from "./Customer/StoreSearch";
 export { default as LoginCallback } from "./Common/LoginCallback";

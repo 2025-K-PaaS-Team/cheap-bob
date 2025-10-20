@@ -1,4 +1,4 @@
-import { CommonBtn, CommonDesc, CommonModal } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
 import { idxToDow, NutritionList } from "@constant";
 import type {
   CustomerDetailType,
@@ -38,7 +38,6 @@ const StoreDetail = () => {
     endLat: 0,
     endLng: 0,
   });
-  const [descOpen, setDescOpen] = useState<boolean>(false);
   const now = dayjs();
   const todayDow = (now.day() + 6) % 7;
   const todayOp = store.operation_times.find(
@@ -223,7 +222,9 @@ const StoreDetail = () => {
             {/* store desc */}
             <div
               className="text-[12px] font-[#6c6c6c]"
-              onClick={() => setDescOpen(true)}
+              onClick={() =>
+                navigate("desc", { state: store.store_introduction })
+              }
             >
               매장 설명 보기 &gt;
             </div>
@@ -414,9 +415,6 @@ const StoreDetail = () => {
           category="green"
         />
       )}
-
-      {/* show desc modal */}
-      {descOpen && <CommonDesc desc={store.store_introduction} />}
 
       {/* show check modal */}
       {openCheckNoti && (
