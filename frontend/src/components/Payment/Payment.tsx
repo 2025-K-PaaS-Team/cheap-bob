@@ -33,7 +33,7 @@ const Payment = ({
   const item: ItemType = {
     id: product.product_id,
     name: product.product_name,
-    price: product.price,
+    price: (product.price * product.sale) / 100,
     currency: "KRW",
     currencyLabel: "원",
   };
