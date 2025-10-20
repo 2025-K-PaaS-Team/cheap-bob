@@ -17,6 +17,7 @@ type EnterProps = BaseProps & {
   value: string;
   setValue: React.Dispatch<React.SetStateAction<string>>;
   validate: (val: string) => string | null;
+  inputType?: "text" | "phone";
 };
 
 type SelectProps = BaseProps & {
@@ -26,6 +27,7 @@ type SelectProps = BaseProps & {
   selected: string[];
   setSelected: React.Dispatch<React.SetStateAction<string[]>>;
   validate?: (val: string[]) => string | null;
+  inputType?: "text" | "phone";
 };
 
 type SignupSwiperProps = AgreeProps | EnterProps | SelectProps;
@@ -59,6 +61,7 @@ const SignupSwiper = (props: SignupSwiperProps) => {
               setValue={props.setValue}
               value={props.value}
               validate={props.validate}
+              inputType={(props as EnterProps).inputType}
             />
           )}
           {/* type: select */}

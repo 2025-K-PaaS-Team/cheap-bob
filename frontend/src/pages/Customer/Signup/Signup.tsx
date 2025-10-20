@@ -33,7 +33,7 @@ const Signup = () => {
       try {
         await CreateCustomerRegister({
           nickname,
-          phone_number: phone,
+          phone_number: phone.replace(/-/g, ""),
           nutrition_types: nutrition,
           preferred_menus: menu,
           allergies: allergy,
@@ -85,10 +85,11 @@ const Signup = () => {
           <SignupSwiper
             title={`전화번호를 입력해주세요`}
             type="enter"
-            placeholder="전화번호 입력"
+            inputType="phone"
+            placeholder="010-1234-5678"
             validate={(val) =>
-              !/^\d{10,11}$/.test(val)
-                ? "01012345678 형식으로 입력해주세요"
+              !/^01\d-\d{3,4}-\d{4}$/.test(val)
+                ? "010-1234-5678 형식으로 입력해주세요"
                 : ""
             }
             onNext={handleNext}
