@@ -48,7 +48,12 @@ const RemainPkg = ({
         </div>
 
         {/* 마이너스 */}
-        <img src="/icon/minus.svg" alt="minusIcon" className="pt-[15px]" />
+        <img
+          src="/icon/minus.svg"
+          alt="minusIcon"
+          className="pt-[15px]"
+          width="15px"
+        />
 
         {/* 주문 수량 */}
         <div className="flex flex-col py-[14px] ">
@@ -57,7 +62,12 @@ const RemainPkg = ({
         </div>
 
         {/* 플러스 */}
-        <img src="/icon/plus.svg" alt="plusIcon" className="pt-[15px]" />
+        <img
+          src="/icon/plus.svg"
+          alt="plusIcon"
+          className="pt-[15px]"
+          width="15px"
+        />
 
         {/* 일일조정값 */}
         <div className="relative py-[14px] w-[115px] flex flex-row  bg-main-pale rounded-sm justify-center">

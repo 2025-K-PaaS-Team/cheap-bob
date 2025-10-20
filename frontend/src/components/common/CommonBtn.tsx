@@ -39,7 +39,11 @@ const CommonBtn = ({
       type={type}
       onClick={onClick}
       className={`font-bold rounded text-base h-[54px] flex justify-center items-center
-        ${notBottom ? "" : "absolute bottom-[38px] left-1/2 -translate-x-1/2"} 
+        ${
+          notBottom
+            ? "w-full"
+            : "absolute bottom-[38px] left-1/2 -translate-x-1/2"
+        } 
         ${colorClass}
         ${className ? className : ""}
         ${width ? width : "w-[350px]"}`}

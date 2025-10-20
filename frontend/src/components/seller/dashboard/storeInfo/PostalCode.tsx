@@ -117,7 +117,7 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
           placeholder="주소를 입력하세요."
         />
         <button
-          className="border border-main-deep border-1 rounded hint w-[180px] px-3"
+          className="border border-main-deep border-1 rounded hint w-[180px] px-3 text-nowrap"
           onClick={() => openPostalCode()}
         >
           우편번호 찾기

@@ -56,21 +56,27 @@ const ChangeCustomerMenu = () => {
   if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
 
   return (
-    <div className="mt-[30px] px-[20px] w-full flex flex-col gap-y-[20px]">
-      <div className="titleFont">
-        선호하는 메뉴를 <br />
-        선택해주세요
+    <div className="my-[30px] px-[20px] w-full flex flex-col flex-1 justify-between gap-y-[20px]">
+      <div className="flex flex-col gap-y-[20px]">
+        <div className="titleFont">
+          선호하는 메뉴를 <br />
+          선택해주세요
+        </div>
+        <div className="hintFont]">주문할 때 사장님한테 보여져요</div>
+        <SelectedGrid
+          data={MenuList}
+          selected={selected}
+          selectType="menu"
+          onClick={handleClick}
+        />
       </div>
-      <div className="hintFont]">주문할 때 사장님한테 보여져요</div>
 
-      <SelectedGrid
-        data={MenuList}
-        selected={selected}
-        selectType="menu"
-        onClick={handleClick}
+      <CommonBtn
+        label="저장"
+        onClick={handleSubmit}
+        category="green"
+        notBottom
       />
-
-      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
 
       {showModal && (
         <CommonModal

@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import { useNavigate } from "react-router";
 import type { StoreSearchBaseType } from "@interface";
+import { getRoundedPrice } from "@utils";
 
 interface StoreBoxProps {
   stores: StoreSearchBaseType[];
@@ -106,14 +107,9 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
                     : "text-sub-orange"
                 }`}
               >
-                {(
-                  Math.floor(
-                    ((store.products[0].price *
-                      (100 - store.products[0].sale)) /
-                      100 +
-                      9) /
-                      10
-                  ) * 10
+                {getRoundedPrice(
+                  store.products[0].price,
+                  store.products[0].sale
                 ).toLocaleString()}
                 원
               </h1>

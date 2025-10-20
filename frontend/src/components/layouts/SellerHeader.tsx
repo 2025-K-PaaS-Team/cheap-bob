@@ -27,7 +27,7 @@ const SellerHeader = ({ layout }: HeaderProps) => {
         )}
 
         {/* center */}
-        <div className="font-bold text-[15px] text-center">
+        <div className="font-bold text-[15px] text-center text-nowrap">
           {myLayout.title}
         </div>
       </div>

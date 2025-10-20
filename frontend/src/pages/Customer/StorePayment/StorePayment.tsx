@@ -1,5 +1,6 @@
 import Payment from "@components/Payment/Payment";
 import type { CustomerDetailType, StoreSearchBaseType } from "@interface";
+import { getRoundedPrice } from "@utils";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 
@@ -107,11 +108,10 @@ const StorePayment = () => {
       {/* 최종 결제 금액 */}
       <h3 className="absolute bottom-30 right-5">
         최종 결제금액:{" "}
-        {Math.floor(
-          ((store.products[0].price * (100 - store.products[0].sale)) / 100 +
-            9) /
-            10
-        ) * 10}
+        {getRoundedPrice(
+          store.products[0].price,
+          store.products[0].sale
+        ).toLocaleString()}
         원
       </h3>
 

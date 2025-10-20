@@ -1,11 +1,13 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 type AgreeProps = {
   onNext?: () => void;
 };
 
 const Agree = ({ onNext }: AgreeProps) => {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState<string>("");
 
@@ -45,7 +47,10 @@ const Agree = ({ onNext }: AgreeProps) => {
             onChange={(e) => handleChange("service", e.target.checked)}
           />
           <div className="bodyFont">(필수) 서비스 이용약관 동의</div>
-          <div className="underline text-[#6C6C6C] absolute right-[20px]">
+          <div
+            className="underline text-[#6C6C6C] absolute right-[20px]"
+            onClick={() => navigate("/docs/tos")}
+          >
             보기
           </div>
         </div>
@@ -57,7 +62,10 @@ const Agree = ({ onNext }: AgreeProps) => {
             onChange={(e) => handleChange("privacy", e.target.checked)}
           />
           <div className="bodyFont">(필수) 개인정보 수집 이용 동의</div>
-          <div className="underline text-[#6C6C6C] absolute right-[20px]">
+          <div
+            className="underline text-[#6C6C6C] absolute right-[20px]"
+            onClick={() => navigate("/docs/privacy")}
+          >
             보기
           </div>
         </div>
