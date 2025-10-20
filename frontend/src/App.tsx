@@ -24,6 +24,8 @@ import {
   StoreSearch,
   OrderAll,
   StoreDesc,
+  Privacy,
+  TermsOfService,
 } from "@pages";
 import {
   ChangeOperationInfo,
@@ -65,6 +67,10 @@ const App = () => {
       <Route path="/withdraw" element={<Withdraw />} />
       {/* roleback withdraw */}
       <Route path="/withdraw/cancel" element={<WithdrawCancel />} />
+      {/* tos */}
+      <Route path="/docs/tos" element={<TermsOfService />} />
+      {/* privacy policy */}
+      <Route path="/docs/privacy" element={<Privacy />} />
 
       {/* customer side */}
       <Route path="/c" element={<Layout />}>

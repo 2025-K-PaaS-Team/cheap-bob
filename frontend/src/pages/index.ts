@@ -27,3 +27,7 @@ export { default as PortOneLab } from "../components/Payment/Payment";
 export { default as QrLab } from "./Common/Lab/QrLab";
 export { default as Withdraw } from "./Common/Withdraw";
 export { default as WithdrawCancel } from "./Common/Withdraw/WithdrawCancel";
+
+// docs
+export { default as TermsOfService } from "./Common/Docs/TermsOfService";
+export { default as Privacy } from "./Common/Docs/Privacy";
