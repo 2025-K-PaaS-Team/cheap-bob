@@ -3,13 +3,16 @@ import { SignupSwiper } from "@components/customer/signup";
 import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
 import { CreateCustomerRegister } from "@services";
 import { formatErrMsg } from "@utils";
-import { useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useState } from "react";
+import { useNavigate, useOutletContext } from "react-router";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
+interface OutletContextType {
+  swiperRef: React.RefObject<any>;
+}
 
 const Signup = () => {
-  const swiperRef = useRef<any>(null);
+  const { swiperRef } = useOutletContext<OutletContextType>();
   const [nickname, setNickname] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [nutrition, setNutrition] = useState<string[]>([]);

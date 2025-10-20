@@ -9,7 +9,7 @@ import {
 import { pathToLayoutKey, pathToSellerLayoutKey } from "@utils";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import SellerHeader from "./SellerHeader";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const Layout = () => {
   const location = useLocation();
@@ -56,17 +56,19 @@ const Layout = () => {
     }
   }, [location.pathname, navigate]);
 
+  const swiperRef = useRef<any>(null);
+
   return (
     <>
       <Wrapper>
         {!notHeader &&
           (isCustomer ? (
-            <Header layout={pathToLayoutKey(path)} />
+            <Header layout={pathToLayoutKey(path)} swiperRef={swiperRef} />
           ) : (
             <SellerHeader layout={pathToSellerLayoutKey(path)} />
           ))}
         <Main>
-          <Outlet />
+          <Outlet context={{ swiperRef }} />
         </Main>
         {!notFooter && (isCustomer ? <Footer /> : <SellerFooter />)}
       </Wrapper>
