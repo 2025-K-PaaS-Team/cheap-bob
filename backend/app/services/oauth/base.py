@@ -41,7 +41,7 @@ class OAuthClient(ABC):
         elif self.provider == OAuthProvider.KAKAO:
             params["prompt"] = "login"
         elif self.provider == OAuthProvider.NAVER:
-            params["prompt"] = "reauthenticate"
+            params["auth_type"] = "reauthenticate"
         
         query_string = "&".join(f"{k}={v}" for k, v in params.items())
         return f"{self.config.authorize_url}?{query_string}"
