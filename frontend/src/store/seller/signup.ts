@@ -59,6 +59,8 @@ export const useSignupStore = create<SignupState>((set) => ({
       bname: "",
       lat: "",
       lng: "",
+      nearest_station: "",
+      walking_time: 0,
     },
     operation_times: makeDefaultOpTimes(),
     payment_info: {
@@ -90,6 +92,8 @@ export const useSignupStore = create<SignupState>((set) => ({
           bname: "",
           lat: "",
           lng: "",
+          nearest_station: "",
+          walking_time: 0,
         },
         operation_times: makeDefaultOpTimes(),
         payment_info: {
