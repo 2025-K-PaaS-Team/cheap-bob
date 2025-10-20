@@ -28,11 +28,11 @@ const Home = () => {
 
       {/* login button */}
       <div className="flex flex-col gap-y-[10px] items-center">
-        <LoginButton
+        {/* <LoginButton
           provider="kakao"
           label="카카오로 계속하기"
           isCustomer={false}
-        />
+        /> */}
         <LoginButton
           provider="naver"
           label="네이버로 계속하기"
