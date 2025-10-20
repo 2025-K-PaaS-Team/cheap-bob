@@ -12,7 +12,7 @@ const Home = () => {
   localStorage.clear();
 
   return (
-    <div className="flex flex-col justify-around w-full pt-[30px]">
+    <div className="flex flex-col flex-1 justify-around w-full pt-[30px]">
       {/* swiper */}
       <Swiper
         pagination={{ clickable: true }}

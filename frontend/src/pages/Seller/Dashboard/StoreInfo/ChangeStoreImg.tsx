@@ -151,7 +151,7 @@ const ChangeStoreImg = () => {
       <div className="flex flex-col gap-y-[20px]">
         <h2>다른 사진도 있나요?</h2>
         {/* preview */}
-        {imgs.length > 0 ? (
+        {imgs.length > 1 && imgs ? (
           <div className="grid grid-cols-3 gap-2">
             {imgs.slice(1).map((img, idx) => (
               <div className="relative" key={idx}>
@@ -172,7 +172,7 @@ const ChangeStoreImg = () => {
             ))}
           </div>
         ) : (
-          <div className="relative h-[100px] bg-custom-white">
+          <div className="relative h-[100px]">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col">
               <div className="hintFont text-custom-black">
                 등록된 사진이 없어요.
