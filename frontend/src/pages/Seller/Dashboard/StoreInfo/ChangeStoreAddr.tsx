@@ -61,25 +61,32 @@ const ChangeStoreAddr = () => {
   };
 
   return (
-    <div className="mt-[30px] px-[20px] w-full">
-      {/* question */}
-      <div className="titleFont">
-        변경할 <span className="font-bold">매장 주소</span>를 <br /> 입력해
-        주세요.
+    <div className="my-[30px] px-[20px] w-full flex flex-col flex-1">
+      <div className="flex flex-col gap-y-[40px] flex-1">
+        {/* question */}
+        <div className="titleFont">
+          변경할 <span className="font-bold">매장 주소</span>를 <br /> 입력해
+          주세요.
+        </div>
+        {/* postal code */}
+        <PostalCode
+          form={addr}
+          setForm={(next) =>
+            setAddr((prev) => ({
+              ...prev,
+              ...(typeof next === "function" ? next(prev ?? {}) : next),
+            }))
+          }
+        />
       </div>
-      {/* postal code */}
-      <PostalCode
-        form={addr}
-        setForm={(next) =>
-          setAddr((prev) => ({
-            ...prev,
-            ...(typeof next === "function" ? next(prev ?? {}) : next),
-          }))
-        }
-      />
 
       {/* save */}
-      <CommonBtn label="저장" onClick={handleSubmit} category="green" />
+      <CommonBtn
+        label="저장"
+        onClick={handleSubmit}
+        notBottom
+        category="green"
+      />
 
       {/* show modal */}
       {showModal && (
