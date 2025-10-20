@@ -43,13 +43,14 @@ const StoreDetail = () => {
   const todayOp = store.operation_times.find(
     (dow) => dow.day_of_week === todayDow
   );
-  const diffTime = todayOp?.pickup_start_time
-    ? dayjs()
+  const pickupTime = todayOp?.pickup_start_time
+    ? dayjs(now)
         .set("hour", Number(todayOp.pickup_start_time.slice(0, 2)))
         .set("minute", Number(todayOp.pickup_start_time.slice(3, 5)))
         .set("second", Number(todayOp.pickup_start_time.slice(6, 8)))
-        .diff(now, "minute")
     : null;
+
+  const diffTime = pickupTime ? pickupTime.diff(now, "minute") : null;
 
   const [openCheckNoti, setOpenCheckNoti] = useState<boolean>(false);
 
@@ -129,7 +130,7 @@ const StoreDetail = () => {
   return (
     <>
       {product ? (
-        <div className="relative flex flex-col justify-center">
+        <div className="relative flex flex-col justify-center mb-[50px]">
           {/* store image */}
           <div className="bg-custom-white h-[230px] w-full relative">
             <Swiper
@@ -327,11 +328,13 @@ const StoreDetail = () => {
               </div>
               {/* pu time desc */}
               <h3 className="text-center text-main-deep my-[16px]">
-                {diffTime && (
+                {diffTime !== null && diffTime > 0 ? (
                   <div>
                     픽업 시간까지 {Math.floor(diffTime / 60)}시간{" "}
                     {diffTime % 60}분
                   </div>
+                ) : (
+                  <div>픽업 시간이 지났습니다</div>
                 )}
               </h3>
             </div>
@@ -360,22 +363,18 @@ const StoreDetail = () => {
             </div>
 
             {storeId && customer && (
-              <div className="my-[30px]">
+              <div className="">
                 {!todayOp?.is_currently_open ? (
                   <CommonBtn
                     category="grey"
                     width="w-[calc(100%-40px)]"
-                    notBottom
-                    className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
                     label="영업시간이 아니예요"
                   />
                 ) : product.products[0].current_stock > 0 ? (
                   <CommonBtn
                     category="green"
                     width="w-[calc(100%-40px)]"
-                    notBottom
                     onClick={() => setOpenCheckNoti(true)}
-                    className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
                     label={`${getRoundedPrice(
                       store.products[0].price,
                       store.products[0].sale
@@ -387,8 +386,6 @@ const StoreDetail = () => {
                   <CommonBtn
                     category="grey"
                     width="w-[calc(100%-40px)]"
-                    notBottom
-                    className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50"
                     label="품절됐어요"
                   />
                 )}
