@@ -27,25 +27,27 @@ const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   };
 
   return (
-    <div className="flex mx-[20px] flex-col mt-[20px] gap-y-[20px]">
-      {/* progress */}
-      <div className="text-main-deep font-bold bodyFont">1/2</div>
-
-      {/* opertation Time */}
-      <CommonOpTime
-        form={form.operation_times}
-        setForm={(times) =>
-          setForm((prev) => ({
-            ...prev,
-            operation_times: times,
-          }))
-        }
-      />
+    <div className="flex mx-[20px] flex-col my-[20px] gap-y-[20px]">
+      <div className="flex flex-1 flex-col gap-y-[40px]">
+        {/* progress */}
+        <div className="text-main-deep font-bold bodyFont">1/2</div>
+        {/* opertation Time */}
+        <CommonOpTime
+          form={form.operation_times}
+          setForm={(times) =>
+            setForm((prev) => ({
+              ...prev,
+              operation_times: times,
+            }))
+          }
+        />
+      </div>
 
       {/* next */}
       <CommonBtn
         category="green"
         label="다음"
+        notBottom
         onClick={() => handleClickNext()}
       />
 

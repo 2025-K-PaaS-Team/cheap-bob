@@ -13,13 +13,19 @@ const LoginFail = () => {
         <br />
         로그인할 계정을 선택해주세요.
       </div>
-      <CommonBtn
-        label="점주 로그인하기"
-        onClick={() => navigate("/s")}
-        notBottom
-        className="absolute bottom-30 left-1/2 -translate-x-1/2"
-      />
-      <CommonBtn label="고객 로그인하기" onClick={() => navigate("/c")} />
+
+      <div className="flex flex-col gap-y-[20px] my-[20px] w-full">
+        <CommonBtn
+          label="점주 로그인하기"
+          onClick={() => navigate("/s")}
+          notBottom
+        />
+        <CommonBtn
+          label="고객 로그인하기"
+          notBottom
+          onClick={() => navigate("/c")}
+        />
+      </div>
     </div>
   );
 };

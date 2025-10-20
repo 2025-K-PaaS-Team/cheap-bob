@@ -42,7 +42,7 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {isProgressBar && <ProgressBar pageIdx={pageIdx} />}
-      <div className="flex-1">{RenderComponent}</div>
+      <div className="flex flex-1">{RenderComponent}</div>
     </div>
   );
 };

@@ -28,32 +28,32 @@ const RegisterPackagePrice = ({
   };
 
   return (
-    <div className="flex flex-col mx-[20px] flex-col mt-[20px] gap-y-[40px]">
-      <div className="text-main-deep font-bold bodyFont">4/5</div>
-      <div className="titleFont">
-        <span className="font-bold">패키지의 가격</span>은 얼마인가요?
+    <div className="mx-[20px] my-[20px] flex flex-col flex-1 gap-y-[40px]">
+      <div className="flex flex-1 flex-col gap-y-[40px]">
+        <div className="text-main-deep font-bold bodyFont">4/5</div>
+        <div className="titleFont">
+          <span className="font-bold">패키지의 가격</span>은 얼마인가요?
+        </div>
+        <CommonPrice pkg={pkg} setPkg={setPkg} />
       </div>
 
-      <CommonPrice pkg={pkg} setPkg={setPkg} />
-
-      <CommonBtn
-        category="transparent"
-        label="이전"
-        onClick={() => handleClickPrev()}
-        notBottom
-        className="absolute left-[20px] bottom-[38px]"
-        width="w-[100px]"
-      />
-      <CommonBtn
-        category={
-          validateNum(pkg.price, packagePrice.minPrice) ? "green" : "grey"
-        }
-        label="다음"
-        onClick={() => handleClickNext()}
-        notBottom
-        className="absolute right-[20px] bottom-[38px]"
-        width="w-[250px]"
-      />
+      <div className="grid grid-cols-3">
+        <CommonBtn
+          category="transparent"
+          label="이전"
+          onClick={() => handleClickPrev()}
+          notBottom
+        />
+        <CommonBtn
+          category={
+            validateNum(pkg.price, packagePrice.minPrice) ? "green" : "grey"
+          }
+          label="다음"
+          onClick={() => handleClickNext()}
+          className="col-span-2"
+          notBottom
+        />
+      </div>
 
       {/* show modal */}
       {showModal && (

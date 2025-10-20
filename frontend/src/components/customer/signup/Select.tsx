@@ -43,7 +43,7 @@ const Select = ({
 
   return (
     <>
-      <div className="flex py-[25px] justify-center items-center">
+      <div className="flex flex-1 py-[25px] mx-[20px] justify-center items-center">
         {data && (
           <SelectedGrid
             data={data}
@@ -55,19 +55,23 @@ const Select = ({
       </div>
 
       {/* 다음 */}
-      <CommonBtn
-        category={!validate?.(selected) ? "green" : "grey"}
-        label={
-          selectType === "nutrition"
-            ? `다음 (${selected.length}/3)`
-            : selectType === "allergy"
-            ? "랜덤팩 고르러 가기"
-            : selected.length > 0
-            ? "다음"
-            : "건너뛰기"
-        }
-        onClick={() => handleSubmit()}
-      />
+      <div className="mx-[20px]">
+        <CommonBtn
+          notBottom
+          category={!validate?.(selected) ? "green" : "grey"}
+          label={
+            selectType === "nutrition"
+              ? `다음 (${selected.length}/3)`
+              : selectType === "allergy"
+              ? "랜덤팩 고르러 가기"
+              : selected.length > 0
+              ? "다음"
+              : "건너뛰기"
+          }
+          onClick={() => handleSubmit()}
+        />
+      </div>
+
       {showModal && (
         <CommonModal
           desc={modalMsg}

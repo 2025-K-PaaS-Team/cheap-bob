@@ -23,6 +23,11 @@ const NearStation = ({
   const handleStationTimeChange = (raw: string) => {
     const onlyNum = raw.replace(/\D/g, "").slice(0, 2);
     setStationTime(onlyNum);
+
+    setAddr((prev) => ({
+      ...prev,
+      walking_time: onlyNum ? Number(onlyNum) : 0,
+    }));
   };
 
   return (
@@ -75,7 +80,6 @@ const NearStation = ({
             setAddr((prev) => ({
               ...prev,
               nearest_station: selectedStation || "",
-              walking_time: stationTime ? Number(stationTime) : 0,
             }));
           }}
           onCancelClick={() => setOpenStation(false)}

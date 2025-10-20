@@ -45,47 +45,48 @@ const RegisterPackageNutrition = ({
   };
 
   return (
-    <div className="flex flex-col mx-[20px] flex-col mt-[20px] gap-y-[40px]">
-      <div className="text-main-deep font-bold bodyFont">3/5</div>
-      <div className="flex flex-col gap-y-[20px]">
-        <div className="titleFont">
-          <span className="font-bold">패키지의 영양 특징</span>은 무엇인가요?
+    <div className="mx-[20px] my-[20px] flex flex-col flex-1 gap-y-[40px]">
+      <div className="flex flex-1 flex-col gap-y-[40px]">
+        <div className="text-main-deep font-bold bodyFont">3/5</div>
+        <div className="flex flex-col gap-y-[20px]">
+          <div className="titleFont">
+            <span className="font-bold">패키지의 영양 특징</span>은 무엇인가요?
+          </div>
+          <div className="hintFont">최대 3개까지 선택할 수 있어요.</div>
         </div>
-        <div className="hintFont">최대 3개까지 선택할 수 있어요.</div>
+
+        {/* nutrition list */}
+        <SelectedGrid
+          data={NutritionList}
+          selected={pkg.nutrition_types}
+          selectType="nutrition"
+          onClick={handleClick}
+        />
       </div>
 
-      {/* nutrition list */}
-      <SelectedGrid
-        data={NutritionList}
-        selected={pkg.nutrition_types}
-        selectType="nutrition"
-        onClick={handleClick}
-      />
-
-      <CommonBtn
-        category="transparent"
-        label="이전"
-        onClick={() => handleClickPrev()}
-        notBottom
-        className="absolute left-[20px] bottom-[38px]"
-        width="w-[100px]"
-      />
-      <CommonBtn
-        category={
-          validateSelect(
-            pkg.nutrition_types.length,
-            packageSelect.minSelect,
-            packageSelect.maxSelect
-          )
-            ? "green"
-            : "grey"
-        }
-        label="다음"
-        onClick={() => handleClickNext()}
-        notBottom
-        className="absolute right-[20px] bottom-[38px]"
-        width="w-[250px]"
-      />
+      <div className="grid grid-cols-3">
+        <CommonBtn
+          category="transparent"
+          label="이전"
+          onClick={() => handleClickPrev()}
+          notBottom
+        />
+        <CommonBtn
+          category={
+            validateSelect(
+              pkg.nutrition_types.length,
+              packageSelect.minSelect,
+              packageSelect.maxSelect
+            )
+              ? "green"
+              : "grey"
+          }
+          label="다음"
+          onClick={() => handleClickNext()}
+          className="col-span-2"
+          notBottom
+        />
+      </div>
 
       {/* show modal */}
       {showModal && (
