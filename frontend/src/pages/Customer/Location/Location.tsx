@@ -48,45 +48,48 @@ const Location = () => {
 
   // 동 선택 토글
   const handleDongClick = (dong: string) => {
+    // 전체가 이미 켜져 있는 상태라면, 전체 외의 클릭은 무시
+    if (selectedDongs[allDongOption] && dong !== allDongOption) return;
+
     if (dong === allDongOption) {
-      // 상위 선택 시 하위 동들 모두 체크
-      const newSelected: Record<string, boolean> = {};
-      currentDongs.forEach((d) => {
-        newSelected[d] = true;
+      // 전체 토글: 켜기 ↔ 끄기 (오직 전체만 유지)
+      setSelectedDongs((prev) => {
+        const next = { ...prev };
+        const isOn = !!next[allDongOption];
+        if (isOn) {
+          // 전체 해제
+          return { [allDongOption]: false };
+        } else {
+          // 전체만 선택(다른 동 전부 해제)
+          return { [allDongOption]: true };
+        }
       });
-      setSelectedDongs(newSelected);
       return;
     }
 
-    // 최대 10개 제한
-    const currentSelectedCount = selectedDongKeys.filter(
-      (d) => d !== allDongOption
+    // 여기부터는 '개별 동' 토글 (전체가 켜져 있으면 위에서 return되어 실행 안 됨)
+
+    // 최대 10개 제한 (전체 제외)
+    const currentSelectedCount = Object.keys(selectedDongs).filter(
+      (d) => d !== allDongOption && selectedDongs[d]
     ).length;
     if (!selectedDongs[dong] && currentSelectedCount >= 10) return;
 
-    setSelectedDongs((prev) => {
-      const newSelected = { ...prev, [dong]: !prev[dong] };
-
-      // 모든 동 선택 시 관악구 전체 자동 체크
-      const allSelected = currentDongs
-        .filter((d) => d !== allDongOption)
-        .every((d) => newSelected[d]);
-      newSelected[allDongOption] = allSelected;
-
-      // 관악구 전체 선택 상태에서 다른 동 선택 시 전체 해제
-      if (newSelected[allDongOption] && dong !== allDongOption) {
-        newSelected[allDongOption] = false;
-      }
-
-      return newSelected;
-    });
+    // 일반 토글
+    setSelectedDongs((prev) => ({
+      ...prev,
+      [dong]: !prev[dong],
+      // 전체 상태는 개별 선택과 연동하지 않음
+      [allDongOption]: false,
+    }));
   };
 
   // 개별 동 선택 제거
   const removeDong = (dong: string) => {
     setSelectedDongs((prev) => {
-      const newSelected = { ...prev, [dong]: false };
-      return newSelected;
+      const next = { ...prev };
+      next[dong] = false;
+      return next;
     });
   };
 
@@ -185,17 +188,23 @@ const Location = () => {
         {/* 동·읍·면 */}
         <div className="flex flex-col min-w-0">
           {currentDongs.map((dong) => {
-            const isActive = selectedDongs[dong];
+            const isActive = !!selectedDongs[dong];
+            const isAllOn = !!selectedDongs[allDongOption];
+            const isDisabled = isAllOn && dong !== allDongOption;
+
             return (
               <div
                 key={dong}
-                className={`flex items-center justify-between cursor-pointer w-full h-[32px] p-[10px] ${
-                  isActive ? "text-main-deep" : "text-[#393939]"
-                }`}
+                className={`flex items-center justify-between w-full h-[32px] p-[10px]
+          ${isDisabled ? "text-main-deep" : "text-[#393939]"}
+          ${isActive ? "text-main-deep" : "text-[#393939]"}
+        `}
                 onClick={() => handleDongClick(dong)}
               >
                 <span>{dong}</span>
-                {isActive && <img src="/icon/check.svg" alt="check" />}
+                {(isActive || isDisabled) && (
+                  <img src="/icon/check.svg" alt="check" />
+                )}
               </div>
             );
           })}
@@ -211,10 +220,11 @@ const Location = () => {
               ? "1 / 10"
               : `${selectedDongKeys.length} / 10`}
           </div>
+
           <div className="flex flex-wrap gap-2 hintFont">
             {selectedDongs[allDongOption] ? (
-              <div className="flex items-center gap-1 bg-main-pale text-main-deep border rounded px-3 py-1">
-                {allDongOption}
+              <div className="flex items-center gap-2 bg-main-pale text-main-deep border rounded px-3 py-1">
+                <span>{allDongOption}</span>
                 <img
                   src="/icon/crossGreen.svg"
                   alt="remove"
@@ -226,11 +236,11 @@ const Location = () => {
               selectedDongKeys.map((dong) => (
                 <div
                   key={dong}
-                  className="flex items-center gap-1 bg-main-pale text-main-deep border rounded px-3 py-1"
+                  className="flex items-center gap-2 bg-main-pale text-main-deep border rounded px-3 py-1"
                 >
-                  {dong}
+                  <span>{dong}</span>
                   <img
-                    src="/icon/cross.svg"
+                    src="/icon/crossGreen.svg"
                     alt="remove"
                     className="w-3 h-3 cursor-pointer"
                     onClick={() => removeDong(dong)}
