@@ -3,18 +3,17 @@ import { NutritionList } from "@constant";
 import { useDashboardStore } from "@store";
 import { DeletePkgNutrition, AddPkgNutrition, GetProduct } from "@services";
 import { formatErrMsg } from "@utils";
-import type { ProductBase } from "@interface";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import CommonLoading from "@components/common/CommonLoading";
 
 const ChangePackageNutrition = () => {
   const navigate = useNavigate();
   const repProductId = useDashboardStore((s) => s.repProductId);
 
-  const [product, setProduct] = useState<ProductBase | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [busyKey, setBusyKey] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -22,7 +21,6 @@ const ChangePackageNutrition = () => {
   const load = async (id: string) => {
     try {
       const res = await GetProduct(id);
-      setProduct(res as ProductBase);
       const init = Array.isArray((res as any).nutrition_types)
         ? ((res as any).nutrition_types as string[])
         : [];
@@ -30,8 +28,9 @@ const ChangePackageNutrition = () => {
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
+      navigate(-1);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -39,11 +38,10 @@ const ChangePackageNutrition = () => {
     if (!repProductId) {
       setModalMsg("대표 패키지 ID를 찾을 수 없습니다.");
       setShowModal(true);
-      setLoading(false);
+      setIsLoading(false);
+      navigate(-1);
       return;
     }
-
-    console.log(product);
 
     load(repProductId);
   }, [repProductId]);
@@ -91,8 +89,9 @@ const ChangePackageNutrition = () => {
     navigate(-1);
   };
 
-  if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
-
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
   return (
     <div className="my-[30px] px-[20px] w-full flex flex-col flex-1 gap-y-[20px]">
       <div className="flex flex-1 flex-col gap-y-[20px]">

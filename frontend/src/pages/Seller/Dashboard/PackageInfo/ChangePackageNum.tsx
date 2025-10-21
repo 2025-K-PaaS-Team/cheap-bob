@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { CommonPkgNum } from "@components/seller/common";
 import type { ProductRequestType } from "@interface";
 import { GetProduct, UpdateProduct } from "@services";
@@ -10,7 +11,7 @@ import { useNavigate } from "react-router";
 const ChangePackageNum = () => {
   const repProductId = useDashboardStore((s) => s.repProductId);
   const [pkg, setPkg] = useState<ProductRequestType | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
 
@@ -24,7 +25,7 @@ const ChangePackageNum = () => {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -32,7 +33,8 @@ const ChangePackageNum = () => {
     if (!repProductId) {
       setModalMsg("대표 패키지 ID를 찾을 수 없습니다.");
       setShowModal(true);
-      setLoading(false);
+      setIsLoading(false);
+      navigate(-1);
       return;
     }
     load(repProductId);
@@ -42,12 +44,15 @@ const ChangePackageNum = () => {
     if (!repProductId) {
       setModalMsg("대표 패키지 ID를 찾을 수 없습니다.");
       setShowModal(true);
-      setLoading(false);
+      setIsLoading(false);
+      navigate(-1);
       return;
     }
     if (!pkg) {
       setModalMsg("패키지 정보를 불러오지 못했습니다.");
       setShowModal(true);
+      setIsLoading(false);
+      navigate(-1);
       return;
     }
     const payload: ProductRequestType = {
@@ -64,8 +69,9 @@ const ChangePackageNum = () => {
     }
   };
 
-  if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
-
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
   return (
     <div className="flex flex-col flex-1 my-[30px] px-[20px] gap-y-[40px]">
       <div className="flex-1 flex">

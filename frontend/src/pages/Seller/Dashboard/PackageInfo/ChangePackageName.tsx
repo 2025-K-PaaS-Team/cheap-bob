@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import type { ProductBase } from "@interface";
 import { GetProduct, UpdateProduct } from "@services";
 import { useDashboardStore } from "@store";
@@ -12,7 +13,7 @@ const ChangePackageName = () => {
   const repProductId = useDashboardStore((s) => s.repProductId); // string | null
   const [product, setProduct] = useState<ProductBase | null>(null);
   const [name, setName] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -26,15 +27,16 @@ const ChangePackageName = () => {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     if (!repProductId) {
+      setIsLoading(false);
       setModalMsg("패키지를 찾을 수 없습니다.");
       setShowModal(true);
-      setLoading(false);
+      navigate(-1);
       return;
     }
     load(repProductId);
@@ -71,7 +73,9 @@ const ChangePackageName = () => {
     }
   };
 
-  if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   return (
     <div className="my-[30px] px-[20px] w-full flex flex-col flex-1">

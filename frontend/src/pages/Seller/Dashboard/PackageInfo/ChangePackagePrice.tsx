@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { CommonPrice } from "@components/seller/common";
 import type { ProductBase } from "@interface";
 import { GetProduct, UpdateProduct } from "@services";
@@ -10,7 +11,7 @@ import { useNavigate } from "react-router";
 const ChangePackagePrice = () => {
   const repProductId = useDashboardStore((s) => s.repProductId); // string | null
   const [product, setProduct] = useState<ProductBase | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -25,7 +26,7 @@ const ChangePackagePrice = () => {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -33,7 +34,7 @@ const ChangePackagePrice = () => {
     if (!repProductId) {
       setModalMsg("패키지를 찾을 수 없습니다.");
       setShowModal(true);
-      setLoading(false);
+      setIsLoading(false);
       return;
     }
     load(repProductId);
@@ -71,8 +72,9 @@ const ChangePackagePrice = () => {
     }
   };
 
-  if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
-
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
   return (
     <div className="my-[30px] px-[20px] w-full flex flex-1 flex-col gap-y-[20px]">
       <div className="flex flex-col flex-1">
