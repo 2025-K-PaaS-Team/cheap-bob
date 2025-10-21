@@ -10,6 +10,7 @@ from services.auth.jwt import JWTService
 from database.mongodb_session import init_mongodb, close_mongodb
 from services.scheduled_tasks.startup_recovery import ScheduleRecovery
 from services.scheduler import scheduler
+from services.cart_recovery_service import CartRecoveryService
 
 # 로깅 설정
 logging.basicConfig(
@@ -27,6 +28,15 @@ async def lifespan(app: FastAPI):
     await init_mongodb()
     scheduler.start()
     logger.info(f"스케줄러 상태: {'실행 중' if scheduler.is_running else '중지됨'}")
+    
+    try:
+        recovered_carts = await CartRecoveryService.recover_abandoned_carts()
+        if recovered_carts > 0:
+            logger.info(f"장바구니 재고 복구 완료: {recovered_carts}개 아이템")
+        else:
+            logger.info("복구할 장바구니 아이템이 없습니다")
+    except Exception as e:
+        logger.error(f"장바구니 재고 복구 중 오류 발생: {e}", exc_info=True)
     
     try:
         recovered = await ScheduleRecovery.recover_dynamic_schedules_if_needed(scheduler)
