@@ -59,12 +59,15 @@ const BillingChange = () => {
   };
 
   useEffect(() => {
-    handleCheckPaymentInfo();
-    setIsLoading(false);
+    const init = async () => {
+      await handleCheckPaymentInfo();
+      setIsLoading(false);
+    };
+    init();
   }, []);
 
   if (isLoading) {
-    return <div>로딩 중...</div>;
+    return <CommonLoading type="data" isLoading={isLoading} />;
   }
 
   return (

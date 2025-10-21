@@ -1,4 +1,5 @@
 import { CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import type { StoreDetailType } from "@interface";
 import {
   GetStoreDetail,
@@ -19,6 +20,7 @@ const BillingInfo = () => {
   const [showWarn, setShowWarn] = useState<Boolean>(false);
   const today = dayjs();
   const endDate = today.add(-6, "day");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleGetWeekBilling = async () => {
     try {
@@ -55,9 +57,17 @@ const BillingInfo = () => {
   };
 
   useEffect(() => {
-    handleGetWeekBilling();
-    handleGetStore();
+    const init = async () => {
+      await handleGetWeekBilling();
+      await handleGetStore();
+      setIsLoading(false);
+    };
+    init();
   }, []);
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   return (
     <div className="flex flex-col relative h-full">

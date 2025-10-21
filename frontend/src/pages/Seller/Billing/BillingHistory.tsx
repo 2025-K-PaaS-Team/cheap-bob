@@ -1,4 +1,5 @@
 import { CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { BillingStatus } from "@components/seller/billing";
 import type { SettlementType } from "@interface";
 import { GetStoreSettlement } from "@services";
@@ -12,30 +13,18 @@ const BillingHistory = () => {
   const [settlement, setSettlement] = useState<SettlementType | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGetSettlement = async (start: string, end: string) => {
     try {
-      setLoading(true);
       const res = await GetStoreSettlement(start, end);
       setSettlement(res);
     } catch (err: unknown) {
       setModalMsg("정산 내역을 불러오는데 실패했습니다.");
       setShowModal(true);
-    } finally {
-      setLoading(false);
     }
   };
 
-  // ✅ 최초 1회 + 날짜 변경될 때마다 자동 호출
-  useEffect(() => {
-    handleGetSettlement(
-      startDate.format("YYYY-MM-DD"),
-      endDate.format("YYYY-MM-DD")
-    );
-  }, [startDate, endDate]);
-
-  // ✅ 상태별 필터링
   const filteredSettlements = useMemo(() => {
     if (!settlement) return [];
 
@@ -53,12 +42,24 @@ const BillingHistory = () => {
       .filter((day) => day.items.length > 0);
   }, [settlement, status]);
 
-  // ✅ 총 주문 건수 계산
   const totalCount = useMemo(() => {
     return filteredSettlements.reduce((sum, day) => sum + day.items.length, 0);
   }, [filteredSettlements]);
 
-  if (loading) return <div className="text-center mt-10">로딩 중...</div>;
+  useEffect(() => {
+    const init = async () => {
+      await handleGetSettlement(
+        startDate.format("YYYY-MM-DD"),
+        endDate.format("YYYY-MM-DD")
+      );
+      setIsLoading(false);
+    };
+    init();
+  }, [startDate, endDate]);
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   return (
     <div className="flex flex-col relative h-full">
@@ -72,7 +73,7 @@ const BillingHistory = () => {
             value={startDate.format("YYYY-MM-DD")}
             onChange={(e) => setStartDate(dayjs(e.target.value))}
             onFocus={(e) => e.target.showPicker()}
-            className="w-[110px] h-[36px] text-center flex items-center justify-center border-b border-black/80 hintFont focus:outline-none appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer"
+            className="w-[110px] h-[36px] pl-5 text-center flex items-center justify-center border-b border-black/80 hintFont focus:outline-none appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer"
           />
 
           <span className="fontBody font-bold">~</span>
@@ -81,7 +82,7 @@ const BillingHistory = () => {
             value={endDate.format("YYYY-MM-DD")}
             onChange={(e) => setEndDate(dayjs(e.target.value))}
             onFocus={(e) => e.target.showPicker()}
-            className="w-[110px] h-[36px] text-center flex items-center justify-center border-b border-black/80 hintFont focus:outline-none appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer"
+            className="w-[110px] h-[36px] pl-5 text-center flex items-center justify-center border-b border-black/80 hintFont focus:outline-none appearance-none [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer"
           />
         </div>
 
