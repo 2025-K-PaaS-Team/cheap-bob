@@ -86,7 +86,7 @@ const NearStation = ({
           category="green"
           className="text-start"
         >
-          <div className="flex flex-col max-h-[150px] mt-[5px] overflow-y-auto bodyFont gap-y-[10px]">
+          <div className="flex flex-col max-h-[150px] mt-[5px] overflow-y-auto bodyFont gap-y-[10px] station-scroll">
             <div className="font-bold">역을 선택해주세요</div>
             <div className="flex flex-col">
               {NearStationList.map((station, idx) => (
