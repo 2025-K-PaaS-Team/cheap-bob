@@ -215,12 +215,14 @@ const StoreDetail = () => {
                   onClick={handleClickDirection}
                   width={22}
                 />
-                <img
-                  src="/icon/instagram.svg"
-                  alt="instagramIcon"
-                  onClick={() => window.open(store.sns.instagram)}
-                  width={22}
-                />
+                {store.sns.homepage && (
+                  <img
+                    src="/icon/instagram.svg"
+                    alt="instagramIcon"
+                    onClick={() => window.open(store.sns.instagram)}
+                    width={22}
+                  />
+                )}
               </div>
             </div>
 
