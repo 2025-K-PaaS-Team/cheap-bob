@@ -1,4 +1,3 @@
-// Payment.tsx
 import { CommonBtn, CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import type {
