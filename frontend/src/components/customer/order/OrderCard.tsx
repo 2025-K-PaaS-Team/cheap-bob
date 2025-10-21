@@ -9,7 +9,7 @@ import { QrReader } from "react-qr-reader";
 interface OrderCardProps {
   orders: OrderBaseType[];
   isAll?: boolean;
-  onRefresh: () => void | Promise<void>;
+  onRefresh?: () => void | Promise<void>;
 }
 
 const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
@@ -81,7 +81,7 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
       {orders.map((order, idx) => {
         const timeStampKey = timeKeyMap[order.status] ?? "reservation_at";
         const timeStampValue = order[timeStampKey as keyof OrderBaseType];
-        const orderTime = formatDate(String(timeStampValue))
+        const orderTime = formatDate(timeStampValue)
           ?.slice(0, 10)
           .replaceAll("-", ".");
         const orderState =
