@@ -52,13 +52,11 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     try {
       await handleRegisterStore();
       await handleRegisterStoreImg();
+      setPageIdx(pageIdx + 1);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
-      // return;
     }
-
-    setPageIdx(pageIdx + 1);
   };
 
   const handleClickPrev = () => {
