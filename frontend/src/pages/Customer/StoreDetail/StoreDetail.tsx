@@ -374,15 +374,10 @@ const StoreDetail = () => {
             {storeId && customer && (
               <div className="">
                 {!todayOp?.is_currently_open ? (
-                  <CommonBtn
-                    category="grey"
-                    width="w-[calc(100%-40px)]"
-                    label="영업시간이 아니예요"
-                  />
+                  <CommonBtn category="grey" label="영업시간이 아니예요" />
                 ) : product.products[0].current_stock > 0 ? (
                   <CommonBtn
                     category="green"
-                    width="w-[calc(100%-40px)]"
                     onClick={() => setOpenCheckNoti(true)}
                     label={`${getRoundedPrice(
                       store.products[0].price,
@@ -392,11 +387,7 @@ const StoreDetail = () => {
                     }개 남음)`}
                   />
                 ) : (
-                  <CommonBtn
-                    category="grey"
-                    width="w-[calc(100%-40px)]"
-                    label="품절됐어요"
-                  />
+                  <CommonBtn category="grey" label="품절됐어요" />
                 )}
               </div>
             )}

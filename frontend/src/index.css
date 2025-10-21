@@ -184,6 +184,23 @@
   }
 }
 
+.fixed-action {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 38px;
+  z-index: 50;
+  width: calc(100% - 40px);
+}
+
+@media (min-width: 901px) {
+  .fixed-action {
+    width: calc(min(420px, 100% - (var(--frame-padding) * 2)) - 40px);
+    left: calc(50% + 210px);
+    transform: translateX(-50%);
+  }
+}
+
 /* ====== Theme Tokens ====== */
 @theme {
   --color-main-normal: oklch(0.9098 0.236 131.12);

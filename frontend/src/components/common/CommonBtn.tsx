@@ -39,7 +39,7 @@ const CommonBtn = ({
       type={type}
       onClick={onClick}
       className={`font-bold rounded text-base h-[54px] flex justify-center items-center
-        ${notBottom ? "" : "fixed bottom-[38px] left-1/2 -translate-x-1/2"} 
+        ${notBottom ? "" : "fixed-action"} 
         ${colorClass}
         ${className ? className : ""}
         ${width ? width : "w-full"}`}
