@@ -1,6 +1,17 @@
+import { useNavigate } from "react-router";
+
 const Privacy = () => {
+  const navigate = useNavigate();
   return (
-    <div className="h-full overflow-y-auto py-6 text-custom-black">
+    <div className="relative h-full py-6 text-custom-black">
+      <img
+        src="/icon/cross.svg"
+        alt="crossIcon"
+        onClick={() => navigate(-1)}
+        className="absolute top-10 right-10 cursor-pointer z-10"
+        width="20"
+      />
+
       <div className="m-[20px] max-w-none text-left space-y-4">
         <h1 className="text-2xl font-bold">[저렴한끼] 개인정보처리방침</h1>
         <h2 className="text-xl font-semibold">개인정보처리방침</h2>

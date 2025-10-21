@@ -67,10 +67,14 @@ const App = () => {
       <Route path="/withdraw" element={<Withdraw />} />
       {/* roleback withdraw */}
       <Route path="/withdraw/cancel" element={<WithdrawCancel />} />
-      {/* tos */}
-      <Route path="/docs/tos" element={<TermsOfService />} />
-      {/* privacy policy */}
-      <Route path="/docs/privacy" element={<Privacy />} />
+
+      {/* docs */}
+      <Route path="/docs" element={<Layout />}>
+        {/* tos */}
+        <Route path="tos" element={<TermsOfService />} />
+        {/* privacy policy */}
+        <Route path="privacy" element={<Privacy />} />
+      </Route>
 
       {/* customer side */}
       <Route path="/c" element={<Layout />}>
