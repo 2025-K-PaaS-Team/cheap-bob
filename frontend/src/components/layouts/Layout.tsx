@@ -17,12 +17,14 @@ const Layout = () => {
   const path = location.pathname.toLowerCase();
   const isCustomer = path.startsWith("/c");
   const isAuth = path.startsWith("/auth");
+  const isWithdraw = path.startsWith("/withdraw");
+  const isDocs = path.startsWith("/docs");
 
   const token = localStorage.getItem("accessToken");
   const role = localStorage.getItem("loginRole");
 
   const resolveRedirect = (): string | null => {
-    if (isAuth) return null;
+    if (isAuth || isWithdraw || isDocs) return null;
 
     if (!token) {
       return path.startsWith("/s") ? "/s" : "/c";
