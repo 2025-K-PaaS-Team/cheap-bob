@@ -14,6 +14,8 @@ const StorePayment = () => {
   const [myPhone, setMyPhone] = useState<string>("");
 
   const maxQty = store.products[0].current_stock;
+  const unit = getRoundedPrice(store.products[0].price, store.products[0].sale);
+  const total = unit * qty;
 
   useEffect(() => {
     const digits = customer.phone_number.replace(/-/g, "").slice(0, 11);
@@ -115,12 +117,7 @@ const StorePayment = () => {
       {/* 최종 결제 금액 */}
 
       <h3 className="flex flex-col text-end">
-        최종 결제금액:{" "}
-        {getRoundedPrice(
-          store.products[0].price,
-          store.products[0].sale
-        ).toLocaleString()}
-        원
+        최종 결제금액: {total.toLocaleString()}원
       </h3>
 
       <Payment
