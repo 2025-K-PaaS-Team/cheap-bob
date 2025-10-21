@@ -36,11 +36,14 @@ const Header = ({ layout, swiperRef }: HeaderProps) => {
             onClick={handleClickBefore}
           />
         ) : myLayout.loc ? (
-          <img
-            src="/icon/location.svg"
-            alt="locationIcon"
-            onClick={() => navigate("/c/location")}
-          />
+          <div className="flex gap-x-[5px]">
+            <img
+              src="/icon/location.svg"
+              alt="locationIcon"
+              onClick={() => navigate("/c/location")}
+            />
+            <div className="bodyFont font-bold">관악구</div>
+          </div>
         ) : (
           <div />
         )}
