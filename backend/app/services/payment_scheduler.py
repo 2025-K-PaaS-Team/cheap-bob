@@ -4,8 +4,10 @@ from loguru import logger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import timezone as pytz_timezone
 
+from database.session import get_session
 from services.scheduler import scheduler as app_scheduler
-from repositories.store_product_info import StockUpdateResult
+from repositories.store_product_info import StockUpdateResult, StoreProductInfoRepository
+from repositories.order_current_item import OrderCurrentItemRepository
 from config.settings import settings
 
 KST = pytz_timezone('Asia/Seoul')
@@ -25,9 +27,7 @@ class PaymentSchedulerService:
         cls,
         payment_id: str,
         product_id: str,
-        quantity: int,
-        product_repo: Any,
-        cart_repo: Any
+        quantity: int
     ) -> bool:
         """
         결제 타임아웃 스케줄 등록
@@ -37,8 +37,6 @@ class PaymentSchedulerService:
             payment_id: 결제 ID
             product_id: 상품 ID
             quantity: 구매 수량
-            product_repo: 상품 레포지토리 인스턴스
-            cart_repo: 장바구니 레포지토리 인스턴스
             
         Returns:
             성공 여부
@@ -53,23 +51,27 @@ class PaymentSchedulerService:
                 """재고 복구 및 장바구니 삭제 작업"""
                 logger.info(f"결제 타임아웃으로 재고 복구 시작 - Payment ID: {payment_id}")
                 
-                max_retries = settings.MAX_RETRY_LOCK
-                for attempt in range(max_retries):
-                    result = await product_repo.adjust_purchased_stock(product_id, -quantity)
+                async with get_session() as session:
+                    product_repo = StoreProductInfoRepository(session)
+                    cart_repo = OrderCurrentItemRepository(session)
                     
-                    if result == StockUpdateResult.SUCCESS:
-                        logger.info(f"재고 복구 성공 - Product ID: {product_id}, 수량: {quantity}")
-                        break
+                    max_retries = settings.MAX_RETRY_LOCK
+                    for attempt in range(max_retries):
+                        result = await product_repo.adjust_purchased_stock(product_id, -quantity)
+                        
+                        if result == StockUpdateResult.SUCCESS:
+                            logger.info(f"재고 복구 성공 - Product ID: {product_id}, 수량: {quantity}")
+                            break
+                        
+                        if attempt == max_retries - 1:
+                            logger.error(f"재고 복구 실패 - Product ID: {product_id}, 수량: {quantity}")
+                            return
                     
-                    if attempt == max_retries - 1:
-                        logger.error(f"재고 복구 실패 - Product ID: {product_id}, 수량: {quantity}")
-                        return
-                
-                try:
-                    await cart_repo.delete(payment_id)
-                    logger.info(f"장바구니에서 삭제 완료 - Payment ID: {payment_id}")
-                except Exception as e:
-                    logger.error(f"장바구니 삭제 실패 - Payment ID: {payment_id}, Error: {str(e)}")
+                    try:
+                        await cart_repo.delete(payment_id)
+                        logger.info(f"장바구니에서 삭제 완료 - Payment ID: {payment_id}")
+                    except Exception as e:
+                        logger.error(f"장바구니 삭제 실패 - Payment ID: {payment_id}, Error: {str(e)}")
             
             scheduler.add_job(
                 func=restore_stock,

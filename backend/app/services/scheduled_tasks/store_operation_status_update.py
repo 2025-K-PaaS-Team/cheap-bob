@@ -4,7 +4,7 @@ from typing import Dict, Any
 from sqlalchemy import update, select
 from sqlalchemy.orm import joinedload
 
-from database.session import get_db
+from database.session import get_session
 from database.models.store_operation_info import StoreOperationInfo
 from database.models.store import Store
 from repositories.store_payment_info import StorePaymentInfoRepository
@@ -33,7 +33,7 @@ class StoreOperationStatusUpdateTask:
                 f"KST 기준 - 현재: {now_kst.strftime('%Y-%m-%d %H:%M:%S')}, "
                 f"오늘 요일: {now_kst_day_of_week}"
             )
-            async for session in get_db():
+            async with get_session() as session:
                 # 포트원 정보가 있는 가게들만 조회
                 payment_repo = StorePaymentInfoRepository(session)
                 

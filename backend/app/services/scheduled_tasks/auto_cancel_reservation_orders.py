@@ -3,7 +3,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List
 from collections import defaultdict
 
-from database.session import get_db
+from database.session import get_session
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_operation_info import StoreOperationInfoRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
@@ -35,7 +35,7 @@ class AutoCancelReservationOrdersTask:
         total_refund_amount = 0
 
         try:
-            async for session in get_db():
+            async with get_session() as session:
                 order_repo = OrderCurrentItemRepository(session)
                 payment_info_repo = StorePaymentInfoRepository(session)
                 
@@ -122,7 +122,7 @@ class AutoCancelReservationOrdersTask:
         try:
             AutoCancelReservationOrdersTask._remove_existing_jobs(scheduler)
 
-            async for session in get_db():
+            async with get_session(auto_commit=False) as session:
                 operation_repo = StoreOperationInfoRepository(session)
 
                 now_kst = datetime.now(KST)

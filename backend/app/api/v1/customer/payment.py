@@ -19,7 +19,7 @@ from schemas.payment import (
     PaymentConfirmRequest,
     PaymentResponse
 )
-from services.payment_scheduler_service import PaymentSchedulerService
+from services.payment_scheduler import PaymentSchedulerService
 from services.payment import PaymentService
 from services.email import email_service
 from utils.docs_error import create_error_responses
@@ -165,9 +165,7 @@ async def init_payment(
     await PaymentSchedulerService.schedule_payment_timeout(
         payment_id=payment_id,
         product_id=request.product_id,
-        quantity=request.quantity,
-        product_repo=product_repo,
-        cart_repo=cart_repo
+        quantity=request.quantity
     )
     
     # 장바구니에 등록
