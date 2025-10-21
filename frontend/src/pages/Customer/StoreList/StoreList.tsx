@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AddFavoriteStore, getStores, RemoveFavoriteStore } from "@services";
 import { Chips, CommonModal } from "@components/common";
 import { NutritionList } from "@constant";
@@ -15,21 +15,26 @@ const StoreList = () => {
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
-  const [selected, setSelected] = useState<Record<string, boolean>>(
-    NutritionList.reduce((acc, item) => {
-      acc[item.key] = false;
-      return acc;
-    }, {} as Record<string, boolean>)
-  );
-
-  const filteredStores = stores?.stores.filter((store) => {
-    const activeKeys = Object.keys(selected).filter((key) => selected[key]);
-    if (activeKeys.length === 0) return true;
-
-    return store.products.some((p) =>
-      p.nutrition_types.some((type) => activeKeys.includes(type))
-    );
+  const [selected, setSelected] = useState<Record<string, boolean>>({
+    all: true,
   });
+
+  const filteredStores = useMemo(() => {
+    if (!stores) return [];
+
+    const activeKeys = Object.keys(selected).filter(
+      (k) => k !== "all" && selected[k]
+    );
+
+    const showAll = selected.all || activeKeys.length === 0;
+    if (showAll) return stores.stores;
+
+    return stores.stores.filter((store) =>
+      store.products.some((p) =>
+        p.nutrition_types.some((type) => activeKeys.includes(type))
+      )
+    );
+  }, [stores, selected]);
 
   // get stores list
   const handleGetStores = async (pageIdx: number) => {
