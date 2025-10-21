@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import type {
   CustomerDetailType,
   ItemType,
@@ -6,7 +7,7 @@ import type {
   ProductBaseType,
 } from "@interface";
 import PortOne from "@portone/browser-sdk/v2";
-import { cancelPayment, confrimPayment, initPayment } from "@services";
+import { confrimPayment, initPayment } from "@services";
 import { formatErrMsg, getRoundedPrice } from "@utils";
 import { useState } from "react";
 import { useNavigate } from "react-router";
@@ -30,6 +31,7 @@ const Payment = ({
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState<string>("");
   const roundedPrice = getRoundedPrice(product.price, product.sale);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const item: ItemType = {
     id: product.product_id,
@@ -61,12 +63,14 @@ const Payment = ({
         payment_id: payment_id,
       });
       console.log("결제 확인 성공", confirm);
-      return confirm;
+      setModalMsg(
+        "결제가 정상적으로 완료되었습니다. <br/> 3초 후 주문 현황 페이지로 이동합니다."
+      );
+      setShowModal(true);
+      setTimeout(() => navigate("/c/order"), 3000);
     } catch (err: unknown) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
-      await cancelPayment(payment_id);
-      return null;
     }
   };
 
@@ -78,6 +82,8 @@ const Payment = ({
       setShowModal(true);
       return;
     }
+
+    setIsLoading(true);
 
     const phoneRegex = /^01\d-\d{3,4}-\d{4}$/;
     if (!phoneRegex.test(customer.phone_number)) {
@@ -95,7 +101,7 @@ const Payment = ({
     }
 
     try {
-      const response = await PortOne.requestPayment({
+      await PortOne.requestPayment({
         storeId: paymentResult.store_id,
         channelKey: paymentResult.channel_id,
         paymentId: paymentResult?.payment_id,
@@ -119,23 +125,18 @@ const Payment = ({
         },
       });
 
-      console.log("결제 성공!", response);
-    } catch (err: unknown) {
-      setModalMsg(formatErrMsg(err));
-      setShowModal(true);
-    }
-
-    try {
-      const confirmResult = await handleConfrimPayment(
-        paymentResult.payment_id
-      );
-      console.log("confirmResult", confirmResult);
-      navigate("/c/order");
+      await handleConfrimPayment(paymentResult.payment_id);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   return (
     <div className="relative h-full flex flex-col">
@@ -147,7 +148,6 @@ const Payment = ({
             <CommonBtn
               type="submit"
               category="green"
-              width="w-[calc(100%-40px)]"
               notBottom
               className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
               label="결제하기"

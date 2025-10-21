@@ -31,7 +31,7 @@ const CommonModal = ({
       <div
         className={`${
           className ? className : ""
-        } text-center flex flex-col w-[359px] p-[20px] rounded-lg gap-y-[10px] bg-white`}
+        } text-center flex flex-col w-[359px] p-[20px] rounded-lg gap-y-[10px] bg-white mx-[20px]`}
       >
         {/* description */}
         {desc && (
