@@ -62,6 +62,7 @@
 }
 .app-scroll::-webkit-scrollbar {
   display: none;
+  width: 0px;
 }
 .app-scroll::-webkit-scrollbar-track {
   background: transparent;

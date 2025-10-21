@@ -48,9 +48,13 @@ const Location = () => {
 
   // 동 선택 토글
   const handleDongClick = (dong: string) => {
-    // 관악구 전체 선택 시
     if (dong === allDongOption) {
-      setSelectedDongs({ [allDongOption]: true });
+      // 상위 선택 시 하위 동들 모두 체크
+      const newSelected: Record<string, boolean> = {};
+      currentDongs.forEach((d) => {
+        newSelected[d] = true;
+      });
+      setSelectedDongs(newSelected);
       return;
     }
 
@@ -67,8 +71,7 @@ const Location = () => {
       const allSelected = currentDongs
         .filter((d) => d !== allDongOption)
         .every((d) => newSelected[d]);
-      if (allSelected) newSelected[allDongOption] = true;
-      else newSelected[allDongOption] = false;
+      newSelected[allDongOption] = allSelected;
 
       // 관악구 전체 선택 상태에서 다른 동 선택 시 전체 해제
       if (newSelected[allDongOption] && dong !== allDongOption) {
@@ -105,7 +108,7 @@ const Location = () => {
       </div>
 
       {/* Header */}
-      <div className="grid grid-cols-3">
+      <div className="grid grid-cols-3 overflow-y-scroll min-h-[30px]">
         {["시 · 도", "시 · 군 · 구", "동 · 읍 · 면"].map((header, idx) => (
           <div
             key={idx}
@@ -120,9 +123,9 @@ const Location = () => {
 
       {/* Content */}
       <div
-        className={`grid grid-cols-3 ${
+        className={`grid grid-cols-3 overflow-y-scroll ${
           Object.values(selectedDongs).some((v) => v)
-            ? "max-h-[400px] overflow-y-auto"
+            ? "max-h-[400px]"
             : "h-full"
         }`}
       >
@@ -180,21 +183,19 @@ const Location = () => {
         </div>
 
         {/* 동·읍·면 */}
-        <div className="flex flex-col">
+        <div className="flex flex-col min-w-0">
           {currentDongs.map((dong) => {
             const isActive = selectedDongs[dong];
             return (
               <div
                 key={dong}
                 className={`flex items-center justify-between cursor-pointer w-full h-[32px] p-[10px] ${
-                  isActive ? "text-main-deep font-bold" : "text-[#393939]"
+                  isActive ? "text-main-deep" : "text-[#393939]"
                 }`}
                 onClick={() => handleDongClick(dong)}
               >
                 <span>{dong}</span>
-                {isActive && (
-                  <img src="/icon/check.svg" alt="check" className="w-4 h-4" />
-                )}
+                {isActive && <img src="/icon/check.svg" alt="check" />}
               </div>
             );
           })}
@@ -208,7 +209,7 @@ const Location = () => {
           <div className="tagFont">
             {selectedDongs[allDongOption]
               ? "1 / 10"
-              : `${Math.min(selectedDongKeys.length, 10)} / 10`}
+              : `${selectedDongKeys.length} / 10`}
           </div>
           <div className="flex flex-wrap gap-2 hintFont">
             {selectedDongs[allDongOption] ? (
