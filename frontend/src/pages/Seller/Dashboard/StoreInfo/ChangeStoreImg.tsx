@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import type { ImageInfoType } from "@interface";
 import {
   AddStoreImg,
@@ -16,6 +17,7 @@ const ChangeStoreImg = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const [imgs, setImgs] = useState<ImageInfoType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleSubmit = () => {
     navigate(-1);
@@ -37,6 +39,7 @@ const ChangeStoreImg = () => {
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsLoading(true);
     const files = e.target.files ? Array.from(e.target.files).slice(0, 5) : [];
     if (files.length === 0) return;
 
@@ -100,6 +103,7 @@ const ChangeStoreImg = () => {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
+      setIsLoading(false);
       e.target.value = "";
     }
   };
@@ -115,11 +119,15 @@ const ChangeStoreImg = () => {
   };
 
   useEffect(() => {
-    handleGetStoreImg();
+    const init = async () => {
+      await handleGetStoreImg();
+      setIsLoading(false);
+    };
+    init();
   }, []);
 
-  if (!imgs || imgs.length === 0) {
-    return <div>이미지를 불러오는 중</div>;
+  if (isLoading || !imgs || imgs.length == 0) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
   }
 
   return (

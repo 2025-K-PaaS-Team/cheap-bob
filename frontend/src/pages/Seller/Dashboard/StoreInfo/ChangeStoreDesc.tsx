@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { GetStoreDetail, UpdateStoreDesc } from "@services";
 import { formatErrMsg, validateLength } from "@utils";
 import { useEffect, useState } from "react";
@@ -9,12 +10,14 @@ const ChangeStoreDesc = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const handleGetStore = async () => {
       try {
         const res = await GetStoreDetail();
         setValue(res.store_introduction);
+        setIsLoading(false);
       } catch (err) {
         console.error(formatErrMsg(err));
       }
@@ -22,6 +25,10 @@ const ChangeStoreDesc = () => {
 
     handleGetStore();
   }, []);
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   const handleUpdateStoreDesc = async (storeName: string) => {
     const validMsg = "매장 설명은 1~100자여야 합니다.";

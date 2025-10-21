@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { GetStoreDetail, UpdateStoreAddr } from "@services";
 import { formatErrMsg } from "@utils";
 import type { AddressInfoType } from "@interface";
+import CommonLoading from "@components/common/CommonLoading";
 
 const ChangeStoreAddr = () => {
   const initialAddr: AddressInfoType = {
@@ -29,6 +30,8 @@ const ChangeStoreAddr = () => {
   const [selectedStation, setSelectStation] = useState<string>("");
   const [stationTime, setStationTime] = useState<string>("");
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   useEffect(() => {
     const handleGetStore = async () => {
       try {
@@ -37,12 +40,17 @@ const ChangeStoreAddr = () => {
         setAddr(a);
         setSelectStation(a.nearest_station || "");
         setStationTime(a.walking_time ? String(a.walking_time) : "");
+        setIsLoading(false);
       } catch (err) {
         console.error(formatErrMsg(err));
       }
     };
     handleGetStore();
   }, []);
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   const validateAddr = (a: AddressInfoType) => {
     if (!a.address || !a.postal_code) {

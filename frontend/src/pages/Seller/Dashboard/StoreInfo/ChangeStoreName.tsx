@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { GetStoreDetail, UpdateStoreName } from "@services";
 import { formatErrMsg, validateLength } from "@utils";
 import { useEffect, useState } from "react";
@@ -9,19 +10,7 @@ const ChangeStoreName = ({}) => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
-
-  useEffect(() => {
-    const handleGetStore = async () => {
-      try {
-        const res = await GetStoreDetail();
-        setValue(res.store_name);
-      } catch (err) {
-        console.error(formatErrMsg(err));
-      }
-    };
-
-    handleGetStore();
-  }, []);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleUpdateStoreName = async (storeName: string) => {
     const validMsg = "매장 이름은 1~7자여야 합니다.";
@@ -44,6 +33,24 @@ const ChangeStoreName = ({}) => {
   const handleSubmit = () => {
     handleUpdateStoreName(value);
   };
+
+  useEffect(() => {
+    const handleGetStore = async () => {
+      try {
+        const res = await GetStoreDetail();
+        setValue(res.store_name);
+        setIsLoading(false);
+      } catch (err) {
+        console.error(formatErrMsg(err));
+      }
+    };
+
+    handleGetStore();
+  }, []);
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   return (
     <div className="my-[30px] px-[20px] w-full flex-1 flex flex-col">
