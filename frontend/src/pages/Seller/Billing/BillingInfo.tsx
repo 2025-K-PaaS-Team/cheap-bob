@@ -97,7 +97,7 @@ const BillingInfo = () => {
             className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
           >
             <div>정산 내역 보기</div>
-            <div>&gt;</div>
+            <img src="/icon/next.svg" alt="nextIcon" />
           </div>
           {/* change billing info */}
           <div
@@ -105,12 +105,12 @@ const BillingInfo = () => {
             onClick={() => navigate("change")}
           >
             <div>정산 정보 변경</div>
-            <div>&gt;</div>
+            <img src="/icon/next.svg" alt="nextIcon" />
           </div>
           {/* help */}
           <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
             <div>도움말</div>
-            <div>&gt;</div>
+            <img src="/icon/next.svg" alt="nextIcon" />
           </div>
           {/* logout */}
           <div className="bodyFont font-bold py-[20px] border-b border-black/10">

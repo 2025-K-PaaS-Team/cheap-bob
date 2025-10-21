@@ -250,7 +250,7 @@ const StoreDetail = () => {
                 navigate("desc", { state: store.store_introduction })
               }
             >
-              매장 설명 보기 &gt;
+              매장 소개 보기 &gt;
             </div>
 
             {/* store addr */}
