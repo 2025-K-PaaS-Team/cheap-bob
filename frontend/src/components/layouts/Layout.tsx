@@ -22,12 +22,14 @@ const Layout = () => {
     path.startsWith("/s/change") ||
     path === "/s" ||
     path.startsWith("/s/signup") ||
-    path.startsWith("/s/billing/");
+    path.startsWith("/s/billing/") ||
+    path.startsWith("/docs");
   const notHeader =
     path === "/c" ||
     path === "/s" ||
     path.startsWith("/s/signup") ||
-    path === "/s/order";
+    path === "/s/order" ||
+    path.startsWith("/docs");
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
