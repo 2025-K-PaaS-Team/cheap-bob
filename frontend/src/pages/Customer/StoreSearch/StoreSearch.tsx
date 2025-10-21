@@ -43,7 +43,7 @@ const StoreSearch = () => {
 
     debounceTimer = setTimeout(() => {
       handleGetNameSearch(value, 0);
-    }, 500);
+    }, 1000);
   }, [value]);
 
   const handleDeleteSearch = async (word: string) => {
@@ -88,6 +88,11 @@ const StoreSearch = () => {
           placeholder="가게명, 랜덤팩명을 검색하세요"
           value={value}
           onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleGetNameSearch(value, 0);
+            }
+          }}
         />
         <img
           src="/icon/search.svg"
