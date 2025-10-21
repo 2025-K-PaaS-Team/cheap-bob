@@ -34,6 +34,8 @@ const OtherOrderList = ({ orders }: OtherOrderListProps) => {
       </div>
 
       {orders.map((order, idx) => {
+        const doneOrCanceledAt = order.completed_at ?? order.canceled_at ?? "";
+
         return (
           <div
             className="bg-white shadow flex flex-col p-[16px] gap-y-[16px] rounded"
@@ -52,7 +54,7 @@ const OtherOrderList = ({ orders }: OtherOrderListProps) => {
             {/* second row */}
             <div className="flex flex-row justify-end gap-x-[16px] bodyFont">
               <div>
-                {(order.completed_at || order.canceled_at).slice(11, 16)}
+                {doneOrCanceledAt ? doneOrCanceledAt.slice(11, 16) : "--:--"}
               </div>
               <div
                 className={`font-bold ${
