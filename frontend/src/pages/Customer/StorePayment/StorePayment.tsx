@@ -2,12 +2,29 @@ import Payment from "@components/Payment/Payment";
 import type { CustomerDetailType, StoreSearchBaseType } from "@interface";
 import { getRoundedPrice } from "@utils";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation } from "react-router-dom";
 
 const StorePayment = () => {
   const location = useLocation();
-  const { store } = location.state as { store: StoreSearchBaseType };
-  const { customer } = location.state as { customer: CustomerDetailType };
+  const state =
+    (location.state as {
+      store?: StoreSearchBaseType;
+      customer?: CustomerDetailType;
+    }) || {};
+  const store = state.store;
+  const customer = state.customer;
+
+  if (!store || !customer) {
+    return (
+      <div className="px-[20px] py-[40px]">
+        <h3 className="mb-3">결제 확인 중…</h3>
+        <p className="hintFont">
+          잠시만 기다려주세요. 결제 상태를 확인하고 있습니다.
+        </p>
+        <Payment />
+      </div>
+    );
+  }
 
   const [qty, setQty] = useState<number>(1);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
@@ -28,7 +45,7 @@ const StorePayment = () => {
       )}`;
     }
     setMyPhone(formatted);
-  }, []);
+  }, [customer.phone_number]);
 
   useEffect(() => {
     setQty((prev) => Math.max(1, Math.min(prev, Math.max(1, maxQty))));
@@ -38,7 +55,6 @@ const StorePayment = () => {
     <div className="mx-[20px] my-[20px] flex flex-col flex-1 gap-y-[40px]">
       <div className="flex flex-1 flex-col gap-y-[39px]">
         {/* 픽업 시간 */}
-
         <div className="grid grid-cols-3 bodyFont">
           <div className="font-bold">픽업 시간</div>
           <div className="flex flex-row gap-x-[5px] col-span-2">
