@@ -4,11 +4,12 @@ import { Chips, CommonModal } from "@components/common";
 import { NutritionList } from "@constant";
 import type { StoreSearchType } from "@interface";
 import { StoreBox } from "@components/customer/storeList";
+import CommonLoading from "@components/common/CommonLoading";
 
 const StoreList = () => {
   const [stores, setStores] = useState<StoreSearchType>();
   const [pageIdx, setPageIdx] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -30,11 +31,9 @@ const StoreList = () => {
 
   // get stores list
   const handleGetStores = async (pageIdx: number) => {
-    if (isLoading) return;
     if (stores?.is_end) return;
 
     try {
-      setIsLoading(true);
       const newStores = await getStores(pageIdx);
       setStores((prev) => {
         if (pageIdx === 0) {
@@ -105,6 +104,10 @@ const StoreList = () => {
     if (pageIdx === 0) return;
     handleGetStores(pageIdx);
   }, [pageIdx]);
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   return (
     <div className="flex flex-col px-[20px]">

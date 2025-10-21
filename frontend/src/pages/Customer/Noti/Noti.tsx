@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import type { AlarmBaseType } from "@interface/customer/order";
 import { getAlarmToday } from "@services";
 import { formatErrMsg } from "@utils";
@@ -12,6 +13,8 @@ const Noti = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const handleGetAlarm = async () => {
     try {
       const res = await getAlarmToday();
@@ -19,6 +22,8 @@ const Noti = () => {
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -28,21 +33,22 @@ const Noti = () => {
 
   if (!noti.length) {
     return (
-      <div className="flex flex-col w-full h-full justify-center items-center">
+      <div className="flex flex-col h-full justify-center items-center">
         <img
           src="/icon/angrySalad.svg"
           alt="saladBowlIcon"
           className="pb-[26px] w-[116px]"
         />
         <div className="text-[20px] pb-[17px] font-bold">
-          주문내역이 비어있어요.
+          관심 가게가 비어있어요.
         </div>
         <div className="text-[12px] font-base pb-[46px]">
           다양한 랜덤팩을 주문하고 픽업해보세요.
         </div>
         <CommonBtn
           label="실시간 랜덤팩 보러가기"
-          notBottom={true}
+          notBottom
+          width="w-[calc(100%-40px)]"
           onClick={() => navigate("/c/stores")}
         />
       </div>
@@ -62,6 +68,10 @@ const Noti = () => {
       return "-";
     }
   };
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   return (
     <div className="m-[20px] flex flex-col gap-y-[20px]">
