@@ -55,7 +55,7 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
-      return;
+      // return;
     }
 
     setPageIdx(pageIdx + 1);

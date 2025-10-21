@@ -59,7 +59,6 @@ const RegisterPackageDesc = ({
           label="이전"
           onClick={() => handleClickPrev()}
           notBottom
-          width="w-[100px]"
         />
         <CommonBtn
           category={
@@ -73,7 +72,6 @@ const RegisterPackageDesc = ({
           }
           label="다음"
           onClick={() => handleClickNext()}
-          width="w-[250px]"
           className="col-span-2"
           notBottom
         />

@@ -1,7 +1,7 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { CommonPrice } from "@components/seller/common";
 import type { SellerSignupPkgProps } from "@interface";
-import { validateNum, validationRules } from "@utils";
+import { getRoundedPrice, validateNum, validationRules } from "@utils";
 import { useState } from "react";
 
 const RegisterPackagePrice = ({
@@ -20,11 +20,19 @@ const RegisterPackagePrice = ({
       setShowModal(true);
       return;
     }
+
+    if (getRoundedPrice(pkg.price, pkg.sale) < 1000 || !pkg.price) {
+      setModalMsg("최소 패키지 판매가는 1000원입니다.");
+      setShowModal(true);
+      return;
+    }
+
     if (!validateNum(pkg.sale, 1)) {
       setModalMsg("할인율은 1~99% 사이여야 합니다.");
       setShowModal(true);
       return;
     }
+
     setPageIdx(pageIdx + 1);
   };
 
