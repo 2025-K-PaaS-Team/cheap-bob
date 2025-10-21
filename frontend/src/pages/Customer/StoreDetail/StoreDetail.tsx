@@ -215,11 +215,28 @@ const StoreDetail = () => {
                   onClick={handleClickDirection}
                   width={22}
                 />
-                {store.sns.homepage && (
+                {store.sns.instagram && (
                   <img
                     src="/icon/instagram.svg"
                     alt="instagramIcon"
                     onClick={() => window.open(store.sns.instagram)}
+                    width={22}
+                  />
+                )}
+                {store.sns.homepage && (
+                  <img
+                    src="/icon/homeFull.svg"
+                    alt="homeIcon"
+                    onClick={() => window.open(store.sns.homepage)}
+                    width={22}
+                  />
+                )}
+
+                {store.sns.x && (
+                  <img
+                    src="/icon/twitter.svg"
+                    alt="twitterIcon"
+                    onClick={() => window.open(store.sns.x)}
                     width={22}
                   />
                 )}
