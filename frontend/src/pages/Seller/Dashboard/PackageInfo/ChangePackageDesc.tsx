@@ -5,7 +5,7 @@ import { GetProduct, UpdateProduct } from "@services";
 import { useDashboardStore } from "@store";
 import { formatErrMsg, validateLength } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const ChangePackageDesc = () => {
   const navigate = useNavigate();

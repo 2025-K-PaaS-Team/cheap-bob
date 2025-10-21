@@ -5,7 +5,7 @@ import type { PreferNutritionBaseType, CustomerDetailType } from "@interface";
 import { GetCustomerDetail, GetNutrition, WithdrawCustomer } from "@services";
 import { formatErrMsg, getTitleByKey } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const My = () => {
   const navigate = useNavigate();

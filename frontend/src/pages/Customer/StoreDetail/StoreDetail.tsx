@@ -16,7 +16,7 @@ import {
 import { formatErrMsg, getRoundedPrice } from "@utils";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 

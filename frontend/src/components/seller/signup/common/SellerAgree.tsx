@@ -1,6 +1,6 @@
 import CommonAgree from "@components/customer/signup/Agree";
 import type { SellerSignupProps } from "@interface";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const SellerAgree = ({ setPageIdx, pageIdx }: SellerSignupProps) => {
   const navigate = useNavigate();

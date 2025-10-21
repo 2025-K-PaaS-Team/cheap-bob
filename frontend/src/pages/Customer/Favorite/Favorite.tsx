@@ -9,7 +9,7 @@ import {
 } from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const Favorite = () => {
   const navigate = useNavigate();

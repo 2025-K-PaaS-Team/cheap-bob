@@ -4,7 +4,7 @@ import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
 import { CreateCustomerRegister } from "@services";
 import { formatErrMsg } from "@utils";
 import { useState } from "react";
-import { useNavigate, useOutletContext } from "react-router";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 interface OutletContextType {

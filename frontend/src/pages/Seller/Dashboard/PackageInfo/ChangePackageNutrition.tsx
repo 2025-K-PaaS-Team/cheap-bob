@@ -4,7 +4,7 @@ import { useDashboardStore } from "@store";
 import { DeletePkgNutrition, AddPkgNutrition, GetProduct } from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import CommonLoading from "@components/common/CommonLoading";
 
 const ChangePackageNutrition = () => {

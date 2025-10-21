@@ -4,7 +4,7 @@ import type { AlarmBaseType } from "@interface/customer/order";
 import { getAlarmToday } from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const Noti = () => {
   const [noti, setNoti] = useState<AlarmBaseType[]>([]);

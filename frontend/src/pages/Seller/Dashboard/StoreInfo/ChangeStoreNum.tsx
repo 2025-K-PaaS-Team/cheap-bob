@@ -4,7 +4,7 @@ import type { SnsInfoType } from "@interface";
 import { GetStoreDetail, UpdateStorePhone, UpdateStoreSns } from "@services";
 import { formatErrMsg, normalizeUrl, validatePattern } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const ChangeStoreNum = () => {
   const [value, setValue] = useState<string>("");

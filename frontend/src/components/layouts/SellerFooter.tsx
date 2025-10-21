@@ -1,4 +1,4 @@
-import { useLocation } from "react-router";
+import { useLocation } from "react-router-dom";
 import FooterItem from "./FooterItem";
 
 const SellerFooter = () => {

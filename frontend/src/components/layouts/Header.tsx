@@ -1,6 +1,6 @@
 import { layoutMap } from "@constant";
 import type { LayoutType } from "@interface";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   layout: LayoutType;

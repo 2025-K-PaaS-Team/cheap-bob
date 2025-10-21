@@ -4,7 +4,7 @@ import { OrderCard } from "@components/customer/order";
 import type { OrderBaseType } from "@interface/common/types";
 import { getOrders } from "@services";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const Order = () => {
   const navigate = useNavigate();

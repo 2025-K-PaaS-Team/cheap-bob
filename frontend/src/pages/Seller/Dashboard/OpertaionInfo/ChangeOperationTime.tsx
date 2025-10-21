@@ -7,7 +7,7 @@ import { GetStoreOperation } from "@services";
 import { CreateOperationReservation } from "@services";
 import { diffFromClose, fromMinutes, toMinutes } from "@utils";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const ChangeOperationTime = () => {
   const navigate = useNavigate();

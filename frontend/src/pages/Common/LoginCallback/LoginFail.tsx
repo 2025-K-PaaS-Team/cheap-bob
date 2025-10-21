@@ -1,5 +1,5 @@
 import { CommonBtn } from "@components/common";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const LoginFail = () => {
   const navigate = useNavigate();

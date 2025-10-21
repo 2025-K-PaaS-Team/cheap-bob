@@ -3,7 +3,7 @@ import CommonLoading from "@components/common/CommonLoading";
 import { GetStoreDetail, UpdateStoreDesc } from "@services";
 import { formatErrMsg, validateLength } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const ChangeStoreDesc = () => {
   const [value, setValue] = useState<string>("");

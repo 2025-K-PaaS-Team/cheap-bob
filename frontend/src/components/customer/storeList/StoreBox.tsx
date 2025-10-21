@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import type { StoreSearchBaseType } from "@interface";
 import { getRoundedPrice } from "@utils";
 

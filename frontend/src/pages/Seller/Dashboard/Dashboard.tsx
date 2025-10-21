@@ -11,7 +11,7 @@ import { GetDashboard } from "@services/seller/order";
 import { useDashboardStore } from "@store";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [data, setData] = useState<StoreDetailType | null>(null);

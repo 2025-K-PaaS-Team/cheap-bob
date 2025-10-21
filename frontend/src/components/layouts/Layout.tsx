@@ -9,7 +9,7 @@ import {
 import { pathToLayoutKey, pathToSellerLayoutKey } from "@utils";
 import SellerHeader from "./SellerHeader";
 import { useRef } from "react";
-import { useLocation, Outlet, Navigate } from "react-router";
+import { useLocation, Outlet, Navigate } from "react-router-dom";
 
 const Layout = () => {
   const swiperRef = useRef<any>(null);

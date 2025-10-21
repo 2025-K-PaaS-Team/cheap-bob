@@ -39,6 +39,7 @@ const Payment = ({
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
+    console.log("hello");
     const paymentId = searchParams.get("paymentId");
     const txId = searchParams.get("txId");
     const transactionType = searchParams.get("transactionType");

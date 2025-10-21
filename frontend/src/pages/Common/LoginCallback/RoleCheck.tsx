@@ -1,6 +1,6 @@
 import { CommonBtn } from "@components/common";
 import { useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const RoleCheck = () => {
   const navigate = useNavigate();

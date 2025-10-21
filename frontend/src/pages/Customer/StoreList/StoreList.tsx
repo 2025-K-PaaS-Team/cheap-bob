@@ -5,7 +5,7 @@ import { NutritionList } from "@constant";
 import type { StoreSearchType } from "@interface";
 import { StoreBox } from "@components/customer/storeList";
 import CommonLoading from "@components/common/CommonLoading";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 

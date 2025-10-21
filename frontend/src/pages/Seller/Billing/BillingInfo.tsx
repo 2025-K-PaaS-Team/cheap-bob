@@ -9,7 +9,7 @@ import {
 import { formatErrMsg } from "@utils";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const BillingInfo = () => {
   const navigate = useNavigate();

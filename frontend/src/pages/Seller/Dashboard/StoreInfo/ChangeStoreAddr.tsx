@@ -1,7 +1,7 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { useEffect, useState } from "react";
 import { NearStation, PostalCode } from "@components/seller/dashboard";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { GetStoreDetail, UpdateStoreAddr } from "@services";
 import { formatErrMsg } from "@utils";
 import type { AddressInfoType } from "@interface";

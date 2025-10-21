@@ -9,7 +9,7 @@ import {
 } from "@services";
 import { formatErrMsg } from "@utils";
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const ChangeStoreImg = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);

@@ -4,7 +4,7 @@ import type { CustomerDetailType } from "@interface";
 import { GetCustomerDetail, UpdateCustomerDetail } from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const ChangeCustomerInfo = () => {
   const [customer, setCustomer] = useState<CustomerDetailType | null>(null);

@@ -2,7 +2,7 @@ import { CommonBtn } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import { dongData, siDoData, siGunGuData } from "@constant";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const Location = () => {
   const navigate = useNavigate();

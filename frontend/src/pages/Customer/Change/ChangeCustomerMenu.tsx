@@ -4,7 +4,7 @@ import { MenuList } from "@constant";
 import { CreatePreferMenu, DeletePreferMenu, GetPreferMenu } from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const ChangeCustomerMenu = () => {
   const navigate = useNavigate();

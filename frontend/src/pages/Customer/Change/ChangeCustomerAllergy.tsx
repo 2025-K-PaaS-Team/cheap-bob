@@ -4,7 +4,7 @@ import { AllergyList } from "@constant";
 import { CreateAllergies, DeleteAllergies, GetAllergies } from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const ChangeCustomerAllergy = () => {
   const navigate = useNavigate();

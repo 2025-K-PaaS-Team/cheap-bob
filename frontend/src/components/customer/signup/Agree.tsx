@@ -1,6 +1,6 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 type AgreeProps = {
   onNext?: () => void;

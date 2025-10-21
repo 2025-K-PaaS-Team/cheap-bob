@@ -4,7 +4,7 @@ import { ToppingList } from "@constant";
 import { CreateTopping, DeleteTopping, GetTopping } from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const ChangeCustomerTopping = () => {
   const navigate = useNavigate();

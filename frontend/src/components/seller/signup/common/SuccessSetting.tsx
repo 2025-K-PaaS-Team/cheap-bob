@@ -1,6 +1,6 @@
 import { CommonBtn } from "@components/common";
 import type { SellerSignupProps } from "@interface";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const SuccessSetting = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const navigate = useNavigate();

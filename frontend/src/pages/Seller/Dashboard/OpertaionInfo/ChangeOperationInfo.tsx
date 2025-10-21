@@ -4,7 +4,7 @@ import { idxToDow } from "@constant";
 import type { StoreOperationType } from "@interface";
 import { GetStoreOperation, GetStoreOpReservation } from "@services";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const hhmm = (t?: string) => (t ? t.slice(0, 5) : "—");
 const pickDefaultDow = (ops: StoreOperationType): number | null => {
