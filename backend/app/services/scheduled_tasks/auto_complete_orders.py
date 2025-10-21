@@ -92,13 +92,13 @@ class AutoCompleteOrdersTask:
                     f"KST 기준 - 현재: {now_kst.strftime('%Y-%m-%d %H:%M:%S')}, "
                     f"오늘 요일: {today_day_of_week}"
                 )
-
-                # 오늘 운영하는 모든 가게의 운영 정보 조회
+      
                 all_operations = await operation_repo.get_many(
                     filters={
                         "day_of_week": today_day_of_week,
                         "is_open_enabled": True
-                    }
+                    },
+                    load_relations=["store"]
                 )
 
                 if not all_operations:
@@ -134,14 +134,14 @@ class AutoCompleteOrdersTask:
                                 )
                                 continue
 
-                            # 작업 등록
+                            store_name = operation.store.store_name
                             scheduler.scheduler.add_job(
-                                func=lambda sid=operation.store_id, sname=operation.store.store_name: \
+                                func=lambda sid=operation.store_id, sname=store_name: \
                                     AutoCompleteOrdersTask.complete_store_accepted_orders(sid, sname),
                                 trigger='date',
                                 run_date=run_datetime,
                                 id=job_id,
-                                name=f"[{operation.store.store_name}] 마감 시 주문 자동 완료",
+                                name=f"[{store_name}] 마감 시 주문 자동 완료",
                                 misfire_grace_time=1800,  # 30분 유예
                                 replace_existing=True
                             )

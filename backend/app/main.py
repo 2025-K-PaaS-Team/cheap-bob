@@ -8,6 +8,7 @@ from config.settings import settings
 from middleware.auth import JWTAuthMiddleware
 from services.auth.jwt import JWTService
 from database.mongodb_session import init_mongodb, close_mongodb
+from services.scheduled_tasks.startup_recovery import ScheduleRecovery
 from services.scheduler import scheduler
 
 # 로깅 설정
@@ -26,6 +27,16 @@ async def lifespan(app: FastAPI):
     await init_mongodb()
     scheduler.start()
     logger.info(f"스케줄러 상태: {'실행 중' if scheduler.is_running else '중지됨'}")
+    
+    try:
+        recovered = await ScheduleRecovery.recover_dynamic_schedules_if_needed(scheduler)
+        if recovered:
+            logger.info("서버 재시작으로 인한 동적 스케줄 복원 완료")
+        else:
+            logger.info("동적 스케줄 복원이 필요하지 않습니다")
+    except Exception as e:
+        logger.error(f"동적 스케줄 복원 중 오류 발생: {e}", exc_info=True)
+    
     yield
     # Shutdown
     logger.info("애플리케이션 종료 중...")

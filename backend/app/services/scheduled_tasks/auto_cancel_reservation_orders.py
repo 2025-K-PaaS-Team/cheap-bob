@@ -131,13 +131,14 @@ class AutoCancelReservationOrdersTask:
                 logger.info(
                     f"KST 기준 - 현재: {now_kst.strftime('%Y-%m-%d %H:%M:%S')}, "
                     f"오늘 요일: {today_day_of_week}"
-                )
-
+                )   
+                
                 all_operations = await operation_repo.get_many(
                     filters={
                         "day_of_week": today_day_of_week,
                         "is_open_enabled": True
-                    }
+                    },
+                    load_relations=["store"]
                 )
 
                 if not all_operations:
@@ -172,15 +173,17 @@ class AutoCancelReservationOrdersTask:
                                 )
                                 continue
 
+                            # store name을 미리 추출하여 람다에서 lazy loading 방지
+                            store_name = operation.store.store_name
                             scheduler.scheduler.add_job(
-                                func=lambda sid=operation.store_id, sname=operation.store.store_name: \
+                                func=lambda sid=operation.store_id, sname=store_name: \
                                     AutoCancelReservationOrdersTask.cancel_and_refund_store_reservation_orders(
                                         sid, sname
                                     ),
                                 trigger='date',
                                 run_date=run_datetime,
                                 id=job_id,
-                                name=f"[{operation.store.store_name}] 픽업 마감 시 주문 자동 취소/환불",
+                                name=f"[{store_name}] 픽업 마감 시 주문 자동 취소/환불",
                                 misfire_grace_time=1800,  # 30분 유예
                                 replace_existing=True
                             )
