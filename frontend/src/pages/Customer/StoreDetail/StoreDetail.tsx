@@ -81,7 +81,6 @@ const StoreDetail = () => {
     setProduct(res);
   };
 
-  // ====== 초기화 ======
   useEffect(() => {
     const init = async () => {
       try {

@@ -127,10 +127,7 @@ const StoreList = () => {
   }
 
   return (
-    <div
-      ref={scrollRef}
-      className="flex flex-col px-[20px] overflow-auto h-full"
-    >
+    <div ref={scrollRef} className="flex flex-col px-[20px] app-scroll h-full">
       <div className="border border-1 border-main-deep flex flex-row justify-between px-[18px] py-[16px] h-[54px] rounded-[50px]">
         <input
           type="text"
