@@ -261,7 +261,7 @@ const Location = () => {
           onClick={() => navigate(-1)}
         />
         <CommonBtn
-          label="매장 고르기 (N개)"
+          label={`매장 고르기 (${selectedDongKeys.length}개)`}
           notBottom
           className="w-full col-span-3"
           onClick={() => handleSelectLoc()}
