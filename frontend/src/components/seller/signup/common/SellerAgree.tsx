@@ -21,7 +21,7 @@ const SellerAgree = ({ setPageIdx, pageIdx }: SellerSignupProps) => {
           width="12px"
         />
 
-        <div className="titleFont pb-[20px]">
+        <div className="titleFont">
           서비스 이용 약관에 <br />
           동의해주세요
         </div>

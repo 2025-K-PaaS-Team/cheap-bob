@@ -42,7 +42,6 @@ const RegisterName = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
         category={form.store_name ? "green" : "grey"}
         label="다음"
         notBottom
-        width="w-[calc(100%-40px)]"
         onClick={() => handleClickNext()}
       />
 
