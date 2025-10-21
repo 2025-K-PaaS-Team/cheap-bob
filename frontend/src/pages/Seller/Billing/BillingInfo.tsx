@@ -72,9 +72,9 @@ const BillingInfo = () => {
   return (
     <div className="flex flex-col relative h-full">
       {/* top content */}
-      <div className="mx-[20px] flex flex-1 flex-col">
+      <div className="mx-[20px] flex flex-1 flex-col gap-y-[40px] mb-[40px]">
         {/* greeting */}
-        <div className="flex flex-col pb-[31.5px] gap-y-[10px]">
+        <div className="flex flex-col gap-y-[10px]">
           <div className="titleFont">{store?.store_name} 님, 안녕하세요.</div>
           <div className="bodyFont">{store?.seller_email}</div>
         </div>
