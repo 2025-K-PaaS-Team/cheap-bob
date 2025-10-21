@@ -248,6 +248,7 @@ const StoreDetail = () => {
               <h3>영업 시간</h3>
               <div className="tagFont">
                 {store.operation_times
+                  .filter((dow) => dow.is_open_enabled == true)
                   .sort((a, b) => a.day_of_week - b.day_of_week)
                   .map((dow, idx) => {
                     const todayDow = idxToDow[idx];
