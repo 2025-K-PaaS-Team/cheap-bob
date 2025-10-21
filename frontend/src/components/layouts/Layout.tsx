@@ -7,15 +7,45 @@ import {
   SellerFooter,
 } from "@components/layouts";
 import { pathToLayoutKey, pathToSellerLayoutKey } from "@utils";
-import { Outlet, useLocation, useNavigate } from "react-router";
 import SellerHeader from "./SellerHeader";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import { useLocation, Outlet, Navigate } from "react-router";
 
 const Layout = () => {
+  const swiperRef = useRef<any>(null);
   const location = useLocation();
-  const navigate = useNavigate();
   const path = location.pathname.toLowerCase();
   const isCustomer = path.startsWith("/c");
+  const isAuth = path.startsWith("/auth");
+
+  const token = localStorage.getItem("accessToken");
+  const role = localStorage.getItem("loginRole");
+
+  const resolveRedirect = (): string | null => {
+    if (isAuth) return null;
+
+    if (!token) {
+      return path.startsWith("/s") ? "/s" : "/c";
+    }
+
+    if (token && role) {
+      if (path === "/c") return "/c/stores";
+      if (path === "/s") return "/s/dashboard";
+
+      if (role === "seller" && path.startsWith("/c")) return "/auth/role-check";
+      if (role === "customer" && path.startsWith("/s"))
+        return "/auth/role-check";
+    }
+
+    return null;
+  };
+
+  const dest = resolveRedirect();
+
+  if (dest && dest !== path) {
+    return <Navigate to={dest} replace />;
+  }
+
   const notFooter =
     path === "/c" ||
     path === "/c/signup" ||
@@ -36,35 +66,6 @@ const Layout = () => {
     path.startsWith("/withdraw") ||
     path.startsWith("/auth");
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    const role = localStorage.getItem("loginRole");
-
-    if (role === "seller" && path.startsWith("/c")) {
-      navigate("/auth/role-check", { replace: true });
-      return;
-    }
-
-    if (role === "customer" && path.startsWith("/s")) {
-      navigate("/auth/role-check", { replace: true });
-      return;
-    }
-
-    if (!token) {
-      if (role === "customer") {
-        navigate("/c", { replace: true });
-        return;
-      }
-
-      if (role === "seller") {
-        navigate("/s", { replace: true });
-        return;
-      }
-    }
-  }, [location.pathname, navigate]);
-
-  const swiperRef = useRef<any>(null);
-
   return (
     <div className="app-layout">
       <aside className="app-intro">
@@ -74,7 +75,8 @@ const Layout = () => {
           건강한 식사, <br />
           저렴하게 해결하세요
         </div>
-      </aside>{" "}
+      </aside>
+
       <div className="app-frame">
         <Wrapper>
           {!notHeader &&

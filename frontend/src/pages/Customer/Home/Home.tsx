@@ -9,7 +9,6 @@ import { useNavigate } from "react-router";
 
 const Home = () => {
   const navigate = useNavigate();
-  localStorage.clear();
 
   return (
     <div className="flex flex-col flex-1 justify-start w-full py-[50px]">

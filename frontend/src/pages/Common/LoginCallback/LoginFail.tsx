@@ -17,13 +17,21 @@ const LoginFail = () => {
       <div className="flex flex-col gap-y-[20px] my-[20px] w-full">
         <CommonBtn
           label="점주 로그인하기"
-          onClick={() => navigate("/s")}
+          onClick={() => {
+            localStorage.removeItem("loginRole");
+            localStorage.setItem("loginRole", "seller");
+            navigate("/s");
+          }}
           notBottom
         />
         <CommonBtn
           label="고객 로그인하기"
           notBottom
-          onClick={() => navigate("/c")}
+          onClick={() => {
+            localStorage.removeItem("loginRole");
+            localStorage.setItem("loginRole", "customer");
+            navigate("/c");
+          }}
         />
       </div>
     </div>

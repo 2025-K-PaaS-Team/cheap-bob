@@ -29,8 +29,8 @@ const LoginCallback = () => {
   useEffect(() => {
     const token = searchParams.get("token");
     if (token) {
-      handleCheckConflict();
       localStorage.setItem("accessToken", token);
+      handleCheckConflict();
     } else {
       navigate("/auth/success");
     }
