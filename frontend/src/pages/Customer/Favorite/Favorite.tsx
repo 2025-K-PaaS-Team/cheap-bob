@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { StoreBox } from "@components/customer/storeList";
 import type { StoreSearchBaseType } from "@interface";
 import {
@@ -15,15 +16,17 @@ const Favorite = () => {
   const [stores, setStores] = useState<StoreSearchBaseType[]>();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleGetFavorStore = async () => {
     try {
       const res = await GetFavoriteStore();
       setStores(res);
-      console.log(stores);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -50,9 +53,13 @@ const Favorite = () => {
     handleGetFavorStore();
   }, []);
 
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
+
   if (!stores || stores.length === 0) {
     return (
-      <div className="flex flex-col w-full h-full justify-center items-center">
+      <div className="flex flex-col h-full justify-center items-center">
         <img
           src="/icon/angrySalad.svg"
           alt="saladBowlIcon"
@@ -66,7 +73,8 @@ const Favorite = () => {
         </div>
         <CommonBtn
           label="실시간 랜덤팩 보러가기"
-          notBottom={true}
+          notBottom
+          width="w-[calc(100%-40px)]"
           onClick={() => navigate("/c/stores")}
         />
       </div>

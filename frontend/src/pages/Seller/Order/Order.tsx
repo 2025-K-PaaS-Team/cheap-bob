@@ -1,4 +1,5 @@
 import { CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import {
   Now,
   OrderList,
@@ -15,8 +16,7 @@ import { getStoreOrder } from "@services/seller/order";
 import { useEffect, useMemo, useState } from "react";
 
 const Order = () => {
-  const [orders, setOrders] = useState<OrderResponseType | null>();
-
+  const [orders, setOrders] = useState<OrderResponseType | null>(null);
   const [status, setStatus] = useState<string>("reservation");
   const [op, setOp] = useState<StoreOperationType>([]);
 
@@ -24,7 +24,37 @@ const Order = () => {
   const [modalMsg, setModalMsg] = useState("");
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const fetchInitialData = async () => {
+    setIsLoading(true);
+    try {
+      const [ordersRes, opRes] = await Promise.all([
+        getStoreOrder(),
+        GetStoreOperation(),
+      ]);
+      setOrders(ordersRes);
+      setOp(opRes);
+
+      const now = new Date();
+      const hh = now.getHours().toString().padStart(2, "0");
+      const mm = now.getMinutes().toString().padStart(2, "0");
+      setLastUpdated(`${hh}시 ${mm}분`);
+    } catch (err) {
+      setModalMsg("데이터를 불러오는데 실패했습니다.");
+      setShowModal(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
+
+  // 리프레시용
   const handleGetOrders = async () => {
+    setIsLoading(true);
     try {
       const res = await getStoreOrder();
       setOrders(res);
@@ -36,23 +66,10 @@ const Order = () => {
     } catch (err) {
       setModalMsg("주문 목록을 불러오는데 실패했습니다.");
       setShowModal(true);
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  const handleGetStoreOperation = async () => {
-    try {
-      const res = await GetStoreOperation();
-      setOp(res);
-    } catch {
-      setModalMsg("운영 정보를 불러오는 것에 실패했습니다.");
-      setShowModal(true);
-    }
-  };
-
-  useEffect(() => {
-    handleGetOrders();
-    handleGetStoreOperation();
-  }, []);
 
   const sortByDateDesc = (a?: string | null, b?: string | null) =>
     new Date(b ?? 0).getTime() - new Date(a ?? 0).getTime();
@@ -93,6 +110,10 @@ const Order = () => {
         return reservationOrders;
     }
   }, [status, reservationOrders, acceptedOrders, otherOrders]);
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   return (
     <div className="flex flex-col h-full">

@@ -34,9 +34,14 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
   ];
 
   const handleClickCancel = async (paymentId: string, reason: string) => {
+    if (!paymentId) {
+      setModalMsg("주문 정보를 찾을 수 없습니다.");
+      setShowModal(true);
+      return;
+    }
     try {
       await cancelOrder(paymentId, reason);
-      await onRefresh();
+      onRefresh();
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
@@ -165,7 +170,10 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
                 notBottom
                 category="white"
                 className="w-full border-none"
-                onClick={() => setShowCancelModal(true)}
+                onClick={() => {
+                  setSelectedPaymentId(order.payment_id);
+                  setShowCancelModal(true);
+                }}
               />
               <CommonBtn
                 label={getTitleByKey(status, cfmLabel) ?? ""}

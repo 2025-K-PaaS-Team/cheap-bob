@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import type { SnsInfoType } from "@interface";
 import { GetStoreDetail, UpdateStorePhone, UpdateStoreSns } from "@services";
 import { formatErrMsg, normalizeUrl, validatePattern } from "@utils";
@@ -11,6 +12,7 @@ const ChangeStoreNum = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const handleGetStore = async () => {
@@ -18,6 +20,7 @@ const ChangeStoreNum = () => {
         const res = await GetStoreDetail();
         setValue(res.store_phone);
         setSns(res.sns);
+        setIsLoading(false);
       } catch (err) {
         console.error(formatErrMsg(err));
       }
@@ -25,6 +28,10 @@ const ChangeStoreNum = () => {
 
     handleGetStore();
   }, []);
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   const handleUpdateStoreDesc = async (storePhone: string) => {
     const validMsg = "01012345678 형식으로 입력해 주세요.";

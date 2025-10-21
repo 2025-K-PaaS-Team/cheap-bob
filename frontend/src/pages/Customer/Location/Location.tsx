@@ -1,4 +1,5 @@
 import { CommonBtn } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { dongData, siDoData, siGunGuData } from "@constant";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -10,6 +11,7 @@ const Location = () => {
   const [selectedDongs, setSelectedDongs] = useState<Record<string, boolean>>(
     {}
   );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const savedSiDo = localStorage.getItem("sido");
@@ -19,6 +21,8 @@ const Location = () => {
     if (savedSiDo) setSelectedSiDo(savedSiDo);
     if (savedSiGunGu) setSelectedSiGunGu(savedSiGunGu);
     if (savedDongs) setSelectedDongs(JSON.parse(savedDongs));
+
+    setIsLoading(false);
   }, []);
 
   // 로컬스토리지 저장
@@ -88,6 +92,10 @@ const Location = () => {
     Array.from({ length: count }, (_, i) => (
       <div key={i} className="py-3"></div>
     ));
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   return (
     <div className="flex w-full flex-col relative h-full">

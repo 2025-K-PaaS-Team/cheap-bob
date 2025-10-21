@@ -1,4 +1,5 @@
 import { CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { NutritionList } from "@constant";
 import type { PreferNutritionBaseType, CustomerDetailType } from "@interface";
 import { GetCustomerDetail, GetNutrition, WithdrawCustomer } from "@services";
@@ -16,6 +17,7 @@ const My = () => {
   const [nutrition, setNutrition] = useState<PreferNutritionBaseType[] | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handlePostWithdraw = async () => {
     setShowWarn(false);
@@ -51,9 +53,17 @@ const My = () => {
   };
 
   useEffect(() => {
-    handleGetCustomerDetail();
-    handleGetCustomerNutrition();
+    const init = async () => {
+      await handleGetCustomerDetail();
+      await handleGetCustomerNutrition();
+      setIsLoading(false);
+    };
+    init();
   }, []);
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   return (
     <div className="px-[20px] w-full h-full flex flex-col gap-y-[31px]">

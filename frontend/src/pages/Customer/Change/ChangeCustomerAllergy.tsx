@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal, SelectedGrid } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { AllergyList } from "@constant";
 import { CreateAllergies, DeleteAllergies, GetAllergies } from "@services";
 import { formatErrMsg } from "@utils";
@@ -8,7 +9,7 @@ import { useNavigate } from "react-router";
 const ChangeCustomerAllergy = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -24,7 +25,7 @@ const ChangeCustomerAllergy = () => {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -53,8 +54,9 @@ const ChangeCustomerAllergy = () => {
     navigate(-1);
   };
 
-  if (loading) return <div className="mt-[30px] px-[20px]">로딩중…</div>;
-
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
   return (
     <div className="my-[30px] px-[20px] w-full flex flex-col flex-1 justify-between gap-y-[20px]">
       <div className="flex flex-col gap-y-[20px]">

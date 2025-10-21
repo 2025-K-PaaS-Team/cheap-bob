@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import type { CustomerDetailType } from "@interface";
 import { GetCustomerDetail, UpdateCustomerDetail } from "@services";
 import { formatErrMsg } from "@utils";
@@ -10,6 +11,7 @@ const ChangeCustomerInfo = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const handleGetCustomerDetail = async () => {
@@ -19,6 +21,8 @@ const ChangeCustomerInfo = () => {
       } catch (err) {
         setModalMsg("고객 데이터 가져오기에 실패했습니다.");
         setShowModal(true);
+      } finally {
+        setIsLoading(false);
       }
     };
     handleGetCustomerDetail();
@@ -42,8 +46,8 @@ const ChangeCustomerInfo = () => {
     handleUpdateCustomerProfile(customer);
   };
 
-  if (!customer) {
-    return <div>로딩 중...</div>;
+  if (isLoading || !customer) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
   }
 
   return (

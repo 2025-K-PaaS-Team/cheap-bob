@@ -1,4 +1,5 @@
 import { CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import {
   NowOpStatus,
   RemainPkg,
@@ -21,6 +22,7 @@ const Dashboard = () => {
   const [modalMsg, setModalMsg] = useState("");
   const [paymentExist, setPaymentExist] = useState<boolean>(true);
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // 가게 별 패키지 1개 제한 수정 후 제거 필요
   const repPkg = (remainPkg?.items ?? [])
@@ -59,19 +61,24 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    handleGetStore();
-    handleGetDashboard();
-    handleCheckPaymentInfo();
-  }, []);
-
-  useEffect(() => {
     if (repPkg?.product_id) setRepProductId(repPkg.product_id);
     else setRepProductId(null);
   }, [repPkg?.product_id, setRepProductId]);
 
-  if (!data) {
-    return <div>로딩중...</div>;
+  useEffect(() => {
+    const init = async () => {
+      await handleGetStore();
+      await handleGetDashboard();
+      await handleCheckPaymentInfo();
+      setIsLoading(false);
+    };
+    init();
+  }, []);
+
+  if (isLoading || !data) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
   }
+
   return (
     <div className="flex w-full flex-col pb-[30px]">
       {/* now operating status */}
