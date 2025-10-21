@@ -1,4 +1,5 @@
 import { CommonBtn } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { OrderCard } from "@components/customer/order";
 import type { OrderBaseType } from "@interface/common/types";
 import { getCurrentOrders } from "@services";
@@ -8,6 +9,7 @@ import { useNavigate } from "react-router";
 const Order = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderBaseType[] | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleGetOrders = async () => {
     try {
@@ -15,6 +17,8 @@ const Order = () => {
       setOrders(res.orders);
     } catch (err: unknown) {
       console.error("get stores fail", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -44,6 +48,10 @@ const Order = () => {
         />
       </div>
     );
+  }
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
   }
 
   return (
