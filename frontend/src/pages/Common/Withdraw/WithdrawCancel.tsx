@@ -1,7 +1,12 @@
 import { CommonBtn, CommonModal } from "@components/common";
-import { CancelWithdrawCustomer, CancelWithdrawSeller } from "@services";
+import {
+  CancelWithdrawCustomer,
+  CancelWithdrawSeller,
+  GetCustomerEmail,
+  GetSellerEmail,
+} from "@services";
 import { formatErrMsg } from "@utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 const WithdrawCancel = () => {
@@ -9,6 +14,7 @@ const WithdrawCancel = () => {
   const loginRole = localStorage.getItem("loginRole");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const [email, setEmail] = useState<string>("");
 
   const handleCancelWithdraw = async () => {
     if (loginRole === "seller") {
@@ -28,6 +34,25 @@ const WithdrawCancel = () => {
     }
   };
 
+  useEffect(() => {
+    const init = async () => {
+      try {
+        if (loginRole === "seller") {
+          const res = await GetSellerEmail();
+          setEmail(res.email);
+        } else {
+          const res = await GetCustomerEmail();
+          setEmail(res.email);
+        }
+      } catch (err) {
+        setModalMsg(formatErrMsg(err));
+        setShowModal(true);
+      }
+    };
+
+    init();
+  }, []);
+
   return (
     <div className="relative mx-[20px] flex flex-col h-full items-start justify-center text-center text-custom-black">
       <div className="w-full text-start titleFont pb-[65px]">
@@ -38,7 +63,7 @@ const WithdrawCancel = () => {
       </div>
       {/* need to fix */}
       {/* email */}
-      <div className="bodyFont mb-[150px]">dummy@gmail.com</div>
+      <div className="bodyFont mb-[150px]">{email}</div>
 
       {/* notice */}
       <div className="absolute bottom-25 hintFont text-center w-full">
