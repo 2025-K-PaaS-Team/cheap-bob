@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AddFavoriteStore, getStores, RemoveFavoriteStore } from "@services";
 import { Chips, CommonModal } from "@components/common";
 import { NutritionList } from "@constant";
@@ -6,113 +6,131 @@ import type { StoreSearchType } from "@interface";
 import { StoreBox } from "@components/customer/storeList";
 import CommonLoading from "@components/common/CommonLoading";
 import { useNavigate } from "react-router";
+import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 const StoreList = () => {
   const navigate = useNavigate();
+
   const [stores, setStores] = useState<StoreSearchType>();
   const [pageIdx, setPageIdx] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
+  const [isFetchingMore, setIsFetchingMore] = useState<boolean>(false);
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
-  const [selected, setSelected] = useState<Record<string, boolean>>(
-    NutritionList.reduce((acc, item) => {
-      acc[item.key] = false;
-      return acc;
-    }, {} as Record<string, boolean>)
-  );
-
-  const filteredStores = stores?.stores.filter((store) => {
-    const activeKeys = Object.keys(selected).filter((key) => selected[key]);
-    if (activeKeys.length === 0) return true;
-
-    return store.products.some((p) =>
-      p.nutrition_types.some((type) => activeKeys.includes(type))
-    );
+  const [selected, setSelected] = useState<Record<string, boolean>>({
+    all: true,
   });
 
-  // get stores list
-  const handleGetStores = async (pageIdx: number) => {
-    if (stores?.is_end) return;
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  const filteredStores = useMemo(() => {
+    if (!stores) return [];
+    const activeKeys = Object.keys(selected).filter(
+      (k) => k !== "all" && selected[k]
+    );
+    const showAll = selected.all || activeKeys.length === 0;
+    if (showAll) return stores.stores;
+
+    return stores.stores.filter((store) =>
+      store.products.some((p) =>
+        p.nutrition_types.some((type) => activeKeys.includes(type))
+      )
+    );
+  }, [stores, selected]);
+
+  const handleGetStores = async (page: number) => {
+    if (page > 0 && stores?.is_end) return;
 
     try {
-      const newStores = await getStores(pageIdx);
+      if (page === 0) setIsInitialLoading(true);
+      else setIsFetchingMore(true);
+
+      const newStores = await getStores(page);
       setStores((prev) => {
-        if (pageIdx === 0) {
-          return newStores;
-        } else {
-          return {
-            stores: prev?.stores
-              ? [...prev.stores, ...newStores.stores]
-              : newStores.stores,
-            is_end: newStores.is_end,
-          };
-        }
+        if (!prev || page === 0) return newStores;
+        return {
+          stores: [...prev.stores, ...newStores.stores],
+          is_end: newStores.is_end,
+        };
       });
-    } catch (err: unknown) {
+    } catch (err) {
       setModalMsg("가게 불러오기에 실패했습니다.");
       setShowModal(true);
     } finally {
-      setIsLoading(false);
+      if (page === 0) setIsInitialLoading(false);
+      else setIsFetchingMore(false);
     }
   };
 
-  // add or delete favorite store
   const handleUpdateFavorStore = async (storeId: string, nowFavor: boolean) => {
     try {
-      if (!nowFavor) {
-        // add favor store
-        await AddFavoriteStore(storeId);
-      } else {
-        // remove favor store
-        await RemoveFavoriteStore(storeId);
-      }
+      if (!nowFavor) await AddFavoriteStore(storeId);
+      else await RemoveFavoriteStore(storeId);
 
-      await getStores(pageIdx);
-      setStores((prev) => ({
-        ...prev!,
-        stores: prev!.stores.map((s) =>
-          s.store_id === storeId ? { ...s, is_favorite: !nowFavor } : s
-        ),
-      }));
-    } catch (err) {
+      setStores((prev) =>
+        prev
+          ? {
+              ...prev,
+              stores: prev.stores.map((s) =>
+                s.store_id === storeId ? { ...s, is_favorite: !nowFavor } : s
+              ),
+            }
+          : prev
+      );
+    } catch {
       setModalMsg("선호 가게 업데이트에 실패했습니다.");
       setShowModal(true);
     }
   };
 
   useEffect(() => {
-    handleGetStores(pageIdx);
+    handleGetStores(0);
   }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollToTop = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const docHegiht = document.body.scrollHeight;
-
-      if (scrollToTop + windowHeight >= docHegiht - 100) {
-        if (!stores?.is_end) {
-          setPageIdx((prev) => prev + 1);
-        }
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  });
 
   useEffect(() => {
     if (pageIdx === 0) return;
     handleGetStores(pageIdx);
   }, [pageIdx]);
 
-  if (isLoading) {
-    return <CommonLoading type="data" isLoading={isLoading} />;
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const rootEl = scrollRef.current ?? null;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry.isIntersecting) return;
+
+        if (!stores?.is_end && !isFetchingMore && !isInitialLoading) {
+          setPageIdx((prev) => prev + 1);
+        }
+      },
+      {
+        root: rootEl,
+        rootMargin: "0px 0px 100px 0px",
+        threshold: 0,
+      }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [stores?.is_end, isFetchingMore, isInitialLoading]);
+
+  if (isInitialLoading && !stores) {
+    return <CommonLoading type="data" isLoading={true} />;
   }
 
   return (
-    <div className="flex flex-col px-[20px]">
+    <div
+      ref={scrollRef}
+      className="flex flex-col px-[20px] overflow-auto h-full"
+    >
       <div className="border border-1 border-main-deep flex flex-row justify-between px-[18px] py-[16px] h-[54px] rounded-[50px]">
         <input
           type="text"
@@ -120,7 +138,6 @@ const StoreList = () => {
           className="focus:outline-none"
           placeholder="랜덤팩을 찾으시나요?"
         />
-
         <img src="/icon/search.svg" alt="searchIcon" />
       </div>
 
@@ -130,17 +147,38 @@ const StoreList = () => {
         setSelected={setSelected}
       />
 
-      <div className="flex flex-col gap-y-[10px] justify-center mb-[30px]">
-        {filteredStores ? (
+      <div className="flex flex-col gap-y-[10px] justify-center">
+        {filteredStores.length > 0 ? (
           <StoreBox
             stores={filteredStores}
             onToggleFavorite={handleUpdateFavorStore}
           />
         ) : (
-          <div>loading</div>
+          <div className="text-center text-gray-500 py-8">
+            조건에 맞는 가게가 없습니다.
+          </div>
         )}
       </div>
-      {/* show modal */}
+
+      <div className="min-h-[100px] flex items-center justify-center">
+        {isFetchingMore && (
+          <motion.div
+            animate={{
+              rotate: 360,
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              rotate: { duration: 1.5, repeat: Infinity, ease: "linear" },
+              scale: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
+            }}
+          >
+            <Loader2 className="w-7 h-7 text-main-deep" />
+          </motion.div>
+        )}
+      </div>
+
+      <div ref={sentinelRef} style={{ height: 1 }} />
+
       {showModal && (
         <CommonModal
           desc={modalMsg}

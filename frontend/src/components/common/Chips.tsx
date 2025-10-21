@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { SelectItem } from "@constant";
 
 interface ChipsProps {
@@ -9,39 +10,63 @@ interface ChipsProps {
 const Chips = ({ chips, selected, setSelected }: ChipsProps) => {
   const chipsWithAll = [{ key: "all", title: "전체" }, ...chips];
 
+  const makeInitState = () =>
+    Object.fromEntries(
+      ["all", ...chips.map((c) => c.key)].map((k) => [k, k === "all"])
+    ) as Record<string, boolean>;
+
+  useEffect(() => {
+    const keys = new Set(["all", ...chips.map((c) => c.key)]);
+    const hasAllKeys = Array.from(keys).every((k) => k in selected);
+    if (!hasAllKeys) {
+      setSelected(makeInitState());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chips]);
+
+  const makeResetFalse = () =>
+    Object.fromEntries(
+      ["all", ...chips.map((c) => c.key)].map((k) => [k, false])
+    ) as Record<string, boolean>;
+
   const handleClick = (chipKey: string) => {
     setSelected((prev) => {
-      // 전체 칩 클릭 시
       if (chipKey === "all") {
-        return {
-          ...prev,
-          all: !prev.all,
-        };
+        const reset = makeResetFalse();
+        return { ...reset, all: true };
       }
-      // 일반 칩 클릭 시
-      return {
+
+      // 개별 토글 → 전체 해제
+      const next = {
         ...prev,
         [chipKey]: !prev[chipKey],
         all: false,
       };
+
+      // 개별이 모두 false면 → 전체 복귀
+      const anyOn = chips.some((c) => next[c.key]);
+      if (!anyOn) {
+        const reset = makeResetFalse();
+        return { ...reset, all: true };
+      }
+
+      return next;
     });
   };
 
-  const isNoneSelected =
-    !Object.values(selected).some((v) => v) || selected["all"];
+  const isAll = !!selected["all"];
 
   return (
     <div className="flex flex-wrap">
       <div className="flex overflow-x-auto gap-[4px] items-center w-max my-[20px]">
-        {chipsWithAll.map((chip, idx) => {
-          const isActive =
-            chip.key === "all" ? isNoneSelected : selected[chip.key];
+        {chipsWithAll.map((chip) => {
+          const active = chip.key === "all" ? isAll : !!selected[chip.key];
 
           return (
             <div
-              key={idx}
+              key={chip.key}
               className={`${
-                isActive
+                active
                   ? "bg-main-pale text-main-deep border border-main-deep"
                   : "text-custom-black"
               } rounded px-[10px] py-[7px] text-center tagFont min-h-[28px] flex items-center whitespace-nowrap cursor-pointer`}

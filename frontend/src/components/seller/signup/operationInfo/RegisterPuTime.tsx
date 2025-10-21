@@ -18,6 +18,8 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const { form: imgForm } = useSignupImageStore();
+  const startOffsetMin =
+    (pickupStartOffset?.hour ?? 0) * 60 + (pickupStartOffset?.min ?? 0);
 
   const handleRegisterStore = async () => {
     try {
@@ -41,26 +43,20 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   };
 
   const handleClickNext = async () => {
-    const hasEmptyTime = form.operation_times.some(
-      (t) => !t.pickup_start_time || !t.pickup_end_time
-    );
-
-    if (hasEmptyTime) {
-      setModalMsg("픽업 시간을 설정해 주세요.");
+    if (startOffsetMin < 90) {
+      setModalMsg(`픽업 시작은 마감 기준 1시간 30분 이상 전이어야 합니다.`);
       setShowModal(true);
       return;
     }
 
-    // register api
     try {
       await handleRegisterStore();
       await handleRegisterStoreImg();
-      // setPageIdx(pageIdx + 1);
+      setPageIdx(pageIdx + 1);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     }
-    setPageIdx(pageIdx + 1);
   };
 
   const handleClickPrev = () => {
@@ -68,7 +64,7 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   };
 
   return (
-    <div className="flex mx-[20px] flex-col my-[20px]  gap-y-[20px]">
+    <div className="flex mx-[20px] flex-col flex-1 my-[20px]  gap-y-[20px]">
       <div className="flex flex-1 flex-col gap-y-[40px]">
         {/* progress */}
         <div className="text-main-deep font-bold bodyFont">2/2</div>
@@ -94,12 +90,10 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
           label="이전"
           onClick={() => handleClickPrev()}
           notBottom
-          width="w-[100px]"
         />
         <CommonBtn
           label="다음"
           onClick={() => handleClickNext()}
-          width="w-[250px]"
           className="col-span-2"
           notBottom
         />

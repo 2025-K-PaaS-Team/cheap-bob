@@ -41,6 +41,7 @@ const CommonPrice = ({ pkg, setPkg }: PriceProps) => {
             className="w-4/5 h-[40px] text-end text-[20px] text-main-deep font-bold"
             placeholder="0"
             value={pkg.sale}
+            maxLength={2}
             onChange={(e) =>
               setPkg((prev) => ({ ...prev, sale: Number(e.target.value) }))
             }

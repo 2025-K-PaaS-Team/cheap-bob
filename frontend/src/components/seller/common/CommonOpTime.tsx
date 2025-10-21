@@ -205,7 +205,7 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-y-[20px]">
+    <div className="flex flex-col w-full gap-y-[20px]">
       {/* 영업 요일 */}
       <div className="flex flex-col gap-y-[10px]">
         <h3>영업 요일</h3>

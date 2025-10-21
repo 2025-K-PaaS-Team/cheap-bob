@@ -17,8 +17,8 @@ const RegisterPackageNum = ({
 
   const handleRegisterProduct = async () => {
     try {
-      const res = await createProduct(pkg);
-      console.log("등록 성공:", res);
+      await createProduct(pkg);
+      setPageIdx(pageIdx + 1);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
@@ -29,15 +29,8 @@ const RegisterPackageNum = ({
     if (!validateNum(pkg.initial_stock, packageStock.minStock)) {
       setModalMsg(packageStock.errorMessage);
       setShowModal(true);
-      return;
     }
-    try {
-      await handleRegisterProduct();
-      setPageIdx(pageIdx + 1);
-    } catch (err) {
-      setModalMsg(formatErrMsg(err));
-      setShowModal(true);
-    }
+    handleRegisterProduct();
   };
 
   const handleClickPrev = () => {

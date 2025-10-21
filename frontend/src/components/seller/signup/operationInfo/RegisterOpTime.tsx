@@ -1,6 +1,6 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { CommonOpTime } from "@components/seller/common";
-import type { SellerSignupProps } from "@interface";
+import type { OperationTimeType, SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
 import { validateLength, validationRules } from "@utils";
 import { useEffect, useState } from "react";
@@ -9,6 +9,10 @@ const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const { form, setForm } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+
+  const getValid = (ops: OperationTimeType[]) => {
+    return ops.some((op) => op.is_open_enabled == true);
+  };
 
   useEffect(() => {
     console.log(form);
@@ -27,7 +31,7 @@ const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   };
 
   return (
-    <div className="flex mx-[20px] flex-col my-[20px] gap-y-[20px]">
+    <div className="flex mx-[20px] flex-col flex-1 my-[20px] gap-y-[20px]">
       <div className="flex flex-1 flex-col gap-y-[40px]">
         {/* progress */}
         <div className="text-main-deep font-bold bodyFont">1/2</div>
@@ -45,7 +49,7 @@ const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
 
       {/* next */}
       <CommonBtn
-        category="green"
+        category={getValid(form.operation_times) ? "green" : "grey"}
         label="다음"
         notBottom
         onClick={() => handleClickNext()}

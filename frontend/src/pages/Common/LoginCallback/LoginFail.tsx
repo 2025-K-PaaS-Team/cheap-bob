@@ -5,7 +5,7 @@ const LoginFail = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col h-full items-center justify-center text-center">
+    <div className="flex flex-col flex-1 items-center justify-center text-center mx-auto w-[calc(100%-40px)] gap-y-[28px]">
       <img src="/icon/error.svg" alt="errorIcon" className="w-15 mb-5" />
       <div className="titleFont font-bold">로그인에 실패했어요</div>
       <div className="text-[16px]">
@@ -17,13 +17,21 @@ const LoginFail = () => {
       <div className="flex flex-col gap-y-[20px] my-[20px] w-full">
         <CommonBtn
           label="점주 로그인하기"
-          onClick={() => navigate("/s")}
+          onClick={() => {
+            localStorage.removeItem("loginRole");
+            localStorage.setItem("loginRole", "seller");
+            navigate("/s");
+          }}
           notBottom
         />
         <CommonBtn
           label="고객 로그인하기"
           notBottom
-          onClick={() => navigate("/c")}
+          onClick={() => {
+            localStorage.removeItem("loginRole");
+            localStorage.setItem("loginRole", "customer");
+            navigate("/c");
+          }}
         />
       </div>
     </div>

@@ -42,12 +42,20 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
           {/* store image */}
           <div className="h-[131px] rounded-t overflow-hidden relative">
             {/* now open */}
-            <div className="bg-custom-white rounded-lg absolute bottom-2 left-2 z-10 py-[4px] px-[10px]">
+            <div className="tagFont bg-custom-white rounded-lg absolute bottom-2 left-2 z-10 py-[4px] px-[10px]">
               {store.operation_times.find((dow) => dow.day_of_week === todayDow)
                 ?.is_currently_open
                 ? "영업중"
                 : "영업 종료"}
             </div>
+            {/* near time */}
+            {store.address.nearest_station && store.address.walking_time && (
+              <div className="tagFont bg-custom-black text-custom-white rounded-sm absolute bottom-2 right-2 z-10 py-[4px] px-[10px]">
+                {store.address.nearest_station} 도보{" "}
+                {store.address.walking_time}분
+              </div>
+            )}
+
             <img
               src={store.images.find((img) => img.is_main)?.image_url}
               alt="StoreImage"

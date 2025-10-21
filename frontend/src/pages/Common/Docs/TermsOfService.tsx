@@ -1,6 +1,17 @@
+import { useNavigate } from "react-router";
+
 const TermsOfService = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="overflow-y-auto text-custom-black">
+    <div className="relative h-full py-6 text-custom-black">
+      <img
+        src="/icon/cross.svg"
+        alt="crossIcon"
+        onClick={() => navigate(-1)}
+        className="absolute top-10 right-10 cursor-pointer z-10"
+        width="20"
+      />
       <div className="m-[20px] prose max-w-none prose-p:leading-relaxed prose-li:leading-relaxed">
         <h1 className="text-2xl font-bold mb-4">[저렴한끼] 서비스 이용약관</h1>
 

@@ -144,3 +144,10 @@ export const DeleteTopping = async (body: string) => {
 
   return data;
 };
+
+// GET: get customer profile all
+export const GetCustomerEmail = async () => {
+  const { data } = await customerProfileApi.get("/me");
+
+  return data;
+};

@@ -38,7 +38,7 @@ const Agree = ({ onNext }: AgreeProps) => {
 
   return (
     <>
-      <div className="flex flex-col mx-auto w-[calc(100%-40px)] gap-y-[28px]">
+      <div className="flex flex-col justify-end mx-auto w-[calc(100%-40px)] gap-y-[28px]">
         {/* 서비스 동의 */}
         <div className="flex flex-row justify-between">
           <div className="flex flex-row gap-x-[10px] flex-1">
@@ -92,7 +92,6 @@ const Agree = ({ onNext }: AgreeProps) => {
             label="다음"
             notBottom
             onClick={handleSubmit}
-            width="w-[calc(100%-40px)]"
             category={allAgree ? "green" : "grey"}
           />
         )}

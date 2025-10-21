@@ -114,7 +114,15 @@ const BillingInfo = () => {
           </div>
           {/* logout */}
           <div className="bodyFont font-bold py-[20px] border-b border-black/10">
-            <div onClick={() => navigate("/s")}>로그아웃</div>
+            <div
+              onClick={() => {
+                localStorage.removeItem("loginRole");
+                localStorage.removeItem("accessToken");
+                navigate("/s");
+              }}
+            >
+              로그아웃
+            </div>
           </div>
           {/* withdraw */}
           <div

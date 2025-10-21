@@ -67,7 +67,6 @@ const CommonPuTime = ({
       if (!f.close_time) return f;
 
       const { h: ch, m: cm } = toHM(f.close_time);
-
       const s = minusOffset(
         ch,
         cm,
@@ -101,7 +100,6 @@ const CommonPuTime = ({
     if (changed) setForm(next);
   }, [form, setForm, pickupStartOffset, pickupDiscardOffset]);
 
-  // 표시용 (첫 운영일 기준)
   const startDisplay = firstOpenDay?.pickup_start_time || "00:00:00";
   const [sHH = "00", sMM = "00"] = startDisplay.split(":");
   const discardDisplay = firstOpenDay?.pickup_end_time || "00:00:00";
@@ -113,12 +111,22 @@ const CommonPuTime = ({
   };
   const resetDiscardOffset = () => {
     const init = initialOffsetsRef.current?.discard ?? { hour: 0, min: 0 };
-    setPickupDiscardOffset(init.hour, init.min);
+    setPickupDiscardOffset(0, Math.min(60, Math.max(0, init.min)));
+  };
+
+  const onStartHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPickupStartOffset(clampNum(e.target.value, 23), pickupStartOffset.min);
+  };
+  const onStartMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPickupStartOffset(pickupStartOffset.hour, clampNum(e.target.value, 59));
+  };
+  const onDiscardMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPickupDiscardOffset(0, clampNum(e.target.value, 60));
   };
 
   return (
     <div className="flex flex-col gap-y-[20px]">
-      {/* 픽업 시작 기준 (전부터) */}
+      {/* 픽업 시작 기준 */}
       <div className="flex flex-col gap-y-[10px]">
         <h3>픽업 시간</h3>
         <div className="bodyFont">마감 세일을 시작할 시간을 입력해주세요.</div>
@@ -127,12 +135,7 @@ const CommonPuTime = ({
             <input
               className="bg-[#E7E7E7] rounded-sm w-[50px] h-[44px] text-center"
               value={pickupStartOffset.hour}
-              onChange={(e) =>
-                setPickupStartOffset(
-                  clampNum(e.target.value, 23),
-                  pickupStartOffset.min
-                )
-              }
+              onChange={onStartHourChange}
               inputMode="numeric"
               placeholder="hh"
             />
@@ -140,12 +143,7 @@ const CommonPuTime = ({
             <input
               className="bg-[#E7E7E7] rounded-sm w-[50px] h-[44px] text-center"
               value={pickupStartOffset.min}
-              onChange={(e) =>
-                setPickupStartOffset(
-                  pickupStartOffset.hour,
-                  clampNum(e.target.value, 59)
-                )
-              }
+              onChange={onStartMinChange}
               inputMode="numeric"
               placeholder="mm"
             />
@@ -167,7 +165,7 @@ const CommonPuTime = ({
         </div>
       </div>
 
-      {/* 픽업 마감(폐기) 기준 */}
+      {/* 픽업 마감 기준 */}
       <div className="flex flex-col gap-y-[10px]">
         <h3>픽업 마감 시간</h3>
         <div className="bodyFont">픽업을 마감할 시간을 입력해주세요.</div>
@@ -175,26 +173,8 @@ const CommonPuTime = ({
           <div className="flex flex-row text-[20px] justify-center items-center gap-x-[10px]">
             <input
               className="bg-[#E7E7E7] rounded-sm w-[50px] h-[44px] text-center"
-              value={pickupDiscardOffset.hour}
-              onChange={(e) =>
-                setPickupDiscardOffset(
-                  clampNum(e.target.value, 23),
-                  pickupDiscardOffset.min
-                )
-              }
-              inputMode="numeric"
-              placeholder="hh"
-            />
-            <div>시</div>
-            <input
-              className="bg-[#E7E7E7] rounded-sm w-[50px] h-[44px] text-center"
               value={pickupDiscardOffset.min}
-              onChange={(e) =>
-                setPickupDiscardOffset(
-                  pickupDiscardOffset.hour,
-                  clampNum(e.target.value, 59)
-                )
-              }
+              onChange={onDiscardMinChange}
               inputMode="numeric"
               placeholder="mm"
             />
