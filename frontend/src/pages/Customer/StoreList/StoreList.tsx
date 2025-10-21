@@ -5,8 +5,10 @@ import { NutritionList } from "@constant";
 import type { StoreSearchType } from "@interface";
 import { StoreBox } from "@components/customer/storeList";
 import CommonLoading from "@components/common/CommonLoading";
+import { useNavigate } from "react-router";
 
 const StoreList = () => {
+  const navigate = useNavigate();
   const [stores, setStores] = useState<StoreSearchType>();
   const [pageIdx, setPageIdx] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -111,6 +113,17 @@ const StoreList = () => {
 
   return (
     <div className="flex flex-col px-[20px]">
+      <div className="border border-1 border-main-deep flex flex-row justify-between px-[18px] py-[16px] h-[54px] rounded-[50px]">
+        <input
+          type="text"
+          onClick={() => navigate("/c/stores/search")}
+          className="focus:outline-none"
+          placeholder="랜덤팩을 찾으시나요?"
+        />
+
+        <img src="/icon/search.svg" alt="searchIcon" />
+      </div>
+
       <Chips
         chips={NutritionList}
         selected={selected}
