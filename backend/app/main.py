@@ -8,9 +8,9 @@ from config.settings import settings
 from middleware.auth import JWTAuthMiddleware
 from services.auth.jwt import JWTService
 from database.mongodb_session import init_mongodb, close_mongodb
-from services.scheduled_tasks.startup_recovery import ScheduleRecovery
 from services.scheduler import scheduler
 from services.cart_recovery_service import CartRecoveryService
+from services.startup_recovery import ScheduleRecovery
 
 # 로깅 설정
 logging.basicConfig(
