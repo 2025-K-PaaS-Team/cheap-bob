@@ -20,6 +20,11 @@ const RegisterPackagePrice = ({
       setShowModal(true);
       return;
     }
+    if (!validateNum(pkg.sale, 1)) {
+      setModalMsg("할인율은 1~99% 사이여야 합니다.");
+      setShowModal(true);
+      return;
+    }
     setPageIdx(pageIdx + 1);
   };
 

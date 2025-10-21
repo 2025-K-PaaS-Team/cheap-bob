@@ -4,7 +4,7 @@ import { CommonPrice } from "@components/seller/common";
 import type { ProductBase } from "@interface";
 import { GetProduct, UpdateProduct } from "@services";
 import { useDashboardStore } from "@store";
-import { formatErrMsg } from "@utils";
+import { formatErrMsg, getRoundedPrice } from "@utils";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -52,9 +52,14 @@ const ChangePackagePrice = () => {
       return;
     }
 
-    // (선택) 간단 검증
-    if (product.price < 0 || product.sale < 0 || product.sale > product.price) {
-      setModalMsg("가격/세일 값을 확인해 주세요.");
+    if (getRoundedPrice(product.price, product.sale) < 1000 || !product.price) {
+      setModalMsg("최소 패키지 판매가는 1000원입니다.");
+      setShowModal(true);
+      return;
+    }
+
+    if (product.sale > 99 || product.sale < 1) {
+      setModalMsg("할인율은 1~99% 사이여야 합니다.");
       setShowModal(true);
       return;
     }
