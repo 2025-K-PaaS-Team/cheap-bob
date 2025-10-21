@@ -23,13 +23,18 @@ const Layout = () => {
     path === "/s" ||
     path.startsWith("/s/signup") ||
     path.startsWith("/s/billing/") ||
-    path.startsWith("/docs");
+    path.startsWith("/docs") ||
+    path.startsWith("/withdraw") ||
+    path.startsWith("/auth");
+
   const notHeader =
     path === "/c" ||
     path === "/s" ||
     path.startsWith("/s/signup") ||
     path === "/s/order" ||
-    path.startsWith("/docs");
+    path.startsWith("/docs") ||
+    path.startsWith("/withdraw") ||
+    path.startsWith("/auth");
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");

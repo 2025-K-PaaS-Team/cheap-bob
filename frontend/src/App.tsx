@@ -57,16 +57,23 @@ import {
 const App = () => {
   return (
     <Routes>
-      {/* login callback */}
-      <Route path="/auth/success" element={<LoginCallback />} />
-      {/* login 409 failed */}
-      <Route path="/auth/fail" element={<LoginFail />} />
-      {/* role path */}
-      <Route path="/auth/role-check" element={<RoleCheck />} />
+      {/* auth */}
+      <Route path="/auth" element={<Layout />}>
+        {/* login callback */}
+        <Route path="success" element={<LoginCallback />} />
+        {/* login 409 failed */}
+        <Route path="fail" element={<LoginFail />} />
+        {/* role path */}
+        <Route path="role-check" element={<RoleCheck />} />
+      </Route>
+
       {/* withdraw */}
-      <Route path="/withdraw" element={<Withdraw />} />
-      {/* roleback withdraw */}
-      <Route path="/withdraw/cancel" element={<WithdrawCancel />} />
+      <Route path="/withdraw" element={<Layout />}>
+        {/* withdraw */}
+        <Route index element={<Withdraw />} />
+        {/* roleback withdraw */}
+        <Route path="cancel" element={<WithdrawCancel />} />
+      </Route>
 
       {/* docs */}
       <Route path="/docs" element={<Layout />}>

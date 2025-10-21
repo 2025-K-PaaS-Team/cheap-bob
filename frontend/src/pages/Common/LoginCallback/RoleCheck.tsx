@@ -14,7 +14,7 @@ const RoleCheck = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full items-center justify-center text-center">
+    <div className="flex flex-col flex-1 items-center justify-center text-center mx-auto w-[calc(100%-40px)] gap-y-[28px]">
       <img src="/icon/error.svg" alt="errorIcon" className="w-15 mb-5" />
       <div className="titleFont font-bold">확인해주세요</div>
       <div className="text-[16px]">

@@ -92,7 +92,6 @@ const Agree = ({ onNext }: AgreeProps) => {
             label="다음"
             notBottom
             onClick={handleSubmit}
-            width="w-[calc(100%-40px)]"
             category={allAgree ? "green" : "grey"}
           />
         )}
