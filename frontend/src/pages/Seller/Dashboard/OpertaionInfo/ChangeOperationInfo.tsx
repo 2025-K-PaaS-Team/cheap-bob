@@ -1,4 +1,5 @@
 import { CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { idxToDow } from "@constant";
 import type { StoreOperationType } from "@interface";
 import { GetStoreOperation, GetStoreOpReservation } from "@services";
@@ -25,7 +26,7 @@ const ChangeOperationInfo = () => {
   const [selectedDow, setSelectedDow] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const activeDays = useMemo(() => op.filter((o) => o.is_open_enabled), [op]);
 
@@ -43,7 +44,7 @@ const ChangeOperationInfo = () => {
       setModalMsg("운영 정보를 불러오는 것에 실패했습니다.");
       setShowModal(true);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -55,7 +56,7 @@ const ChangeOperationInfo = () => {
       setModalMsg("운영 변경 예약 정보를 불러오는 것에 실패했습니다.");
       setShowModal(true);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -64,7 +65,9 @@ const ChangeOperationInfo = () => {
     handleGetStoreReservation();
   }, []);
 
-  if (loading) return <div className="mx-[35px]">로딩중...</div>;
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   return (
     <div className="mx-[35px]">
@@ -142,7 +145,7 @@ const ChangeOperationInfo = () => {
           className="flex flex-row items-center justify-between"
         >
           <div
-            className="bodyFont font-bold py-[20px] border-b-[1px] border-black/10 cursor-pointer"
+            className="w-full bodyFont font-bold py-[20px] border-b-[1px] border-black/10 cursor-pointer"
             onClick={() => navigate(item.to)}
           >
             {item.label}

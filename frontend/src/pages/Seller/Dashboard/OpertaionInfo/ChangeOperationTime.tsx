@@ -1,5 +1,6 @@
 // pages/ChangeOperationTime.tsx
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { CommonOpTime } from "@components/seller/common";
 import type { StoreOperationType, OperationTimeType } from "@interface";
 import { GetStoreOperation } from "@services";
@@ -15,10 +16,10 @@ const ChangeOperationTime = () => {
   const [orig, setOrig] = useState<StoreOperationType>([]);
   // 화면에서 편집할 폼(open/close/is_open_enabled)
   const [form, setForm] = useState<OperationTimeType[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // 월~일 7개 포함 여부
   const isComplete7 = useMemo(() => {
@@ -49,13 +50,17 @@ const ChangeOperationTime = () => {
       setModalMsg("운영 정보를 불러오는 것에 실패했습니다.");
       setShowModal(true);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     load();
   }, []);
+
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
 
   // 제출: 기존 close↔pickup 간격 유지해서 pickup 재계산 후 예약 생성
   const handleSubmit = async () => {
@@ -116,10 +121,6 @@ const ChangeOperationTime = () => {
       setShowModal(true);
     }
   };
-
-  if (loading) {
-    return <div className="mx-[20px] mt-[40px]">로딩중…</div>;
-  }
 
   return (
     <div className="px-[20px] my-[30px] flex flex-col gap-y-[20px]">

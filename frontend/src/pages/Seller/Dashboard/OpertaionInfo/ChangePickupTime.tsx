@@ -1,4 +1,5 @@
 import { CommonBtn, CommonModal } from "@components/common";
+import CommonLoading from "@components/common/CommonLoading";
 import { CommonPuTime } from "@components/seller/common";
 import type { OperationTimeType, StoreOperationType, Offset } from "@interface";
 import { GetStoreOperation } from "@services";
@@ -12,7 +13,7 @@ const ChangePickupTime = () => {
 
   const [orig, setOrig] = useState<StoreOperationType>([]);
   const [form, setForm] = useState<OperationTimeType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // 오프셋(마감에서 몇 분 전부터 시작/폐기)
   const [pickupStartOffset, _setPickupStartOffset] = useState<Offset>({
@@ -82,7 +83,7 @@ const ChangePickupTime = () => {
       setModalMsg("운영 정보를 불러오는 것에 실패했습니다.");
       setShowModal(true);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -121,8 +122,8 @@ const ChangePickupTime = () => {
     }
   };
 
-  if (loading) {
-    return <div className="mx-[20px] mt-[40px]">로딩중…</div>;
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
   }
 
   return (
