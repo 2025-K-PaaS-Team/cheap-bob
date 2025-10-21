@@ -14,7 +14,9 @@ const Order = () => {
   const handleGetOrders = async () => {
     try {
       const res = await getCurrentOrders();
-      setOrders(res.orders);
+      const orders = res.orders;
+      const filteredOrders = orders.filter((order) => order.status != "cancel");
+      setOrders(filteredOrders);
     } catch (err: unknown) {
       console.error("get stores fail", err);
     } finally {
@@ -26,6 +28,10 @@ const Order = () => {
     handleGetOrders();
   }, []);
 
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
+
   if (!orders || orders.length == 0) {
     return (
       <div className="flex flex-col h-full justify-center items-center">
@@ -35,7 +41,7 @@ const Order = () => {
           className="pb-[26px] w-[116px]"
         />
         <div className="text-[20px] pb-[17px] font-bold">
-          관심 가게가 비어있어요.
+          주문 내역이 비어있어요.
         </div>
         <div className="text-[12px] font-base pb-[46px]">
           다양한 랜덤팩을 주문하고 픽업해보세요.
@@ -50,13 +56,9 @@ const Order = () => {
     );
   }
 
-  if (isLoading) {
-    return <CommonLoading type="data" isLoading={isLoading} />;
-  }
-
   return (
     <>
-      <OrderCard orders={orders} />
+      <OrderCard orders={orders} onRefresh={handleGetOrders} />
     </>
   );
 };

@@ -76,7 +76,7 @@ const CommonPrice = ({ pkg, setPkg }: PriceProps) => {
       </div>
 
       {/* divider */}
-      <hr className="w-full border-0 bg-black/10 h-[1px]" />
+      <hr className="w-full border-0 bg-black/20 h-[1px]" />
 
       {/* sale price */}
       <div className="flex flex-row justify-between items-center">

@@ -9,9 +9,10 @@ import { QrReader } from "react-qr-reader";
 interface OrderCardProps {
   orders: OrderBaseType[];
   isAll?: boolean;
+  onRefresh?: () => void | Promise<void>;
 }
 
-const OrderCard = ({ orders, isAll = false }: OrderCardProps) => {
+const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
   const [qrReaderOpen, setQrReaderOpen] = useState<Boolean>(false);
   const [paymentIdToComplete, setPaymentIdToComplete] = useState<string | null>(
     null
@@ -19,13 +20,15 @@ const OrderCard = ({ orders, isAll = false }: OrderCardProps) => {
   const scannedRef = useRef(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
-
+  const [paymentIdToCancel, setPaymentIdToCancel] = useState<string | null>(
+    null
+  );
   const [modalMsg, setModalMsg] = useState("");
   const [showCancelReason, setShowCancelReason] = useState<boolean>(false);
   const [cancelReason, setCancelReason] = useState<string>("");
 
   const getColorByStautus = (status: string) => {
-    if (status == "reservation") {
+    if (status == "reservation" || status == "cancel") {
       return "bg-[#E7E7E7]";
     } else {
       return "bg-main-pale text-main-deep border-main-deep border";
@@ -37,12 +40,14 @@ const OrderCard = ({ orders, isAll = false }: OrderCardProps) => {
       setQrReaderOpen(false);
       setModalMsg("픽업이 완료되었습니다!");
       setShowModal(true);
+      await onRefresh?.();
     } catch (err: any) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
       setQrReaderOpen(false);
       setPaymentIdToComplete(null);
+      scannedRef.current = false;
     }
   };
 
@@ -51,6 +56,7 @@ const OrderCard = ({ orders, isAll = false }: OrderCardProps) => {
       await deleteOrder(paymentId);
       setShowCancelModal(false);
       getCurrentOrders();
+      await onRefresh?.();
     } catch (err: any) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
@@ -60,24 +66,22 @@ const OrderCard = ({ orders, isAll = false }: OrderCardProps) => {
   const handleClickPickupCompleteBtn = (paymentId: string) => {
     setQrReaderOpen(true);
     setPaymentIdToComplete(paymentId);
+    scannedRef.current = false;
   };
 
-  const getTimeKey = (status: string) => {
-    if (status == "reservation") {
-      return status + "_at";
-    } else if (status == "complete") {
-      return status + "d_at";
-    } else {
-      return status + "ed_at";
-    }
+  const timeKeyMap: Record<string, keyof OrderBaseType> = {
+    reservation: "reservation_at",
+    accept: "accepted_at",
+    complete: "completed_at",
+    cancel: "canceled_at",
   };
 
   return (
     <>
       {orders.map((order, idx) => {
-        const timeStampKey = getTimeKey(order.status);
+        const timeStampKey = timeKeyMap[order.status] ?? "reservation_at";
         const timeStampValue = order[timeStampKey as keyof OrderBaseType];
-        const orderTime = formatDate(String(timeStampValue))
+        const orderTime = formatDate(timeStampValue)
           ?.slice(0, 10)
           .replaceAll("-", ".");
         const orderState =
@@ -142,7 +146,10 @@ const OrderCard = ({ orders, isAll = false }: OrderCardProps) => {
                     category="red"
                     notBottom
                     className="w-full"
-                    onClick={() => setShowCancelModal(true)}
+                    onClick={() => {
+                      setPaymentIdToCancel(order.payment_id);
+                      setShowCancelModal(true);
+                    }}
                   />
                 )}
                 {order.status == "accept" && (
@@ -221,13 +228,20 @@ const OrderCard = ({ orders, isAll = false }: OrderCardProps) => {
                   <div className="grid grid-cols-2 btnFont text-center">
                     <div
                       className="text-sub-red"
-                      onClick={() => handleClickCancelBtn(order.payment_id)}
+                      onClick={() => {
+                        if (paymentIdToCancel) {
+                          handleClickCancelBtn(paymentIdToCancel);
+                        }
+                      }}
                     >
                       주문 취소
                     </div>
                     <div
                       className="text-custom-black"
-                      onClick={() => setShowCancelModal(false)}
+                      onClick={() => {
+                        setShowCancelModal(false);
+                        setPaymentIdToCancel(null);
+                      }}
                     >
                       뒤로 가기
                     </div>

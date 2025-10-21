@@ -31,7 +31,7 @@ const StorePayment = () => {
       {/* 픽업 시간 */}
       <div className="grid grid-cols-3 bodyFont">
         <div className="font-bold">픽업 시간</div>
-        <div className="flex flex-row gap-x-[5px]">
+        <div className="flex flex-row gap-x-[5px] col-span-2">
           <div>{store.operation_times[0].pickup_start_time.slice(0, 5)}</div>
           <div>~</div>
           <div>{store.operation_times[0].pickup_end_time.slice(0, 5)}</div>
@@ -41,7 +41,7 @@ const StorePayment = () => {
       {/* 가게 이름 */}
       <div className="grid grid-cols-3 bodyFont">
         <div className="font-bold">가게 이름</div>
-        <div>{store.store_name}</div>
+        <div className="col-span-2">{store.store_name}</div>
       </div>
 
       {/* 내 연락처 */}
@@ -72,7 +72,7 @@ const StorePayment = () => {
       {/* 패키지 명 */}
       <div className="grid grid-cols-3 bodyFont">
         <div className="font-bold">패키지 명</div>
-        <div>{store.products[0].product_name}</div>
+        <div className="col-span-2">{store.products[0].product_name}</div>
       </div>
 
       {/* 수량 */}

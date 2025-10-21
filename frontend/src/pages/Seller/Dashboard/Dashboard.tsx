@@ -92,7 +92,7 @@ const Dashboard = () => {
         onChanged={handleGetDashboard}
       />
 
-      {/* border */}
+      {/* divider */}
       <hr className="bg-black/20 h-[1px] border-0 mt-[50px] mb-[33px]" />
 
       {/* my store info */}

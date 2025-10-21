@@ -215,12 +215,14 @@ const StoreDetail = () => {
                   onClick={handleClickDirection}
                   width={22}
                 />
-                <img
-                  src="/icon/instagram.svg"
-                  alt="instagramIcon"
-                  onClick={() => window.open(store.sns.instagram)}
-                  width={22}
-                />
+                {store.sns.homepage && (
+                  <img
+                    src="/icon/instagram.svg"
+                    alt="instagramIcon"
+                    onClick={() => window.open(store.sns.instagram)}
+                    width={22}
+                  />
+                )}
               </div>
             </div>
 
@@ -248,6 +250,7 @@ const StoreDetail = () => {
               <h3>영업 시간</h3>
               <div className="tagFont">
                 {store.operation_times
+                  .filter((dow) => dow.is_open_enabled == true)
                   .sort((a, b) => a.day_of_week - b.day_of_week)
                   .map((dow, idx) => {
                     const todayDow = idxToDow[idx];
@@ -356,8 +359,10 @@ const StoreDetail = () => {
                     사장님께 따로 메뉴 요청을 할 수 없어요.
                   </li>
                   <li className="ml-4">
-                    픽업 확정 전, 가게 사정에 의해 취소될 수 있어요. 취소사유는
-                    구매 내역에서 확인할 수 있어요.
+                    픽업 확정 전, 가게 사정에 의해 취소될 수 있어요.
+                  </li>
+                  <li className="ml-4">
+                    취소사유는 구매 내역에서 확인할 수 있어요.
                   </li>
                   <li className="ml-4">
                     주문 취소는 가게의 픽업 확정 이후에는 불가능해요.

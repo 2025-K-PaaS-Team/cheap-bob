@@ -36,11 +36,14 @@ const Header = ({ layout, swiperRef }: HeaderProps) => {
             onClick={handleClickBefore}
           />
         ) : myLayout.loc ? (
-          <img
-            src="/icon/location.svg"
-            alt="locationIcon"
-            onClick={() => navigate("/c/location")}
-          />
+          <div className="flex gap-x-[5px]">
+            <img
+              src="/icon/location.svg"
+              alt="locationIcon"
+              onClick={() => navigate("/c/location")}
+            />
+            <div className="bodyFont font-bold">관악구</div>
+          </div>
         ) : (
           <div />
         )}
@@ -76,20 +79,6 @@ const Header = ({ layout, swiperRef }: HeaderProps) => {
           )}
         </div>
       </div>
-
-      {/* search bar */}
-      {myLayout.search && (
-        <div className="border border-1 border-main-deep flex flex-row justify-between px-[18px] py-[16px] h-[54px] mx-[20px] rounded-[50px]">
-          <input
-            type="text"
-            onClick={() => navigate("/c/stores/search")}
-            className="focus:outline-none"
-            placeholder={myLayout.searchPlaceholder}
-          />
-
-          <img src="/icon/search.svg" alt="searchIcon" />
-        </div>
-      )}
     </>
   );
 };

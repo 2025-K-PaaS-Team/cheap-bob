@@ -18,7 +18,7 @@ const CommonProfile = ({
   onCancelClick,
 }: ProfileProps) => {
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/50 z-50">
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/20 z-50">
       <div className="bg-white rounded-t flex flex-col border-b border-black/80 w-[322px] px-[16px] py-[20px] gap-y-[8px]">
         {/* first row - white zone */}
         <div className="flex flex-row justify-between">

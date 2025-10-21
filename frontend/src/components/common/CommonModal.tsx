@@ -27,11 +27,11 @@ const CommonModal = ({
       : "bg-main-deep text-white border-none";
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
       <div
         className={`${
           className ? className : ""
-        } text-center flex flex-col w-[359px] p-[20px] rounded-lg gap-y-[10px] bg-white`}
+        } text-center flex flex-col w-[359px] p-[20px] rounded-lg gap-y-[10px] bg-white mx-[20px]`}
       >
         {/* description */}
         {desc && (

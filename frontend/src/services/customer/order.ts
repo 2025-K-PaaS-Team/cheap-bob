@@ -32,7 +32,7 @@ export const getOrderDetail = async (
 export const deleteOrder = async (paymentId: string) => {
   const { data } = await customerOrderApi.delete(`/${paymentId}/cancel`, {
     data: {
-      reason: "형식을 맞추기 위한 reason",
+      reason: "'구매자 요청' 으로 주문이 취소되었어요.",
     },
   });
 

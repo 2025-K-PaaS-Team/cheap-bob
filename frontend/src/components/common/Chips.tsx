@@ -32,7 +32,7 @@ const Chips = ({ chips, selected, setSelected }: ChipsProps) => {
 
   return (
     <div className="flex flex-wrap">
-      <div className="flex flex-wrap gap-[4px] items-center w-max my-[20px]">
+      <div className="flex overflow-x-auto gap-[4px] items-center w-max my-[20px]">
         {chipsWithAll.map((chip, idx) => {
           const isActive =
             chip.key === "all" ? isNoneSelected : selected[chip.key];

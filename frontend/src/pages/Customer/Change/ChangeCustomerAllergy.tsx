@@ -57,6 +57,7 @@ const ChangeCustomerAllergy = () => {
   if (isLoading) {
     return <CommonLoading type="data" isLoading={isLoading} />;
   }
+
   return (
     <div className="my-[30px] px-[20px] w-full flex flex-col flex-1 justify-between gap-y-[20px]">
       <div className="flex flex-col gap-y-[20px]">
