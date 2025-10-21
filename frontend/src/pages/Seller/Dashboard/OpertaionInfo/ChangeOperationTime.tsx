@@ -27,6 +27,10 @@ const ChangeOperationTime = () => {
     return [0, 1, 2, 3, 4, 5, 6].every((v) => set.has(v));
   }, [form]);
 
+  const getValid = (ops: OperationTimeType[]) => {
+    return ops.some((op) => op.is_open_enabled == true);
+  };
+
   // 최초 로드: 기존 운영 정보로 폼 초기화
   const load = async () => {
     try {
@@ -137,7 +141,7 @@ const ChangeOperationTime = () => {
       <CommonBtn
         label="저장"
         onClick={handleSubmit}
-        category="green"
+        category={getValid(form) ? "green" : "grey"}
         notBottom
       />
 
