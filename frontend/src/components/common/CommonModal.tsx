@@ -1,4 +1,3 @@
-// CommonModal.tsx
 import { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 
