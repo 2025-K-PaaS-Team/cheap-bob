@@ -9,8 +9,8 @@ import type {
 import PortOne from "@portone/browser-sdk/v2";
 import { confrimPayment, initPayment } from "@services";
 import { formatErrMsg, getRoundedPrice } from "@utils";
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 
 type PortOneProps = {
   storeId: string;
@@ -27,27 +27,63 @@ const Payment = ({
   qty,
   selectedPayment,
 }: PortOneProps) => {
+  const calledRef = useRef(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState<string>("");
-  const roundedPrice = getRoundedPrice(product.price, product.sale);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const item: ItemType = {
-    id: product.product_id,
-    name: product.product_name,
-    price: roundedPrice,
-    currency: "KRW",
-    currencyLabel: "원",
-  };
+  const { pathname } = useLocation();
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+  const unitPrice = getRoundedPrice(product.price, product.sale);
+  const totalAmount = unitPrice * Math.max(1, qty);
+
+  useEffect(() => {
+    const paymentId = searchParams.get("paymentId");
+    const txId = searchParams.get("txId");
+    const transactionType = searchParams.get("transactionType");
+
+    if (!paymentId || !txId) return;
+
+    if (!isMobile) return;
+
+    if (sessionStorage.getItem(`confirmed:${txId}`)) return;
+    if (calledRef.current) return;
+    calledRef.current = true;
+
+    if (transactionType && transactionType !== "PAYMENT") return;
+
+    (async () => {
+      try {
+        setIsLoading(true);
+        await confrimPayment({ payment_id: paymentId });
+
+        sessionStorage.setItem(`confirmed:${txId}`, "1");
+
+        navigate(pathname, { replace: true });
+
+        setModalMsg(
+          "결제가 정상적으로 완료되었습니다. <br/> 3초 후 주문 현황 페이지로 이동합니다."
+        );
+        setShowModal(true);
+        setTimeout(() => navigate("/c/order"), 3000);
+      } catch (err: any) {
+        setModalMsg(err?.message || "결제 확정에 실패했습니다.");
+        setShowModal(true);
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, [searchParams, pathname, isMobile]);
 
   const handleInitPayment = async (): Promise<PaymentResponseType | null> => {
     try {
       const res = await initPayment({
         product_id: product.product_id,
-        quantity: qty,
+        quantity: Math.max(1, qty),
       });
-      console.log("초기화 성공", res);
       return res;
     } catch (err: unknown) {
       setModalMsg(formatErrMsg(err));
@@ -56,13 +92,10 @@ const Payment = ({
     }
   };
 
-  const handleConfrimPayment = async (payment_id: string) => {
-    console.log("payment_id", payment_id);
+  const handleConfirmPayment = async (payment_id: string) => {
     try {
-      const confirm = await confrimPayment({
-        payment_id: payment_id,
-      });
-      console.log("결제 확인 성공", confirm);
+      setIsLoading(true);
+      await confrimPayment({ payment_id });
       setModalMsg(
         "결제가 정상적으로 완료되었습니다. <br/> 3초 후 주문 현황 페이지로 이동합니다."
       );
@@ -71,6 +104,8 @@ const Payment = ({
     } catch (err: unknown) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -83,8 +118,6 @@ const Payment = ({
       return;
     }
 
-    setIsLoading(true);
-
     const phoneRegex = /^01\d-\d{3,4}-\d{4}$/;
     if (!phoneRegex.test(customer.phone_number)) {
       setModalMsg("010-1234-5678 형식으로 입력해주세요");
@@ -92,26 +125,33 @@ const Payment = ({
       return;
     }
 
-    const sanitizedPhone = customer.phone_number.replace(/-/g, "");
+    setIsLoading(true);
 
-    const paymentResult = await handleInitPayment();
-    if (!paymentResult) {
-      console.log("paymentResult is not existed", paymentResult);
+    const sanitizedPhone = customer.phone_number.replace(/-/g, "");
+    const paymentInit = await handleInitPayment();
+    if (!paymentInit) {
+      setIsLoading(false);
       return;
     }
 
+    const item: ItemType = {
+      id: product.product_id,
+      name: product.product_name,
+      price: unitPrice,
+      currency: "KRW",
+      currencyLabel: "원",
+    };
+
     try {
       await PortOne.requestPayment({
-        storeId: paymentResult.store_id,
-        channelKey: paymentResult.channel_id,
-        paymentId: paymentResult?.payment_id,
+        storeId: paymentInit.store_id,
+        channelKey: paymentInit.channel_id,
+        paymentId: paymentInit.payment_id,
         orderName: item.name,
-        totalAmount: item.price,
+        totalAmount,
         currency: item.currency,
         payMethod: "EASY_PAY",
-        popup: {
-          center: true,
-        },
+        popup: { center: true },
         redirectUrl: window.location.href,
         customer: {
           fullName: customer.nickname,
@@ -120,12 +160,15 @@ const Payment = ({
         },
         customData: {
           productId: product.product_id,
-          quantity: 1,
-          storeId: storeId,
+          quantity: Math.max(1, qty),
+          storeId,
         },
+        easyPay: { easyPayProvider: "KAKAOPAY" },
       });
 
-      await handleConfrimPayment(paymentResult.payment_id);
+      if (!isMobile) {
+        await handleConfirmPayment(paymentInit.payment_id);
+      }
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
@@ -139,24 +182,11 @@ const Payment = ({
   }
 
   return (
-    <div className="relative h-full flex flex-col">
+    <div className="flex flex-col">
       <form onSubmit={handleSubmit}>
-        {!item ? (
-          <div>결제 정보를 불러오는 중입니다.</div>
-        ) : (
-          <>
-            <CommonBtn
-              type="submit"
-              category="green"
-              notBottom
-              className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
-              label="결제하기"
-            />
-          </>
-        )}
+        <CommonBtn type="submit" category="green" notBottom label="결제하기" />
       </form>
 
-      {/* show modal */}
       {showModal && (
         <CommonModal
           desc={modalMsg}

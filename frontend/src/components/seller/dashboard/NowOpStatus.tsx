@@ -123,12 +123,13 @@ const NowOpStatus = ({ ops }: Props) => {
         />
         {statusInfo.sub && <div className="text-[20px]">{statusInfo.sub}</div>}
 
-        <button
+        <div
+          className="flex flex-row items-center"
           onClick={() => setOpenChangeModal(true)}
-          className="text-[16px] text-left mt-[3px]"
         >
-          영업 상태 변경 &gt;
-        </button>
+          <div className="text-[16px]">영업 상태 변경</div>
+          <img src="/icon/nextWhite.svg" alt="nextIcon" />
+        </div>
       </div>
 
       {openChangeModal && (

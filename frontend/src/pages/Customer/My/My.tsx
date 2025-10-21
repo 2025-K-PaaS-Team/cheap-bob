@@ -72,7 +72,10 @@ const My = () => {
         onClick={() => navigate("/c/change/info")}
         className="flex flex-col gap-y-[10px]"
       >
-        <div className="titleFont">{customer?.nickname} 님</div>
+        <div className="flex flex-row justify-between items-center">
+          <div className="titleFont">{customer?.nickname} 님</div>{" "}
+          <img src="/icon/next.svg" alt="nextIcon" />
+        </div>
         <div className="bodyFont">{customer?.customer_email}</div>
       </div>
       {/* nutrition goal */}
@@ -100,7 +103,7 @@ const My = () => {
           className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
         >
           <div>선호 메뉴</div>
-          <div>&gt;</div>
+          <img src="/icon/next.svg" alt="nextIcon" />
         </div>
         {/* prefer topping */}
         <div
@@ -108,7 +111,7 @@ const My = () => {
           className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
         >
           <div>선호 토핑</div>
-          <div>&gt;</div>
+          <img src="/icon/next.svg" alt="nextIcon" />
         </div>
         {/* allergy */}
         <div
@@ -116,7 +119,7 @@ const My = () => {
           className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
         >
           <div>못먹는 음식</div>
-          <div>&gt;</div>
+          <img src="/icon/next.svg" alt="nextIcon" />
         </div>
         {/* order */}
         <div
@@ -124,7 +127,7 @@ const My = () => {
           className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
         >
           <div>주문 내역</div>
-          <div>&gt;</div>
+          <img src="/icon/next.svg" alt="nextIcon" />
         </div>
         {/* policy */}
         <div
@@ -132,7 +135,7 @@ const My = () => {
           onClick={() => navigate("/docs/tos")}
         >
           <div>서비스 이용약관</div>
-          <div>&gt;</div>
+          <img src="/icon/next.svg" alt="nextIcon" />
         </div>
         {/* logout */}
         <div className="bodyFont font-bold py-[20px] border-b border-black/10">

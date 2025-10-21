@@ -72,9 +72,9 @@ const BillingInfo = () => {
   return (
     <div className="flex flex-col relative h-full">
       {/* top content */}
-      <div className="mx-[20px] flex flex-1 flex-col">
+      <div className="mx-[20px] flex flex-1 flex-col gap-y-[40px] mb-[40px]">
         {/* greeting */}
-        <div className="flex flex-col pb-[31.5px] gap-y-[10px]">
+        <div className="flex flex-col gap-y-[10px]">
           <div className="titleFont">{store?.store_name} 님, 안녕하세요.</div>
           <div className="bodyFont">{store?.seller_email}</div>
         </div>
@@ -97,7 +97,7 @@ const BillingInfo = () => {
             className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
           >
             <div>정산 내역 보기</div>
-            <div>&gt;</div>
+            <img src="/icon/next.svg" alt="nextIcon" />
           </div>
           {/* change billing info */}
           <div
@@ -105,12 +105,12 @@ const BillingInfo = () => {
             onClick={() => navigate("change")}
           >
             <div>정산 정보 변경</div>
-            <div>&gt;</div>
+            <img src="/icon/next.svg" alt="nextIcon" />
           </div>
           {/* help */}
           <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
             <div>도움말</div>
-            <div>&gt;</div>
+            <img src="/icon/next.svg" alt="nextIcon" />
           </div>
           {/* logout */}
           <div className="bodyFont font-bold py-[20px] border-b border-black/10">
