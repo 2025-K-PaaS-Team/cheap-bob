@@ -31,6 +31,10 @@ const Noti = () => {
     handleGetAlarm();
   }, []);
 
+  if (isLoading) {
+    return <CommonLoading type="data" isLoading={isLoading} />;
+  }
+
   if (!noti.length) {
     return (
       <div className="flex flex-col h-full justify-center items-center">
@@ -68,10 +72,6 @@ const Noti = () => {
       return "-";
     }
   };
-
-  if (isLoading) {
-    return <CommonLoading type="data" isLoading={isLoading} />;
-  }
 
   return (
     <div className="m-[20px] flex flex-col gap-y-[20px]">
