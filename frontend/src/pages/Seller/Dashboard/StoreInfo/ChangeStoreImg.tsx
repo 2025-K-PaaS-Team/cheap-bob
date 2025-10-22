@@ -177,14 +177,14 @@ const ChangeStoreImg = () => {
                   key={idx}
                   src={img.image_url}
                   alt={`img-${idx}`}
-                  className="w-full h-[100px] object-contain"
+                  className="w-full h-[100px] object-cover"
                 />
                 <button
                   type="button"
                   onClick={() => handleClickDelete(img.image_id)}
-                  className="absolute top-0 right-0 text-custom-black text-xs w-5 h-5 flex items-center justify-center rounded-full"
+                  className="absolute top-1 right-1 text-white text-xs w-5 h-5 flex items-center justify-center"
                 >
-                  X
+                  <img src="/icon/crossWhite.svg" alt="crossIcon" />
                 </button>
               </div>
             ))}

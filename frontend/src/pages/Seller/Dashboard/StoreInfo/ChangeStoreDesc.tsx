@@ -1,11 +1,13 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
+import { useToast } from "@context";
 import { GetStoreDetail, UpdateStoreDesc } from "@services";
 import { formatErrMsg, validateLength } from "@utils";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangeStoreDesc = () => {
+  const { showToast } = useToast();
   const [value, setValue] = useState<string>("");
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -41,10 +43,12 @@ const ChangeStoreDesc = () => {
 
     try {
       await UpdateStoreDesc(storeName);
+      showToast("매장 소개 변경에 성공했어요.", "success");
       navigate(-1);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
+      showToast("매장 소개 변경에 실패했어요.", "error");
     }
   };
 
