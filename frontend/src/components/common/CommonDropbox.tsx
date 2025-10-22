@@ -5,9 +5,15 @@ interface CommonDropboxProps {
   options: OptionType[];
   value: OptionType | null;
   onChange: (options: OptionType | null) => void;
+  placeholder: string;
 }
 
-const CommonDropbox = ({ options, value, onChange }: CommonDropboxProps) => {
+const CommonDropbox = ({
+  options,
+  value,
+  onChange,
+  placeholder,
+}: CommonDropboxProps) => {
   return (
     <div>
       <Select
@@ -15,7 +21,7 @@ const CommonDropbox = ({ options, value, onChange }: CommonDropboxProps) => {
         value={value}
         onChange={(newValue: SingleValue<OptionType>) => onChange(newValue)}
         options={options}
-        placeholder="변경할 영업 상태를 선택해 주세요."
+        placeholder={placeholder}
       />
     </div>
   );
