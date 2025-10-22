@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
-from api.deps.auth import CurrentCustomerDep
+from api.deps.auth import CurrentCustomerDep, CurrentCustomerNoActiveDep
 from api.deps.repository import (
     CustomerDetailRepositoryDep,
     CustomerPreferredMenuRepositoryDep,
@@ -63,7 +63,7 @@ async def get_customer_profile_all(
     })
 )
 async def get_customer_profile_all(
-    current_user: CurrentCustomerDep
+    current_user: CurrentCustomerNoActiveDep
 ):
     """소비자 이메일 조회"""
     customer_email = current_user["sub"]

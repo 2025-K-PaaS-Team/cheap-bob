@@ -65,17 +65,27 @@ app = FastAPI(
 jwt_service = JWTService()
 app.add_middleware(JWTAuthMiddleware, jwt_service=jwt_service)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        settings.FRONTEND_URL,    
-        settings.FRONTEND_LOCAL_URL
-    ], 
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["X-New-Token"],
-)
+if settings.ENVIRONMENT == "dev":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            settings.FRONTEND_URL,    
+            settings.FRONTEND_LOCAL_URL
+        ], 
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            settings.FRONTEND_URL
+        ], 
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 app.include_router(api_router, prefix="/api/v1")
 

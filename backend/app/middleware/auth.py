@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from services.auth.jwt import JWTService
-
+from config.settings import settings
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, jwt_service: JWTService):
@@ -30,16 +30,14 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         
         access_token = None
         
-        # 1. Authorization 헤더에서 토큰 확인
-        authorization = request.headers.get("Authorization")
-        if authorization and authorization.startswith("Bearer "):
-            access_token = authorization[7:]  # "Bearer " 제거
-        
-        # 2. URL 쿼리 파라미터에서 토큰 확인
-        if not access_token:
-            access_token = request.query_params.get("token")
-        
-        # 3. 쿠키에서 토큰 확인 (옵션)
+        if settings.ENVIRONMENT == "dev":
+            authorization = request.headers.get("Authorization")
+            if authorization and authorization.startswith("Bearer "):
+                access_token = authorization[7:]  # "Bearer " 제거
+            
+            if not access_token:
+                access_token = request.query_params.get("token")
+            
         if not access_token:
             access_token = request.cookies.get("access_token")
         
@@ -60,13 +58,19 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         
         # 요청에 사용자 정보 추가
         request.state.user = payload
-        request.state.new_token = new_token  # 갱신된 토큰 저장
         
         # 다음 미들웨어 또는 엔드포인트 호출
         response = await call_next(request)
         
-        # 토큰이 갱신되었으면 응답 헤더에 새 토큰 전달
         if new_token:
-            response.headers["X-New-Token"] = new_token
+            response.set_cookie(
+                key="access_token",
+                value=new_token,
+                httponly=True,
+                secure=True,
+                samesite="lax",
+                max_age=settings.COOKIE_EXPIRE_MINUTES,
+                path="/"
+            )
         
         return response

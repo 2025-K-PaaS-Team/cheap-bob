@@ -92,15 +92,23 @@ async def customer_oauth_callback(
             registration_status = await get_customer_register(email,customer_detail_repo)
         
         # 프론트 로컬 개발 용
-        if state == '1004':
-            frontend_url = settings.FRONTEND_LOCAL_URL
+        if state == '1004' and settings.ENVIRONMENT == "dev":
+            response = RedirectResponse(
+                url=f"{settings.FRONTEND_LOCAL_URL}/auth/success?token={token_response.access_token}&status={registration_status}&conflict={int(conflict)}"
+            )
         else:
-            frontend_url = settings.FRONTEND_URL
-            
-        # status 파라미터를 포함한 redirect URL 생성
-        response = RedirectResponse(
-            url=f"{frontend_url}/auth/success?token={token_response.access_token}&status={registration_status}&conflict={int(conflict)}"
-        )
+            response = RedirectResponse(
+                url=f"{settings.FRONTEND_URL}/auth/success?status={registration_status}&conflict={int(conflict)}"
+            )
+            response.set_cookie(
+                key="access_token",
+                value=token_response.access_token,
+                httponly=True,
+                secure=True,
+                samesite="lax",
+                max_age=settings.COOKIE_EXPIRE_MINUTES,
+                path="/"
+            )
         
         return response
         
@@ -145,14 +153,23 @@ async def seller_oauth_callback(
             registration_status = await get_seller_register(email, store_repo, product_repo)
         
         # 프론트 로컬 개발 용
-        if state == '1004':
-            frontend_url = settings.FRONTEND_LOCAL_URL
+        if state == '1004' and settings.ENVIRONMENT == "dev":
+            response = RedirectResponse(
+                url=f"{settings.FRONTEND_LOCAL_URL}/auth/success?token={token_response.access_token}&status={registration_status}&conflict={int(conflict)}"
+            )
         else:
-            frontend_url = settings.FRONTEND_URL
-            
-        response = RedirectResponse(
-            url=f"{frontend_url}/auth/success?token={token_response.access_token}&status={registration_status}&conflict={int(conflict)}"
-        )
+            response = RedirectResponse(
+                url=f"{settings.FRONTEND_URL}/auth/success?status={registration_status}&conflict={int(conflict)}"
+            )
+            response.set_cookie(
+                key="access_token",
+                value=token_response.access_token,
+                httponly=True,
+                secure=True,
+                samesite="lax",
+                max_age=settings.COOKIE_EXPIRE_MINUTES,
+                path="/"
+            )
         
         return response
         

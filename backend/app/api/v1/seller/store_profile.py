@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from utils.docs_error import create_error_responses
 from utils.store_utils import get_store_id_by_email
-from api.deps.auth import CurrentSellerDep
+from api.deps.auth import CurrentSellerDep, CurrentSellerNoActiveDep
 from api.deps.repository import StoreRepositoryDep
 from schemas.seller_profile import (
     StoreNameUpdateRequest,
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/store/profile", tags=["Seller-Store-Profile"])
     })
 )
 async def get_customer_profile_all(
-    current_user: CurrentSellerDep
+    current_user: CurrentSellerNoActiveDep
 ):
     """소비자 이메일 조회"""
     seller_email = current_user["sub"]

@@ -1,0 +1,80 @@
+# version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dev-cheapbob-postgres
+    environment:
+      POSTGRES_USER: cheap
+      POSTGRES_PASSWORD: bob
+      POSTGRES_DB: cheapbob
+    volumes:
+      - dev-postgresql-data:/var/lib/postgresql/data
+    networks:
+      - dev-cheapbob-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cheap -d cheapbob"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: dev-cheapbob-redis
+    networks:
+      - dev-cheapbob-network
+    volumes:
+      - dev-redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7-jammy
+    container_name: dev-cheapbob-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: cheap
+      MONGO_INITDB_ROOT_PASSWORD: bob
+      MONGO_INITDB_DATABASE: cheapbob
+    volumes:
+      - dev-mongodb-data:/data/db
+    networks:
+      - dev-cheapbob-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../docker_dev/backend/Dockerfile
+    container_name: dev-cheapbob-backend
+    env_file:
+      - ../backend/.env
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - dev-cheapbob-network
+    volumes:
+      - ../backend:/backend
+
+networks:
+  dev-cheapbob-network:
+    driver: bridge
+
+volumes:
+  dev-postgresql-data:
+  dev-redis-data:
+  dev-mongodb-data:
