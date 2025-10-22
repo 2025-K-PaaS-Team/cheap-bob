@@ -31,11 +31,7 @@ const attachInterceptors = (instance: AxiosInstance) => {
 
       // 439 Withdrawn user
       if (status === 439) {
-        if (role === "seller") {
-          window.location.href = "/s";
-        } else {
-          window.location.href = "/c";
-        }
+        window.location.href = "/withdraw/cancel";
         return Promise.reject(error);
       }
 
@@ -213,7 +209,7 @@ const kakaoAttachInterceptors = (instance: AxiosInstance) => {
 export const kakaoApi = kakaoAttachInterceptors(
   axios.create({
     baseURL: `https://dapi.kakao.com/v2/local/search/address.json`,
-    withCredentials: true,
+    withCredentials: false,
     headers: { "Content-Type": "application/json" },
   })
 );
