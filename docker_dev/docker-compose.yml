@@ -9,9 +9,9 @@ services:
       POSTGRES_PASSWORD: bob
       POSTGRES_DB: cheapbob
     volumes:
-      - postgresql-data:/var/lib/postgresql/data
+      - dev-postgresql-data:/var/lib/postgresql/data
     networks:
-      - cheapbob-network
+      - dev-cheapbob-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U cheap -d cheapbob"]
       interval: 5s
@@ -22,9 +22,9 @@ services:
     image: redis:7-alpine
     container_name: dev-cheapbob-redis
     networks:
-      - cheapbob-network
+      - dev-cheapbob-network
     volumes:
-      - redis-data:/data
+      - dev-redis-data:/data
     command: redis-server --appendonly yes
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -40,9 +40,9 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: bob
       MONGO_INITDB_DATABASE: cheapbob
     volumes:
-      - mongodb-data:/data/db
+      - dev-mongodb-data:/data/db
     networks:
-      - cheapbob-network
+      - dev-cheapbob-network
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 5s
@@ -52,7 +52,7 @@ services:
   backend:
     build:
       context: ../backend
-      dockerfile: ../docker/backend/Dockerfile
+      dockerfile: ../docker_dev/backend/Dockerfile
     container_name: dev-cheapbob-backend
     env_file:
       - ../backend/.env
@@ -66,15 +66,15 @@ services:
       mongodb:
         condition: service_healthy
     networks:
-      - cheapbob-network
+      - dev-cheapbob-network
     volumes:
       - ../backend:/backend
 
 networks:
-  cheapbob-network:
+  dev-cheapbob-network:
     driver: bridge
 
 volumes:
-  postgresql-data:
-  redis-data:
-  mongodb-data:
+  dev-postgresql-data:
+  dev-redis-data:
+  dev-mongodb-data:
