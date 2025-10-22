@@ -19,7 +19,7 @@ importers:
         version: 5.89.0(react@18.3.1)
       axios:
         specifier: ^1.11.0
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       dayjs:
         specifier: ^1.11.18
         version: 1.11.18
@@ -84,6 +84,9 @@ importers:
       autoprefixer:
         specifier: ^10.4.21
         version: 10.4.21(postcss@8.5.6)
+      cross-env:
+        specifier: ^10.1.0
+        version: 10.1.0
       eslint:
         specifier: ^9.33.0
         version: 9.35.0(jiti@2.6.1)
@@ -111,6 +114,9 @@ importers:
       vite:
         specifier: ^7.1.2
         version: 7.1.6(@types/node@24.5.2)(jiti@2.6.1)(lightningcss@1.30.1)
+      vite-plugin-mkcert:
+        specifier: ^1.17.9
+        version: 1.17.9(vite@7.1.6(@types/node@24.5.2)(jiti@2.6.1)(lightningcss@1.30.1))
 
 packages:
 
@@ -212,6 +218,9 @@ packages:
 
   '@emotion/weak-memoize@0.4.0':
     resolution: {integrity: sha512-snKqtPW01tN0ui7yu9rGv69aJXr/a/Ywvl11sUjNtEcRc+ng/mQriFL0wLXMef74iHa/EkftbDzU9F8iFbH+zg==}
+
+  '@epic-web/invariant@1.0.0':
+    resolution: {integrity: sha512-lrTPqgvfFQtR/eY/qkIzp98OGdNJu0m5ji3q/nJI8v3SXkRKEnWiOxMmbvcSoAIzv/cGiuvRy57k4suKQSAdwA==}
 
   '@esbuild/aix-ppc64@0.25.10':
     resolution: {integrity: sha512-0NFWnA+7l41irNuaSVlLfgNT12caWJVLzp5eAVhZ0z1qpxbockccEt3s+149rE64VUI3Ml2zt8Nv5JVc4QXTsw==}
@@ -1052,6 +1061,11 @@ packages:
     resolution: {integrity: sha512-AdmX6xUzdNASswsFtmwSt7Vj8po9IuqXm0UXz7QKPuEUmPB4XyjGfaAr2PSuELMwkRMVH1EpIkX5bTZGRB3eCA==}
     engines: {node: '>=10'}
 
+  cross-env@10.1.0:
+    resolution: {integrity: sha512-GsYosgnACZTADcmEyJctkJIoqAhHjttw7RsFrVoJNXbsWWqaq6Ym+7kZjq6mS45O0jij6vtiReppKQEtqWy6Dw==}
+    engines: {node: '>=20'}
+    hasBin: true
+
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
@@ -1861,6 +1875,12 @@ packages:
       '@types/react':
         optional: true
 
+  vite-plugin-mkcert@1.17.9:
+    resolution: {integrity: sha512-SwI7yqp2Cq4r2XItarnHRCj2uzHPqevbxFNMLpyN+LDXd5w1vmZeM4l5X/wCZoP4mjPQYN+9+4kmE6e3nPO5fg==}
+    engines: {node: '>=v16.7.0'}
+    peerDependencies:
+      vite: '>=3'
+
   vite@7.1.6:
     resolution: {integrity: sha512-SRYIB8t/isTwNn8vMB3MR6E+EQZM/WG1aKmmIUCfDXfVvKfc20ZpamngWHKzAmmu9ppsgxsg4b2I7c90JZudIQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -2071,6 +2091,8 @@ snapshots:
   '@emotion/utils@1.4.2': {}
 
   '@emotion/weak-memoize@0.4.0': {}
+
+  '@epic-web/invariant@1.0.0': {}
 
   '@esbuild/aix-ppc64@0.25.10':
     optional: true
@@ -2699,9 +2721,9 @@ snapshots:
       postcss: 8.5.6
       postcss-value-parser: 4.2.0
 
-  axios@1.12.2:
+  axios@1.12.2(debug@4.4.3):
     dependencies:
-      follow-redirects: 1.15.11
+      follow-redirects: 1.15.11(debug@4.4.3)
       form-data: 4.0.4
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -2779,6 +2801,11 @@ snapshots:
       parse-json: 5.2.0
       path-type: 4.0.0
       yaml: 1.10.2
+
+  cross-env@10.1.0:
+    dependencies:
+      '@epic-web/invariant': 1.0.0
+      cross-spawn: 7.0.6
 
   cross-spawn@7.0.6:
     dependencies:
@@ -2999,7 +3026,9 @@ snapshots:
 
   flatted@3.3.3: {}
 
-  follow-redirects@1.15.11: {}
+  follow-redirects@1.15.11(debug@4.4.3):
+    optionalDependencies:
+      debug: 4.4.3
 
   form-data@4.0.4:
     dependencies:
@@ -3563,6 +3592,15 @@ snapshots:
       react: 18.3.1
     optionalDependencies:
       '@types/react': 19.1.13
+
+  vite-plugin-mkcert@1.17.9(vite@7.1.6(@types/node@24.5.2)(jiti@2.6.1)(lightningcss@1.30.1)):
+    dependencies:
+      axios: 1.12.2(debug@4.4.3)
+      debug: 4.4.3
+      picocolors: 1.1.1
+      vite: 7.1.6(@types/node@24.5.2)(jiti@2.6.1)(lightningcss@1.30.1)
+    transitivePeerDependencies:
+      - supports-color
 
   vite@7.1.6(@types/node@24.5.2)(jiti@2.6.1)(lightningcss@1.30.1):
     dependencies:

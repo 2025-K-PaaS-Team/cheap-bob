@@ -1,30 +1,13 @@
-import fs from "fs";
+import mkcert from "vite-plugin-mkcert";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
-const isDev = process.env.VITE_IS_DEV === "true";
-
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), mkcert()],
   server: {
-    host: "localhost",
     port: 5173,
-    https: isDev
-      ? {
-          key: fs.readFileSync("./localhost-key.pem"),
-          cert: fs.readFileSync("./localhost-cert.pem"),
-        }
-      : undefined,
-    proxy: {
-      "/api": {
-        target: "https://back.cheap-bob.store",
-        changeOrigin: true,
-        secure: false,
-        cookieDomainRewrite: "cheap-bob.store",
-      },
-    },
   },
   resolve: {
     alias: {

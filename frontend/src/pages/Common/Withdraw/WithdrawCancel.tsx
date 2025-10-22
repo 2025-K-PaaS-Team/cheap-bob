@@ -20,7 +20,7 @@ const WithdrawCancel = () => {
     if (loginRole === "seller") {
       try {
         await CancelWithdrawSeller();
-        navigate("/s");
+        navigate("/s/dashboard");
       } catch (err) {
         setModalMsg(formatErrMsg(err));
         setShowModal(true);
@@ -28,7 +28,7 @@ const WithdrawCancel = () => {
     } else {
       try {
         await CancelWithdrawCustomer();
-        navigate("/c");
+        navigate("/c/stores");
       } catch (err) {
         setModalMsg(formatErrMsg(err));
         setShowModal(true);
