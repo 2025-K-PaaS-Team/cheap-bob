@@ -22,7 +22,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen
 
 # Copy entrypoint script first and set permissions
-COPY entrypoint.sh /backend/
+COPY entrypoint_dev.sh /backend/
 RUN chmod +x /backend/entrypoint_dev.sh
 
 # Copy application code
