@@ -18,8 +18,8 @@ const attachInterceptors = (instance: AxiosInstance) => {
       const status = error.response?.status;
       const role = localStorage.getItem("loginRole");
 
-      // 401 Unauthorized or 403 Forbidden
-      if (status === 401 || status === 403) {
+      // 401 Unauthorized
+      if (status === 401) {
         localStorage.removeItem("accessToken");
         if (role === "seller") {
           window.location.href = "/s";
