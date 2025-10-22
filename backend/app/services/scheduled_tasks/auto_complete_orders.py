@@ -3,7 +3,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List
 from collections import defaultdict
 
-from database.session import get_db
+from database.session import get_session
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_operation_info import StoreOperationInfoRepository
 from schemas.order import OrderStatus
@@ -31,7 +31,7 @@ class AutoCompleteOrdersTask:
         error_count = 0
 
         try:
-            async for session in get_db():
+            async with get_session() as session:
                 order_repo = OrderCurrentItemRepository(session)
 
                 all_orders = await order_repo.get_store_current_orders_with_relations(store_id)
@@ -82,7 +82,7 @@ class AutoCompleteOrdersTask:
             # 기존에 등록된 스케줄링 작업들 삭제 (시간이 바뀔 수도 있어서)
             AutoCompleteOrdersTask._remove_existing_jobs(scheduler)
 
-            async for session in get_db():
+            async with get_session(auto_commit=False) as session:
                 operation_repo = StoreOperationInfoRepository(session)
 
                 now_kst = datetime.now(KST)

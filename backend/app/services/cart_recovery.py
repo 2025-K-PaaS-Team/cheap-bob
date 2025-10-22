@@ -1,5 +1,6 @@
 from loguru import logger
 
+from database.session import get_session
 from repositories.cart_item import CartItemRepository
 from repositories.store_product_info import StoreProductInfoRepository, StockUpdateResult
 from config.settings import settings
@@ -19,7 +20,7 @@ class CartRecoveryService:
         recovered_count = 0
         
         try:
-            async for session in get_db():
+            async with get_session() as session:
                 cart_repo = CartItemRepository(session)
                 product_repo = StoreProductInfoRepository(session)
                 

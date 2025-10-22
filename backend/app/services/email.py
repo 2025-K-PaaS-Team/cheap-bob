@@ -1,6 +1,6 @@
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import smtplib
+import aiosmtplib
 import ssl
 from typing import Optional, Dict, Any
 from datetime import datetime
@@ -42,7 +42,7 @@ class EmailService:
         
         return message
     
-    def send(
+    async def send(
         self,
         recipient_email: str,
         subject: str,
@@ -50,7 +50,7 @@ class EmailService:
         html_body: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        이메일 전송
+        비동기 이메일 전송
         
         Args:
             recipient_email: 수신자 이메일
@@ -69,12 +69,15 @@ class EmailService:
                 html_body=html_body
             )
             
-            context = ssl.create_default_context()
-            
-            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
-                server.starttls(context=context)
-                server.login(self.smtp_user, self.smtp_password)
-                server.send_message(message)
+            await aiosmtplib.send(
+                message,
+                hostname=self.smtp_host,
+                port=self.smtp_port,
+                username=self.smtp_user,
+                password=self.smtp_password,
+                start_tls=True,
+                tls_context=ssl.create_default_context()
+            )
             
             logger.info(f"이메일 전송 성공: {recipient_email}")
             return {
@@ -83,7 +86,7 @@ class EmailService:
                 "sent_at": datetime.now()
             }
             
-        except smtplib.SMTPAuthenticationError:
+        except aiosmtplib.SMTPAuthenticationError:
             error_msg = "SMTP 인증 실패: Gmail 계정 또는 앱 패스워드를 확인하세요"
             logger.error(error_msg)
             return {
@@ -91,7 +94,7 @@ class EmailService:
                 "message": error_msg,
                 "error_type": "authentication_error"
             }
-        except smtplib.SMTPException as e:
+        except aiosmtplib.SMTPException as e:
             error_msg = f"SMTP 에러: {str(e)}"
             logger.error(error_msg)
             return {
@@ -108,14 +111,14 @@ class EmailService:
                 "error_type": "unexpected_error"
             }
     
-    def send_template(
+    async def send_template(
         self,
         recipient_email: str,
         store_name: str,
         template_type: str
     ) -> Dict[str, Any]:
         """
-        템플릿 기반 이메일 전송
+        템플릿 기반 비동기 이메일 전송
         
         Args:
             recipient_email: 수신자 이메일
@@ -127,7 +130,7 @@ class EmailService:
         """
         template_data = self._get_email_template(template_type, recipient_email, store_name)
         
-        return self.send(
+        return await self.send(
             recipient_email=recipient_email,
             subject=template_data["subject"],
             body=template_data["body"],

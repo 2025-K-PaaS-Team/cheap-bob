@@ -9,7 +9,7 @@ from middleware.auth import JWTAuthMiddleware
 from services.auth.jwt import JWTService
 from database.mongodb_session import init_mongodb, close_mongodb
 from services.scheduler import scheduler
-from services.cart_recovery_service import CartRecoveryService
+from services.cart_recovery import CartRecoveryService
 from services.startup_recovery import ScheduleRecovery
 
 # 로깅 설정

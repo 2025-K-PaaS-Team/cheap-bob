@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, BackgroundTasks
 from datetime import datetime, timezone
 
 from utils.qr_generator import encode_qr_data
@@ -26,7 +26,7 @@ from schemas.order import (
     DashboardStockItem
 )
 from services.payment import PaymentService
-from services.email import email_service
+from services.background_email import send_order_accepted_email, send_seller_cancel_email
 from config.settings import settings
 
 router = APIRouter(prefix="/store/orders", tags=["Seller-Order"])
@@ -189,7 +189,8 @@ async def update_order_accept(
     payment_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    order_repo: OrderCurrentItemRepositoryDep
+    order_repo: OrderCurrentItemRepositoryDep,
+    background_tasks: BackgroundTasks
 ):
     """
     주문 수락
@@ -219,14 +220,9 @@ async def update_order_accept(
         accepted_at=datetime.now(timezone.utc)
     )
     
-    # 주문 확정 이메일 서비스
-    if email_service.is_configured():
-        store = await store_repo.get_by_store_id(store_id)
-        email_service.send_template(
-            recipient_email=order.customer_id,
-            store_name=store.store_name,
-            template_type="accept"
-        )
+    # 주문 확정 이메일을 백그라운드로 전송
+    store = await store_repo.get_by_store_id(store_id)
+    background_tasks.add_task(send_order_accepted_email, order.customer_id, store.store_name)
     
     # response 포맷으로 변환
     return OrderItemResponse(
@@ -270,7 +266,8 @@ async def cancel_order(
     store_repo: StoreRepositoryDep,
     order_repo: OrderCurrentItemRepositoryDep,
     product_repo: StoreProductInfoRepositoryDep,
-    payment_info_repo: StorePaymentInfoRepositoryDep
+    payment_info_repo: StorePaymentInfoRepositoryDep,
+    background_tasks: BackgroundTasks
 ):
     """
     주문 취소 (포트원 환불 포함)
@@ -330,14 +327,9 @@ async def cancel_order(
                 detail="재고 복구 중 충돌이 발생했습니다. 다시 시도해주세요."
             )
     
-    # 판매자 주문 취소 이메일 서비스
-    if email_service.is_configured():
-        store = await store_repo.get_by_store_id(store_id)
-        email_service.send_template(
-            recipient_email=order.customer_id,
-            store_name=store.store_name,
-            template_type="seller_cancel"
-        )
+    # 판매자 주문 취소 이메일을 백그라운드로 전송
+    store = await store_repo.get_by_store_id(store_id)
+    background_tasks.add_task(send_seller_cancel_email, order.customer_id, store.store_name)
     
     return OrderCancelResponse(
         payment_id=payment_id,

@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any
 
-from database.session import get_db
+from database.session import get_session
 from repositories.seller_withdraw_reservation import SellerWithdrawReservationRepository
 from repositories.customer_withdraw_reservation import CustomerWithdrawReservationRepository
 from repositories.seller import SellerRepository
@@ -55,7 +55,7 @@ class UserWithdrawProcessTask:
             
             logger.info(f"총 {len(all_reservations)}건의 판매자 탈퇴 예약 발견")
             
-            async for session in get_db():
+            async with get_session() as session:
                 seller_repo = SellerRepository(session)
                 store_repo = StoreRepository(session)
                 product_repo = StoreProductInfoRepository(session)
@@ -139,7 +139,7 @@ class UserWithdrawProcessTask:
             
             logger.info(f"총 {len(all_reservations)}건의 소비자 탈퇴 예약 발견")
             
-            async for session in get_db():
+            async with get_session() as session:
                 customer_repo = CustomerRepository(session)
                 
                 for reservation in all_reservations:

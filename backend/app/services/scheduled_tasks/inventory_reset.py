@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any
 
 from sqlalchemy import update
-from database.session import get_db
+from database.session import get_session
 from database.models.store_product_info import StoreProductInfo
 
 
@@ -19,7 +19,7 @@ class InventoryResetTask:
         start_time = datetime.now(timezone.utc)
         
         try:
-            async for session in get_db():
+            async with get_session() as session:
                 stmt = (
                     update(StoreProductInfo)
                     .values(

@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timezone
 from typing import List, Dict, Any
 
-from database.session import get_db
+from database.session import get_session
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.order_history_item import OrderHistoryItemRepository
 
@@ -20,7 +20,7 @@ class OrderMigrationTask:
         start_time = datetime.now(timezone.utc)
         
         try:
-            async for session in get_db():
+            async with get_session() as session:
                 current_order_repo = OrderCurrentItemRepository(session)
                 history_order_repo = OrderHistoryItemRepository()
                 

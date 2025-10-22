@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any
 from collections import defaultdict
 
-from database.session import get_db
+from database.session import get_session
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_payment_info import StorePaymentInfoRepository
 from repositories.store import StoreRepository
@@ -29,7 +29,7 @@ class UncompletedOrderRefundTask:
         total_refund_amount = 0
         
         try:
-            async for session in get_db():
+            async with get_session() as session:
                 order_repo = OrderCurrentItemRepository(session)
                 payment_info_repo = StorePaymentInfoRepository(session)
                 store_repo = StoreRepository(session)
@@ -79,7 +79,7 @@ class UncompletedOrderRefundTask:
                                 
                                 if email_service.is_configured():
                                     store = await store_repo.get_by_seller_email(order.product.store_id)
-                                    email_service.send_template(
+                                    await email_service.send_template(
                                         recipient_email=order.customer_id,
                                         store_name=store["store_name"],
                                         template_type="seller_cancel"

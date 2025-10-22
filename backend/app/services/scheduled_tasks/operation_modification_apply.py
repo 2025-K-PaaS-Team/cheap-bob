@@ -4,7 +4,7 @@ from typing import Dict, Any
 from sqlalchemy import select, update, delete
 from sqlalchemy.orm import selectinload
 
-from database.session import get_db
+from database.session import get_session
 from database.models.store_operation_info import StoreOperationInfo
 from database.models.store_operation_info_modification import StoreOperationInfoModification
 
@@ -28,7 +28,7 @@ class OperationModificationApplyTask:
         error_count = 0
         
         try:
-            async for session in get_db():
+            async with get_session() as session:
                 query = (
                     select(StoreOperationInfoModification)
                     .options(selectinload(StoreOperationInfoModification.operation_info))
