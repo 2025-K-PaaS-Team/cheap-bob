@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, BackgroundTasks
 from datetime import datetime, timezone, timedelta
 
 from utils.qr_generator import validate_qr_data
@@ -29,7 +29,7 @@ from schemas.order import (
     TodayAlarmResponse
 )
 from services.payment import PaymentService
-from services.email import email_service
+from services.background_email import send_customer_cancel_email
 from config.settings import settings
 
 # KST 타임존 설정
@@ -435,7 +435,8 @@ async def cancel_order(
     order_repo: OrderCurrentItemRepositoryDep,
     product_repo: StoreProductInfoRepositoryDep,
     payment_info_repo: StorePaymentInfoRepositoryDep,
-    store_repo: StoreRepositoryDep
+    store_repo: StoreRepositoryDep,
+    background_tasks: BackgroundTasks
 ):
     """
     주문 취소 (포트원 환불 포함)
@@ -497,14 +498,9 @@ async def cancel_order(
                 detail="재고 복구 중 충돌이 발생했습니다. 다시 시도해주세요."
             )
     
-    # 소비자 주문 취소 이메일 서비스
-    if email_service.is_configured():
-        store = await store_repo.get_by_store_id(order.product.store_id)
-        await email_service.send_template(
-            recipient_email=customer_email,
-            store_name=store.store_name,
-            template_type="customer_cancel"
-        )
+    # 소비자 주문 취소 이메일을 백그라운드로 전송
+    store = await store_repo.get_by_store_id(order.product.store_id)
+    background_tasks.add_task(send_customer_cancel_email, customer_email, store.store_name)
     
     return OrderCancelResponse(
         payment_id=payment_id,

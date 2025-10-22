@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, BackgroundTasks
 from datetime import datetime, timezone, timedelta
 from loguru import logger
 
@@ -21,7 +21,7 @@ from schemas.payment import (
 )
 from services.payment_scheduler import PaymentSchedulerService
 from services.payment import PaymentService
-from services.email import email_service
+from services.background_email import send_reservation_email
 from utils.docs_error import create_error_responses
 from utils.id_generator import generate_payment_id
 from utils.string_utils import join_values
@@ -225,7 +225,8 @@ async def confirm_payment(
     product_repo: StoreProductInfoRepositoryDep,
     payment_info_repo: StorePaymentInfoRepositoryDep,
     profile_repo: CustomerProfileRepositoryDep,
-    operation_repo: StoreOperationInfoRepositoryDep
+    operation_repo: StoreOperationInfoRepositoryDep,
+    background_tasks: BackgroundTasks
 ):
     """
     결제 최종 확인 API - 포트원에서 결제가 성공했는지 확인
@@ -336,13 +337,8 @@ async def confirm_payment(
         # 장바구니에서 삭제
         await cart_repo.delete(cart_item.payment_id)
         
-        # 주문 예약 이메일 서비스
-        if email_service.is_configured():
-            await email_service.send_template(
-                recipient_email=customer_email,
-                store_name="",
-                template_type="reservation"
-            )
+        # 주문 예약 이메일을 백그라운드로 전송
+        background_tasks.add_task(send_reservation_email, customer_email)
         
         return PaymentResponse(
             payment_id=request.payment_id
