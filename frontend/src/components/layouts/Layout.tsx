@@ -92,6 +92,8 @@ const Layout = () => {
           </Main>
           {!notFooter && (isCustomer ? <Footer /> : <SellerFooter />)}
         </Wrapper>
+
+        <div id="toast-root" className="absolute inset-0 pointer-events-none" />
       </div>
     </div>
   );
