@@ -59,7 +59,7 @@ const Favorite = () => {
 
   if (!stores || stores.length === 0) {
     return (
-      <div className="flex flex-col h-full justify-center items-center">
+      <div className="flex flex-col h-full justify-center items-center bg-custom-white">
         <img
           src="/icon/angrySalad.svg"
           alt="saladBowlIcon"
