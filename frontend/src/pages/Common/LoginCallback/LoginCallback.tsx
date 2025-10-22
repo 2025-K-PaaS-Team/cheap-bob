@@ -32,7 +32,8 @@ const LoginCallback = () => {
       localStorage.setItem("accessToken", token);
       handleCheckConflict();
     } else {
-      navigate("/auth/success");
+      console.warn("No token found in query");
+      navigate("/auth/fail");
     }
   }, [searchParams, navigate]);
 

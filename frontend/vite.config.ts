@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     host: "localhost",
+    port: 5173,
     https: {
       key: fs.readFileSync("./localhost-key.pem"),
       cert: fs.readFileSync("./localhost-cert.pem"),
