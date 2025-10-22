@@ -31,7 +31,11 @@ const attachInterceptors = (instance: AxiosInstance) => {
 
       // 439 Withdrawn user
       if (status === 439) {
-        window.location.href = "/withdraw/cancel";
+        if (role === "seller") {
+          window.location.href = "/s";
+        } else {
+          window.location.href = "/c";
+        }
         return Promise.reject(error);
       }
 
