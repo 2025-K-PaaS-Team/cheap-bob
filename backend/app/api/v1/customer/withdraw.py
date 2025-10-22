@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
+from fastapi.responses import JSONResponse
 from datetime import datetime, timezone
 
 from utils.docs_error import create_error_responses
@@ -10,12 +11,12 @@ from api.deps.repository import (
 )
 from api.deps.service import JWTServiceDep
 from schemas.auth import UserType
-from schemas.withdraw import WithdrawResponse
+from config.settings import settings
 
 router = APIRouter(prefix="/withdraw", tags=["Customer-Withdraw"])
 
 
-@router.post("", status_code=status.HTTP_200_OK, response_model=WithdrawResponse,
+@router.post("", status_code=status.HTTP_200_OK,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
         403: ["진행 중인 주문이 있어 탈퇴할 수 없음"],
@@ -27,13 +28,12 @@ async def withdraw_customer(
     current_user: CurrentCustomerDep,
     customer_repo: CustomerRepositoryDep,
     order_repo: OrderCurrentItemRepositoryDep,
-    withdraw_repo: CustomerWithdrawReservationRepositoryDep,
-    jwt_service: JWTServiceDep
+    withdraw_repo: CustomerWithdrawReservationRepositoryDep
 ):
     """
     소비자 탈퇴 처리
     
-    탈퇴 처리 후 새 토큰을 발급합니다.
+    탈퇴 처리 후 쿠키를 만료시킵니다.
     """
     customer_email = current_user["sub"]
     
@@ -65,16 +65,25 @@ async def withdraw_customer(
         withdrawn_at=datetime.now(timezone.utc)
     )
     
-    new_token = jwt_service.create_user_token(
-        email=customer_email,
-        user_type=UserType.CUSTOMER.value,
-        is_active=False
+    response = JSONResponse(
+        content={"message": "탈퇴가 완료되었습니다"},
+        status_code=200
     )
     
-    return WithdrawResponse(message="탈퇴가 완료되었습니다", access_token=new_token)
+    response.set_cookie(
+        key="access_token",
+        value="",
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=0,
+        path="/"
+    )
+    
+    return response
 
 
-@router.delete("/cancel", status_code=status.HTTP_200_OK, response_model=WithdrawResponse,
+@router.delete("/cancel", status_code=status.HTTP_200_OK,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
         404: ["소비자를 찾을 수 없음", "탈퇴 기록을 찾을 수 없음"],
@@ -90,7 +99,7 @@ async def cancel_withdraw(
     """
     소비자 탈퇴 취소
     
-    탈퇴한 계정을 다시 활성화하고 새로운 토큰을 발급합니다.
+    탈퇴한 계정을 다시 활성화하고 새로운 토큰을 쿠키로 발급합니다.
     """
     customer_email = current_user["sub"]
     
@@ -125,4 +134,19 @@ async def cancel_withdraw(
         is_active=True
     )
     
-    return WithdrawResponse(message="탈퇴가 취소되었습니다", access_token=new_token)
+    response = JSONResponse(
+        content={"message": "탈퇴가 취소되었습니다"},
+        status_code=200
+    )
+    
+    response.set_cookie(
+        key="access_token",
+        value=new_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=settings.COOKIE_EXPIRE_MINUTES,
+        path="/"
+    )
+    
+    return response

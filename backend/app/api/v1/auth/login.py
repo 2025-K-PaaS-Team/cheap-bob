@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 
 from config.oauth import OAuthProvider
 from schemas.auth import UserType
@@ -37,3 +37,24 @@ async def seller_oauth_login(
     )
     
     return RedirectResponse(url=auth_url)
+
+
+@router.post("/logout")
+async def logout():
+    """로그아웃 - 쿠키 삭제"""
+    response = JSONResponse(
+        content={"message": "로그아웃되었습니다."},
+        status_code=200
+    )
+    
+    response.set_cookie(
+        key="access_token",
+        value="",
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=0,
+        path="/"
+    )
+    
+    return response

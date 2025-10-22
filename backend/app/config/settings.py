@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str
     JWT_ALGORITHM: str
     JWT_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
+    COOKIE_EXPIRE_MINUTES: int = 60 * 60 * 24 * 7  # 7 days
     
     # OAuth Redirect URIs
     OAUTH_REDIRECT_BASE_URL: str
