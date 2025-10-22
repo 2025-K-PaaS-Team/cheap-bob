@@ -7,7 +7,7 @@ import path from "path";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    host: "cheap-bob.store",
+    host: "localhost",
     https: {
       key: fs.readFileSync("./localhost-key.pem"),
       cert: fs.readFileSync("./localhost-cert.pem"),
