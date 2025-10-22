@@ -27,6 +27,8 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
   const [showCancelReason, setShowCancelReason] = useState<boolean>(false);
   const [cancelReason, setCancelReason] = useState<string>("");
 
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
   const getColorByStautus = (status: string) => {
     if (status == "reservation" || status == "cancel") {
       return "bg-[#E7E7E7]";
@@ -52,14 +54,20 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
   };
 
   const handleClickCancelBtn = async (paymentId: string) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
     try {
       await deleteOrder(paymentId);
-      setShowCancelModal(false);
       getCurrentOrders();
+
       await onRefresh?.();
     } catch (err: any) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
+    } finally {
+      setIsProcessing(false);
+      setShowCancelModal(false);
     }
   };
 
@@ -226,7 +234,8 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
                     3~5일 내에 환불이 진행돼요.
                   </div>
                   <div className="grid grid-cols-2 btnFont text-center">
-                    <div
+                    <button
+                      disabled={isProcessing}
                       className="text-sub-red"
                       onClick={() => {
                         if (paymentIdToCancel) {
@@ -234,8 +243,8 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
                         }
                       }}
                     >
-                      주문 취소
-                    </div>
+                      {isProcessing ? "처리 중..." : "주문 취소"}
+                    </button>
                     <div
                       className="text-custom-black"
                       onClick={() => {

@@ -35,6 +35,8 @@ const Payment = ({
   const [modalMsg, setModalMsg] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const [waitingOpen, setWaitingOpen] = useState<boolean>(false);
+
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
@@ -92,11 +94,8 @@ const Payment = ({
     try {
       setIsLoading(true);
       await confrimPayment({ payment_id });
-      setModalMsg(
-        "결제가 정상적으로 완료되었습니다. <br/> 3초 후 주문 현황 페이지로 이동합니다."
-      );
-      setShowModal(true);
-      const timer = setTimeout(() => navigate("/c/order"), 3000);
+      setWaitingOpen(true);
+      const timer = setTimeout(() => navigate("/c/order"), 1000);
       return () => clearTimeout(timer);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
@@ -191,6 +190,11 @@ const Payment = ({
           onConfirmClick={() => setShowModal(false)}
           category="green"
         />
+      )}
+
+      {/* waiting modal */}
+      {waitingOpen && (
+        <CommonModal desc="결제가 정상적으로 완료되었습니다. <br/> 1초 후 주문 현황 페이지로 이동합니다." />
       )}
     </div>
   );

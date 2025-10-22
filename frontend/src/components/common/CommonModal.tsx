@@ -11,6 +11,7 @@ type ModalProps = {
   children?: React.ReactNode;
   className?: string;
   container?: string | Element;
+  isProcessing?: boolean;
 };
 
 const CommonModal = ({
@@ -23,6 +24,7 @@ const CommonModal = ({
   className,
   children,
   container,
+  isProcessing = false,
 }: ModalProps) => {
   const confrimBtnClass =
     category === "red"
@@ -86,12 +88,13 @@ const CommonModal = ({
           )}
           {onConfirmClick && (
             <button
+              disabled={isProcessing}
               className={`${confrimBtnClass} ${
                 onCancelClick ? "col-span-2" : "col-span-3"
               } rounded w-full py-[12px]`}
               onClick={onConfirmClick}
             >
-              {confirmLabel}
+              {isProcessing ? "처리 중..." : confirmLabel}
             </button>
           )}
         </div>

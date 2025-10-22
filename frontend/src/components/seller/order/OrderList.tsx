@@ -27,6 +27,7 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
   const [selectedProfile, setSelectedProfile] = useState<OrderBaseType | null>(
     null
   );
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   const cfmLabel = [
     { key: "reservation", title: "픽업 확정하기" },
@@ -39,6 +40,10 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
       setShowModal(true);
       return;
     }
+
+    if (isProcessing) return;
+    setIsProcessing(true);
+
     try {
       await cancelOrder(paymentId, reason);
       onRefresh();
@@ -46,6 +51,7 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
+      setIsProcessing(false);
       setShowCancelModal(false);
     }
   };
@@ -219,11 +225,12 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
           desc="주문 취소 사유를 입력해 주세요."
           confirmLabel="주문 취소하기"
           cancelLabel="취소"
-          onConfirmClick={() =>
-            handleClickCancel(selectedPaymentId ?? "", reason)
-          }
-          onCancelClick={() => setShowCancelModal(false)}
+          onConfirmClick={() => {
+            !isProcessing && handleClickCancel(selectedPaymentId ?? "", reason);
+          }}
+          onCancelClick={() => !isProcessing && setShowCancelModal(false)}
           category="red"
+          isProcessing={isProcessing}
         >
           <div className="w-full border-b border-[#c9c9c9] my-[10px] p-1">
             <input
