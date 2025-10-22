@@ -23,11 +23,10 @@ const My = () => {
     setShowWarn(false);
     try {
       await WithdrawCustomer();
-      navigate("withdraw");
+      navigate("/withdraw");
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
-      return;
     }
   };
 

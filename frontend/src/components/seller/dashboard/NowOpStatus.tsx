@@ -144,6 +144,7 @@ const NowOpStatus = ({ ops }: Props) => {
             options={OpStatusOption}
             value={selectedOption}
             onChange={setSelectedOption}
+            placeholder="변경할 영업 상태를 선택해 주세요."
           />
         </CommonModal>
       )}

@@ -1,9 +1,22 @@
-import { CommonBtn, CommonModal, CommonProfile } from "@components/common";
+import {
+  CommonBtn,
+  CommonDropbox,
+  CommonModal,
+  CommonProfile,
+} from "@components/common";
 import CommonQR from "@components/common/CommonQR";
-import { AllergyList, MenuList, NutritionList, ToppingList } from "@constant";
+import {
+  AllergyList,
+  CancelOption,
+  MenuList,
+  NutritionList,
+  ToppingList,
+} from "@constant";
 import type { GetQrCodeType, OrderBaseType } from "@interface";
+import type { OptionType } from "@interface/common/types";
 import { cancelOrder, GetOrderQr, updateOrderAccept } from "@services";
 import { formatErrMsg, getTitleByKey } from "@utils";
+
 import { useState } from "react";
 
 interface OrderListProps {
@@ -17,7 +30,6 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
   const [showAcceptModal, setShowAcceptModal] = useState<boolean>(false);
   const [openQr, setOpenQr] = useState<boolean>(false);
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
-  const [reason, setReason] = useState<string>("");
   const [qrData, setQrData] = useState<GetQrCodeType | null>(null);
   const [modalMsg, setModalMsg] = useState("");
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
@@ -27,6 +39,8 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
   const [selectedProfile, setSelectedProfile] = useState<OrderBaseType | null>(
     null
   );
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [reason, setReason] = useState<OptionType | null>(null);
 
   const cfmLabel = [
     { key: "reservation", title: "픽업 확정하기" },
@@ -39,6 +53,10 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
       setShowModal(true);
       return;
     }
+
+    if (isProcessing) return;
+    setIsProcessing(true);
+
     try {
       await cancelOrder(paymentId, reason);
       onRefresh();
@@ -46,6 +64,7 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
+      setIsProcessing(false);
       setShowCancelModal(false);
     }
   };
@@ -216,24 +235,23 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
       {/* show cancel modal */}
       {showCancelModal && (
         <CommonModal
-          desc="주문 취소 사유를 입력해 주세요."
+          desc="주문 취소 사유를 선택하세요."
           confirmLabel="주문 취소하기"
           cancelLabel="취소"
-          onConfirmClick={() =>
-            handleClickCancel(selectedPaymentId ?? "", reason)
-          }
-          onCancelClick={() => setShowCancelModal(false)}
+          onConfirmClick={() => {
+            !isProcessing &&
+              handleClickCancel(selectedPaymentId ?? "", reason?.label ?? "");
+          }}
+          onCancelClick={() => !isProcessing && setShowCancelModal(false)}
           category="red"
+          isProcessing={isProcessing}
         >
-          <div className="w-full border-b border-[#c9c9c9] my-[10px] p-1">
-            <input
-              type="text"
-              placeholder="취소 사유를 입력하세요"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="w-full"
-            />
-          </div>
+          <CommonDropbox
+            options={CancelOption}
+            value={reason}
+            onChange={setReason}
+            placeholder="취소 사유를 선택하세요."
+          />
         </CommonModal>
       )}
 

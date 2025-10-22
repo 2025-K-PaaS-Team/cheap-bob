@@ -51,6 +51,11 @@ const Layout = () => {
   const notFooter =
     path === "/c" ||
     path === "/c/signup" ||
+    path === "/c/location" ||
+    path === "/c/favorite" ||
+    path === "/c/noti" ||
+    path.startsWith("/c/change") ||
+    path.startsWith("/c/order/all") ||
     path.startsWith("/s/change") ||
     path === "/s" ||
     path.startsWith("/s/signup") ||
@@ -92,6 +97,8 @@ const Layout = () => {
           </Main>
           {!notFooter && (isCustomer ? <Footer /> : <SellerFooter />)}
         </Wrapper>
+
+        <div id="toast-root" className="absolute inset-0 pointer-events-none" />
       </div>
     </div>
   );
