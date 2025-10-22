@@ -79,7 +79,7 @@ class UncompletedOrderRefundTask:
                                 
                                 if email_service.is_configured():
                                     store = await store_repo.get_by_seller_email(order.product.store_id)
-                                    email_service.send_template(
+                                    await email_service.send_template(
                                         recipient_email=order.customer_id,
                                         store_name=store["store_name"],
                                         template_type="seller_cancel"

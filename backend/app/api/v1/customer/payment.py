@@ -338,7 +338,7 @@ async def confirm_payment(
         
         # 주문 예약 이메일 서비스
         if email_service.is_configured():
-            email_service.send_template(
+            await email_service.send_template(
                 recipient_email=customer_email,
                 store_name="",
                 template_type="reservation"

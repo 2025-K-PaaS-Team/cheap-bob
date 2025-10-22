@@ -50,7 +50,7 @@ async def send_template_email(
     
     logger.info(f"템플릿 이메일 전송 시도 - 수신자: {recipient_email}, 템플릿: {request.template_type}")
     
-    result = email_service.send_template(
+    result = await email_service.send_template(
         recipient_email=recipient_email,
         store_name="맛있는 가게",
         template_type=request.template_type

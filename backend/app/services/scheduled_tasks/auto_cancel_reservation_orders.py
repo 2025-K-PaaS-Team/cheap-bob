@@ -72,7 +72,7 @@ class AutoCancelReservationOrdersTask:
                             )
                             
                             if email_service.is_configured():
-                                email_service.send_template(
+                                await email_service.send_template(
                                     recipient_email=order.customer_id,
                                     store_name=store_name,
                                     template_type="seller_cancel"

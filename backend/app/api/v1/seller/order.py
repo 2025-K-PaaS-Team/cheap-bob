@@ -222,7 +222,7 @@ async def update_order_accept(
     # 주문 확정 이메일 서비스
     if email_service.is_configured():
         store = await store_repo.get_by_store_id(store_id)
-        email_service.send_template(
+        await email_service.send_template(
             recipient_email=order.customer_id,
             store_name=store.store_name,
             template_type="accept"
@@ -333,7 +333,7 @@ async def cancel_order(
     # 판매자 주문 취소 이메일 서비스
     if email_service.is_configured():
         store = await store_repo.get_by_store_id(store_id)
-        email_service.send_template(
+        await email_service.send_template(
             recipient_email=order.customer_id,
             store_name=store.store_name,
             template_type="seller_cancel"
