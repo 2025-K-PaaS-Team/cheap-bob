@@ -17,6 +17,8 @@ const Withdraw = () => {
       <CommonBtn
         label="첫 화면으로"
         onClick={() => {
+          localStorage.removeItem("loginRole");
+          localStorage.removeItem("accessToken");
           loginRole === "customer" ? navigate("/c") : navigate("/s");
         }}
         category="white"
