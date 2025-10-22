@@ -3,7 +3,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: cheapbob-postgres
+    container_name: dev-cheapbob-postgres
     environment:
       POSTGRES_USER: cheap
       POSTGRES_PASSWORD: bob
@@ -20,7 +20,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: cheapbob-redis
+    container_name: dev-cheapbob-redis
     networks:
       - cheapbob-network
     volumes:
@@ -34,7 +34,7 @@ services:
 
   mongodb:
     image: mongo:7-jammy
-    container_name: cheapbob-mongodb
+    container_name: dev-cheapbob-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: cheap
       MONGO_INITDB_ROOT_PASSWORD: bob
@@ -53,7 +53,7 @@ services:
     build:
       context: ../backend
       dockerfile: ../docker/backend/Dockerfile
-    container_name: cheapbob-backend
+    container_name: dev-cheapbob-backend
     env_file:
       - ../backend/.env
     ports:
