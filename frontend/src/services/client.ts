@@ -44,7 +44,7 @@ const attachInterceptors = (instance: AxiosInstance) => {
 export const api = attachInterceptors(
   axios.create({
     baseURL: BASE,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -52,7 +52,7 @@ export const api = attachInterceptors(
 export const sellerStoreApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -60,7 +60,7 @@ export const sellerStoreApi = attachInterceptors(
 export const sellerStoreProfileApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store/profile`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -68,7 +68,7 @@ export const sellerStoreProfileApi = attachInterceptors(
 export const sellerStoreSnsApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store/sns`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -76,7 +76,7 @@ export const sellerStoreSnsApi = attachInterceptors(
 export const sellerStoreSettingsApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store/settings`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -84,7 +84,7 @@ export const sellerStoreSettingsApi = attachInterceptors(
 export const sellerStoreImgApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store/images`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -92,7 +92,7 @@ export const sellerStoreImgApi = attachInterceptors(
 export const sellerProductApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store/products`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -100,7 +100,7 @@ export const sellerProductApi = attachInterceptors(
 export const sellerOrderApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store/orders`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -108,7 +108,7 @@ export const sellerOrderApi = attachInterceptors(
 export const sellerSettlementApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store/settlement`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -116,7 +116,7 @@ export const sellerSettlementApi = attachInterceptors(
 export const sellerWithdrawApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/withdraw`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -124,7 +124,7 @@ export const sellerWithdrawApi = attachInterceptors(
 export const paymentApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/payment`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -132,7 +132,7 @@ export const paymentApi = attachInterceptors(
 export const customerSearchApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/search/stores`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -140,7 +140,7 @@ export const customerSearchApi = attachInterceptors(
 export const customerSearchHistoryApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/history/search`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -148,7 +148,7 @@ export const customerSearchHistoryApi = attachInterceptors(
 export const customerPaymentApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/payment`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -156,7 +156,7 @@ export const customerPaymentApi = attachInterceptors(
 export const customerWithdrawApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/withdraw`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -164,7 +164,7 @@ export const customerWithdrawApi = attachInterceptors(
 export const customerOrderApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/orders`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -172,7 +172,7 @@ export const customerOrderApi = attachInterceptors(
 export const customerRegisterApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/register`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -180,7 +180,7 @@ export const customerRegisterApi = attachInterceptors(
 export const customerProfileApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/customer/profile`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -188,7 +188,7 @@ export const customerProfileApi = attachInterceptors(
 export const optionInfoApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/common/options`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
@@ -209,7 +209,7 @@ const kakaoAttachInterceptors = (instance: AxiosInstance) => {
 export const kakaoApi = kakaoAttachInterceptors(
   axios.create({
     baseURL: `https://dapi.kakao.com/v2/local/search/address.json`,
-    withCredentials: false,
+    withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })
 );
