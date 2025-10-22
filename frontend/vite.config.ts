@@ -4,15 +4,19 @@ import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
+const isDev = process.env.VITE_IS_DEV === "true";
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     host: "localhost",
     port: 5173,
-    https: {
-      key: fs.readFileSync("./localhost-key.pem"),
-      cert: fs.readFileSync("./localhost-cert.pem"),
-    },
+    https: isDev
+      ? {
+          key: fs.readFileSync("./localhost-key.pem"),
+          cert: fs.readFileSync("./localhost-cert.pem"),
+        }
+      : undefined,
     proxy: {
       "/api": {
         target: "https://back.cheap-bob.store",
