@@ -7,14 +7,14 @@ const attachInterceptors = (instance: AxiosInstance) => {
     (response) => response,
     (error) => {
       const status = error.response?.status;
-      // const role = localStorage.getItem("loginRole");
-      // const isHome =
-      //   window.location.pathname === "/c" || window.location.pathname === "/s";
+      const role = localStorage.getItem("loginRole");
+      const isHome =
+        window.location.pathname === "/c" || window.location.pathname === "/s";
 
-      // if (status === 401 && !isHome) {
-      //   if (role === "seller") window.location.href = "/s";
-      //   else window.location.href = "/c";
-      // }
+      if (status === 401 && !isHome) {
+        if (role === "seller") window.location.href = "/s";
+        else window.location.href = "/c";
+      }
 
       // 439 Withdrawn user
       if (status === 439) {
