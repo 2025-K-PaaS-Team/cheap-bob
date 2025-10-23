@@ -1,9 +1,25 @@
-import { CommonBtn } from "@components/common";
+import { CommonBtn, CommonModal } from "@components/common";
+import { PostLogout } from "@services/common/auth";
+import { formatErrMsg } from "@utils";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Withdraw = () => {
   const navigate = useNavigate();
   const loginRole = localStorage.getItem("loginRole");
+  const isLocal = import.meta.env.VITE_IS_LOCAL === "true";
+  const state = isLocal ? "1004" : undefined;
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [modalMsg, setModalMsg] = useState("");
+
+  const handleLogout = async () => {
+    try {
+      await PostLogout(state);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
+  };
 
   return (
     <div className="m-[20px] flex flex-col h-full items-center justify-center text-center text-custom-black">
@@ -18,6 +34,7 @@ const Withdraw = () => {
         label="첫 화면으로"
         onClick={() => {
           localStorage.removeItem("loginRole");
+          handleLogout();
           loginRole === "customer" ? navigate("/c") : navigate("/s");
         }}
         category="white"
@@ -28,6 +45,16 @@ const Withdraw = () => {
         <br />
         문의사항: cheapbob2025@gmail.com
       </div>
+
+      {/* show modal */}
+      {showModal && (
+        <CommonModal
+          desc={modalMsg}
+          confirmLabel="확인"
+          onConfirmClick={() => setShowModal(false)}
+          category="green"
+        />
+      )}
     </div>
   );
 };

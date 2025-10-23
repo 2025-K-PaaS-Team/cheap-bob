@@ -5,33 +5,59 @@ import {
   GetCustomerEmail,
   GetSellerEmail,
 } from "@services";
+import { PostLogout } from "@services/common/auth";
 import { formatErrMsg } from "@utils";
+import type { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const WithdrawCancel = () => {
   const navigate = useNavigate();
+  const isLocal = import.meta.env.VITE_IS_LOCAL === "true";
+  const state = isLocal ? "1004" : undefined;
+
   const loginRole = localStorage.getItem("loginRole");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const [email, setEmail] = useState<string>("");
 
+  const handleLogout = async () => {
+    try {
+      await PostLogout(state);
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
+  };
+
   const handleCancelWithdraw = async () => {
     if (loginRole === "seller") {
       try {
         await CancelWithdrawSeller();
+        handleLogout();
         navigate("/s/dashboard");
       } catch (err) {
-        setModalMsg(formatErrMsg(err));
-        setShowModal(true);
+        if ((err as AxiosError)?.response?.status === 409) {
+          handleLogout();
+          navigate("/s/dashboard");
+        } else {
+          setModalMsg(formatErrMsg(err));
+          setShowModal(true);
+        }
       }
     } else {
       try {
         await CancelWithdrawCustomer();
+        handleLogout();
         navigate("/c/stores");
       } catch (err) {
-        setModalMsg(formatErrMsg(err));
-        setShowModal(true);
+        if ((err as AxiosError)?.response?.status === 409) {
+          handleLogout();
+          navigate("/c/stores");
+        } else {
+          setModalMsg(formatErrMsg(err));
+          setShowModal(true);
+        }
       }
     }
   };
@@ -80,6 +106,7 @@ const WithdrawCancel = () => {
           category="grey"
           className="w-full"
           onClick={() => {
+            handleLogout();
             loginRole === "seller" ? navigate("/s") : navigate("/c");
           }}
         />
