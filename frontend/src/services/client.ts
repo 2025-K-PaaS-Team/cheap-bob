@@ -36,6 +36,14 @@ export const api = attachInterceptors(
   })
 );
 
+export const authApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/auth`,
+    withCredentials: true,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
 export const sellerStoreApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/seller/store`,
