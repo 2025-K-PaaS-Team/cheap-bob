@@ -22,10 +22,12 @@ const BillingInfo = () => {
   const today = dayjs();
   const endDate = today.add(-6, "day");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const isLocal = import.meta.env.VITE_IS_LOCAL === "true";
+  const state = isLocal ? "1004" : undefined;
 
   const handleLogout = async () => {
     try {
-      await PostLogout();
+      await PostLogout(state);
       navigate("/s");
     } catch (err) {
       setModalMsg(formatErrMsg(err));

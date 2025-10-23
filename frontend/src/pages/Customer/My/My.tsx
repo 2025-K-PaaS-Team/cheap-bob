@@ -19,10 +19,12 @@ const My = () => {
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const isLocal = import.meta.env.VITE_IS_LOCAL === "true";
+  const state = isLocal ? "1004" : undefined;
 
   const handleLogout = async () => {
     try {
-      await PostLogout();
+      await PostLogout(state);
       navigate("/c");
     } catch (err) {
       setModalMsg(formatErrMsg(err));
