@@ -2,14 +2,16 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import { CommonOpTime } from "@components/seller/common";
+import { useToast } from "@context";
 import type { StoreOperationType, OperationTimeType } from "@interface";
 import { GetStoreOperation } from "@services";
 import { CreateOperationReservation } from "@services";
-import { diffFromClose, fromMinutes, toMinutes } from "@utils";
+import { diffFromClose, formatErrMsg, fromMinutes, toMinutes } from "@utils";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangeOperationTime = () => {
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   // 원본(서버 현재값) — pickup 간격 계산에 필요
@@ -119,9 +121,10 @@ const ChangeOperationTime = () => {
 
     try {
       await CreateOperationReservation({ operation_times: merged });
+      showToast("영업 시간 변경에 성공했어요.", "success");
       navigate(-1);
-    } catch {
-      setModalMsg("예약 저장에 실패했습니다. 입력값을 확인해 주세요.");
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
       setShowModal(true);
     }
   };

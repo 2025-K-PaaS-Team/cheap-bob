@@ -6,8 +6,10 @@ import { GetStoreDetail, UpdateStoreAddr } from "@services";
 import { formatErrMsg } from "@utils";
 import type { AddressInfoType } from "@interface";
 import CommonLoading from "@components/common/CommonLoading";
+import { useToast } from "@context";
 
 const ChangeStoreAddr = () => {
+  const { showToast } = useToast();
   const initialAddr: AddressInfoType = {
     postal_code: "",
     address: "",
@@ -77,6 +79,7 @@ const ChangeStoreAddr = () => {
 
     try {
       await UpdateStoreAddr(payload);
+      showToast("주소 변경에 성공했어요.", "success");
       navigate(-1);
     } catch (err) {
       setModalMsg(formatErrMsg(err));

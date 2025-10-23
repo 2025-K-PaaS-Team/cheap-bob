@@ -1,10 +1,12 @@
 import { CommonBtn } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import { dongData, siDoData, siGunGuData } from "@constant";
+import { useToast } from "@context";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Location = () => {
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [selectedSiDo, setSelectedSiDo] = useState<string | null>(null);
   const [selectedSiGunGu, setSelectedSiGunGu] = useState<string | null>(null);
@@ -25,11 +27,11 @@ const Location = () => {
     setIsLoading(false);
   }, []);
 
-  // 로컬스토리지 저장
   const handleSelectLoc = () => {
     localStorage.setItem("sido", selectedSiDo || "");
     localStorage.setItem("sigungu", selectedSiGunGu || "");
     localStorage.setItem("dongs", JSON.stringify(selectedDongs));
+    showToast("위치 설정에 성공했어요.", "success");
     navigate(-1);
   };
 

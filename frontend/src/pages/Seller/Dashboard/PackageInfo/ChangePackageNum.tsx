@@ -1,6 +1,7 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import { CommonPkgNum } from "@components/seller/common";
+import { useToast } from "@context";
 import type { ProductRequestType } from "@interface";
 import { GetProduct, UpdateProduct } from "@services";
 import { useDashboardStore } from "@store";
@@ -9,13 +10,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangePackageNum = () => {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+
   const repProductId = useDashboardStore((s) => s.repProductId);
   const [pkg, setPkg] = useState<ProductRequestType | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
-
-  const navigate = useNavigate();
 
   const load = async (id: string) => {
     try {
@@ -45,14 +47,12 @@ const ChangePackageNum = () => {
       setModalMsg("대표 패키지 ID를 찾을 수 없습니다.");
       setShowModal(true);
       setIsLoading(false);
-      navigate(-1);
       return;
     }
     if (!pkg) {
       setModalMsg("패키지 정보를 불러오지 못했습니다.");
       setShowModal(true);
       setIsLoading(false);
-      navigate(-1);
       return;
     }
     const payload: ProductRequestType = {
@@ -62,6 +62,7 @@ const ChangePackageNum = () => {
 
     try {
       await UpdateProduct(repProductId, payload);
+      showToast("패키지 기본값 변경에 성공했어요.", "success");
       navigate(-1);
     } catch (err) {
       setModalMsg(formatErrMsg(err));

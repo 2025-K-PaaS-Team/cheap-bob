@@ -21,10 +21,7 @@ export { default as Dashboard } from "./Seller/Dashboard";
 export { default as SellerSignup } from "./Seller//Signup";
 export * from "./Seller/Billing";
 
-// lab
-export { default as CustomerLab } from "./Common/Lab/CustomerLab";
-export { default as PortOneLab } from "../components/Payment/Payment";
-export { default as QrLab } from "./Common/Lab/QrLab";
+// withdraw
 export { default as Withdraw } from "./Common/Withdraw";
 export { default as WithdrawCancel } from "./Common/Withdraw/WithdrawCancel";
 

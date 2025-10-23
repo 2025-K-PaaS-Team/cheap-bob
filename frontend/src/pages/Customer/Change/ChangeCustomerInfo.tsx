@@ -1,5 +1,6 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
+import { useToast } from "@context";
 import type { CustomerDetailType } from "@interface";
 import { GetCustomerDetail, UpdateCustomerDetail } from "@services";
 import { formatErrMsg } from "@utils";
@@ -7,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangeCustomerInfo = () => {
+  const { showToast } = useToast();
   const [customer, setCustomer] = useState<CustomerDetailType | null>(null);
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -35,6 +37,7 @@ const ChangeCustomerInfo = () => {
         phone_number: customer?.phone_number ?? "",
       });
       navigate(-1);
+      showToast("프로필 수정에 성공했어요.", "success");
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);

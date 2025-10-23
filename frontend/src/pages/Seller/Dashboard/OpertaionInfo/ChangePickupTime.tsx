@@ -1,14 +1,16 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import { CommonPuTime } from "@components/seller/common";
+import { useToast } from "@context";
 import type { OperationTimeType, StoreOperationType, Offset } from "@interface";
 import { GetStoreOperation } from "@services";
 import { CreateOperationReservation } from "@services";
-import { diffFromClose, minutesToOffset } from "@utils";
+import { diffFromClose, formatErrMsg, minutesToOffset } from "@utils";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangePickupTime = () => {
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [orig, setOrig] = useState<StoreOperationType>([]);
@@ -113,11 +115,11 @@ const ChangePickupTime = () => {
     });
 
     try {
-      // 문서 스펙: { operation_times: OperationTimeType[] }
       await CreateOperationReservation({ operation_times: merged });
+      showToast("픽업 시간 변경에 성공했어요.", "success");
       navigate(-1);
-    } catch {
-      setModalMsg("예약 저장에 실패했습니다. 입력값을 확인해 주세요.");
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
       setShowModal(true);
     }
   };

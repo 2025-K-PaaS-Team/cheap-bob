@@ -61,7 +61,7 @@ const BillingInfo = () => {
     setShowWarn(false);
     try {
       await WithdrawSeller();
-      // navigate("withdraw");
+      navigate("/withdraw");
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);

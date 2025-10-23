@@ -30,7 +30,6 @@ const ChangeStoreName = ({}) => {
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
-      showToast("가게 이름 변경에 실패했어요.", "error");
     }
   };
 

@@ -196,8 +196,6 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
                         onResult={(result) => {
                           if (result && !scannedRef.current) {
                             const data = result?.getText();
-                            alert(data);
-                            console.log(result, scannedRef.current);
                             if (data && !scannedRef.current) {
                               scannedRef.current = true;
                               handleCompletePickup(order.payment_id, data);
