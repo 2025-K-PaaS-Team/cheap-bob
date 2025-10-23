@@ -6,6 +6,7 @@ interface CommonToastProps {
   type: "success" | "error";
   message: string;
 }
+
 const CommonToast = ({ type, message }: CommonToastProps) => {
   const [visible, setVisible] = useState(true);
 
@@ -29,11 +30,14 @@ const CommonToast = ({ type, message }: CommonToastProps) => {
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.5 }}
-          className="absolute w-[90%] bottom-[30px] left-1/2 -translate-x-1/2 p-5 z-[1000] flex items-center bg-[#0a0a0a]/60 rounded-md bodyFont text-white gap-x-[20px]"
+          exit={{ opacity: 0, y: 30 }}
+          transition={{ duration: 1.5 }}
+          className="absolute w-[90%] bottom-[110px] left-1/2 -translate-x-1/2 p-5 z-[1000] flex items-center bg-[#0a0a0a]/60 rounded-md bodyFont text-white gap-x-[20px]"
+          onAnimationComplete={() => {
+            if (visible) setVisible(false);
+          }}
         >
           {type === "success" ? (
             <img src="/icon/toastGreen.svg" alt="greenToast" />
