@@ -1,12 +1,14 @@
 import { CommonBtn, CommonModal, SelectedGrid } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import { AllergyList } from "@constant";
+import { useToast } from "@context";
 import { CreateAllergies, DeleteAllergies, GetAllergies } from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangeCustomerAllergy = () => {
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -52,6 +54,7 @@ const ChangeCustomerAllergy = () => {
 
   const handleSubmit = () => {
     navigate(-1);
+    showToast("못 먹는 음식 변경에 성공했어요.", "success");
   };
 
   if (isLoading) {

@@ -1,12 +1,14 @@
 import { CommonBtn, CommonModal, SelectedGrid } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import { ToppingList } from "@constant";
+import { useToast } from "@context";
 import { CreateTopping, DeleteTopping, GetTopping } from "@services";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangeCustomerTopping = () => {
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -51,6 +53,7 @@ const ChangeCustomerTopping = () => {
   };
 
   const handleSubmit = () => {
+    showToast("선호 토핑 변경에 성공했어요.", "success");
     navigate(-1);
   };
 
