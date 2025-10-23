@@ -1,6 +1,7 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import { CommonPrice } from "@components/seller/common";
+import { useToast } from "@context";
 import type { ProductBase } from "@interface";
 import { GetProduct, UpdateProduct } from "@services";
 import { useDashboardStore } from "@store";
@@ -9,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangePackagePrice = () => {
+  const { showToast } = useToast();
   const repProductId = useDashboardStore((s) => s.repProductId); // string | null
   const [product, setProduct] = useState<ProductBase | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -20,7 +22,6 @@ const ChangePackagePrice = () => {
   const load = async (productId: string) => {
     try {
       const res = await GetProduct(productId);
-      // 서버 응답이 ProductBase 형태라고 가정
       setProduct(res as ProductBase);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
@@ -35,6 +36,7 @@ const ChangePackagePrice = () => {
       setModalMsg("패키지를 찾을 수 없습니다.");
       setShowModal(true);
       setIsLoading(false);
+      navigate(-1);
       return;
     }
     load(repProductId);
@@ -70,6 +72,7 @@ const ChangePackagePrice = () => {
         price: Math.floor(product.price),
         sale: Math.floor(product.sale),
       });
+      showToast("패키지 가격 변경에 성공했어요.", "success");
       navigate(-1);
     } catch (err) {
       setModalMsg(formatErrMsg(err));

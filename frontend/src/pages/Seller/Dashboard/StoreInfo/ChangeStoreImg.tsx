@@ -1,5 +1,6 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
+import { useToast } from "@context";
 import type { ImageInfoType } from "@interface";
 import {
   AddStoreImg,
@@ -12,6 +13,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangeStoreImg = () => {
+  const { showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -20,6 +22,7 @@ const ChangeStoreImg = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleSubmit = () => {
+    showToast("이미지 등록에 성공했어요.", "success");
     navigate(-1);
   };
 

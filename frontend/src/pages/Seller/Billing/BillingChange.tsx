@@ -1,5 +1,6 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
+import { useToast } from "@context";
 import {
   CheckPaymentInfo,
   RegisterPayment,
@@ -10,6 +11,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const BillingChange = () => {
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -37,6 +39,7 @@ const BillingChange = () => {
           portone_store_id: storeId,
           portone_secret_key: secretKey,
         });
+        showToast("정산 정보 변경에 성공했어요.", "success");
         navigate(-1);
       } catch (err) {
         setModalMsg(formatErrMsg(err));
@@ -49,6 +52,7 @@ const BillingChange = () => {
           portone_channel_id: chId,
           portone_store_id: storeId,
         });
+        showToast("정산 정보 변경에 성공했어요.", "success");
         navigate(-1);
       } catch (err) {
         setModalMsg(formatErrMsg(err));

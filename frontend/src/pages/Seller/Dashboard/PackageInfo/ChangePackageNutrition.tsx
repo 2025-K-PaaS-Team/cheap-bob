@@ -6,8 +6,10 @@ import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CommonLoading from "@components/common/CommonLoading";
+import { useToast } from "@context";
 
 const ChangePackageNutrition = () => {
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const repProductId = useDashboardStore((s) => s.repProductId);
 
@@ -86,6 +88,7 @@ const ChangePackageNutrition = () => {
   };
 
   const handleSubmit = () => {
+    showToast("패키지 영양목표 변경에 성공했어요.", "success");
     navigate(-1);
   };
 

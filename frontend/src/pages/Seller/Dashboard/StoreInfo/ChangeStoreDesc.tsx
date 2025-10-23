@@ -48,7 +48,6 @@ const ChangeStoreDesc = () => {
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
-      showToast("매장 소개 변경에 실패했어요.", "error");
     }
   };
 

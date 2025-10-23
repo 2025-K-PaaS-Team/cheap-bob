@@ -1,5 +1,6 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
+import { useToast } from "@context";
 import type { ProductBase } from "@interface";
 import { GetProduct, UpdateProduct } from "@services";
 import { useDashboardStore } from "@store";
@@ -8,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangePackageName = () => {
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const repProductId = useDashboardStore((s) => s.repProductId); // string | null
@@ -66,6 +68,7 @@ const ChangePackageName = () => {
 
     try {
       await UpdateProduct(repProductId, payload);
+      showToast("패키지 이름 변경에 성공했어요.", "success");
       navigate(-1);
     } catch (err) {
       setModalMsg(formatErrMsg(err));

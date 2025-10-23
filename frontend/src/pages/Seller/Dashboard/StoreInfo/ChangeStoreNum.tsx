@@ -1,5 +1,6 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
+import { useToast } from "@context";
 import type { SnsInfoType } from "@interface";
 import { GetStoreDetail, UpdateStorePhone, UpdateStoreSns } from "@services";
 import { formatErrMsg, normalizeUrl, validatePattern } from "@utils";
@@ -7,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangeStoreNum = () => {
+  const { showToast } = useToast();
   const [value, setValue] = useState<string>("");
   const [sns, setSns] = useState<SnsInfoType>({});
   const navigate = useNavigate();
@@ -45,10 +47,12 @@ const ChangeStoreNum = () => {
 
     try {
       await UpdateStorePhone(storePhone);
+      showToast("휴대폰 번호 변경에 성공했어요.", "success");
       return true;
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
+
       return false;
     }
   };

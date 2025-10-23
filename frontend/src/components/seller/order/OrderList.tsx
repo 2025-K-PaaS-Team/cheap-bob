@@ -12,6 +12,7 @@ import {
   NutritionList,
   ToppingList,
 } from "@constant";
+import { useToast } from "@context";
 import type { GetQrCodeType, OrderBaseType } from "@interface";
 import type { OptionType } from "@interface/common/types";
 import { cancelOrder, GetOrderQr, updateOrderAccept } from "@services";
@@ -26,6 +27,7 @@ interface OrderListProps {
 }
 
 const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
+  const { showToast } = useToast();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showAcceptModal, setShowAcceptModal] = useState<boolean>(false);
   const [openQr, setOpenQr] = useState<boolean>(false);
@@ -60,6 +62,7 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
     try {
       await cancelOrder(paymentId, reason);
       onRefresh();
+      showToast("주문 취소에 성공했어요.", "success");
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
@@ -94,6 +97,7 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
       const res = await updateOrderAccept(selectedPaymentId);
       await onRefresh();
       console.log("픽업 확정 완료:", res);
+      showToast("픽업 확정에 성공했어요.", "success");
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
