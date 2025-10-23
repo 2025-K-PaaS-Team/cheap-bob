@@ -19,7 +19,7 @@ const StoreManage = () => {
         onClick={() => navigate("/s/change/operation")}
         className="flex flex-row justify-between h-[60px] items-center border-b-1 border-black/10"
       >
-        운영 정보 변경
+        영업 시간 변경
         <img src="/icon/next.svg" alt="nextIcon" />
       </div>
 

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const SuccessSetting = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   const navigate = useNavigate();
   const handleClickNext = () => {
-    if (pageIdx < 16) {
+    if (pageIdx < 15) {
       setPageIdx(pageIdx + 1);
     } else {
       navigate("/s/dashboard");

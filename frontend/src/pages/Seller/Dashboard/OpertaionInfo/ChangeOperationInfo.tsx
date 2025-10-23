@@ -17,7 +17,7 @@ const pickDefaultDow = (ops: StoreOperationType): number | null => {
 const ChangeOperationInfo = () => {
   const navigate = useNavigate();
   const items = [
-    { label: "운영 시간 변경", to: "/s/change/operation/op-time" },
+    { label: "영업 시간 변경", to: "/s/change/operation/op-time" },
     { label: "픽업 시간 변경", to: "/s/change/operation/pu-time" },
   ];
 

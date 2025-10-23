@@ -5,10 +5,9 @@ import {
   Header,
   SellerFooter,
 } from "@components/layouts";
-import { pathToLayoutKey, pathToSellerLayoutKey } from "@utils";
 import SellerHeader from "./SellerHeader";
 import { useRef } from "react";
-import { useLocation, Outlet, Navigate } from "react-router-dom";
+import { useLocation, Outlet, Navigate, matchPath } from "react-router-dom";
 
 const Layout = () => {
   const swiperRef = useRef<any>(null);
@@ -18,7 +17,14 @@ const Layout = () => {
 
   const role = localStorage.getItem("loginRole");
 
+  const isAuth = path.startsWith("/auth");
+  const isWithdraw = path.startsWith("/withdraw");
+  const isDocs = path.startsWith("/docs");
+  const isHome = path === "/c" || path === "/s";
+
   const resolveRedirect = () => {
+    if (isAuth || isWithdraw || isDocs || isHome) return null;
+
     if (role === "seller" && path.startsWith("/c")) return "/auth/role-check";
     if (role === "customer" && path.startsWith("/s")) return "/auth/role-check";
   };
@@ -47,6 +53,7 @@ const Layout = () => {
 
   const notHeader =
     path === "/c" ||
+    matchPath("/c/stores/:storeId", path) ||
     path === "/s" ||
     path.startsWith("/s/signup") ||
     path === "/s/order" ||
@@ -68,11 +75,7 @@ const Layout = () => {
       <div className="app-frame">
         <Wrapper>
           {!notHeader &&
-            (isCustomer ? (
-              <Header layout={pathToLayoutKey(path)} swiperRef={swiperRef} />
-            ) : (
-              <SellerHeader layout={pathToSellerLayoutKey(path)} />
-            ))}
+            (isCustomer ? <Header swiperRef={swiperRef} /> : <SellerHeader />)}
           <Main className="app-scroll">
             <Outlet context={{ swiperRef }} />
           </Main>

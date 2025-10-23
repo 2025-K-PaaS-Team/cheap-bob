@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AddFavoriteStore, getStores, RemoveFavoriteStore } from "@services";
+import {
+  AddFavoriteStore,
+  GetPreferMenu,
+  getStores,
+  RemoveFavoriteStore,
+} from "@services";
 import { Chips, CommonModal } from "@components/common";
 import { NutritionList } from "@constant";
 import type { StoreSearchType } from "@interface";
@@ -12,6 +17,9 @@ import { Loader2 } from "lucide-react";
 const StoreList = () => {
   const navigate = useNavigate();
 
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
   const [stores, setStores] = useState<StoreSearchType>();
   const [pageIdx, setPageIdx] = useState<number>(0);
 
@@ -23,9 +31,36 @@ const StoreList = () => {
   const [selected, setSelected] = useState<Record<string, boolean>>({
     all: true,
   });
+  const [isPreferLoaded, setIsPreferLoaded] = useState(false);
 
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  const loadPreferredMenus = async () => {
+    try {
+      const localSelectedStr = localStorage.getItem("preferredMenus");
+      if (localSelectedStr) {
+        setSelected(JSON.parse(localSelectedStr));
+      } else {
+        const res = await GetPreferMenu();
+        const selectedFromApi: Record<string, boolean> = { all: false };
+
+        res.preferred_menus.forEach((menu: any) => {
+          selectedFromApi[menu.menu_type] = true;
+        });
+
+        if (Object.keys(selectedFromApi).length === 1) {
+          selectedFromApi.all = true;
+        }
+
+        setSelected(selectedFromApi);
+        localStorage.setItem("preferredMenus", JSON.stringify(selectedFromApi));
+      }
+    } catch {
+      setSelected({ all: true });
+    } finally {
+      setIsPreferLoaded(true);
+    }
+  };
 
   const filteredStores = useMemo(() => {
     if (!stores) return [];
@@ -44,12 +79,14 @@ const StoreList = () => {
 
   const handleGetStores = async (page: number) => {
     if (page > 0 && stores?.is_end) return;
+    if (loadFailed) return;
 
     try {
       if (page === 0) setIsInitialLoading(true);
       else setIsFetchingMore(true);
 
       const newStores = await getStores(page);
+
       setStores((prev) => {
         if (!prev || page === 0) return newStores;
         return {
@@ -57,15 +94,17 @@ const StoreList = () => {
           is_end: newStores.is_end,
         };
       });
+
+      setLoadFailed(false);
     } catch (err) {
       setModalMsg("가게 불러오기에 실패했습니다.");
       setShowModal(true);
+      setLoadFailed(true);
     } finally {
       if (page === 0) setIsInitialLoading(false);
       else setIsFetchingMore(false);
     }
   };
-
   const handleUpdateFavorStore = async (storeId: string, nowFavor: boolean) => {
     try {
       if (!nowFavor) await AddFavoriteStore(storeId);
@@ -88,8 +127,15 @@ const StoreList = () => {
   };
 
   useEffect(() => {
+    loadPreferredMenus();
     handleGetStores(0);
   }, []);
+
+  useEffect(() => {
+    if (isPreferLoaded) {
+      localStorage.setItem("preferredMenus", JSON.stringify(selected));
+    }
+  }, [selected, isPreferLoaded]);
 
   useEffect(() => {
     if (pageIdx === 0) return;
