@@ -1,34 +1,26 @@
-import { sellerLayoutMap } from "@constant";
-import type { SellerLayoutType } from "@interface";
-import { useNavigate } from "react-router-dom";
+import { getSellerLayoutByPath } from "@utils";
+import { useLocation, useNavigate } from "react-router-dom";
 
-interface HeaderProps {
-  layout: SellerLayoutType;
-}
-
-const SellerHeader = ({ layout }: HeaderProps) => {
+const SellerHeader = () => {
+  const { pathname } = useLocation();
+  const layout = getSellerLayoutByPath(pathname);
   const navigate = useNavigate();
-  const handleClickBefore = () => {
-    navigate(-1);
-  };
-
-  const myLayout = sellerLayoutMap[layout];
 
   return (
     <>
       <div className="h-[75px] pt-[15px] px-[20px] grid grid-cols-3 items-center">
         {/* left */}
-        {myLayout.back && (
+        {layout.back && (
           <img
             src="/icon/before.svg"
             alt="beforeArrowIcon"
-            onClick={handleClickBefore}
+            onClick={() => navigate(-1)}
           />
         )}
 
         {/* center */}
         <div className="font-bold text-[15px] text-center text-nowrap">
-          {myLayout.title}
+          {layout.title}
         </div>
       </div>
     </>

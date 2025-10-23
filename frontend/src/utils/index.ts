@@ -1,5 +1,5 @@
 export * from "./formatDate";
-export * from "./pathToLayoutKey";
+export * from "./getLayoutByPath";
 export * from "./validation";
 export * from "./formatErrMsg";
 export * from "./calculateTime";

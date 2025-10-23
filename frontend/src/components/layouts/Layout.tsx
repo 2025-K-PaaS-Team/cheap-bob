@@ -5,7 +5,6 @@ import {
   Header,
   SellerFooter,
 } from "@components/layouts";
-import { pathToLayoutKey, pathToSellerLayoutKey } from "@utils";
 import SellerHeader from "./SellerHeader";
 import { useRef } from "react";
 import { useLocation, Outlet, Navigate } from "react-router-dom";
@@ -75,11 +74,7 @@ const Layout = () => {
       <div className="app-frame">
         <Wrapper>
           {!notHeader &&
-            (isCustomer ? (
-              <Header layout={pathToLayoutKey(path)} swiperRef={swiperRef} />
-            ) : (
-              <SellerHeader layout={pathToSellerLayoutKey(path)} />
-            ))}
+            (isCustomer ? <Header swiperRef={swiperRef} /> : <SellerHeader />)}
           <Main className="app-scroll">
             <Outlet context={{ swiperRef }} />
           </Main>

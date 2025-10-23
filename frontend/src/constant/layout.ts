@@ -1,21 +1,18 @@
-export const layoutMap = {
-  default: {
-    back: false,
-    title: "",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
-  },
-  onBoarding: {
-    back: true,
-    title: "",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
-  },
-  Home: {
+interface Layout {
+  key: string;
+  back: boolean;
+  title: string;
+  centerIcon?: boolean;
+  loc?: boolean;
+  heart?: boolean;
+  noti?: boolean;
+  paths: (string | RegExp)[];
+}
+
+export const layoutMap: Layout[] = [
+  {
+    key: "Home",
+    paths: ["/c", "/c/stores"],
     back: false,
     title: "",
     centerIcon: true,
@@ -23,147 +20,214 @@ export const layoutMap = {
     heart: true,
     noti: true,
   },
-  SetLoc: {
+  {
+    key: "onBoarding",
+    paths: ["/c/signup"],
     back: true,
-    title: "위치 설정",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
+    title: "",
   },
-  Search: {
-    back: true,
-    title: "검색",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
-  },
-  FavStore: {
-    back: true,
-    title: "관심 가게",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
-  },
-  Noti: {
-    back: true,
-    title: "주문 알림",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
-  },
-  StoreDesc: {
-    back: true,
-    title: "매장 설명",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
-  },
-  Payment: {
+  {
+    key: "Payment",
+    paths: [/^\/c\/stores\/.*\/payment$/],
     back: true,
     title: "결제",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
   },
-  Order: {
+  {
+    key: "StoreDesc",
+    paths: [/^\/c\/stores\/.*/],
+    back: true,
+    title: "매장 설명",
+  },
+  {
+    key: "FavStore",
+    paths: ["/c/favorite"],
+    back: true,
+    title: "관심 가게",
+  },
+  {
+    key: "Order",
+    paths: ["/c/order"],
     back: true,
     title: "주문 현황",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
   },
-  OrderAll: {
+  {
+    key: "OrderAll",
+    paths: ["/c/order/all"],
     back: true,
     title: "주문 내역",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
   },
-  My: {
+  {
+    key: "My",
+    paths: ["/c/my"],
     back: false,
     title: "마이페이지",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
   },
-  ChangeInfo: {
+  {
+    key: "ChangeInfo",
+    paths: ["/c/change/info"],
     back: true,
     title: "프로필 수정",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
   },
-  ChangeNutrition: {
+  {
+    key: "ChangeNutrition",
+    paths: ["/c/change/nutrition"],
     back: true,
     title: "영양 목표",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
   },
-  ChangeAllergy: {
+  {
+    key: "ChangeAllergy",
+    paths: ["/c/change/allergy"],
     back: true,
     title: "못먹는 음식",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
   },
-  ChangeMenu: {
+  {
+    key: "ChangeMenu",
+    paths: ["/c/change/menu"],
     back: true,
     title: "선호 메뉴",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
   },
-  ChangeTopping: {
+  {
+    key: "ChangeTopping",
+    paths: ["/c/change/topping"],
     back: true,
     title: "선호 토핑",
-    centerIcon: false,
-    loc: false,
-    heart: false,
-    noti: false,
   },
-};
-
-export const sellerLayoutMap = {
-  default: {
+  {
+    key: "SetLoc",
+    paths: ["/c/location"],
+    back: true,
+    title: "위치 설정",
+  },
+  {
+    key: "Search",
+    paths: ["/c/search"],
+    back: true,
+    title: "검색",
+  },
+  {
+    key: "Noti",
+    paths: ["/c/noti"],
+    back: true,
+    title: "주문 알림",
+  },
+  {
+    key: "default",
+    paths: [/.*/],
     back: false,
     title: "",
   },
-  back: {
+] as const;
+
+export const sellerLayoutMap = [
+  // 매장 정보 변경
+  {
+    key: "changeStoreName",
+    paths: [/^\/s\/change\/store\/name$/],
     back: true,
-    title: "",
+    title: "매장 이름 변경",
   },
-  changeStoreInfo: {
+  {
+    key: "changeStoreDesc",
+    paths: [/^\/s\/change\/store\/desc$/],
+    back: true,
+    title: "매장 소개 변경",
+  },
+  {
+    key: "changeStoreNum",
+    paths: [/^\/s\/change\/store\/num$/],
+    back: true,
+    title: "매장 연락처 변경",
+  },
+  {
+    key: "changeStoreAddr",
+    paths: [/^\/s\/change\/store\/addr$/],
+    back: true,
+    title: "매장 주소 변경",
+  },
+  {
+    key: "changeStoreImg",
+    paths: [/^\/s\/change\/store\/img$/],
+    back: true,
+    title: "이미지 등록 및 변경",
+  },
+  {
+    key: "changeStoreInfo",
+    paths: [/^\/s\/change\/store/],
     back: true,
     title: "매장 정보 변경",
   },
-  changeOperationInfo: {
+  // 영업 시간 변경
+  {
+    key: "changeOperationOpTime",
+    paths: [/^\/s\/change\/operation\/op-time$/],
     back: true,
-    title: "운영 정보 변경",
+    title: "영업 시간 변경",
   },
-  changePackageInfo: {
+  {
+    key: "changeOperationPuTime",
+    paths: [/^\/s\/change\/operation\/pu-time$/],
+    back: true,
+    title: "픽업 시간 변경",
+  },
+  {
+    key: "changeOperationInfo",
+    paths: [/^\/s\/change\/operation/],
+    back: true,
+    title: "영업 시간 변경",
+  },
+  // 패키지 정보 변경
+  {
+    key: "changePackageName",
+    paths: [/^\/s\/change\/package\/name$/],
+    back: true,
+    title: "패키지 이름 변경",
+  },
+  {
+    key: "changePackageDesc",
+    paths: [/^\/s\/change\/package\/desc$/],
+    back: true,
+    title: "패키지 소개 변경",
+  },
+  {
+    key: "changePackageNutrition",
+    paths: [/^\/s\/change\/package\/nutrition$/],
+    back: true,
+    title: "영양목표 변경",
+  },
+  {
+    key: "changePackagePrice",
+    paths: [/^\/s\/change\/package\/price$/],
+    back: true,
+    title: "패키지 가격 변경",
+  },
+  {
+    key: "changePackageNum",
+    paths: [/^\/s\/change\/package\/num$/],
+    back: true,
+    title: "판매 기본값 변경",
+  },
+  {
+    key: "changePackageInfo",
+    paths: [/^\/s\/change\/package/],
     back: true,
     title: "패키지 정보 변경",
   },
-  billingHistory: {
+  {
+    key: "billingHistory",
+    paths: ["/s/billing/history"],
     back: true,
-    title: "정산 내역 확인",
+    title: "정산 내역 보기",
   },
-  billingChange: {
+  {
+    key: "billingChange",
+    paths: ["/s/billing/change"],
     back: true,
     title: "정산 정보 변경",
   },
-};
+  {
+    key: "default",
+    paths: [/.*/],
+    back: false,
+    title: "",
+  },
+] as const;
