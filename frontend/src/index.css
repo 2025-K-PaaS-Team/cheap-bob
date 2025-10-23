@@ -286,6 +286,8 @@ h3 {
   --swiper-pagination-bullet-inactive-opacity: 1;
   --swiper-pagination-progressbar-size: 8px;
   --swiper-pagination-progressbar-bg-color: #e7e7e7;
+
+  --swiper-pagination-bottom: 10px;
 }
 
 .swiper-pagination-progressbar-fill {
