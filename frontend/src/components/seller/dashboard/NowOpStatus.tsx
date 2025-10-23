@@ -105,6 +105,7 @@ const NowOpStatus = ({ ops }: Props) => {
   const handleChangeOpStatus = async () => {
     try {
       await CloseStore();
+      setOpenChangeModal(false);
     } catch (err) {
       setModalMsg("영업 상태 변경에 실패했습니다.");
       setShowModal(true);
