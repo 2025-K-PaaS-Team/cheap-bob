@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Query
 from fastapi.responses import JSONResponse
 from datetime import datetime, timezone, timedelta
 
@@ -33,7 +33,8 @@ async def withdraw_seller(
     seller_repo: SellerRepositoryDep,
     store_repo: StoreRepositoryDep,
     operation_repo: StoreOperationInfoRepositoryDep,
-    withdraw_repo: SellerWithdrawReservationRepositoryDep
+    withdraw_repo: SellerWithdrawReservationRepositoryDep,
+    state: str = Query(None, description="로컬 테스트 용")
 ):
     """
     판매자 탈퇴 처리
@@ -74,15 +75,26 @@ async def withdraw_seller(
         status_code=200
     )
     
-    response.set_cookie(
-        key="access_token",
-        value="",
-        httponly=True,
-        secure=True,
-        samesite="lax",
-        max_age=0,
-        path="/"
-    )
+    if state == "1004" and settings.ENVIRONMENT == "dev":
+        response.set_cookie(
+            key="access_token",
+            value="",
+            httponly=True,
+            secure=True,
+            samesite="none",
+            max_age=0,
+            path="/"
+        )
+    else:
+        response.set_cookie(
+            key="access_token",
+            value="",
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            max_age=0,
+            path="/"
+        )
     
     return response
 
@@ -98,7 +110,8 @@ async def cancel_withdraw(
     current_user: CurrentSellerNoActiveDep,
     seller_repo: SellerRepositoryDep,
     withdraw_repo: SellerWithdrawReservationRepositoryDep,
-    jwt_service: JWTServiceDep
+    jwt_service: JWTServiceDep,
+    state: str = Query(None, description="로컬 테스트 용")
 ):
     """
     판매자 탈퇴 취소
@@ -142,15 +155,25 @@ async def cancel_withdraw(
         content={"message": "탈퇴가 취소되었습니다"},
         status_code=200
     )
-    
-    response.set_cookie(
-        key="access_token",
-        value=new_token,
-        httponly=True,
-        secure=True,
-        samesite="lax",
-        max_age=settings.COOKIE_EXPIRE_MINUTES,
-        path="/"
-    )
+    if state == "1004" and settings.ENVIRONMENT == "dev":
+        response.set_cookie(
+            key="access_token",
+            value=new_token,
+            httponly=True,
+            secure=True,
+            samesite="none",
+            max_age=settings.COOKIE_EXPIRE_MINUTES,
+            path="/"
+        )
+    else:
+        response.set_cookie(
+            key="access_token",
+            value=new_token,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            max_age=settings.COOKIE_EXPIRE_MINUTES,
+            path="/"
+        )
     
     return response
