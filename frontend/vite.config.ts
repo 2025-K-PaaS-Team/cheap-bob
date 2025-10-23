@@ -8,7 +8,16 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), mkcert()],
   server: {
     port: 5173,
+    // proxy: {
+    //   "/api": {
+    //     target: "https://dev-back.cheap-bob.store/",
+    //     changeOrigin: true,
+    //     secure: false,
+    //     cookieDomainRewrite: { ".cheap-bob.store": "localhost" },
+    //   },
+    // },
   },
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),

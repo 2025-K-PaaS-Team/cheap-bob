@@ -6,9 +6,24 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { homeSwiperMap } from "@constant";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { GetCustomerEmail } from "@services";
 
 const Home = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await GetCustomerEmail();
+        navigate("/c/stores");
+      } catch (err) {
+        console.warn("err", err);
+      }
+    };
+
+    init();
+  }, []);
 
   return (
     <div className="flex flex-col flex-1 justify-start w-full py-[50px]">

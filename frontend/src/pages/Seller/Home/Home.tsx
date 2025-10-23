@@ -1,5 +1,7 @@
 import { HomeSwiper, LoginButton } from "@components/common/home";
 import { homeSwiperMap } from "@constant";
+import { GetSellerEmail } from "@services";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -9,6 +11,19 @@ import { Swiper, SwiperSlide } from "swiper/react";
 
 const Home = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await GetSellerEmail();
+        navigate("/s/dashboard");
+      } catch (err) {
+        console.warn("err", err);
+      }
+    };
+
+    init();
+  }, []);
 
   return (
     <div className="flex flex-col flex-1 justify-start w-full py-[50px]">
