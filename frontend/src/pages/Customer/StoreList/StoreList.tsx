@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AddFavoriteStore, getStores, RemoveFavoriteStore } from "@services";
+import {
+  AddFavoriteStore,
+  GetPreferMenu,
+  getStores,
+  RemoveFavoriteStore,
+} from "@services";
 import { Chips, CommonModal } from "@components/common";
 import { NutritionList } from "@constant";
 import type { StoreSearchType } from "@interface";
@@ -12,6 +17,9 @@ import { Loader2 } from "lucide-react";
 const StoreList = () => {
   const navigate = useNavigate();
 
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
   const [stores, setStores] = useState<StoreSearchType>();
   const [pageIdx, setPageIdx] = useState<number>(0);
 
@@ -23,10 +31,36 @@ const StoreList = () => {
   const [selected, setSelected] = useState<Record<string, boolean>>({
     all: true,
   });
+  const [isPreferLoaded, setIsPreferLoaded] = useState(false);
+
   const [loadFailed, setLoadFailed] = useState(false);
 
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const loadPreferredMenus = async () => {
+    try {
+      const localSelectedStr = localStorage.getItem("preferredMenus");
+      if (localSelectedStr) {
+        setSelected(JSON.parse(localSelectedStr));
+      } else {
+        const res = await GetPreferMenu();
+        const selectedFromApi: Record<string, boolean> = { all: false };
+
+        res.preferred_menus.forEach((menu: any) => {
+          selectedFromApi[menu.menu_type] = true;
+        });
+
+        if (Object.keys(selectedFromApi).length === 1) {
+          selectedFromApi.all = true;
+        }
+
+        setSelected(selectedFromApi);
+        localStorage.setItem("preferredMenus", JSON.stringify(selectedFromApi));
+      }
+    } catch {
+      setSelected({ all: true });
+    } finally {
+      setIsPreferLoaded(true);
+    }
+  };
 
   const filteredStores = useMemo(() => {
     if (!stores) return [];
@@ -93,8 +127,15 @@ const StoreList = () => {
   };
 
   useEffect(() => {
+    loadPreferredMenus();
     handleGetStores(0);
   }, []);
+
+  useEffect(() => {
+    if (isPreferLoaded) {
+      localStorage.setItem("preferredMenus", JSON.stringify(selected));
+    }
+  }, [selected, isPreferLoaded]);
 
   useEffect(() => {
     if (pageIdx === 0) return;
