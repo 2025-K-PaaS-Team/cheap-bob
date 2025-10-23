@@ -23,6 +23,7 @@ const StoreList = () => {
   const [selected, setSelected] = useState<Record<string, boolean>>({
     all: true,
   });
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -44,12 +45,14 @@ const StoreList = () => {
 
   const handleGetStores = async (page: number) => {
     if (page > 0 && stores?.is_end) return;
+    if (loadFailed) return;
 
     try {
       if (page === 0) setIsInitialLoading(true);
       else setIsFetchingMore(true);
 
       const newStores = await getStores(page);
+
       setStores((prev) => {
         if (!prev || page === 0) return newStores;
         return {
@@ -57,15 +60,17 @@ const StoreList = () => {
           is_end: newStores.is_end,
         };
       });
+
+      setLoadFailed(false);
     } catch (err) {
       setModalMsg("가게 불러오기에 실패했습니다.");
       setShowModal(true);
+      setLoadFailed(true);
     } finally {
       if (page === 0) setIsInitialLoading(false);
       else setIsFetchingMore(false);
     }
   };
-
   const handleUpdateFavorStore = async (storeId: string, nowFavor: boolean) => {
     try {
       if (!nowFavor) await AddFavoriteStore(storeId);
