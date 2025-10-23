@@ -5,10 +5,9 @@ import { useNavigate } from "react-router-dom";
 const RoleCheck = () => {
   const navigate = useNavigate();
   const role = localStorage.getItem("loginRole");
-  const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
-    if (!role || !accessToken) {
+    if (!role) {
       navigate("/c");
     }
   }, []);
