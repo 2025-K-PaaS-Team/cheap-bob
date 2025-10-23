@@ -5,9 +5,12 @@ import ssl
 from typing import Optional, Dict, Any
 from datetime import datetime
 from loguru import logger
+import pytz
 
 from config.settings import settings
 from services.email_templates import reservation, accept, customer_cancel, seller_cancel
+
+kst = pytz.timezone('Asia/Seoul')
 
 class EmailService:
     """구글 SMTP를 사용한 이메일 전송 서비스"""
@@ -144,7 +147,7 @@ class EmailService:
         store_name: str
     ) -> Dict[str, str]:
         """이메일 템플릿 반환"""
-        timestamp = datetime.now().strftime("%Y년 %m월 %d일 %H:%M:%S")
+        timestamp = datetime.now(kst).strftime("%Y년 %m월 %d일 %H:%M:%S")
         
         templates = {
             "reservation": {

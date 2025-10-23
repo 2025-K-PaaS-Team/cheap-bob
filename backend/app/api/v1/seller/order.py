@@ -117,6 +117,13 @@ async def get_store_orders(
         )
         order_responses.append(order_response)
     
+    order_responses.sort(
+        key=lambda x: max(
+            filter(None, [x.reservation_at, x.accepted_at, x.completed_at, x.canceled_at])
+        ),
+        reverse=True
+    )
+    
     return OrderListResponse(
         orders=order_responses,
         total=len(order_responses)
@@ -171,6 +178,13 @@ async def get_order_today(
             topping_types=parse_comma_separated_string(order.topping_types)
         )
         order_responses.append(order_response)
+    
+    order_responses.sort(
+        key=lambda x: max(
+            filter(None, [x.reservation_at, x.accepted_at, x.completed_at, x.canceled_at])
+        ),
+        reverse=True
+    )
     
     return OrderListResponse(
         orders=order_responses,
