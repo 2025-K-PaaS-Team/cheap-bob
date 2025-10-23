@@ -6,6 +6,7 @@ import {
   GetStoreWeekSettlement,
   WithdrawSeller,
 } from "@services";
+import { PostLogout } from "@services/common/auth";
 import { formatErrMsg } from "@utils";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -21,6 +22,16 @@ const BillingInfo = () => {
   const today = dayjs();
   const endDate = today.add(-6, "day");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const handleLogout = async () => {
+    try {
+      await PostLogout();
+      navigate("/s");
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
+  };
 
   const handleGetWeekBilling = async () => {
     try {
@@ -116,7 +127,7 @@ const BillingInfo = () => {
             <div
               onClick={() => {
                 localStorage.removeItem("loginRole");
-                navigate("/s");
+                handleLogout();
               }}
             >
               로그아웃

@@ -3,6 +3,7 @@ import CommonLoading from "@components/common/CommonLoading";
 import { NutritionList } from "@constant";
 import type { PreferNutritionBaseType, CustomerDetailType } from "@interface";
 import { GetCustomerDetail, GetNutrition, WithdrawCustomer } from "@services";
+import { PostLogout } from "@services/common/auth";
 import { formatErrMsg, getTitleByKey } from "@utils";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +19,16 @@ const My = () => {
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const handleLogout = async () => {
+    try {
+      await PostLogout();
+      navigate("/c");
+    } catch (err) {
+      setModalMsg(formatErrMsg(err));
+      setShowModal(true);
+    }
+  };
 
   const handlePostWithdraw = async () => {
     setShowWarn(false);
@@ -141,7 +152,7 @@ const My = () => {
           <div
             onClick={() => {
               localStorage.removeItem("loginRole");
-              navigate("/c");
+              handleLogout();
             }}
           >
             로그아웃
