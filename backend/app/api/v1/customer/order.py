@@ -127,6 +127,13 @@ async def get_order_history(
         )
         order_responses.append(order_response)
     
+    order_responses.sort(
+        key=lambda x: max(
+            filter(None, [x.reservation_at, x.accepted_at, x.completed_at, x.canceled_at])
+        ),
+        reverse=True
+    )
+    
     return CustomerOrderListResponse(
         orders=order_responses,
         total=len(order_responses)
@@ -186,6 +193,13 @@ async def get_order_today(
             pickup_end_time=pickup_end_time
         )
         order_responses.append(order_response)
+    
+    order_responses.sort(
+        key=lambda x: max(
+            filter(None, [x.reservation_at, x.accepted_at, x.completed_at, x.canceled_at])
+        ),
+        reverse=True
+    )
     
     return CustomerTodayOrderListResponse(
         orders=order_responses,
