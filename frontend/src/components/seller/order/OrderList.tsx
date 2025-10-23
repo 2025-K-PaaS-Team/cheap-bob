@@ -141,11 +141,11 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
             {/* first row */}
             <div className="flex flex-row justify-between border-b border-black/10 pb-[16px]">
               {/* time */}
-              <h3>{order.reservation_at.slice(11, 16)}</h3>
+              <h3>{order?.reservation_at.slice(11, 16)}</h3>
               {/* quantity */}
               <h3>
                 <span className="font-normal">주문 수량:</span>{" "}
-                <span className="text-main-deep">{order.quantity}</span>개
+                <span className="text-main-deep">{order?.quantity}</span>개
               </h3>
             </div>
             {/* second row */}
@@ -153,7 +153,7 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
               {/* customer name */}
               <h3>
                 <span className="font-normal">주문자:</span>{" "}
-                {order.customer_nickname}
+                {order?.customer_nickname}
               </h3>
               {/* more info */}
               <div
@@ -167,19 +167,19 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
             <div className="flex flex-row gap-x-[10px] flex-wrap justify-start gap-y-[10px] border-b border-black/10 pb-[16px] tagFont">
               {/* nutrition_types info */}
               <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
-                {getTitleByKey(order.nutrition_types[0], NutritionList)}
+                {getTitleByKey(order?.nutrition_types[0], NutritionList)}
               </div>
               {/* preferred_menus info */}
               <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
-                {getTitleByKey(order.preferred_menus[0], MenuList)}
+                {getTitleByKey(order?.preferred_menus[0], MenuList)}
               </div>
               {/* topping_types info */}
               <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
-                {getTitleByKey(order.topping_types[0], ToppingList)}
+                {getTitleByKey(order?.topping_types[0], ToppingList)}
               </div>
               {/* allergies info */}
               <div className="bg-[#E7E7E7] border border-[#E7E7E7] rounded py-[7px] px-[16px]">
-                {getTitleByKey(order.allergies[0], AllergyList)}
+                {getTitleByKey(order?.allergies[0], AllergyList)}
               </div>
             </div>
             {/* fourth row */}
@@ -190,7 +190,7 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
                 category="white"
                 className="w-full border-none"
                 onClick={() => {
-                  setSelectedPaymentId(order.payment_id);
+                  setSelectedPaymentId(order?.payment_id);
                   setShowCancelModal(true);
                 }}
               />
@@ -198,7 +198,7 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
                 label={getTitleByKey(status, cfmLabel) ?? ""}
                 notBottom
                 className="col-span-2 w-full"
-                onClick={() => handleClickConfirm(status, order.payment_id)}
+                onClick={() => handleClickConfirm(status, order?.payment_id)}
               />
             </div>
 
