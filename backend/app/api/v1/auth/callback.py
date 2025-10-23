@@ -94,8 +94,19 @@ async def customer_oauth_callback(
         # 프론트 로컬 개발 용
         if state == '1004' and settings.ENVIRONMENT == "dev":
             response = RedirectResponse(
-                url=f"{settings.FRONTEND_LOCAL_URL}/auth/success?token={token_response.access_token}&status={registration_status}&conflict={int(conflict)}"
+                url=f"{settings.FRONTEND_LOCAL_URL}/auth/success?&status={registration_status}&conflict={int(conflict)}"
             )
+            response.set_cookie(
+                key="access_token",
+                value=token_response.access_token,
+                httponly=True,
+                secure=False,
+                samesite="lax",
+                max_age=settings.COOKIE_EXPIRE_MINUTES,
+                path="/",
+                domain="localhost"
+            )
+            
         else:
             response = RedirectResponse(
                 url=f"{settings.FRONTEND_URL}/auth/success?status={registration_status}&conflict={int(conflict)}"
@@ -155,8 +166,19 @@ async def seller_oauth_callback(
         # 프론트 로컬 개발 용
         if state == '1004' and settings.ENVIRONMENT == "dev":
             response = RedirectResponse(
-                url=f"{settings.FRONTEND_LOCAL_URL}/auth/success?token={token_response.access_token}&status={registration_status}&conflict={int(conflict)}"
+                url=f"{settings.FRONTEND_LOCAL_URL}/auth/success?&status={registration_status}&conflict={int(conflict)}"
             )
+            response.set_cookie(
+                key="access_token",
+                value=token_response.access_token,
+                httponly=True,
+                secure=False,
+                samesite="lax",
+                max_age=settings.COOKIE_EXPIRE_MINUTES,
+                path="/",
+                domain="localhost"
+            )
+            
         else:
             response = RedirectResponse(
                 url=f"{settings.FRONTEND_URL}/auth/success?status={registration_status}&conflict={int(conflict)}"
