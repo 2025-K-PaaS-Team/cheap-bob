@@ -7,7 +7,7 @@ import {
 } from "@components/layouts";
 import SellerHeader from "./SellerHeader";
 import { useRef } from "react";
-import { useLocation, Outlet, Navigate } from "react-router-dom";
+import { useLocation, Outlet, Navigate, matchPath } from "react-router-dom";
 
 const Layout = () => {
   const swiperRef = useRef<any>(null);
@@ -53,6 +53,7 @@ const Layout = () => {
 
   const notHeader =
     path === "/c" ||
+    matchPath("/c/stores/:storeId", path) ||
     path === "/s" ||
     path.startsWith("/s/signup") ||
     path === "/s/order" ||

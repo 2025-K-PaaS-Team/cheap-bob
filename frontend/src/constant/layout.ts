@@ -33,10 +33,10 @@ export const layoutMap: Layout[] = [
     title: "결제",
   },
   {
-    key: "StoreDesc",
-    paths: [/^\/c\/stores\/.*/],
+    key: "StoreSearch",
+    paths: [/^\/c\/stores\/search.*/],
     back: true,
-    title: "매장 설명",
+    title: "검색",
   },
   {
     key: "FavStore",

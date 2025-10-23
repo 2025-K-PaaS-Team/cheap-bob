@@ -4,12 +4,11 @@ import "swiper/css";
 
 const StoreDetail = () => {
   const location = useLocation();
-  const desc = location.state as string;
-
+  const { desc, name } = location.state as { desc: string; name: string };
   return (
     <>
       {/* show desc modal */}
-      <CommonDesc desc={desc} />
+      <CommonDesc desc={desc || ""} name={name || ""} />
     </>
   );
 };

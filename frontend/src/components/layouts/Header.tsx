@@ -50,7 +50,7 @@ const Header = ({ swiperRef }: HeaderProps) => {
         {/* center */}
         {layout.title ? (
           <div className="font-bold text-[15px] text-center">
-            {layout.title}
+            {layout.title || ""}
           </div>
         ) : layout?.centerIcon ? (
           <div className="flex justify-center">
