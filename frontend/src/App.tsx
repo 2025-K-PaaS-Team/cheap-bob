@@ -5,8 +5,6 @@ import {
   StoreDetail,
   StoreList,
   LoginCallback,
-  CustomerLab,
-  QrLab,
   Order,
   OrderManage,
   Signup,
@@ -119,9 +117,7 @@ const App = () => {
               path="change/nutrition"
               element={<ChangeCustomerNutrition />}
             />
-            {/* lab */}
-            <Route path="lab" element={<CustomerLab />} />
-            <Route path="qr" element={<QrLab />} />
+
             {/* customer fallback */}
             <Route path="*" element={<Navigate to="/c" replace />} />
           </Route>
