@@ -141,7 +141,6 @@ const My = () => {
           <div
             onClick={() => {
               localStorage.removeItem("loginRole");
-              localStorage.removeItem("accessToken");
               navigate("/c");
             }}
           >

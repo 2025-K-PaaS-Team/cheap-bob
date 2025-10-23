@@ -3,41 +3,28 @@ import axios, { type AxiosInstance } from "axios";
 const BASE = `${import.meta.env.VITE_API_BASE_URL}/api/v1`;
 
 const attachInterceptors = (instance: AxiosInstance) => {
-  // instance.interceptors.request.use((config) => {
-  //   const token = localStorage.getItem("accessToken");
-  //   if (token) {
-  //     config.headers = config.headers ?? {};
-  //     config.headers.Authorization = `Bearer ${token}`;
-  //   }
-  //   return config;
-  // });
-
   instance.interceptors.response.use(
     (response) => response,
     (error) => {
       const status = error.response?.status;
       const role = localStorage.getItem("loginRole");
+      const isHome =
+        window.location.pathname === "/c" || window.location.pathname === "/s";
 
-      // 401 Unauthorized
-      if (status === 401) {
-        // localStorage.removeItem("accessToken");
-        if (role === "seller") {
-          window.location.href = "/s";
-        } else {
-          window.location.href = "/c";
-        }
-        return Promise.reject(error);
+      if (status === 401 && !isHome) {
+        if (role === "seller") window.location.href = "/s";
+        else window.location.href = "/c";
       }
 
       // 439 Withdrawn user
       if (status === 439) {
         window.location.href = "/withdraw/cancel";
-        return Promise.reject(error);
       }
 
       return Promise.reject(error);
     }
   );
+
   return instance;
 };
 

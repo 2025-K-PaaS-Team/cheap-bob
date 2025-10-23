@@ -55,7 +55,7 @@ const Header = ({ layout, swiperRef }: HeaderProps) => {
           </div>
         ) : myLayout?.centerIcon ? (
           <div className="flex justify-center">
-            <img src="/icon/angrySalad.svg" alt="angrySaladIcon" width="47px" />
+            <img src="/typo.svg" alt="typoIcon" width="60px" />
           </div>
         ) : (
           <div />

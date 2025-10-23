@@ -7,8 +7,11 @@ import path from "path";
 export default defineConfig({
   plugins: [react(), tailwindcss(), mkcert()],
   server: {
+    https: {},
+    host: "localhost",
     port: 5173,
   },
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),

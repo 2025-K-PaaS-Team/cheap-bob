@@ -28,14 +28,6 @@ const LoginCallback = () => {
 
   useEffect(() => {
     handleCheckConflict();
-    // const token = searchParams.get("token");
-    // if (token) {
-    //   localStorage.setItem("accessToken", token);
-    //   handleCheckConflict();
-    // } else {
-    //   console.warn("No token found in query");
-    //   navigate("/auth/fail");
-    // }
   }, [searchParams, navigate]);
 
   return null;

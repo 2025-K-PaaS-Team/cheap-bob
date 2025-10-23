@@ -116,7 +116,6 @@ const BillingInfo = () => {
             <div
               onClick={() => {
                 localStorage.removeItem("loginRole");
-                localStorage.removeItem("accessToken");
                 navigate("/s");
               }}
             >
