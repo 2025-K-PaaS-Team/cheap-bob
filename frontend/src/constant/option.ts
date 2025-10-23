@@ -6,7 +6,7 @@ export const BillingOption = [
     title: "전체보기",
   },
   { key: "complete", title: "정산 완료" },
-  { key: "refund", title: "환불 완료" },
+  { key: "cancel", title: "환불 완료" },
 ];
 
 export const CancelOption = [
