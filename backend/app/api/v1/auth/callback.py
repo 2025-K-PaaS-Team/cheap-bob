@@ -100,11 +100,10 @@ async def customer_oauth_callback(
                 key="access_token",
                 value=token_response.access_token,
                 httponly=True,
-                secure=False,
-                samesite="lax",
+                secure=True,
+                samesite="none",
                 max_age=settings.COOKIE_EXPIRE_MINUTES,
-                path="/",
-                domain="localhost"
+                path="/"
             )
             
         else:
@@ -172,11 +171,10 @@ async def seller_oauth_callback(
                 key="access_token",
                 value=token_response.access_token,
                 httponly=True,
-                secure=False,
-                samesite="lax",
+                secure=True,
+                samesite="none",
                 max_age=settings.COOKIE_EXPIRE_MINUTES,
-                path="/",
-                domain="localhost"
+                path="/"
             )
             
         else:
