@@ -402,7 +402,8 @@ const StoreDetail = () => {
 
         {storeId && customer && (
           <div>
-            {!todayOp?.is_currently_open ? (
+            {!todayOp?.is_currently_open ||
+            (diffTime !== null && diffTime <= 0) ? (
               <CommonBtn category="grey" label="영업시간이 아니예요" />
             ) : mainProd.current_stock > 0 ? (
               <CommonBtn
