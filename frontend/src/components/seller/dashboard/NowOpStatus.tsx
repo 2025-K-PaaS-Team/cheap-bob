@@ -44,6 +44,7 @@ const NowOpStatus = ({ ops }: Props) => {
 
   const today = ops.find((o) => o.day_of_week === dow);
   const enabledToday = today?.is_open_enabled ?? false;
+  const currentOpenToday = today?.is_currently_open ?? false;
 
   const statusInfo = useMemo(() => {
     if (!today) return { title: "지금은 영업 전 입니다.", sub: "" };
@@ -59,8 +60,12 @@ const NowOpStatus = ({ ops }: Props) => {
       return { title: "오늘은 휴무 입니다.", sub: "" };
     }
 
-    // 영업 전
+    if (enabledToday && !currentOpenToday) {
+      return { title: "오늘의 영업이 끝났습니다.", sub: "" };
+    }
+
     if (current < open) {
+      // 영업 전
       return {
         title: "지금은 영업 전 입니다.",
         sub: `오픈까지 ${fmtDur(open - current)}`,
