@@ -75,7 +75,10 @@ export type OperationReservationBaseType = {
 };
 
 export type OperationReservationType = {
+  modification_type: number;
   modifications: OperationReservationBaseType[];
+  new_pickup_start_interval: number;
+  new_pickup_end_interval: number;
 };
 
 export type StoreSearchBaseType = StoreDetailType & {
