@@ -86,6 +86,42 @@ async def update_store_address(
         )
 
 
+@router.get("/payment", response_model=StorePaymentResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: "가게를 찾을 수 없음"
+    })
+)
+async def get_store_payment(
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    payment_repo: StorePaymentInfoRepositoryDep
+):
+    """
+    결제 정보 조회
+    
+    포트원 연동 정보를 조회합니다.
+    """
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    try:
+        payment = await payment_repo.get_by_store_id(store_id=store_id)
+        
+        return StorePaymentResponse(
+            store_id=store_id,
+            portone_store_id=payment.portone_store_id,
+            portone_channel_id=payment.portone_channel_id
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"결제 정보 수정 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
 @router.put("/payment", response_model=StorePaymentResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
