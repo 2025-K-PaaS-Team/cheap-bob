@@ -210,16 +210,22 @@ async def get_operation_reservation(
                 for info in sorted(operation_infos, key=lambda x: x.day_of_week)
             ]
             
-            first_operation = operation_infos[0]
+            open_operation = None
+            for info in operation_infos:
+                if info.is_open_enabled:
+                    open_operation = info
+                    break
             
-            pickup_start_datetime = datetime.combine(datetime.today(), first_operation.pickup_start_time)
-            pickup_end_datetime = datetime.combine(datetime.today(), first_operation.pickup_end_time)
-            close_datetime = datetime.combine(datetime.today(), first_operation.close_time)
-            print(pickup_start_datetime)
-            print(pickup_end_datetime)
-            print(close_datetime)
-            new_pickup_start_interval = int((close_datetime - pickup_start_datetime).total_seconds() // 60)
-            new_pickup_end_interval = int((close_datetime - pickup_end_datetime).total_seconds() // 60)
+            if open_operation:
+                pickup_start_datetime = datetime.combine(datetime.today(), open_operation.pickup_start_time)
+                pickup_end_datetime = datetime.combine(datetime.today(), open_operation.pickup_end_time)
+                close_datetime = datetime.combine(datetime.today(), open_operation.close_time)
+                
+                new_pickup_start_interval = int((close_datetime - pickup_start_datetime).total_seconds() // 60)
+                new_pickup_end_interval = int((close_datetime - pickup_end_datetime).total_seconds() // 60)
+            else:
+                new_pickup_start_interval = 60
+                new_pickup_end_interval = 30
             
             return StoreOperationReservationResponse(
                 modification_type=0,
@@ -228,11 +234,24 @@ async def get_operation_reservation(
                 new_pickup_end_interval=new_pickup_end_interval
             )
   
-        first_mod = modifications[0]
-        first_operation = operation_infos[0]
+        has_operation_time_change = False
+        has_pickup_time_change = False
         
-        has_operation_time_change = (first_mod.new_open_time != first_operation.open_time) or (first_mod.new_close_time != first_operation.close_time)
-        has_pickup_time_change = (first_mod.new_pickup_start_time != first_operation.pickup_start_time) or (first_mod.new_pickup_end_time != first_operation.pickup_end_time)
+        operation_info_dict = {info.operation_id: info for info in operation_infos}
+        
+        for mod in modifications:
+            day_of_week = mod.operation_id
+            orig_info = operation_info_dict.get(day_of_week)
+            
+            if orig_info:
+                if (mod.new_open_time != orig_info.open_time or 
+                    mod.new_close_time != orig_info.close_time or 
+                    mod.new_is_open_enabled != orig_info.is_open_enabled):
+                    has_operation_time_change = True
+                
+                if (mod.new_pickup_start_time != orig_info.pickup_start_time or 
+                    mod.new_pickup_end_time != orig_info.pickup_end_time):
+                    has_pickup_time_change = True
         
         if has_operation_time_change and has_pickup_time_change:
             modification_type = 3
@@ -243,13 +262,23 @@ async def get_operation_reservation(
         else:
             modification_type = 0
             
+        
+        open_operation = None
+        for info in modifications:
+            if info.new_is_open_enabled:
+                open_operation = info
+                break
+        
+        if open_operation:
+            pickup_start_datetime = datetime.combine(datetime.today(), open_operation.new_pickup_start_time)
+            pickup_end_datetime = datetime.combine(datetime.today(), open_operation.new_pickup_end_time)
+            close_datetime = datetime.combine(datetime.today(), open_operation.new_close_time)
             
-        pickup_start_datetime = datetime.combine(datetime.today(), first_mod.new_pickup_start_time)
-        pickup_end_datetime = datetime.combine(datetime.today(), first_mod.new_pickup_end_time)
-        close_datetime = datetime.combine(datetime.today(), first_mod.new_close_time)
-            
-        new_pickup_start_interval = int((close_datetime - pickup_start_datetime).total_seconds() // 60)
-        new_pickup_end_interval = int((close_datetime - pickup_end_datetime).total_seconds() // 60)
+            new_pickup_start_interval = int((close_datetime - pickup_start_datetime).total_seconds() // 60)
+            new_pickup_end_interval = int((close_datetime - pickup_end_datetime).total_seconds() // 60)
+        else:
+            new_pickup_start_interval = 60
+            new_pickup_end_interval = 30
         
         modification_responses = [
             StoreOperationModificationResponse(
