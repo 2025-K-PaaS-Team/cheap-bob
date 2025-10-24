@@ -115,7 +115,7 @@ const ChangeOperationInfo = () => {
                 <div className="text-center">{hhmm(selectedOp.open_time)}</div>
               </div>
               <div className="flex flex-row">
-                <div className="w-[120px]">픽업 확정 시간</div>
+                <div className="w-[120px]">픽업 시작 시간</div>
                 <div className="text-center">
                   {hhmm(selectedOp.pickup_start_time)}
                 </div>
