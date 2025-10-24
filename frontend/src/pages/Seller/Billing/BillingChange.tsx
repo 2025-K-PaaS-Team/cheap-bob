@@ -3,6 +3,7 @@ import CommonLoading from "@components/common/CommonLoading";
 import { useToast } from "@context";
 import {
   CheckPaymentInfo,
+  GetStorePayment,
   RegisterPayment,
   UpdateStorePayment,
 } from "@services";
@@ -64,6 +65,14 @@ const BillingChange = () => {
 
   useEffect(() => {
     const init = async () => {
+      try {
+        const res = await GetStorePayment();
+        setChId(res.portone_channel_id);
+        setStoreId(res.portone_store_id);
+      } catch (err) {
+        setModalMsg(formatErrMsg(err));
+        setShowModal(true);
+      }
       await handleCheckPaymentInfo();
       setIsLoading(false);
     };
