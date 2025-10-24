@@ -20,6 +20,7 @@ from repositories.store_image import StoreImageRepository
 from repositories.store_operation_info import StoreOperationInfoRepository
 from repositories.store_operation_info_modification import StoreOperationInfoModificationRepository
 from repositories.product_nutrition import ProductNutritionRepository
+from repositories.prodcut_stock_reservation import ProductStockReservationRepository
 from repositories.customer_favorite import CustomerFavoriteRepository
 
 __all__ = [
@@ -43,5 +44,6 @@ __all__ = [
     "StoreOperationInfoRepository",
     "StoreOperationInfoModificationRepository",
     "ProductNutritionRepository",
+    "ProductStockReservationRepository",
     "CustomerFavoriteRepository"
 ]
