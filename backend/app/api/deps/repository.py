@@ -27,7 +27,7 @@ from repositories.store_operation_info_modification import StoreOperationInfoMod
 from repositories.store_payment_info import StorePaymentInfoRepository
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.product_nutrition import ProductNutritionRepository
-from repositories.prodcut_stock_reservation import ProductStockReservationRepository
+from repositories.product_stock_reservation import ProductStockReservationRepository
 # 주문
 from repositories.cart_item import CartItemRepository
 from repositories.order_current_item import OrderCurrentItemRepository
