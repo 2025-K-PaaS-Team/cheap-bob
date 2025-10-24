@@ -1,3 +1,4 @@
+import { GetSellerEmail } from "@services";
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -16,7 +17,7 @@ const LoginCallback = () => {
       console.log("needRegisterProductOnly", needRegisterProductOnly);
 
       if (needRegisterProductOnly) {
-        console.log("!!!", needRegisterProductOnly);
+        await GetSellerEmail();
         navigate("/s/signup/10");
         return;
       }
