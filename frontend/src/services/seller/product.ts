@@ -56,6 +56,28 @@ export const DecreaseProductStock = async (
   return data;
 };
 
+// GET: Get store reservation
+export const GetStoreReservation = async (productId: string) => {
+  const { data } = await sellerProductApi.get(
+    `/${productId}/stock/reservation`
+  );
+
+  return data;
+};
+
+// POST: Create or Update Stock Reservation
+export const UpdateStoreReservation = async (
+  productId: string,
+  newStock: number
+) => {
+  const { data } = await sellerProductApi.post(
+    `/${productId}/stock/reservation`,
+    { new_stock: newStock }
+  );
+
+  return data;
+};
+
 // GET: get product
 export const GetProduct = async (
   product_id: string

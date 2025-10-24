@@ -3,7 +3,11 @@ import CommonLoading from "@components/common/CommonLoading";
 import { CommonPkgNum } from "@components/seller/common";
 import { useToast } from "@context";
 import type { ProductRequestType } from "@interface";
-import { GetProduct, UpdateProduct } from "@services";
+import {
+  GetProduct,
+  GetStoreReservation,
+  UpdateStoreReservation,
+} from "@services";
 import { useDashboardStore } from "@store";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
@@ -22,7 +26,11 @@ const ChangePackageNum = () => {
   const load = async (id: string) => {
     try {
       const res = await GetProduct(id);
-      setPkg(res);
+      const stock = await GetStoreReservation(repProductId ?? "");
+
+      const initialStock = stock.new_stock ?? res.initial_stock;
+
+      setPkg({ ...res, initial_stock: initialStock });
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
@@ -55,13 +63,9 @@ const ChangePackageNum = () => {
       setIsLoading(false);
       return;
     }
-    const payload: ProductRequestType = {
-      ...pkg,
-      initial_stock: pkg?.initial_stock,
-    };
 
     try {
-      await UpdateProduct(repProductId, payload);
+      await UpdateStoreReservation(repProductId, pkg.initial_stock);
       showToast("패키지 기본값 변경에 성공했어요.", "success");
       navigate(-1);
     } catch (err) {
