@@ -33,7 +33,7 @@ export type OperationTimeType = {
   pickup_end_time: string;
   close_time: string;
   is_open_enabled: boolean;
-  is_currently_open: boolean;
+  is_currently_open?: boolean;
 };
 
 export type PaymentInfoType = {

@@ -145,10 +145,10 @@ const ChangeOperationInfo = () => {
       {items.map((item) => (
         <div
           key={item.to}
-          className="flex flex-row items-center justify-between"
+          className="flex flex-row items-center justify-between border-b-[1px] border-black/10 cursor-pointer"
         >
           <div
-            className="w-full bodyFont font-bold py-[20px] border-b-[1px] border-black/10 cursor-pointer"
+            className="w-full bodyFont font-bold py-[20px]"
             onClick={() => navigate(item.to)}
           >
             {item.label}

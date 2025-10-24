@@ -197,6 +197,15 @@ export const CreateOperationReservation = async (
   return data;
 };
 
+// DELETE: delete operation reservation
+export const DeleteOperationReservation = async () => {
+  const { data } = await sellerStoreSettingsApi.delete(
+    "/operation/reservation"
+  );
+
+  return data;
+};
+
 // PATCH: Update store payment
 export const UpdateStorePayment = async (
   body: StorePaymentType
