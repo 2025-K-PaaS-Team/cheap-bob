@@ -70,7 +70,6 @@ const CommonOpTime = ({ originForm, form, setForm }: OpProps) => {
   });
 
   useEffect(() => {
-    console.log(form);
     const next: Record<number, { open: string; close: string }> = {};
     form.forEach((f) => {
       const [oh, om] = parseTimeParts(f.open_time);
