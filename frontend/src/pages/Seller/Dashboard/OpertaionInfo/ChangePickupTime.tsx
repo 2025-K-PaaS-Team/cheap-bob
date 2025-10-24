@@ -57,6 +57,7 @@ const ChangePickupTime = () => {
         .map((d) => ({
           day_of_week: d.day_of_week,
           is_open_enabled: d.is_open_enabled,
+          is_currently_open: d.is_currently_open,
           open_time: d.open_time ?? "",
           close_time: d.close_time ?? "",
           pickup_start_time: d.pickup_start_time ?? "",
@@ -106,7 +107,8 @@ const ChangePickupTime = () => {
       const f = form.find((x) => x.day_of_week === d.day_of_week)!;
       return {
         day_of_week: d.day_of_week,
-        is_open_enabled: d.is_open_enabled, // 운영여부는 변경 안 함(원하면 f로 교체)
+        is_open_enabled: d.is_open_enabled,
+        is_currently_open: d.is_currently_open,
         open_time: d.open_time,
         close_time: d.close_time,
         pickup_start_time: f.pickup_start_time,

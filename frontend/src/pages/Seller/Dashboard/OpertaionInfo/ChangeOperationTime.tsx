@@ -46,6 +46,7 @@ const ChangeOperationTime = () => {
         .map((d) => ({
           day_of_week: d.day_of_week,
           is_open_enabled: d.is_open_enabled,
+          is_currently_open: d.is_currently_open,
           open_time: d.open_time,
           close_time: d.close_time,
           pickup_start_time: d.pickup_start_time ?? "",

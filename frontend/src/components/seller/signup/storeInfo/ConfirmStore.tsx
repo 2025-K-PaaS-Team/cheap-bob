@@ -1,13 +1,17 @@
 import { CommonBtn } from "@components/common";
-import type { SellerSignupProps } from "@interface";
+import { useNavigate, useParams } from "react-router-dom";
 
-const ConfirmStore = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+const ConfirmStore = () => {
+  const navigate = useNavigate();
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
+
   const handleClickNext = () => {
-    setPageIdx(pageIdx + 1);
+    navigate(`/s/signup/${pageIdx + 1}`);
   };
 
   const handleClickPrev = () => {
-    setPageIdx(pageIdx - 1);
+    navigate(`/s/signup/${pageIdx - 1}`);
   };
 
   return (
