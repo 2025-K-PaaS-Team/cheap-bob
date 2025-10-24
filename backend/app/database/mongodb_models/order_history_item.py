@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 from pydantic import Field
 
@@ -36,6 +36,8 @@ class OrderHistoryItem(Document):
     topping_types: Optional[str] = Field(None, max_length=500, description="선호 토핑 (콤마로 구분)")
     
     class Settings:
+        use_cache = True
+        cache_expiration_time = timedelta(seconds=10)
         name = "order_history_items"
         indexes = [
             [("customer_id", 1)],

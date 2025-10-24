@@ -1,7 +1,6 @@
 from beanie import Document as BeanieDocument
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pydantic import Field, field_validator
-from typing import Optional
 
 
 class Document(BeanieDocument):
@@ -17,8 +16,6 @@ class Document(BeanieDocument):
         return v
     
     class Settings:
-        use_cache = True
-        cache_expiration_time = timedelta(seconds=10)
         validate_on_save = True
         timezone_aware = True
         
