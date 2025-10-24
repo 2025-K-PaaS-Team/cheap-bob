@@ -6,14 +6,17 @@ from api.deps.auth import CurrentSellerDep
 from api.deps.repository import (
     StoreRepositoryDep,
     StoreProductInfoRepositoryDep,
-    ProductNutritionRepositoryDep
+    ProductNutritionRepositoryDep,
+    ProductStockReservationRepositoryDep
 )
 from repositories.store_product_info import StockUpdateResult
 from schemas.product import (
     ProductCreateRequest,
     ProductUpdateRequest,
     ProductResponse,
-    ProductNutritionRequest
+    ProductNutritionRequest,
+    ProductStockReservationRequest,
+    ProductStockReservationResponse
 )
 from utils.id_generator import generate_product_id
 from config.settings import settings
@@ -289,6 +292,134 @@ async def decrease_product_stock(
             )
 
 
+@router.get("/{product_id}/stock/reservation", response_model=ProductStockReservationResponse,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: ["상품을 찾을 수 없음", "재고 예약 정보를 찾을 수 없음"]
+    })
+)
+async def get_stock_reservation(
+    product_id: str,
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep,
+    reservation_repo: ProductStockReservationRepositoryDep
+):
+    """
+    상품 재고 예약 정보 조회
+    """
+    
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    product = await product_repo.get_by_product_id(product_id)
+    
+    if not product or product.store_id != store_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="상품을 찾을 수 없습니다"
+        )
+    
+    reservation = await reservation_repo.get_by_product_id(product_id)
+    
+    if not reservation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="재고 예약 정보를 찾을 수 없습니다"
+        )
+    
+    return ProductStockReservationResponse(
+        product_id=reservation.product_id,
+        initial_stock=reservation.initial_stock,
+        new_stock=reservation.new_stock,
+        reserved_at=reservation.reserved_at
+    )
+
+
+@router.post("/{product_id}/stock/reservation", response_model=ProductStockReservationResponse, status_code=status.HTTP_201_CREATED,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: "상품을 찾을 수 없음",
+        400: "잘못된 재고 예약 요청"
+    })
+)
+async def create_or_update_stock_reservation(
+    product_id: str,
+    request: ProductStockReservationRequest,
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep,
+    reservation_repo: ProductStockReservationRepositoryDep
+):
+    """
+    상품 재고 예약 생성 또는 업데이트
+    """
+    
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    product = await product_repo.get_by_product_id(product_id)
+    
+    if not product or product.store_id != store_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="상품을 찾을 수 없습니다"
+        )
+    
+    reservation = await reservation_repo.create_reservation(
+        product_id=product_id,
+        initial_stock=product.initial_stock,
+        new_stock=request.new_stock
+    )
+    
+    return ProductStockReservationResponse(
+        product_id=reservation.product_id,
+        initial_stock=reservation.initial_stock,
+        new_stock=reservation.new_stock,
+        reserved_at=reservation.reserved_at
+    )
+
+
+@router.delete("/{product_id}/stock/reservation", status_code=status.HTTP_204_NO_CONTENT,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: ["상품을 찾을 수 없음", "재고 예약 정보를 찾을 수 없음"]
+    })
+)
+async def delete_stock_reservation(
+    product_id: str,
+    current_user: CurrentSellerDep,
+    store_repo: StoreRepositoryDep,
+    product_repo: StoreProductInfoRepositoryDep,
+    reservation_repo: ProductStockReservationRepositoryDep
+):
+    """
+    상품 재고 예약 삭제
+    """
+    
+    seller_email = current_user["sub"]
+    
+    store_id = await get_store_id_by_email(seller_email, store_repo)
+    
+    product = await product_repo.get_by_product_id(product_id)
+    
+    if not product or product.store_id != store_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="상품을 찾을 수 없습니다"
+        )
+    
+    deleted = await reservation_repo.delete_by_product_id(product_id)
+    
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="재고 예약 정보를 찾을 수 없습니다"
+        )
+        
+        
 @router.post("/{product_id}/nutrition", response_model=ProductResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],

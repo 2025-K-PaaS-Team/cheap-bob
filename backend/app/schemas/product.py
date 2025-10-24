@@ -1,4 +1,5 @@
 from typing import Optional, List
+from datetime import datetime
 from pydantic import BaseModel, Field, field_validator
 
 from schemas.food_preferences import NutritionType
@@ -47,3 +48,16 @@ class ProductsResponse(BaseModel):
 class ProductNutritionRequest(BaseModel):
     """상품 영양 정보 추가/삭제 요청 스키마"""
     nutrition_types: List[NutritionType] = Field(..., description="추가하거나 삭제할 영양 타입 목록", min_length=1)
+
+
+class ProductStockReservationRequest(BaseModel):
+    """상품 재고 예약 요청 스키마"""
+    new_stock: int = Field(..., description="변경할 재고 수량", ge=0)
+
+
+class ProductStockReservationResponse(BaseModel):
+    """상품 재고 예약 응답 스키마"""
+    product_id: str = Field(..., description="상품 고유 ID")
+    initial_stock: int = Field(..., description="초기 재고 수량")
+    new_stock: int = Field(..., description="변경할 재고 수량")
+    reserved_at: datetime = Field(..., description="예약 일시")
