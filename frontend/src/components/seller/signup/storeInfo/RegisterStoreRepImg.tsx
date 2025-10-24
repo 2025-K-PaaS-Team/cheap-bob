@@ -1,10 +1,13 @@
 import { CommonBtn, CommonModal } from "@components/common";
-import type { SellerSignupProps } from "@interface";
 import { useSignupImageStore, useSignupStore } from "@store";
 import { validateLength, validationRules } from "@utils";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const RegisterStoreRepImg = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+const RegisterStoreRepImg = () => {
+  const navigate = useNavigate();
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
   const { form } = useSignupStore();
   const { form: imgForm, setForm: setImgForm } = useSignupImageStore();
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -30,11 +33,11 @@ const RegisterStoreRepImg = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       setShowModal(true);
       return;
     }
-    setPageIdx(pageIdx + 1);
+    navigate(`/s/signup/${pageIdx + 1}`);
   };
 
   const handleClickPrev = () => {
-    setPageIdx(pageIdx - 1);
+    navigate(`/s/signup/${pageIdx - 1}`);
   };
 
   const handleClickUpload = () => {

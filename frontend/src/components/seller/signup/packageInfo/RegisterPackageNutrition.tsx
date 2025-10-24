@@ -3,13 +3,12 @@ import { NutritionList } from "@constant";
 import type { NutritionBase, SellerSignupPkgProps } from "@interface";
 import { validateSelect, validationRules } from "@utils";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const RegisterPackageNutrition = ({
-  pageIdx,
-  setPageIdx,
-  pkg,
-  setPkg,
-}: SellerSignupPkgProps) => {
+const RegisterPackageNutrition = ({ pkg, setPkg }: SellerSignupPkgProps) => {
+  const navigate = useNavigate();
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const { packageSelect } = validationRules;
@@ -26,11 +25,11 @@ const RegisterPackageNutrition = ({
       setShowModal(true);
       return;
     }
-    setPageIdx(pageIdx + 1);
+    navigate(`/s/signup/${pageIdx + 1}`);
   };
 
   const handleClickPrev = () => {
-    setPageIdx(pageIdx - 1);
+    navigate(`/s/signup/${pageIdx - 1}`);
   };
 
   const handleClick = (key: NutritionBase) => {

@@ -1,13 +1,16 @@
 import { CommonBtn, CommonModal } from "@components/common";
-import type { SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
 import { validateLength, validationRules } from "@utils";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const RegisterName = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+const RegisterName = () => {
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
   const { form, setForm } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const navigate = useNavigate();
 
   const handleClickNext = () => {
     const { storeName } = validationRules;
@@ -18,7 +21,7 @@ const RegisterName = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       setShowModal(true);
       return;
     }
-    setPageIdx(pageIdx + 1);
+    navigate(`/s/signup/${pageIdx + 1}`);
   };
 
   return (

@@ -4,13 +4,14 @@ import type {
   PageComponent,
   ProductRequestType,
   SellerSignupPkgProps,
-  SellerSignupProps,
 } from "@interface";
 import { useState, type JSX } from "react";
+import { useParams } from "react-router-dom";
 
 const Signup = () => {
-  const [pageIdx, setPageIdx] = useState<number>(0);
-  const CurrentPage = pages[pageIdx];
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const initialPageIdx = Number(paramPageIdx) || 0;
+  const CurrentPage = pages[initialPageIdx];
   const isProgressBar = !notProgressBarPages.includes(CurrentPage);
   const [pkg, setPkg] = useState<ProductRequestType>({
     product_name: "",
@@ -21,8 +22,7 @@ const Signup = () => {
     nutrition_types: [],
   });
 
-  const baseProps: SellerSignupProps = { pageIdx, setPageIdx };
-  const pkgProps: SellerSignupPkgProps = { ...baseProps, pkg, setPkg };
+  const pkgProps: SellerSignupPkgProps = { pkg, setPkg };
 
   // type guard
   const isPkgPage = (
@@ -35,13 +35,13 @@ const Signup = () => {
   if (isPkgPage(CurrentPage)) {
     RenderComponent = <CurrentPage {...pkgProps} />;
   } else {
-    const Component = CurrentPage as (props: SellerSignupProps) => JSX.Element;
-    RenderComponent = <Component {...baseProps} />;
+    const Component = CurrentPage as () => JSX.Element;
+    RenderComponent = <Component />;
   }
 
   return (
     <div className="h-full flex flex-col">
-      {isProgressBar && <ProgressBar pageIdx={pageIdx} />}
+      {isProgressBar && <ProgressBar />}
       <div className="flex flex-1">{RenderComponent}</div>
     </div>
   );

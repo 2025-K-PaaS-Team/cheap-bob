@@ -1,12 +1,13 @@
 import { CommonBtn } from "@components/common";
-import type { SellerSignupProps } from "@interface";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-const SuccessSetting = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+const SuccessSetting = () => {
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
   const navigate = useNavigate();
   const handleClickNext = () => {
     if (pageIdx < 15) {
-      setPageIdx(pageIdx + 1);
+      navigate(`/s/signup/${pageIdx + 1}`);
     } else {
       navigate("/s/dashboard");
     }

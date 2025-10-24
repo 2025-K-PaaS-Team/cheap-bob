@@ -10,13 +10,22 @@ const LoginCallback = () => {
     try {
       const conflict = searchParams.get("conflict");
       const status = searchParams.get("status");
+      const needRegisterProductOnly = status == "product";
       const needSignup = status !== "complete";
+
+      console.log("needRegisterProductOnly", needRegisterProductOnly);
+
+      if (needRegisterProductOnly) {
+        console.log("!!!", needRegisterProductOnly);
+        navigate("/s/signup/10");
+        return;
+      }
 
       if (conflict == "1") {
         navigate("/auth/fail");
       } else {
         if (needSignup) {
-          navigate(loginRole == "customer" ? "/c/signup" : "/s/signup");
+          navigate(loginRole == "customer" ? "/c/signup" : "/s/signup/0");
         } else {
           navigate(loginRole == "customer" ? "/c/stores" : "/s/dashboard");
         }
