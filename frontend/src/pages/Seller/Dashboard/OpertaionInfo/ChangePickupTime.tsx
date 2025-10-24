@@ -9,7 +9,14 @@ import {
   GetStoreOpReservation,
 } from "@services";
 import { CreateOperationReservation } from "@services";
-import { formatErrMsg, minusOffset, pad2, toHM } from "@utils";
+import {
+  formatErrMsg,
+  fromMinutes,
+  minusOffset,
+  pad2,
+  toHM,
+  toMinutes,
+} from "@utils";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -22,7 +29,6 @@ const ChangePickupTime = () => {
   const [modiForm, setModiForm] = useState<OperationTimeType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // 오프셋(마감에서 몇 분 전부터 시작/폐기)
   const [pickupStartOffset, _setPickupStartOffset] = useState<Offset>({
     hour: 0,
     min: 0,
@@ -141,16 +147,34 @@ const ChangePickupTime = () => {
       return;
     }
 
-    const merged: OperationTimeType[] = orig.map((d) => {
+    const startOffset = pickupStartOffset.hour * 60 + pickupStartOffset.min;
+    const endOffset = pickupDiscardOffset.hour * 60 + pickupDiscardOffset.min;
+
+    const merged: StoreOperationType = orig.map((d) => {
       const f = modiForm.find((x) => x.day_of_week === d.day_of_week)!;
+      const closeMin = toMinutes(f.close_time);
+
+      if (closeMin === null) {
+        return {
+          ...d,
+          is_open_enabled: f.is_open_enabled,
+          open_time: f.open_time,
+          close_time: f.close_time,
+          pickup_start_time: d.pickup_start_time,
+          pickup_end_time: d.pickup_end_time,
+        };
+      }
+
+      const pickupStartMin = Math.max(closeMin - startOffset, 0);
+      const pickupEndMin = Math.max(closeMin - endOffset, 0);
+
       return {
-        day_of_week: d.day_of_week,
-        is_open_enabled: d.is_open_enabled,
-        is_currently_open: d.is_currently_open,
-        open_time: d.open_time,
-        close_time: d.close_time,
-        pickup_start_time: f.pickup_start_time,
-        pickup_end_time: f.pickup_end_time,
+        ...d,
+        is_open_enabled: f.is_open_enabled,
+        open_time: f.open_time,
+        close_time: f.close_time,
+        pickup_start_time: fromMinutes(pickupStartMin),
+        pickup_end_time: fromMinutes(pickupEndMin),
       };
     });
 
