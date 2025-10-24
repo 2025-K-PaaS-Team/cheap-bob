@@ -1,21 +1,14 @@
 import { CommonBtn } from "@components/common";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const RoleCheck = () => {
+const Fallback = () => {
   const navigate = useNavigate();
   const role = localStorage.getItem("loginRole");
-
-  useEffect(() => {
-    if (!role) {
-      navigate("/c");
-    }
-  }, []);
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center text-center mx-auto w-[calc(100%-40px)] gap-y-[28px]">
       <img src="/icon/error.svg" alt="errorIcon" className="w-15 mb-5" />
-      <div className="titleFont font-bold">확인해주세요</div>
+      <div className="titleFont font-bold">404</div>
       <div className="text-[16px]">
         현재 {role === "customer" ? "고객" : "점주"} 계정으로 로그인이 되어 있는
         것 같아요
@@ -38,4 +31,4 @@ const RoleCheck = () => {
   );
 };
 
-export default RoleCheck;
+export default Fallback;

@@ -11,6 +11,10 @@ const attachInterceptors = (instance: AxiosInstance) => {
       const isHome =
         window.location.pathname === "/c" || window.location.pathname === "/s";
 
+      if (window.location.pathname === "/c" && role === "seller") {
+        window.location.href = "/s";
+      }
+
       if (status === 401 && !isHome) {
         if (role === "seller") window.location.href = "/s";
         else window.location.href = "/c";
