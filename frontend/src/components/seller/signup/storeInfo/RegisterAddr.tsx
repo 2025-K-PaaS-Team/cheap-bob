@@ -1,11 +1,15 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { NearStation, PostalCode } from "@components/seller/dashboard";
-import type { AddressInfoType, SellerSignupProps } from "@interface";
+import type { AddressInfoType } from "@interface";
 import { useSignupStore } from "@store";
 import { validationRules } from "@utils";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const RegisterAddr = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+const RegisterAddr = () => {
+  const navigate = useNavigate();
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
   const { form } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -41,11 +45,11 @@ const RegisterAddr = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       return;
     }
 
-    setPageIdx(pageIdx + 1);
+    navigate(`/s/signup/${pageIdx + 1}`);
   };
 
   const handleClickPrev = () => {
-    setPageIdx(pageIdx - 1);
+    navigate(`/s/signup/${pageIdx - 1}`);
   };
 
   return (

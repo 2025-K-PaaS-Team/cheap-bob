@@ -1,9 +1,8 @@
-type ProgressBarProps = {
-  pageIdx: number;
-};
+import { useParams } from "react-router-dom";
 
-const ProgressBar = ({ pageIdx }: ProgressBarProps) => {
+const ProgressBar = () => {
   const items = ["매장 등록", "운영 정보 등록", "패키지 등록"];
+  const { pageIdx } = useParams<{ pageIdx?: string }>();
 
   const handleStep = (pageIdx: number): number => {
     if (pageIdx < 7) {
@@ -15,7 +14,7 @@ const ProgressBar = ({ pageIdx }: ProgressBarProps) => {
     }
   };
 
-  const currentStep = handleStep(pageIdx);
+  const currentStep = handleStep(Number(pageIdx));
 
   return (
     <div className="grid grid-cols-3 text-center">

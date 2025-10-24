@@ -3,13 +3,12 @@ import { CommonPrice } from "@components/seller/common";
 import type { SellerSignupPkgProps } from "@interface";
 import { getRoundedPrice, validateNum, validationRules } from "@utils";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const RegisterPackagePrice = ({
-  pageIdx,
-  setPageIdx,
-  pkg,
-  setPkg,
-}: SellerSignupPkgProps) => {
+const RegisterPackagePrice = ({ pkg, setPkg }: SellerSignupPkgProps) => {
+  const navigate = useNavigate();
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const { packagePrice } = validationRules;
@@ -33,11 +32,11 @@ const RegisterPackagePrice = ({
       return;
     }
 
-    setPageIdx(pageIdx + 1);
+    navigate(`/s/signup/${pageIdx + 1}`);
   };
 
   const handleClickPrev = () => {
-    setPageIdx(pageIdx - 1);
+    navigate(`/s/signup/${pageIdx - 1}`);
   };
 
   return (

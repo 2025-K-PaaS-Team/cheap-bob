@@ -4,21 +4,20 @@ import type { SellerSignupPkgProps } from "@interface";
 import { createProduct } from "@services";
 import { formatErrMsg, validateNum, validationRules } from "@utils";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const RegisterPackageNum = ({
-  pageIdx,
-  setPageIdx,
-  pkg,
-  setPkg,
-}: SellerSignupPkgProps) => {
+const RegisterPackageNum = ({ pkg, setPkg }: SellerSignupPkgProps) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const { packageStock } = validationRules;
+  const navigate = useNavigate();
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
 
   const handleRegisterProduct = async () => {
     try {
       await createProduct(pkg);
-      setPageIdx(pageIdx + 1);
+      navigate(`/s/signup/${pageIdx + 1}`);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
@@ -34,7 +33,7 @@ const RegisterPackageNum = ({
   };
 
   const handleClickPrev = () => {
-    setPageIdx(pageIdx - 1);
+    navigate(`/s/signup/${pageIdx - 1}`);
   };
   return (
     <div className="mx-[20px] my-[20px] flex flex-col flex-1 gap-y-[40px]">

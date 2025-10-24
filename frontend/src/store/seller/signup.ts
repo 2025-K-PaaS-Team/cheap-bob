@@ -37,6 +37,7 @@ const makeDefaultOpTimes = () =>
     pickup_end_time: "",
     close_time: DEFAULT_CLOSE,
     is_open_enabled: false,
+    is_currently_open: false,
   }));
 
 export const useSignupStore = create<SignupState>((set) => ({

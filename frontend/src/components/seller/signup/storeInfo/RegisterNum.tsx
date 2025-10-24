@@ -1,5 +1,4 @@
 import { CommonBtn, CommonModal } from "@components/common";
-import type { SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
 import {
   validatePattern,
@@ -9,8 +8,12 @@ import {
   formatPhoneNumber,
 } from "@utils";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+const RegisterNum = () => {
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
+  const navigate = useNavigate();
   const { form, setForm } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -36,11 +39,11 @@ const RegisterNum = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       return;
     }
 
-    setPageIdx(pageIdx + 1);
+    navigate(`/s/signup/${pageIdx + 1}`);
   };
 
   const handleClickPrev = () => {
-    setPageIdx(pageIdx - 1);
+    navigate(`/s/signup/${pageIdx - 1}`);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

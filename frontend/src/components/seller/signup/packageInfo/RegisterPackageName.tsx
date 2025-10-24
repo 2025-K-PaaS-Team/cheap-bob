@@ -2,16 +2,15 @@ import { CommonBtn, CommonModal } from "@components/common";
 import type { SellerSignupPkgProps } from "@interface";
 import { validateLength, validationRules } from "@utils";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const RegisterPackageName = ({
-  pageIdx,
-  setPageIdx,
-  pkg,
-  setPkg,
-}: SellerSignupPkgProps) => {
+const RegisterPackageName = ({ pkg, setPkg }: SellerSignupPkgProps) => {
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const { packageName } = validationRules;
+  const navigate = useNavigate();
 
   const handleClickNext = () => {
     if (
@@ -26,7 +25,7 @@ const RegisterPackageName = ({
       return;
     }
 
-    setPageIdx(pageIdx + 1);
+    navigate(`/s/signup/${pageIdx + 1}`);
   };
 
   console.log(pkg);

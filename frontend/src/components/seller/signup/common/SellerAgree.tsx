@@ -1,8 +1,10 @@
 import CommonAgree from "@components/customer/signup/Agree";
-import type { SellerSignupProps } from "@interface";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-const SellerAgree = ({ setPageIdx, pageIdx }: SellerSignupProps) => {
+const SellerAgree = () => {
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
+
   const navigate = useNavigate();
   // handleClickBefore
   const handleClickBefore = () => {
@@ -28,7 +30,7 @@ const SellerAgree = ({ setPageIdx, pageIdx }: SellerSignupProps) => {
       </div>
 
       {/* common agree component */}
-      <CommonAgree onNext={() => setPageIdx(pageIdx + 1)} />
+      <CommonAgree onNext={() => navigate(`/s/signup/${pageIdx + 1}`)} />
     </div>
   );
 };

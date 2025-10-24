@@ -127,7 +127,7 @@ const App = () => {
             {/* home */}
             <Route index element={<SellerHome />} />
             {/* signup */}
-            <Route path="signup" element={<SellerSignup />} />
+            <Route path="signup/:pageIdx" element={<SellerSignup />} />
             {/* dashboard = store management */}
             <Route path="dashboard" element={<Dashboard />}></Route>
             {/* order management */}

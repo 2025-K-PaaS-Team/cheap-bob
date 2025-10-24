@@ -1,14 +1,18 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { CommonOpTime } from "@components/seller/common";
-import type { OperationTimeType, SellerSignupProps } from "@interface";
+import type { OperationTimeType } from "@interface";
 import { useSignupStore } from "@store";
 import { validateLength, validationRules } from "@utils";
 import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+const RegisterOpTime = () => {
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
   const { form, setForm } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
+  const navigate = useNavigate();
 
   const getValid = (ops: OperationTimeType[]) => {
     return ops.some((op) => op.is_open_enabled == true);
@@ -27,7 +31,7 @@ const RegisterOpTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       setShowModal(true);
       return;
     }
-    setPageIdx(pageIdx + 1);
+    navigate(`/s/signup/${pageIdx + 1}`);
   };
 
   return (

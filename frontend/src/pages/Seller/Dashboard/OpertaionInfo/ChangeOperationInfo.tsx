@@ -1,7 +1,7 @@
 import { CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import { idxToDow } from "@constant";
-import type { StoreOperationType } from "@interface";
+import type { OperationReservationType, StoreOperationType } from "@interface";
 import { GetStoreOperation, GetStoreOpReservation } from "@services";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -22,7 +22,8 @@ const ChangeOperationInfo = () => {
   ];
 
   const [op, setOp] = useState<StoreOperationType>([]);
-  const [reservation, setReservation] = useState([]);
+  const [reservation, setReservation] =
+    useState<OperationReservationType | null>(null);
   const [selectedDow, setSelectedDow] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -51,7 +52,7 @@ const ChangeOperationInfo = () => {
   const handleGetStoreReservation = async () => {
     try {
       const res = await GetStoreOpReservation();
-      setReservation(res.modifications);
+      setReservation(res);
     } catch {
       setModalMsg("운영 변경 예약 정보를 불러오는 것에 실패했습니다.");
       setShowModal(true);
@@ -68,6 +69,8 @@ const ChangeOperationInfo = () => {
   if (isLoading) {
     return <CommonLoading type="data" isLoading={isLoading} />;
   }
+
+  console.log(reservation?.modification_type);
 
   return (
     <div className="mx-[35px]">
@@ -115,7 +118,7 @@ const ChangeOperationInfo = () => {
                 <div className="text-center">{hhmm(selectedOp.open_time)}</div>
               </div>
               <div className="flex flex-row">
-                <div className="w-[120px]">픽업 확정 시간</div>
+                <div className="w-[120px]">픽업 시작 시간</div>
                 <div className="text-center">
                   {hhmm(selectedOp.pickup_start_time)}
                 </div>
@@ -142,19 +145,28 @@ const ChangeOperationInfo = () => {
       {items.map((item) => (
         <div
           key={item.to}
-          className="flex flex-row items-center justify-between"
+          className="flex flex-row items-center justify-between border-b-[1px] border-black/10 cursor-pointer"
         >
           <div
-            className="w-full bodyFont font-bold py-[20px] border-b-[1px] border-black/10 cursor-pointer"
+            className="w-full bodyFont font-bold py-[20px]"
             onClick={() => navigate(item.to)}
           >
             {item.label}
           </div>
-          {reservation.length !== 0 && item.label === "운영 시간 변경" && (
-            <div className="tagFont font-bold bg-main-pale border border-main-deep text-main-deep rounded-sm py-[8px] px-[16px]">
-              변경 예약중
-            </div>
-          )}
+          {(reservation?.modification_type == 2 ||
+            reservation?.modification_type == 3) &&
+            item.label === "픽업 시간 변경" && (
+              <div className="tagFont w-fit text-nowrap font-bold bg-main-pale border border-main-deep text-main-deep rounded-sm py-[8px] px-[16px]">
+                변경 예약중
+              </div>
+            )}
+          {(reservation?.modification_type == 1 ||
+            reservation?.modification_type == 3) &&
+            item.label === "영업 시간 변경" && (
+              <div className="tagFont w-fit text-nowrap font-bold bg-main-pale border border-main-deep text-main-deep rounded-sm py-[8px] px-[16px]">
+                변경 예약중
+              </div>
+            )}
         </div>
       ))}
 

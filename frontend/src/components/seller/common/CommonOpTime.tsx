@@ -3,20 +3,20 @@ import type { OperationTimeType } from "@interface";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 interface OpProps {
+  originForm?: OperationTimeType[];
   form: OperationTimeType[];
   setForm: (times: OperationTimeType[]) => void;
 }
 
-const CommonOpTime = ({ form, setForm }: OpProps) => {
+const CommonOpTime = ({ originForm, form, setForm }: OpProps) => {
   const [isBatch, setIsBatch] = useState(false);
 
-  // --- 초기 스냅샷(초기화 시 복원용) ---
   const initialFormRef = useRef<OperationTimeType[] | null>(null);
   useEffect(() => {
-    if (!initialFormRef.current && form?.length) {
-      initialFormRef.current = JSON.parse(JSON.stringify(form));
+    if (!initialFormRef.current && originForm?.length) {
+      initialFormRef.current = JSON.parse(JSON.stringify(originForm));
     }
-  }, [form]);
+  }, [originForm]);
 
   // --- 표시용 정렬 ---
   const sortedForm = useMemo(
@@ -24,7 +24,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     [form]
   );
 
-  // --- 유틸 ---
   const parseTimeParts = (time?: string) => {
     if (!time) return ["", ""];
     const [h = "", m = ""] = time.split(":");
@@ -48,7 +47,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
   };
 
-  // --- 요일 토글 ---
   const handleClickDays = (idx: number) => {
     const next = form.map((f) =>
       f.day_of_week === idx ? { ...f, is_open_enabled: !f.is_open_enabled } : f
@@ -56,7 +54,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     setForm(next);
   };
 
-  // --- 로컬 입력 버퍼(rawTimeMap) ---
   const [rawTimeMap, setRawTimeMap] = useState<
     Record<number, { open: string; close: string }>
   >(() => {
@@ -72,7 +69,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     return init;
   });
 
-  // form이 바뀌면 raw 버퍼 동기화
   useEffect(() => {
     console.log(form);
     const next: Record<number, { open: string; close: string }> = {};
@@ -87,7 +83,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     setRawTimeMap(next);
   }, [form]);
 
-  // --- 시간 확정 커밋: "hhmm" -> "HH:MM:SS" ---
   const commitTime = (
     dayIdx: number,
     which: "open" | "close",
@@ -116,7 +111,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     );
   };
 
-  // 입력 중: raw 버퍼만 수정
   const handleRawChange = (
     dayIdx: number,
     which: "open" | "close",
@@ -143,7 +137,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     if (e.key === "Enter") e.currentTarget.blur();
   };
 
-  // --- 배치 입력: "입력 즉시" 운영 요일에 반영 ---
   const [batchOpen, setBatchOpen] = useState<[string, string]>(["", ""]);
   const [batchClose, setBatchClose] = useState<[string, string]>(["", ""]);
 
@@ -159,7 +152,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
       next[part === "hour" ? 0 : 1] = v;
       setBatchOpen(next);
 
-      // 입력 즉시 반영
       const openStr = makeTimeOrBlank(next[0], next[1]);
       setForm(
         form.map((f) => (f.is_open_enabled ? { ...f, open_time: openStr } : f))
@@ -169,7 +161,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
       next[part === "hour" ? 0 : 1] = v;
       setBatchClose(next);
 
-      // 입력 즉시 반영
       const closeStr = makeTimeOrBlank(next[0], next[1]);
       setForm(
         form.map((f) =>
@@ -179,7 +170,6 @@ const CommonOpTime = ({ form, setForm }: OpProps) => {
     }
   };
 
-  // --- 초기화(초기 스냅샷 복원) ---
   const handleResetTimesOnly = () => {
     const base = initialFormRef.current ?? form;
     const next = form.map((f) => {

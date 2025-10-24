@@ -10,19 +10,12 @@ import type {
 } from "../common/base";
 import type { ProductRequestType } from "@interface/common/product";
 
-export interface SellerSignupProps {
-  pageIdx: number;
-  setPageIdx: React.Dispatch<React.SetStateAction<number>>;
-}
-
-export interface SellerSignupPkgProps extends SellerSignupProps {
+export interface SellerSignupPkgProps {
   pkg: ProductRequestType;
   setPkg: React.Dispatch<React.SetStateAction<ProductRequestType>>;
 }
 
-export type PageComponent =
-  | ((props: SellerSignupProps) => JSX.Element)
-  | ((props: SellerSignupPkgProps) => JSX.Element);
+export type PageComponent = (props: SellerSignupPkgProps) => JSX.Element;
 
 export type SignupRequestType = StoreInfoType & {
   sns_info: SnsInfoType;

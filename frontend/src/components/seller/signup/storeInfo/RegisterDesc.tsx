@@ -1,10 +1,13 @@
 import { CommonBtn, CommonModal } from "@components/common";
-import type { SellerSignupProps } from "@interface";
 import { useSignupStore } from "@store";
 import { validateLength, validationRules } from "@utils";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+const RegisterDesc = () => {
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
+  const navigate = useNavigate();
   const { form, setForm } = useSignupStore();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -22,11 +25,11 @@ const RegisterDesc = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
       setShowModal(true);
       return;
     }
-    setPageIdx(pageIdx + 1);
+    navigate(`/s/signup/${pageIdx + 1}`);
   };
 
   const handleClickPrev = () => {
-    setPageIdx(pageIdx - 1);
+    navigate(`/s/signup/${pageIdx - 1}`);
   };
 
   return (

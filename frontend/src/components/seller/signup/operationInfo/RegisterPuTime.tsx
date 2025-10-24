@@ -1,12 +1,12 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import { CommonPuTime } from "@components/seller/common";
-import type { SellerSignupProps } from "@interface";
 import { registerStore, registerStoreImg } from "@services";
 import { useSignupImageStore, useSignupStore } from "@store";
 import { formatErrMsg } from "@utils";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
+const RegisterPuTime = () => {
   const {
     form,
     setForm,
@@ -15,9 +15,12 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     pickupDiscardOffset,
     setPickupDiscardOffset,
   } = useSignupStore();
+  const { pageIdx: paramPageIdx } = useParams<{ pageIdx?: string }>();
+  const pageIdx = Number(paramPageIdx) ?? 0;
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const { form: imgForm } = useSignupImageStore();
+  const navigate = useNavigate();
   const startOffsetMin =
     (pickupStartOffset?.hour ?? 0) * 60 + (pickupStartOffset?.min ?? 0);
 
@@ -52,7 +55,7 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
     try {
       await handleRegisterStore();
       await handleRegisterStoreImg();
-      setPageIdx(pageIdx + 1);
+      navigate(`/s/signup/${pageIdx + 1}`);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
@@ -60,7 +63,7 @@ const RegisterPuTime = ({ pageIdx, setPageIdx }: SellerSignupProps) => {
   };
 
   const handleClickPrev = () => {
-    setPageIdx(pageIdx - 1);
+    navigate(`/s/signup/${pageIdx - 1}`);
   };
 
   return (

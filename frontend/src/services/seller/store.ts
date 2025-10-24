@@ -178,11 +178,12 @@ export const GetStoreOperation = async (): Promise<StoreOperationType> => {
 };
 
 // GET: get store operation reservation
-export const GetStoreOpReservation = async () => {
-  const { data } = await sellerStoreSettingsApi.get("/operation/reservation");
+export const GetStoreOpReservation =
+  async (): Promise<OperationReservationType> => {
+    const { data } = await sellerStoreSettingsApi.get("/operation/reservation");
 
-  return data;
-};
+    return data;
+  };
 
 // POST: create operation reservation
 export const CreateOperationReservation = async (
@@ -191,6 +192,15 @@ export const CreateOperationReservation = async (
   const { data } = await sellerStoreSettingsApi.post(
     "/operation/reservation",
     res
+  );
+
+  return data;
+};
+
+// DELETE: delete operation reservation
+export const DeleteOperationReservation = async () => {
+  const { data } = await sellerStoreSettingsApi.delete(
+    "/operation/reservation"
   );
 
   return data;
