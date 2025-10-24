@@ -28,3 +28,7 @@ export { default as WithdrawCancel } from "./Common/Withdraw/WithdrawCancel";
 // docs
 export { default as TermsOfService } from "./Common/Docs/TermsOfService";
 export { default as Privacy } from "./Common/Docs/Privacy";
+
+// fallback
+export { default as Fallback } from "./Common/Fallback/Fallback";
+export { default as RouteHome } from "./Common/Fallback/RouteHome";

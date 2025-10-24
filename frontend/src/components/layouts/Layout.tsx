@@ -52,6 +52,7 @@ const Layout = () => {
     path.startsWith("/auth");
 
   const notHeader =
+    path === "/" ||
     path === "/c" ||
     matchPath("/c/stores/:storeId", path) ||
     matchPath("/c/stores/:storeId/desc", path) ||

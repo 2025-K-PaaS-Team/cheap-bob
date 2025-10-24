@@ -206,6 +206,13 @@ export const DeleteOperationReservation = async () => {
   return data;
 };
 
+// GET: get store payment
+export const GetStorePayment = async (): Promise<StorePaymentResponseType> => {
+  const { data } = await sellerStoreSettingsApi.get("/payment");
+
+  return data;
+};
+
 // PATCH: Update store payment
 export const UpdateStorePayment = async (
   body: StorePaymentType

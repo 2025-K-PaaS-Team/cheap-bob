@@ -24,6 +24,8 @@ import {
   StoreDesc,
   Privacy,
   TermsOfService,
+  Fallback,
+  RouteHome,
 } from "@pages";
 import {
   ChangeOperationInfo,
@@ -78,10 +80,17 @@ const App = () => {
 
           {/* docs */}
           <Route path="/docs" element={<Layout />}>
+            <Route index element={<Navigate to="/" replace />} />
             {/* tos */}
             <Route path="tos" element={<TermsOfService />} />
             {/* privacy policy */}
             <Route path="privacy" element={<Privacy />} />
+          </Route>
+
+          {/* fallback */}
+          <Route path="/" element={<Layout />}>
+            <Route index element={<RouteHome />} />
+            <Route path="404" element={<Fallback />} />
           </Route>
 
           {/* customer side */}
@@ -173,7 +182,7 @@ const App = () => {
           </Route>
 
           {/* global fallback */}
-          <Route path="*" element={<Navigate to="/c" replace />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
       </BrowserRouter>
     </ToastProvider>
