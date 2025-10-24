@@ -31,3 +31,24 @@ export const minutesToOffset = (mins: number | null): Offset => {
   const m = ((mins % 1440) + 1440) % 1440;
   return { hour: Math.floor(m / 60), min: m % 60 };
 };
+
+export const pad2 = (n: number) => String(n).padStart(2, "0");
+
+export const toHM = (t?: string) => {
+  const [h = "0", m = "0"] = (t || "").split(":");
+  return { h: Number(h) || 0, m: Number(m) || 0 };
+};
+
+export const minusOffset = (h: number, m: number, oh: number, om: number) => {
+  const base = h * 60 + m;
+  const off = (oh * 60 + om) % 1440;
+  const x = (((base - off) % 1440) + 1440) % 1440;
+  return { h: Math.floor(x / 60), m: x % 60 };
+};
+
+export const clampNum = (raw: string, max: number) => {
+  const v = raw.replace(/\D/g, "");
+  if (!v) return 0;
+  const n = Math.min(max, Math.max(0, parseInt(v.slice(-2), 10) || 0));
+  return n;
+};

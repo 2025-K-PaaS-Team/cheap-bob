@@ -3,7 +3,7 @@ import type { OperationTimeType } from "@interface";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 interface OpProps {
-  originForm: OperationTimeType[];
+  originForm?: OperationTimeType[];
   form: OperationTimeType[];
   setForm: (times: OperationTimeType[]) => void;
 }
