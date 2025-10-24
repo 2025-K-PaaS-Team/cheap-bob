@@ -89,40 +89,13 @@ class StoreOperationReservationRequest(BaseModel):
         return self
 
 
-class StoreOperationReservationUpdateRequest(BaseModel):
-    """운영 정보 예약 수정 요청"""
-    operation_times: List[StoreOperationTime] = Field(
-        ..., 
-        min_length=7, 
-        max_length=7,
-        description="요일별 운영 시간 (월요일부터 일요일까지 7개 필수)"
-    )
-    
-    @model_validator(mode='after')
-    def validate_all_days(self):
-        # 요일 중복 검사
-        days = [op.day_of_week for op in self.operation_times]
-        if len(set(days)) != 7:
-            raise ValueError("모든 요일(0-6)에 대한 정보가 필요합니다.")
-        
-        # 0-6 범위 확인
-        if set(days) != set(range(7)):
-            missing_days = set(range(7)) - set(days)
-            raise ValueError(f"누락된 요일이 있습니다: {sorted(missing_days)}")
-        
-        return self
-
-
 class StoreOperationModificationResponse(BaseModel):
     """운영 정보 수정 예약 응답"""
-    modification_id: int = Field(..., description="수정 예약 ID")
     operation_id: int = Field(..., description="운영 정보 ID") 
     day_of_week: int = Field(..., ge=0, le=6, description="요일 (0: 월요일, 6: 일요일)")
-    new_open_time: Optional[time] = Field(None, description="변경될 오픈 시간")
-    new_close_time: Optional[time] = Field(None, description="변경될 마감 시간")
-    new_pickup_start_time: Optional[time] = Field(None, description="변경될 픽업 시작 시간")
-    new_pickup_end_time: Optional[time] = Field(None, description="변경될 픽업 종료 시간")
-    new_is_open_enabled: Optional[bool] = Field(None, description="변경될 운영 여부")
+    new_open_time: time = Field(..., description="변경될 오픈 시간")
+    new_close_time: time = Field(..., description="변경될 마감 시간")
+    new_is_open_enabled: bool = Field(..., description="변경될 운영 여부")
     created_at: datetime = Field(..., description="예약 생성 시간")
     
     class Config:
@@ -131,7 +104,19 @@ class StoreOperationModificationResponse(BaseModel):
 
 class StoreOperationReservationResponse(BaseModel):
     """운영 정보 예약 조회 응답"""
+    modification_type: int = Field(
+        ..., 
+        description="수정 유형 (0: 수정없음, 1: 운영시간 변경, 2: 픽업시간 변경, 3: 모두 변경)"
+    )
     modifications: List[StoreOperationModificationResponse] = Field(
         ..., 
         description="예약된 운영 정보 변경사항 목록"
+    )
+    new_pickup_start_interval: int = Field(
+        ...,
+        description="픽업 시작 (마감으로부터 간격 분)"
+    )
+    new_pickup_end_interval: int = Field(
+        ...,
+        description="픽업 종료 (마감으로부터 간격 분)"
     )
