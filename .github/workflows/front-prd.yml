@@ -1,0 +1,34 @@
+name: Naver CICD (front-prd)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  push-to-ncloud:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout current repository
+      uses: actions/checkout@v3
+
+    - name: Clone Naver SourceCommit (HTTPS)
+      run: |
+        git clone https://${{ secrets.NCLOUD_ID }}:${{ secrets.NCLOUD_PAT }}@devtools.ncloud.com/3067145/cheapbob.git ncloud_repo
+        cd ncloud_repo
+        git checkout -B front-prd
+
+    - name: Create CICD README file
+      run: |
+        cd ncloud_repo
+        timestamp=$(date +'%Y%m%d-%H%M%S')
+        echo "# Test from GitHub Actions" > test_${timestamp}.md
+        echo "Generated at: $timestamp" >> test_${timestamp}.md
+
+    - name: Commit & Push to ncloud
+      run: |
+        cd ncloud_repo
+        git config --global user.email "actions@ncloud.com"
+        git config --global user.name "GitHub Actions Bot"
+        git add .
+        git commit -m "deploy: front prd" || echo "deploy: front prd"
+        git push https://${{ secrets.NCLOUD_ID }}:${{ secrets.NCLOUD_PAT }}@devtools.ncloud.com/3067145/cheapbob.git front-prd --force
