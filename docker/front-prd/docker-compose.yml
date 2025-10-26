@@ -1,0 +1,16 @@
+# version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: ../docker/front-prd/Dockerfile
+    container_name: cheapbob-frontend
+    env_file:
+      - ../../frontend/.env
+    ports:
+      - "5172:5172"
+    volumes:
+      - ../../frontend:/frontend
+      - /frontend/node_modules
+    restart: unless-stopped
