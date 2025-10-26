@@ -189,14 +189,14 @@ async def close_store(
                     refund_result = await PaymentService.process_refund(
                         payment_id=order.payment_id,
                         secret_key=payment_info.portone_secret_key,
-                        reason="가게 개인 사정으로 인한 마감"
+                        reason="‘기타 사정’ 으로 주문이 취소되었어요."
                     )
                     
                     if refund_result.get("success"):
                         # 주문 취소 처리
                         quantity = await order_repo.cancel_order(
                             payment_id=order.payment_id,
-                            cancel_reason="가게 개인 사정으로 인한 마감"
+                            cancel_reason="‘기타 사정’ 으로 주문이 취소되었어요."
                         )
                         
                         # 재고 복구

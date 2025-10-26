@@ -62,13 +62,13 @@ class AutoCancelReservationOrdersTask:
                         refund_result = await PaymentService.process_refund(
                             payment_id=order.payment_id,
                             secret_key=payment_info.portone_secret_key,
-                            reason="픽업 마감 시간 종료로 인한 자동 환불"
+                            reason="‘조기 마감’ 으로 주문이 취소되었어요."
                         )
 
                         if refund_result.get("success"):
                             await order_repo.cancel_order(
                                 payment_id=order.payment_id,
-                                cancel_reason="픽업 마감 시간 종료로 인한 자동 환불"
+                                cancel_reason="‘조기 마감’ 으로 주문이 취소되었어요."
                             )
                             
                             if email_service.is_configured():

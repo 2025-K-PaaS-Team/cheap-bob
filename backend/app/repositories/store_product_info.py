@@ -80,6 +80,24 @@ class StoreProductInfoRepository(BaseRepository[StoreProductInfo]):
         
         return StockUpdateResult.LOCK_CONFLICT
     
+    async def set_stock(self, product_id: str, new_stock: int) -> StockUpdateResult:
+        """재고를 특정 값으로 설정 (예약된 재고 업데이트용)"""
+        product = await self.get_by_pk(product_id)
+        if not product:
+            return None
+        
+        success = await self.update_lock(
+            product_id,
+            conditions={"version": product.version},
+            initial_stock = new_stock,
+            version=product.version + 1
+        )
+        
+        if success:
+            return StockUpdateResult.SUCCESS
+        
+        return StockUpdateResult.LOCK_CONFLICT
+    
     async def get_with_nutrition_info(self, product_id: str) -> Optional[StoreProductInfo]:
         """영양 정보와 함께 상품 조회"""
         query = (

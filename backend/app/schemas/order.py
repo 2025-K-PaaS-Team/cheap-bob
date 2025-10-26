@@ -56,7 +56,7 @@ class CustomerTodayOrderListResponse(BaseModel):
     total: int = Field(..., description="전체 주문 수")
 
 class OrderCancelRequest(BaseModel):
-    reason: str = Field(default="개인 사정", description="환불 사유", min_length=1, max_length=255)
+    reason: str = Field(default="‘요청’ 으로 주문이 취소되었어요.", description="환불 사유", min_length=1, max_length=255)
 
 
 class OrderCancelResponse(BaseModel):

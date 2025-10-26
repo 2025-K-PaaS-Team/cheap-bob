@@ -27,6 +27,7 @@ from repositories.store_operation_info_modification import StoreOperationInfoMod
 from repositories.store_payment_info import StorePaymentInfoRepository
 from repositories.store_product_info import StoreProductInfoRepository
 from repositories.product_nutrition import ProductNutritionRepository
+from repositories.product_stock_reservation import ProductStockReservationRepository
 # 주문
 from repositories.cart_item import CartItemRepository
 from repositories.order_current_item import OrderCurrentItemRepository
@@ -115,6 +116,10 @@ def get_store_product_info_repository(session: AsyncSessionDep) -> StoreProductI
     return StoreProductInfoRepository(session)
 
 
+def get_product_stock_reservation_repository() -> ProductStockReservationRepository:
+    return ProductStockReservationRepository()
+
+
 # 주문
 def get_cart_item_repository(session: AsyncSessionDep) -> CartItemRepository:
     return CartItemRepository(session)
@@ -151,6 +156,7 @@ StoreOperationInfoRepositoryDep = Annotated[StoreOperationInfoRepository, Depend
 StoreOperationInfoModificationRepositoryDep = Annotated[StoreOperationInfoModificationRepository, Depends(get_store_operation_info_modification_repository)]
 StoreProductInfoRepositoryDep = Annotated[StoreProductInfoRepository, Depends(get_store_product_info_repository)]
 ProductNutritionRepositoryDep = Annotated[ProductNutritionRepository, Depends(get_product_nutrition_repository)]
+ProductStockReservationRepositoryDep = Annotated[ProductStockReservationRepository, Depends(get_product_stock_reservation_repository)]
 # 주문
 CartItemRepositoryDep = Annotated[CartItemRepository, Depends(get_cart_item_repository)]
 OrderCurrentItemRepositoryDep = Annotated[OrderCurrentItemRepository, Depends(get_order_current_item_repository)]
