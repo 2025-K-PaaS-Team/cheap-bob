@@ -45,4 +45,4 @@ uv run python -m alembic upgrade head
 echo "Starting application..."
 cd /backend && exec uv run python -m uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 
-# Docker 실행 실패하면 확인하기 -> chmod +x entrypoint_dev.sh
+# Docker 실행 실패하면 확인하기 -> chmod +x entrypoint-dev.sh
