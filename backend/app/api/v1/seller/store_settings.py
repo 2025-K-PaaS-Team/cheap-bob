@@ -16,6 +16,7 @@ from schemas.store_settings import (
     StorePaymentUpdateRequest,
     StoreAddressResponse,
     StorePaymentResponse,
+    StoreInitPaymentResponse,
     StoreOperationResponse,
     StoreOperationReservationRequest,
     StoreOperationReservationResponse,
@@ -86,7 +87,7 @@ async def update_store_address(
         )
 
 
-@router.get("/payment", response_model=StorePaymentResponse,
+@router.get("/payment", response_model=StoreInitPaymentResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
         404: "가게를 찾을 수 없음"
@@ -108,11 +109,10 @@ async def get_store_payment(
     
     try:
         payment = await payment_repo.get_by_store_id(store_id=store_id)
-        
-        return StorePaymentResponse(
+        return StoreInitPaymentResponse(
             store_id=store_id,
-            portone_store_id=payment.portone_store_id,
-            portone_channel_id=payment.portone_channel_id
+            portone_store_id=payment.portone_store_id if payment else None,
+            portone_channel_id=payment.portone_channel_id if payment else None
         )
         
     except Exception as e:
