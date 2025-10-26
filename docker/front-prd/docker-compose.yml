@@ -1,16 +1,16 @@
-# version: '3.8'
+# # version: '3.8'
 
-services:
-  frontend:
-    build:
-      context: ../../frontend
-      dockerfile: ../docker/front-prd/Dockerfile
-    container_name: cheapbob-frontend
-    env_file:
-      - ../../frontend/.env
-    ports:
-      - "5172:5172"
-    volumes:
-      - ../../frontend:/frontend
-      - /frontend/node_modules
-    restart: unless-stopped
+# services:
+#   frontend-build:
+#     build:
+#       context: ../../frontend
+#       dockerfile: ../docker/front-prd/Dockerfile
+#     container_name: frontend-builder
+#     volumes:
+#       - ../../frontend/dist:/frontend/dist
+#       - /var/www/cheap-bob/dist:/mnt/dist-host
+#     command: >
+#       sh -c "pnpm install &&
+#       pnpm build &&
+#       rm -rf /mnt/dist-host/* &&
+#       cp -r dist/* /mnt/dist-host/"
