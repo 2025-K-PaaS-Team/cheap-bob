@@ -1,4 +1,5 @@
 from .order_migration import scheduled_task as order_migration_task, OrderMigrationTask
+from .product_stock_update import scheduled_task as product_stock_update_task, ProductStockUpdateTask
 from .inventory_reset import scheduled_task as inventory_reset_task, InventoryResetTask
 from .uncompleted_order_refund import scheduled_task as uncompleted_order_refund_task, UncompletedOrderRefundTask
 from .operation_modification_apply import scheduled_task as operation_modification_apply_task, OperationModificationApplyTask
@@ -16,6 +17,7 @@ __all__ = [
     'store_auto_complete_order_task',
     'store_auto_cancel_reservation_order_task',
     'user_withdraw_process_task',
+    'product_stock_update_task',
     'OrderMigrationTask',
     'InventoryResetTask',
     'UncompletedOrderRefundTask',
@@ -23,5 +25,6 @@ __all__ = [
     'OperationModificationApplyTask',
     'AutoCompleteOrdersTask',
     'AutoCancelReservationOrdersTask',
-    'UserWithdrawProcessTask'
+    'UserWithdrawProcessTask',
+    'ProductStockUpdateTask'
 ]
