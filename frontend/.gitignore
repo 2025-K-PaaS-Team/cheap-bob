@@ -27,3 +27,6 @@ dist-ssr
 
 # SSL key/cert
 *.pem
+
+# pnpm store
+.pnpm-store/

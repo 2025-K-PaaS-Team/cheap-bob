@@ -14,6 +14,6 @@ RUN chmod +x /frontend/entrypoint-dev.sh
 
 COPY . .
 
-EXPOSE 3001
+EXPOSE 5173
 
 ENTRYPOINT ["/frontend/entrypoint-dev.sh"]
