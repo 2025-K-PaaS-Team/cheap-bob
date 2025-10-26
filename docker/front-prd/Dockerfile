@@ -1,19 +1,10 @@
-FROM node:20-alpine
+# FROM node:20-alpine as build
 
-WORKDIR /frontend
+# WORKDIR /frontend
+# RUN corepack enable && corepack prepare pnpm@latest --activate
 
-RUN corepack enable
-RUN corepack prepare pnpm@latest --activate
+# COPY package.json pnpm-lock.yaml ./
+# RUN pnpm install --frozen-lockfile
 
-COPY package.json pnpm-lock.yaml ./
-
-RUN pnpm install
-
-COPY entrypoint.sh /frontend/
-RUN chmod +x /frontend/entrypoint.sh
-
-COPY . .
-
-EXPOSE 5172
-
-ENTRYPOINT ["/frontend/entrypoint.sh"]
+# COPY . .
+# RUN pnpm build
