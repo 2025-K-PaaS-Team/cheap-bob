@@ -67,8 +67,6 @@ services:
         condition: service_healthy
     networks:
       - cheapbob-network
-    volumes:
-      - ../../backend:/backend
 
 networks:
   cheapbob-network:
@@ -76,5 +74,11 @@ networks:
 
 volumes:
   postgresql-data:
+    external: true
+    name: cheapbob-prd-postgresql-data
   redis-data:
+    external: true
+    name: cheapbob-prd-redis-data
   mongodb-data:
+    external: true
+    name: cheapbob-prd-mongodb-data
