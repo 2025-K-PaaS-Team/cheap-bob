@@ -76,5 +76,11 @@ networks:
 
 volumes:
   dev-postgresql-data:
+    external: true
+    name: cheapbob-dev-postgresql-data
   dev-redis-data:
+    external: true
+    name: cheapbob-dev-redis-data
   dev-mongodb-data:
+    external: true
+    name: cheapbob-dev-mongodb-data
