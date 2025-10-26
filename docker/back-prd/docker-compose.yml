@@ -74,11 +74,8 @@ networks:
 
 volumes:
   postgresql-data:
-    external: true
     name: cheapbob-prd-postgresql-data
   redis-data:
-    external: true
     name: cheapbob-prd-redis-data
   mongodb-data:
-    external: true
     name: cheapbob-prd-mongodb-data
