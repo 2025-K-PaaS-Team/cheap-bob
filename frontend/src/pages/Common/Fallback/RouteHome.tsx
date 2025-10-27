@@ -1,5 +1,5 @@
 import { CommonBtn, HomeSwiper } from "@components/common";
-import { homeSwiperMap } from "@constant";
+import { routeHomeSwiperMap } from "@constant";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -15,23 +15,23 @@ const RouteHome = () => {
   if (loginRole === "customer") return <Navigate to="/c" replace />;
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center text-center my-[20px] mx-auto w-[calc(100%-40px)] gap-y-[28px]">
+    <div className="flex flex-col flex-1 items-center justify-center text-center mx-auto w-full gap-y-[28px]">
       <img src="/typo.svg" alt="errorIcon" className="w-30 mb-5" />
       {/* swiper */}
       <Swiper
         loop={true}
         pagination={{ clickable: true }}
         modules={[Pagination]}
-        className="mySwiper items-center flex w-full"
+        className="mySwiper items-center flex w-full my-[20px]"
       >
-        {homeSwiperMap.map((slide, idx) => (
+        {routeHomeSwiperMap.map((slide, idx) => (
           <SwiperSlide key={idx}>
             <HomeSwiper title={slide.title} img={slide.img} />
           </SwiperSlide>
         ))}
       </Swiper>
 
-      <div className="w-full flex flex-col gap-y-[10px]">
+      <div className="w-full flex flex-col gap-y-[10px] px-[20px]">
         <CommonBtn
           label="고객 페이지로 이동하기"
           onClick={() => navigate("/c/stores")}

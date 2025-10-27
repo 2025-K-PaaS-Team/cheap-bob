@@ -1,5 +1,5 @@
 import { HomeSwiper, LoginButton } from "@components/common/home";
-import { homeSwiperMap } from "@constant";
+import { sellerHomeSwiperMap } from "@constant";
 import { GetSellerEmail } from "@services";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -33,7 +33,7 @@ const Home = () => {
         modules={[Pagination]}
         className="mySwiper items-center flex h-fit w-full"
       >
-        {homeSwiperMap.map((slide, idx) => (
+        {sellerHomeSwiperMap.map((slide, idx) => (
           <SwiperSlide key={idx}>
             <HomeSwiper title={slide.title} img={slide.img} />
           </SwiperSlide>

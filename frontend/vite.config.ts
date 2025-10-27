@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), mkcert()],
   server: {
     https: {},
-    host: "localhost",
+    host: true,
     port: 5173,
   },
 
