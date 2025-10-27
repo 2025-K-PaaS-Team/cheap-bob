@@ -8,7 +8,9 @@ const attachInterceptors = (instance: AxiosInstance) => {
     (error) => {
       const status = error.response?.status;
       const isHome =
-        window.location.pathname === "/c" || window.location.pathname === "/s";
+        window.location.pathname === "/c" ||
+        window.location.pathname === "/s" ||
+        window.location.pathname === "/";
 
       const isWithdraw = window.location.pathname.startsWith("/withdraw");
 

@@ -20,13 +20,12 @@ const Home = () => {
         const res = await GetUserRole();
         setUserInfo(res);
         if (
-          res.is_active &&
           res.email &&
           res.user_type == "seller" &&
-          res.status === "complete"
-        ) {
+          res.status === "complete" &&
+          res.is_active
+        )
           navigate("/s/dashboard");
-        }
       } catch (err) {}
     };
 

@@ -8,17 +8,19 @@ const LoginCallback = () => {
   const [userInfo, setuserInfo] = useState<UserRoleType | null>(null);
   const navigate = useNavigate();
 
-  const handleCheckConflict = async () => {
+  const handleCheckConflict = async (user?: UserRoleType) => {
     try {
       const conflict = searchParams.get("conflict");
       const status = searchParams.get("status");
       const isCompleteUser = status == "complete";
       const loginRole = sessionStorage.getItem("loginRole");
 
+      const info = user ?? userInfo;
+
       if (conflict == "1") {
         navigate("/auth/fail");
       } else {
-        if (isCompleteUser && userInfo) {
+        if (isCompleteUser && info) {
           // customer complete
           if (loginRole === "customer") {
             navigate("/c");
@@ -46,7 +48,7 @@ const LoginCallback = () => {
     const init = async () => {
       const res = await GetUserRole();
       setuserInfo(res);
-      handleCheckConflict();
+      handleCheckConflict(res);
     };
     init();
   }, [searchParams, navigate]);

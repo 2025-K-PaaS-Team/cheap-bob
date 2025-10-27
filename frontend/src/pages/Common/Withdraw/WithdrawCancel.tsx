@@ -1,37 +1,23 @@
 import { CommonBtn, CommonModal } from "@components/common";
 import type { UserRoleType } from "@interface";
 import { CancelWithdrawCustomer, CancelWithdrawSeller } from "@services";
-import { GetUserRole, PostLogout } from "@services/common/auth";
+import { GetUserRole } from "@services/common/auth";
 import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Lottie from "lottie-react";
-import information from "@assets/information.json";
 
 const WithdrawCancel = () => {
   const navigate = useNavigate();
-  const isLocal = import.meta.env.VITE_IS_LOCAL === "true";
-  const state = isLocal ? "1004" : undefined;
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const [userInfo, setUserInfo] = useState<UserRoleType | null>(null);
 
-  const handleLogout = async () => {
-    try {
-      await PostLogout(state);
-    } catch (err) {
-      setModalMsg(formatErrMsg(err));
-      setShowModal(true);
-    }
-  };
-
   const handleCancelWithdraw = async () => {
     if (userInfo?.user_type == "seller" && userInfo.email) {
       try {
         await CancelWithdrawSeller();
-        handleLogout();
-        navigate("/s/dashboard");
+        navigate("/s");
       } catch (err) {
         setModalMsg(formatErrMsg(err));
         setShowModal(true);
@@ -39,8 +25,7 @@ const WithdrawCancel = () => {
     } else if (userInfo?.user_type == "customer" && userInfo.email) {
       try {
         await CancelWithdrawCustomer();
-        handleLogout();
-        navigate("/c/stores");
+        navigate("/c");
       } catch (err) {
         setModalMsg(formatErrMsg(err));
         setShowModal(true);
@@ -57,32 +42,6 @@ const WithdrawCancel = () => {
     };
     init();
   }, []);
-
-  if (!userInfo) {
-    return (
-      <div className="flex flex-col flex-1 items-center justify-center text-center mx-auto w-[calc(100%-40px)] gap-y-[20px]">
-        <Lottie
-          animationData={information}
-          style={{ width: "150px", height: "150px" }}
-        />
-        <div className="titleFont font-bold">404</div>
-        <div className="text-[16px]">탈퇴 기록이 없거나 존재하지 않습니다.</div>
-
-        <div className="flex flex-col w-full gap-y-[10px]">
-          <CommonBtn
-            label="고객 페이지로 이동하기"
-            onClick={() => navigate("/c")}
-            notBottom
-          />
-          <CommonBtn
-            label="점주 페이지로 이동하기"
-            onClick={() => navigate("/s")}
-            notBottom
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="relative mx-[20px] flex flex-col h-full items-start justify-center text-center text-custom-black">
@@ -109,7 +68,13 @@ const WithdrawCancel = () => {
           category="grey"
           className="w-full"
           onClick={() => {
-            handleLogout();
+            if (userInfo?.user_type === "customer") {
+              navigate("/c");
+            } else if (userInfo?.user_type === "seller") {
+              navigate("/s");
+            } else {
+              navigate("/");
+            }
           }}
         />
         <CommonBtn
