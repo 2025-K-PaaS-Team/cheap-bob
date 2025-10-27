@@ -63,7 +63,10 @@ const Home = () => {
           {/* change to customer account */}
           <div
             className="btnFont text-center text-sub-orange"
-            onClick={() => navigate("/c")}
+            onClick={() => {
+              localStorage.removeItem("loginRole");
+              navigate("/c");
+            }}
           >
             구매자 계정으로 전환
           </div>

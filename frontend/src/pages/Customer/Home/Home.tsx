@@ -51,7 +51,10 @@ const Home = () => {
         <div className="flex flex-col gap-y-[10px] text-center">
           <div
             className="btnFont text-main-deep"
-            onClick={() => navigate("/s")}
+            onClick={() => {
+              localStorage.removeItem("loginRole");
+              navigate("/s");
+            }}
           >
             가게를 운영하고 계신가요?
           </div>

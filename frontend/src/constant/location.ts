@@ -13,7 +13,6 @@ export const dongData: Record<string, string[]> = {
     "대학동",
     "미성동",
     "보라매동",
-    "봉천동",
     "삼성동",
     "서림동",
     "서원동",
