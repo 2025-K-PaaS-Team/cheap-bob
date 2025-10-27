@@ -128,7 +128,6 @@ const BillingInfo = () => {
           <div className="bodyFont font-bold py-[20px] border-b border-black/10">
             <div
               onClick={() => {
-                localStorage.removeItem("loginRole");
                 handleLogout();
               }}
             >

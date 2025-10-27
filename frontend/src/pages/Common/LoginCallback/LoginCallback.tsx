@@ -1,34 +1,42 @@
-import { GetSellerEmail } from "@services";
-import { useEffect } from "react";
+import type { UserRoleType } from "@interface";
+import { GetUserRole } from "@services/common/auth";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const LoginCallback = () => {
   const [searchParams] = useSearchParams();
+  const [userInfo, setuserInfo] = useState<UserRoleType | null>(null);
   const navigate = useNavigate();
-  const loginRole = localStorage.getItem("loginRole");
 
-  const handleCheckConflict = async () => {
+  const handleCheckConflict = async (user?: UserRoleType) => {
     try {
       const conflict = searchParams.get("conflict");
       const status = searchParams.get("status");
-      const needRegisterProductOnly = status == "product";
-      const needSignup = status !== "complete";
+      const isCompleteUser = status == "complete";
+      const loginRole = sessionStorage.getItem("loginRole");
 
-      console.log("needRegisterProductOnly", needRegisterProductOnly);
-
-      if (needRegisterProductOnly) {
-        await GetSellerEmail();
-        navigate("/s/signup/10");
-        return;
-      }
+      const info = user ?? userInfo;
 
       if (conflict == "1") {
         navigate("/auth/fail");
       } else {
-        if (needSignup) {
-          navigate(loginRole == "customer" ? "/c/signup" : "/s/signup/0");
-        } else {
-          navigate(loginRole == "customer" ? "/c/stores" : "/s/dashboard");
+        if (isCompleteUser && info) {
+          // customer complete
+          if (loginRole === "customer") {
+            navigate("/c");
+          }
+          // seller complete
+          else if (loginRole === "seller") {
+            navigate("/s");
+          }
+          // finally
+          sessionStorage.removeItem("loginRole");
+        }
+        // need to signup
+        else {
+          if (status === "profile") navigate("/c/signup");
+          if (status === "store") navigate("/s/signup/0");
+          if (status === "product") navigate("/s/signup/10");
         }
       }
     } catch (err: unknown) {
@@ -37,7 +45,12 @@ const LoginCallback = () => {
   };
 
   useEffect(() => {
-    handleCheckConflict();
+    const init = async () => {
+      const res = await GetUserRole();
+      setuserInfo(res);
+      handleCheckConflict(res);
+    };
+    init();
   }, [searchParams, navigate]);
 
   return null;

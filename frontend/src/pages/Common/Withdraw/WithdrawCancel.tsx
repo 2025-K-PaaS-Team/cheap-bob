@@ -1,13 +1,8 @@
 import { CommonBtn, CommonModal } from "@components/common";
-import {
-  CancelWithdrawCustomer,
-  CancelWithdrawSeller,
-  GetCustomerEmail,
-  GetSellerEmail,
-} from "@services";
-import { PostLogout } from "@services/common/auth";
+import type { UserRoleType } from "@interface";
+import { CancelWithdrawCustomer, CancelWithdrawSeller } from "@services";
+import { GetUserRole } from "@services/common/auth";
 import { formatErrMsg } from "@utils";
-import type { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -16,48 +11,26 @@ const WithdrawCancel = () => {
   const isLocal = import.meta.env.VITE_IS_LOCAL === "true";
   const state = isLocal ? "1004" : undefined;
 
-  const loginRole = localStorage.getItem("loginRole");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
-  const [email, setEmail] = useState<string>("");
-
-  const handleLogout = async () => {
-    try {
-      await PostLogout(state);
-    } catch (err) {
-      setModalMsg(formatErrMsg(err));
-      setShowModal(true);
-    }
-  };
+  const [userInfo, setUserInfo] = useState<UserRoleType | null>(null);
 
   const handleCancelWithdraw = async () => {
-    if (loginRole === "seller") {
+    if (userInfo?.user_type == "seller" && userInfo.email) {
       try {
-        await CancelWithdrawSeller();
-        handleLogout();
-        navigate("/s/dashboard");
+        await CancelWithdrawSeller(state);
+        navigate("/s");
       } catch (err) {
-        if ((err as AxiosError)?.response?.status === 409) {
-          handleLogout();
-          navigate("/s/dashboard");
-        } else {
-          setModalMsg(formatErrMsg(err));
-          setShowModal(true);
-        }
+        setModalMsg(formatErrMsg(err));
+        setShowModal(true);
       }
-    } else {
+    } else if (userInfo?.user_type == "customer" && userInfo.email) {
       try {
-        await CancelWithdrawCustomer();
-        handleLogout();
-        navigate("/c/stores");
+        await CancelWithdrawCustomer(state);
+        navigate("/c");
       } catch (err) {
-        if ((err as AxiosError)?.response?.status === 409) {
-          handleLogout();
-          navigate("/c/stores");
-        } else {
-          setModalMsg(formatErrMsg(err));
-          setShowModal(true);
-        }
+        setModalMsg(formatErrMsg(err));
+        setShowModal(true);
       }
     }
   };
@@ -65,19 +38,10 @@ const WithdrawCancel = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        if (loginRole === "seller") {
-          const res = await GetSellerEmail();
-          setEmail(res.email);
-        } else {
-          const res = await GetCustomerEmail();
-          setEmail(res.email);
-        }
-      } catch (err) {
-        setModalMsg(formatErrMsg(err));
-        setShowModal(true);
-      }
+        const res = await GetUserRole();
+        setUserInfo(res);
+      } catch (err) {}
     };
-
     init();
   }, []);
 
@@ -91,7 +55,7 @@ const WithdrawCancel = () => {
       </div>
       {/* need to fix */}
       {/* email */}
-      <div className="bodyFont mb-[150px]">{email}</div>
+      <div className="bodyFont mb-[150px]">{userInfo?.email}</div>
 
       {/* notice */}
       <div className="absolute bottom-25 hintFont text-center w-full">
@@ -106,8 +70,13 @@ const WithdrawCancel = () => {
           category="grey"
           className="w-full"
           onClick={() => {
-            handleLogout();
-            loginRole === "seller" ? navigate("/s") : navigate("/c");
+            if (userInfo?.user_type === "customer") {
+              navigate("/c");
+            } else if (userInfo?.user_type === "seller") {
+              navigate("/s");
+            } else {
+              navigate("/");
+            }
           }}
         />
         <CommonBtn

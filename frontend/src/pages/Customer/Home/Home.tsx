@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoginButton, HomeSwiper } from "@components/common/home";
 import { Pagination } from "swiper/modules";
@@ -7,26 +7,33 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { homeSwiperMap } from "@constant";
-import { GetCustomerEmail } from "@services";
+import { GetUserRole } from "@services/common/auth";
+import type { UserRoleType } from "@interface";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [_userInfo, setUserInfo] = useState<UserRoleType | null>(null);
 
   useEffect(() => {
     const init = async () => {
       try {
-        await GetCustomerEmail();
-        navigate("/c/stores");
-      } catch (err) {
-        console.warn("Failed to get email:", err);
-      }
+        const res = await GetUserRole();
+        setUserInfo(res);
+        if (
+          res.email &&
+          res.user_type == "customer" &&
+          res.status === "complete" &&
+          res.is_active
+        )
+          navigate("/c/stores");
+      } catch (err) {}
     };
 
     init();
   }, []);
 
   return (
-    <div className="flex flex-col flex-1 justify-around w-full py-[50px]">
+    <div className="flex flex-col flex-1 justify-center w-full py-[50px] gap-y-[15px]">
       {/* swiper */}
       <Swiper
         loop={true}
@@ -51,7 +58,9 @@ const Home = () => {
         <div className="flex flex-col gap-y-[10px] text-center">
           <div
             className="btnFont text-main-deep"
-            onClick={() => navigate("/s")}
+            onClick={() => {
+              navigate("/s");
+            }}
           >
             가게를 운영하고 계신가요?
           </div>

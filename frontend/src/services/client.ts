@@ -7,17 +7,16 @@ const attachInterceptors = (instance: AxiosInstance) => {
     (response) => response,
     (error) => {
       const status = error.response?.status;
-      const role = localStorage.getItem("loginRole");
       const isHome =
-        window.location.pathname === "/c" || window.location.pathname === "/s";
+        window.location.pathname === "/c" ||
+        window.location.pathname === "/s" ||
+        window.location.pathname === "/";
 
-      if (window.location.pathname === "/c" && role === "seller") {
-        window.location.href = "/s";
-      }
+      const isWithdraw = window.location.pathname.startsWith("/withdraw");
 
-      if (status === 401 && !isHome) {
-        if (role === "seller") window.location.href = "/s";
-        else window.location.href = "/c";
+      // 401 Unauthorize
+      if (status === 401 && !isHome && !isWithdraw) {
+        window.location.href = "/auth/role-check";
       }
 
       // 439 Withdrawn user
@@ -43,6 +42,14 @@ export const api = attachInterceptors(
 export const authApi = attachInterceptors(
   axios.create({
     baseURL: `${BASE}/auth`,
+    withCredentials: true,
+    headers: { "Content-Type": "application/json" },
+  })
+);
+
+export const userApi = attachInterceptors(
+  axios.create({
+    baseURL: `${BASE}/user/role`,
     withCredentials: true,
     headers: { "Content-Type": "application/json" },
   })

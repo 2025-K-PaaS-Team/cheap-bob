@@ -1,7 +1,8 @@
 import { HomeSwiper, LoginButton } from "@components/common/home";
-import { homeSwiperMap } from "@constant";
-import { GetSellerEmail } from "@services";
-import { useEffect } from "react";
+import { sellerHomeSwiperMap } from "@constant";
+import type { UserRoleType } from "@interface";
+import { GetUserRole } from "@services/common/auth";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -11,29 +12,35 @@ import { Swiper, SwiperSlide } from "swiper/react";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [_userInfo, setUserInfo] = useState<UserRoleType | null>(null);
 
   useEffect(() => {
     const init = async () => {
       try {
-        await GetSellerEmail();
-        navigate("/s/dashboard");
-      } catch (err) {
-        console.warn("err", err);
-      }
+        const res = await GetUserRole();
+        setUserInfo(res);
+        if (
+          res.email &&
+          res.user_type == "seller" &&
+          res.status === "complete" &&
+          res.is_active
+        )
+          navigate("/s/dashboard");
+      } catch (err) {}
     };
 
     init();
   }, []);
 
   return (
-    <div className="flex flex-col flex-1 justify-around w-full py-[50px]">
+    <div className="flex flex-col flex-1 justify-center w-full py-[50px] gap-y-[15px]">
       {/* swiper */}
       <Swiper
         pagination={{ clickable: true }}
         modules={[Pagination]}
         className="mySwiper items-center flex h-fit w-full"
       >
-        {homeSwiperMap.map((slide, idx) => (
+        {sellerHomeSwiperMap.map((slide, idx) => (
           <SwiperSlide key={idx}>
             <HomeSwiper title={slide.title} img={slide.img} />
           </SwiperSlide>
@@ -63,7 +70,9 @@ const Home = () => {
           {/* change to customer account */}
           <div
             className="btnFont text-center text-sub-orange"
-            onClick={() => navigate("/c")}
+            onClick={() => {
+              navigate("/c");
+            }}
           >
             구매자 계정으로 전환
           </div>

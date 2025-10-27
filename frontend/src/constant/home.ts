@@ -16,3 +16,20 @@ export const homeSwiperMap = [
     img: "/image/HomeSwiper4.png",
   },
 ];
+
+export const sellerHomeSwiperMap = [
+  {
+    title: "버리는 제품 없이 \n추가 수익을 만들어 보세요.",
+    img: "/image/SellerHomeSwiper1.png",
+  },
+  {
+    title: "친환경적 수익으로 \n지속 가능한 운영을 만듭니다.",
+    img: "/image/SellerHomeSwiper2.png",
+  },
+  {
+    title: "마감 패키지로\n고객의 첫 방문을 이끌어보세요.",
+    img: "/image/SellerHomeSwiper3.png",
+  },
+];
+
+export const routeHomeSwiperMap = [...homeSwiperMap, ...sellerHomeSwiperMap];

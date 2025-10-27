@@ -27,6 +27,8 @@
     "baseUrl": ".",
     "paths": {
       "@": ["src"],
+      "@assets": ["src/assets"],
+      "@assets/*": ["src/assets/*"],
       "@pages": ["src/pages"],
       "@pages/*": ["src/pages/*"],
       "@constant": ["src/constant"],

@@ -8,13 +8,14 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), mkcert()],
   server: {
     https: {},
-    host: "localhost",
+    host: true,
     port: 5173,
   },
 
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
+      "@assets": path.resolve(__dirname, "src/assets"),
       "@pages": path.resolve(__dirname, "src/pages"),
       "@constant": path.resolve(__dirname, "src/constant"),
       "@components": path.resolve(__dirname, "src/components"),
