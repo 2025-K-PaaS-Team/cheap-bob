@@ -16,7 +16,6 @@ const WithdrawCancel = () => {
   const isLocal = import.meta.env.VITE_IS_LOCAL === "true";
   const state = isLocal ? "1004" : undefined;
 
-  const loginRole = localStorage.getItem("loginRole");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
   const [email, setEmail] = useState<string>("");
@@ -31,54 +30,53 @@ const WithdrawCancel = () => {
   };
 
   const handleCancelWithdraw = async () => {
-    if (loginRole === "seller") {
-      try {
-        await CancelWithdrawSeller();
-        handleLogout();
-        navigate("/s/dashboard");
-      } catch (err) {
-        if ((err as AxiosError)?.response?.status === 409) {
-          handleLogout();
-          navigate("/s/dashboard");
-        } else {
-          setModalMsg(formatErrMsg(err));
-          setShowModal(true);
-        }
-      }
-    } else {
-      try {
-        await CancelWithdrawCustomer();
-        handleLogout();
-        navigate("/c/stores");
-      } catch (err) {
-        if ((err as AxiosError)?.response?.status === 409) {
-          handleLogout();
-          navigate("/c/stores");
-        } else {
-          setModalMsg(formatErrMsg(err));
-          setShowModal(true);
-        }
-      }
-    }
+    // if (loginRole === "seller") {
+    //   try {
+    //     await CancelWithdrawSeller();
+    //     handleLogout();
+    //     navigate("/s/dashboard");
+    //   } catch (err) {
+    //     if ((err as AxiosError)?.response?.status === 409) {
+    //       handleLogout();
+    //       navigate("/s/dashboard");
+    //     } else {
+    //       setModalMsg(formatErrMsg(err));
+    //       setShowModal(true);
+    //     }
+    //   }
+    // } else {
+    //   try {
+    //     await CancelWithdrawCustomer();
+    //     handleLogout();
+    //     navigate("/c/stores");
+    //   } catch (err) {
+    //     if ((err as AxiosError)?.response?.status === 409) {
+    //       handleLogout();
+    //       navigate("/c/stores");
+    //     } else {
+    //       setModalMsg(formatErrMsg(err));
+    //       setShowModal(true);
+    //     }
+    //   }
+    // }
   };
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        if (loginRole === "seller") {
-          const res = await GetSellerEmail();
-          setEmail(res.email);
-        } else {
-          const res = await GetCustomerEmail();
-          setEmail(res.email);
-        }
-      } catch (err) {
-        setModalMsg(formatErrMsg(err));
-        setShowModal(true);
-      }
-    };
-
-    init();
+    // const init = async () => {
+    //   try {
+    //     if (loginRole === "seller") {
+    //       const res = await GetSellerEmail();
+    //       setEmail(res.email);
+    //     } else {
+    //       const res = await GetCustomerEmail();
+    //       setEmail(res.email);
+    //     }
+    //   } catch (err) {
+    //     setModalMsg(formatErrMsg(err));
+    //     setShowModal(true);
+    //   }
+    // };
+    // init();
   }, []);
 
   return (

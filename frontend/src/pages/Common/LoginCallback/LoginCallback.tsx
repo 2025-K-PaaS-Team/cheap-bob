@@ -1,11 +1,13 @@
+import type { UserRoleType } from "@interface";
 import { GetSellerEmail } from "@services";
-import { useEffect } from "react";
+import { GetUserRole } from "@services/common/auth";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const LoginCallback = () => {
   const [searchParams] = useSearchParams();
+  const [userInfo, setuserInfo] = useState<UserRoleType | null>(null);
   const navigate = useNavigate();
-  const loginRole = localStorage.getItem("loginRole");
 
   const handleCheckConflict = async () => {
     try {
@@ -13,8 +15,6 @@ const LoginCallback = () => {
       const status = searchParams.get("status");
       const needRegisterProductOnly = status == "product";
       const needSignup = status !== "complete";
-
-      console.log("needRegisterProductOnly", needRegisterProductOnly);
 
       if (needRegisterProductOnly) {
         await GetSellerEmail();
@@ -25,11 +25,11 @@ const LoginCallback = () => {
       if (conflict == "1") {
         navigate("/auth/fail");
       } else {
-        if (needSignup) {
-          navigate(loginRole == "customer" ? "/c/signup" : "/s/signup/0");
-        } else {
-          navigate(loginRole == "customer" ? "/c/stores" : "/s/dashboard");
-        }
+        // if (needSignup) {
+        //   navigate(loginRole == "customer" ? "/c/signup" : "/s/signup/0");
+        // } else {
+        //   navigate(loginRole == "customer" ? "/c/stores" : "/s/dashboard");
+        // }
       }
     } catch (err: unknown) {
       console.warn(err);
@@ -37,7 +37,12 @@ const LoginCallback = () => {
   };
 
   useEffect(() => {
-    handleCheckConflict();
+    const init = async () => {
+      const res = await GetUserRole();
+      setuserInfo(res);
+      handleCheckConflict();
+    };
+    init();
   }, [searchParams, navigate]);
 
   return null;

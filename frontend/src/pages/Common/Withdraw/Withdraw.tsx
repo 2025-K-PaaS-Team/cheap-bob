@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 
 const Withdraw = () => {
   const navigate = useNavigate();
-  const loginRole = localStorage.getItem("loginRole");
   const isLocal = import.meta.env.VITE_IS_LOCAL === "true";
   const state = isLocal ? "1004" : undefined;
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -33,9 +32,7 @@ const Withdraw = () => {
       <CommonBtn
         label="첫 화면으로"
         onClick={() => {
-          localStorage.removeItem("loginRole");
           handleLogout();
-          loginRole === "customer" ? navigate("/c") : navigate("/s");
         }}
         category="white"
         notBottom

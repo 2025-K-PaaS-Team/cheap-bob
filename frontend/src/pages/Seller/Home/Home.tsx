@@ -26,7 +26,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="flex flex-col flex-1 justify-around w-full py-[50px]">
+    <div className="flex flex-col flex-1 justify-center w-full py-[50px] gap-y-[15px]">
       {/* swiper */}
       <Swiper
         pagination={{ clickable: true }}
@@ -64,7 +64,6 @@ const Home = () => {
           <div
             className="btnFont text-center text-sub-orange"
             onClick={() => {
-              localStorage.removeItem("loginRole");
               navigate("/c");
             }}
           >

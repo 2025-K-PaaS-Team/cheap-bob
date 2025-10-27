@@ -15,8 +15,6 @@ const Layout = () => {
   const path = location.pathname.toLowerCase();
   const isCustomer = path.startsWith("/c");
 
-  const role = localStorage.getItem("loginRole");
-
   const isAuth = path.startsWith("/auth");
   const isWithdraw = path.startsWith("/withdraw");
   const isDocs = path.startsWith("/docs");
@@ -25,8 +23,8 @@ const Layout = () => {
   const resolveRedirect = () => {
     if (isAuth || isWithdraw || isDocs || isHome) return null;
 
-    if (role === "seller" && path.startsWith("/c")) return "/auth/role-check";
-    if (role === "customer" && path.startsWith("/s")) return "/auth/role-check";
+    // if (role === "seller" && path.startsWith("/c")) return "/auth/role-check";
+    // if (role === "customer" && path.startsWith("/s")) return "/auth/role-check";
   };
 
   const dest = resolveRedirect();

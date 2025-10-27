@@ -18,8 +18,6 @@ const LoginFail = () => {
         <CommonBtn
           label="점주 로그인하기"
           onClick={() => {
-            localStorage.removeItem("loginRole");
-            localStorage.setItem("loginRole", "seller");
             navigate("/s");
           }}
           notBottom
@@ -28,8 +26,6 @@ const LoginFail = () => {
           label="고객 로그인하기"
           notBottom
           onClick={() => {
-            localStorage.removeItem("loginRole");
-            localStorage.setItem("loginRole", "customer");
             navigate("/c");
           }}
         />
