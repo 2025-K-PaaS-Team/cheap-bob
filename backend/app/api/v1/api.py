@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from api.v1 import auth, customer, seller, common, test
+from api.v1 import auth, customer, seller, common, test, user
 
 api_router = APIRouter()
 
@@ -9,6 +9,9 @@ api_router.include_router(auth.router)
 
 # 인증 불필요
 api_router.include_router(common.router)
+
+# User 공통 (인증 필요, 역할 무관)
+api_router.include_router(user.router)
 
 # Customer 전용
 api_router.include_router(customer.router)
