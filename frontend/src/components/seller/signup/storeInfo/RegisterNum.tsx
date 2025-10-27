@@ -67,6 +67,7 @@ const RegisterNum = () => {
           <input
             className="w-full h-[46px]  border-b border-[#393939] hintFont"
             placeholder="텍스트를 입력하세요"
+            maxLength={13}
             value={formatPhoneNumber(form.store_phone)}
             onChange={handleChange}
           />
