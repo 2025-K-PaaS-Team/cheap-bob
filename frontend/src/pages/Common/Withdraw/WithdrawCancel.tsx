@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 
 const WithdrawCancel = () => {
   const navigate = useNavigate();
+  const isLocal = import.meta.env.VITE_IS_LOCAL === "true";
+  const state = isLocal ? "1004" : undefined;
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -16,7 +18,7 @@ const WithdrawCancel = () => {
   const handleCancelWithdraw = async () => {
     if (userInfo?.user_type == "seller" && userInfo.email) {
       try {
-        await CancelWithdrawSeller();
+        await CancelWithdrawSeller(state);
         navigate("/s");
       } catch (err) {
         setModalMsg(formatErrMsg(err));
@@ -24,7 +26,7 @@ const WithdrawCancel = () => {
       }
     } else if (userInfo?.user_type == "customer" && userInfo.email) {
       try {
-        await CancelWithdrawCustomer();
+        await CancelWithdrawCustomer(state);
         navigate("/c");
       } catch (err) {
         setModalMsg(formatErrMsg(err));

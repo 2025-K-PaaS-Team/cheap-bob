@@ -9,8 +9,10 @@ export const WithdrawCustomer = async (): Promise<WithdrawType> => {
 };
 
 // DELETE: cancel withdraw
-export const CancelWithdrawCustomer = async (): Promise<WithdrawType> => {
-  const { data } = await customerWithdrawApi.delete("/cancel");
+export const CancelWithdrawCustomer = async (
+  state?: string
+): Promise<WithdrawType> => {
+  const { data } = await customerWithdrawApi.delete(`/cancel?state=${state}`);
 
   return data;
 };
