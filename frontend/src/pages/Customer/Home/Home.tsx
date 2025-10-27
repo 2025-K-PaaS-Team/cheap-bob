@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoginButton, HomeSwiper } from "@components/common/home";
 import { Pagination } from "swiper/modules";
@@ -7,19 +7,27 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { homeSwiperMap } from "@constant";
-import { GetCustomerEmail } from "@services";
+import { GetUserRole } from "@services/common/auth";
+import type { UserRoleType } from "@interface";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [_userInfo, setUserInfo] = useState<UserRoleType | null>(null);
 
   useEffect(() => {
     const init = async () => {
       try {
-        await GetCustomerEmail();
-        navigate("/c/stores");
-      } catch (err) {
-        console.warn("Failed to get email:", err);
-      }
+        const res = await GetUserRole();
+        setUserInfo(res);
+        if (
+          res.is_active &&
+          res.email &&
+          res.user_type == "customer" &&
+          res.status === "complete"
+        ) {
+          navigate("/c/stores");
+        }
+      } catch (err) {}
     };
 
     init();

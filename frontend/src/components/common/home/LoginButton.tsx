@@ -25,6 +25,8 @@ const LoginButton = ({
       import.meta.env.VITE_API_BASE_URL
     }/api/v1/auth/${provider}/login/${isCustomer ? `customer` : "seller"}`;
 
+    sessionStorage.setItem("loginRole", isCustomer ? "customer" : "seller");
+
     const url = state ? `${baseUrl}?state=${state}` : baseUrl;
     window.location.href = url;
   };

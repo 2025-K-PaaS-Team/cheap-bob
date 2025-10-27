@@ -1,7 +1,8 @@
 import { HomeSwiper, LoginButton } from "@components/common/home";
 import { sellerHomeSwiperMap } from "@constant";
-import { GetSellerEmail } from "@services";
-import { useEffect } from "react";
+import type { UserRoleType } from "@interface";
+import { GetUserRole } from "@services/common/auth";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -11,15 +12,22 @@ import { Swiper, SwiperSlide } from "swiper/react";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [_userInfo, setUserInfo] = useState<UserRoleType | null>(null);
 
   useEffect(() => {
     const init = async () => {
       try {
-        await GetSellerEmail();
-        navigate("/s/dashboard");
-      } catch (err) {
-        console.warn("err", err);
-      }
+        const res = await GetUserRole();
+        setUserInfo(res);
+        if (
+          res.is_active &&
+          res.email &&
+          res.user_type == "seller" &&
+          res.status === "complete"
+        ) {
+          navigate("/s/dashboard");
+        }
+      } catch (err) {}
     };
 
     init();
