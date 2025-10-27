@@ -47,7 +47,8 @@ const Layout = () => {
     path.startsWith("/s/billing/") ||
     path.startsWith("/docs") ||
     path.startsWith("/withdraw") ||
-    path.startsWith("/auth");
+    path.startsWith("/auth") ||
+    path === "/404";
 
   const notHeader =
     path === "/" ||
@@ -59,7 +60,8 @@ const Layout = () => {
     path === "/s/order" ||
     path.startsWith("/docs") ||
     path.startsWith("/withdraw") ||
-    path.startsWith("/auth");
+    path.startsWith("/auth") ||
+    path === "/404";
 
   return (
     <div className="app-layout">
