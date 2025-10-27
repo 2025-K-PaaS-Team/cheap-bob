@@ -12,52 +12,9 @@ from api.deps.repository import StoreRepositoryDep, StoreProductInfoRepositoryDe
 from config.oauth import OAuthProvider
 from config.settings import settings
 from schemas.auth import UserType
+from utils.user_utils import get_customer_status, get_seller_status
 
 router = APIRouter()
-
-async def get_customer_register(
-    customer_email: str,
-    customer_detail_repo: CustomerDetailRepositoryDep,
-) -> str:
-    """Customer 2차 등록 정보 가져오는 함수"""
-    
-    # 소비자 상세 정보 존재 여부 확인
-    customer_detail = await customer_detail_repo.get_by_customer(customer_email)
-    
-    if customer_detail is None:
-        # 상세 정보가 등록되지 않은 경우
-        registration_status = "profile"
-    else:
-        # 모든 등록이 완료된 경우
-        registration_status = "complete"
-        
-    return registration_status
-
-async def get_seller_register(
-    seller_email: str,
-    store_repo: StoreRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep,
-) -> str:
-    """Seller 2차 등록 정보 가져오는 함수"""
-    
-    existing_stores = await store_repo.get_by_seller_email(seller_email)
-        
-    if not existing_stores:
-        # 가게가 등록되지 않은 경우
-        registration_status = "store"
-    else:
-        # 가게가 등록된 경우, 상품 등록 여부 확인
-        store = existing_stores[0]  # 첫 번째 가게 사용
-        product_count = await product_repo.count_products_by_store(store.store_id)
-        
-        if product_count == 0:
-            # 상품이 등록되지 않은 경우
-            registration_status = "product"
-        else:
-            # 모든 등록이 완료된 경우
-            registration_status = "complete"
-        
-    return registration_status
 
 @router.get("/{provider}/callback/customer",
     responses=create_error_responses({         
