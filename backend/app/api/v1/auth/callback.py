@@ -44,9 +44,9 @@ async def customer_oauth_callback(
         email = decoded_token["sub"]
         
         if conflict:
-            registration_status = await get_seller_register(email, store_repo, product_repo)
+            registration_status = await get_seller_status(email, store_repo, product_repo)
         else:
-            registration_status = await get_customer_register(email,customer_detail_repo)
+            registration_status = await get_customer_status(email,customer_detail_repo)
         
         # 프론트 로컬 개발 용
         if state == '1004' and settings.ENVIRONMENT == "dev":
@@ -115,9 +115,9 @@ async def seller_oauth_callback(
         email = decoded_token["sub"]
         
         if conflict:
-            registration_status = await get_customer_register(email,customer_detail_repo)
+            registration_status = await get_customer_status(email,customer_detail_repo)
         else:
-            registration_status = await get_seller_register(email, store_repo, product_repo)
+            registration_status = await get_seller_status(email, store_repo, product_repo)
         
         # 프론트 로컬 개발 용
         if state == '1004' and settings.ENVIRONMENT == "dev":
