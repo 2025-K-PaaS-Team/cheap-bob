@@ -79,7 +79,7 @@ scheduled_task = {
     "trigger": "cron",
     "trigger_args": {
         "hour": 4,
-        "minute": 5,
+        "minute": 10,
     },
     "job_id": "reset_inventory",
     "job_name": "상품 재고 초기화",

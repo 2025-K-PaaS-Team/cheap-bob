@@ -211,8 +211,8 @@ scheduled_task = {
     "func": None,
     "trigger": "cron",
     "trigger_args": {
-        "hour": 5,
-        "minute": 0,
+        "hour": 4,
+        "minute": 35,
     },
     "job_id": "register_auto_complete_schedules",
     "job_name": "가게 마감 시간 동적 스케줄 등록",

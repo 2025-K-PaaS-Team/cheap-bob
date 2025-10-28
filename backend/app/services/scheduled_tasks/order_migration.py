@@ -122,7 +122,7 @@ scheduled_task = {
     "trigger": "cron",
     "trigger_args": {
         "hour": 4,
-        "minute": 10,
+        "minute": 15,
     },
     "job_id": "migrate_daily_orders",
     "job_name": "당일 주문을 히스토리로 이동",
