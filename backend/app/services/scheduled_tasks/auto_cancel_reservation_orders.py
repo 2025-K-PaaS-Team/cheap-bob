@@ -256,7 +256,7 @@ scheduled_task = {
     "trigger": "cron",
     "trigger_args": {
         "hour": 4,
-        "minute": 50,
+        "minute": 30,
     },
     "job_id": "register_auto_cancel_refund_schedules",
     "job_name": "픽업 마감 시간 동적 스케줄 등록 (취소/환불)",

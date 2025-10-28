@@ -198,8 +198,8 @@ scheduled_task = {
     "func": UserWithdrawProcessTask.process_scheduled_withdrawals,
     "trigger": "cron",
     "trigger_args": {
-        "hour": 5,
-        "minute": 10,
+        "hour": 4,
+        "minute": 40,
     },
     "job_id": "process_user_withdrawals",
     "job_name": "예약된 사용자 탈퇴 처리",

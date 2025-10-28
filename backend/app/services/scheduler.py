@@ -9,7 +9,7 @@ from services.scheduled_tasks.order_migration import scheduled_task as order_mig
 from services.scheduled_tasks.product_stock_update import scheduled_task as product_stock_update_task
 from services.scheduled_tasks.inventory_reset import scheduled_task as inventory_reset_task
 from services.scheduled_tasks.uncompleted_order_refund import scheduled_task as uncompleted_order_refund_task
-from services.scheduled_tasks.operation_modification_apply import scheduled_task as OperationModificationApplyTask
+from services.scheduled_tasks.operation_modification_apply import scheduled_task as store_operation_modification_apply_tasak
 from services.scheduled_tasks.store_operation_status_update import scheduled_task as store_operation_status_update_task
 from services.scheduled_tasks.auto_cancel_reservation_orders import scheduled_task as store_auto_complete_order_task, AutoCancelReservationOrdersTask
 from services.scheduled_tasks.auto_complete_orders import scheduled_task as store_auto_cancel_reservation_order_task, AutoCompleteOrdersTask
@@ -30,7 +30,7 @@ class SchedulerService:
             product_stock_update_task,
             inventory_reset_task,
             order_migration_task,
-            OperationModificationApplyTask,
+            store_operation_modification_apply_tasak,
             store_operation_status_update_task,
             user_withdraw_process_task
         ]

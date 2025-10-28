@@ -126,7 +126,7 @@ scheduled_task = {
     "trigger": "cron",
     "trigger_args": {
         "hour": 4,
-        "minute": 2,
+        "minute": 5,
     },
     "job_id": "update_product_stocks",
     "job_name": "예약된 상품 재고 업데이트",
