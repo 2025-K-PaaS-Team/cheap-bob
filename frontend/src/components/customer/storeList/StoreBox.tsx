@@ -59,7 +59,8 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
             <img
               src={store.images.find((img) => img.is_main)?.image_url}
               alt="StoreImage"
-              className="w-full object-none"
+              // className="w-full object-none"
+              className="w-full h-full object-contain object-center"
             />
           </div>
 
