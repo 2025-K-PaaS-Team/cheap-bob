@@ -64,14 +64,13 @@ const ChangePackageNutrition = () => {
     const isSelected = selected.includes(key);
 
     if (isSelected && selected.length < 2) {
-      setModalMsg("특징은 최소 1개 이상 선택해야 합니다.");
+      setModalMsg("영양 목표는 최소 1개 이상 선택해야 합니다.");
       setShowModal(true);
       return;
     }
 
-    // 최대 3개 제한 (추가 시에만 체크)
     if (!isSelected && selected.length >= 3) {
-      setModalMsg("특징은 최대 3개까지 선택할 수 있습니다.");
+      setModalMsg("영양 목표는 최대 3개까지 선택할 수 있습니다.");
       setShowModal(true);
       return;
     }
