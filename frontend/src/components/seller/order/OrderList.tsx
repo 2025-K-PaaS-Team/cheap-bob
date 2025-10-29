@@ -136,7 +136,7 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
         <div>주문 시간 순 ▽</div>
       </div>
 
-      {orders.map((order, idx) => {
+      {orders?.map((order, idx) => {
         return (
           <div
             className="bg-white shadow flex flex-col p-[16px] gap-y-[16px] rounded"
@@ -262,18 +262,18 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
       {/* show profile modal */}
       {showProfile && selectedProfile && (
         <CommonProfile
-          nickname={selectedProfile.customer_nickname}
-          phone={selectedProfile.customer_phone_number}
-          nutrition_goal={selectedProfile.nutrition_types.map((n) =>
+          nickname={selectedProfile?.customer_nickname}
+          phone={selectedProfile?.customer_phone_number}
+          nutrition_goal={selectedProfile?.nutrition_types?.map((n) =>
             getTitleByKey(n, NutritionList)
           )}
-          prefer_menu={selectedProfile.preferred_menus.map((m) =>
+          prefer_menu={selectedProfile?.preferred_menus?.map((m) =>
             getTitleByKey(m, MenuList)
           )}
-          prefer_topping={selectedProfile.topping_types.map((t) =>
+          prefer_topping={selectedProfile?.topping_types?.map((t) =>
             getTitleByKey(t, ToppingList)
           )}
-          allergy={selectedProfile.allergies.map((a) =>
+          allergy={selectedProfile?.allergies?.map((a) =>
             getTitleByKey(a, AllergyList)
           )}
           onCancelClick={() => setShowProfile(false)}

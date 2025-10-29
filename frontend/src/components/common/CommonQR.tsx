@@ -11,7 +11,7 @@ const CommonQR = ({ onClick, qrData }: CommonQRPros) => {
   const qrValue = qrData.qr_data;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
+    <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-black/20">
       <div className="flex flex-col w-[353px] h-[379px] p-[20px] rounded gap-y-[20px] border-[1px] border-none bg-white items-center justify-center">
         <div className="bodyFont text-center">
           손님에게 아래 QR코드를 보여주세요.
