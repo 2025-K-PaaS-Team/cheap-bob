@@ -171,19 +171,19 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
             <div className="flex flex-row gap-x-[10px] flex-wrap justify-start gap-y-[10px] border-b border-black/10 pb-[16px] tagFont">
               {/* nutrition_types info */}
               <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
-                {getTitleByKey(order?.nutrition_types[0], NutritionList)}
+                {getTitleByKey(order?.nutrition_types?.[0], NutritionList)}
               </div>
               {/* preferred_menus info */}
               <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
-                {getTitleByKey(order?.preferred_menus[0], MenuList)}
+                {getTitleByKey(order?.preferred_menus?.[0], MenuList)}
               </div>
               {/* topping_types info */}
               <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
-                {getTitleByKey(order?.topping_types[0], ToppingList)}
+                {getTitleByKey(order?.topping_types?.[0], ToppingList)}
               </div>
               {/* allergies info */}
               <div className="bg-[#E7E7E7] border border-[#E7E7E7] rounded py-[7px] px-[16px]">
-                {getTitleByKey(order?.allergies[0], AllergyList)}
+                {getTitleByKey(order?.allergies?.[0], AllergyList)}
               </div>
             </div>
             {/* fourth row */}
