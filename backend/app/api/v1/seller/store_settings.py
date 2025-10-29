@@ -285,8 +285,8 @@ async def get_operation_reservation(
                     mod.new_is_open_enabled != orig_info.is_open_enabled):
                     has_operation_time_change = True
                 
-                if (mod.new_pickup_start_time != orig_info.pickup_start_time or 
-                    mod.new_pickup_end_time != orig_info.pickup_end_time):
+                if (mod.new_close_time - mod.new_pickup_start_time != orig_info.close_time - orig_info.pickup_start_time or 
+                    mod.new_close_time - mod.new_pickup_end_time != orig_info.close_time - orig_info.pickup_end_time):
                     has_pickup_time_change = True
         
         if has_operation_time_change and has_pickup_time_change:
