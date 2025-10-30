@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 from pytz import timezone as pytz_timezone
 from typing import Dict, Any, List
 
@@ -86,7 +87,7 @@ class SchedulerService:
             )
 
             self.scheduler.add_job(
-                func=lambda: AutoCancelReservationOrdersTask.register_daily_schedules(self),
+                func=partial(AutoCancelReservationOrdersTask.register_daily_schedules, self),
                 trigger=trigger,
                 id="register_auto_cancel_refund_schedules",
                 name="픽업 마감 시간 동적 스케줄 등록 (취소/환불)",
@@ -107,7 +108,7 @@ class SchedulerService:
             )
 
             self.scheduler.add_job(
-                func=lambda: AutoCompleteOrdersTask.register_daily_schedules(self),
+                func=partial(AutoCompleteOrdersTask.register_daily_schedules, self),
                 trigger=trigger,
                 id="register_auto_complete_schedules",
                 name="가게 마감 시간 동적 스케줄 등록",
