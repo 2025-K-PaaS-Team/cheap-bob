@@ -41,7 +41,7 @@ const ChangeStoreAddr = () => {
         const a: AddressInfoType = res.address ?? initialAddr;
         setAddr(a);
         setSelectStation(a.nearest_station || "");
-        setStationTime(a.walking_time ? String(a.walking_time) : "");
+        setStationTime(a.walking_time ? String(a.walking_time) : "0");
         setIsLoading(false);
       } catch (err) {
         console.error(formatErrMsg(err));
