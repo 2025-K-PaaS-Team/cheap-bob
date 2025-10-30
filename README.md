@@ -20,7 +20,9 @@
   <a href="https://redis.io/">Redis</a> ·
   <a href="https://vitejs.dev/">Vite</a> ·
   <a href="https://pnpm.io/">pnpm</a> ·
-  Docker · GitHub Actions · OAuth 2.0 (Naver/Google)
+  <a href="https://www.docker.com/">Docker</a> ·
+  <a href="https://docs.github.com/ko/actions">GitHub Actions</a> ·
+  OAuth 2.0 (<a href="https://developers.naver.com/docs/login/api/api.md">Naver</a>/<a href="https://developers.google.com/identity/protocols/oauth2?hl=ko">Google</a>)
 </p>
 
 ---
@@ -54,7 +56,7 @@
 
 ## ✨ 기능 요약
 
-- 🥬 **마감세일 랜덤팩**: 매장별 잉여 재료 기반 랜덤 구성/고정가 판매
+- 🥬 **마감세일 랜덤팩**: 매장별 남는 재료 기반 랜덤 구성/고정가 판매
 - 🕒 **주문 상태 추적**: 예약 → 수락 → 완료/취소 실시간 확인
 - 📱 **QR 픽업 인증**: 인앱 스캐너로 수령 시점 인증/로그 남김
 - 👤 **개인화**: 영양 목표/선호 토핑/알레르기 기반 추천
@@ -66,8 +68,8 @@
 ## 🏗 아키텍처
 
 <p align="center">
-  <img alt="저렴한끼" src="https://velog.velcdn.com/images/gimgyuwon/post/2a568ce3-5a37-4853-93fc-4e7973cdb747/image.JPG" width="900">
-  <img alt="저렴한끼" src="https://velog.velcdn.com/images/gimgyuwon/post/38ad5c11-e2ec-4260-928e-01e582ab6952/image.JPG" width="900">
+  <img alt="저렴한끼" src="./docs/system-architecture.png" width="900">
+  <img alt="저렴한끼" src="./docs/database-architecture.png" width="900">
 </p>
 
 ---
@@ -82,6 +84,10 @@
 | **Infra/DevOps** | Docker, GitHub Actions, Object Storage(백업), Naver Cloud                                             |
 | **Auth**         | OAuth 2.0 (Naver/ Google), JWT                                                                        |
 | **기타**         | APScheduler, BackgroundTasks(메일), In-Web QR Scanner, Naver Map API, Daum Map API, Daum Postcode API |
+
+<p align="center">
+  <img alt="기술 스택" src="./docs/skills.png" width="900">
+</p>
 
 ---
 
@@ -127,7 +133,9 @@
 - **Webhook**: 배포 서버/SourceCommit 파이프라인 트리거
 - **배포**: Docker 컨테이너 **무중단 교체(blue/green 또는 rolling)**
 - **아티팩트**: 빌드 산출물 zip을 Object Storage에 보관(롤백 대비)
-
+<p align="center">
+  <img alt="기술 스택" src="./docs/cicd.png" width="900">
+</p>
 ---
 
 ## 👥 Contributor
