@@ -15,9 +15,9 @@ const ChangeStoreName = ({}) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleUpdateStoreName = async (storeName: string) => {
-    const validMsg = "매장 이름은 1~7자여야 합니다.";
+    const validMsg = "매장 이름은 1~20자여야 합니다.";
 
-    if (!validateLength(value, 1, 7)) {
+    if (!validateLength(value, 1, 20)) {
       setModalMsg(validMsg);
       setShowModal(true);
       return;

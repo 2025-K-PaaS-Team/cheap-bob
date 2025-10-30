@@ -7,11 +7,12 @@ type ModalProps = {
   onCancelClick?: () => void;
   onConfirmClick?: () => void;
   desc?: string;
-  category?: "red" | "black" | "green";
+  category?: "red" | "black" | "green" | "disabled";
   children?: React.ReactNode;
   className?: string;
   container?: string | Element;
   isProcessing?: boolean;
+  disabled?: boolean;
 };
 
 const CommonModal = ({
@@ -25,9 +26,12 @@ const CommonModal = ({
   children,
   container,
   isProcessing = false,
+  disabled,
 }: ModalProps) => {
   const confrimBtnClass =
-    category === "red"
+    disabled || isProcessing
+      ? "bg-custom-white cursor-not-allowed"
+      : category === "red"
       ? "bg-sub-red text-white"
       : category === "black"
       ? "bg-black text-white border-black"
@@ -88,7 +92,7 @@ const CommonModal = ({
           )}
           {onConfirmClick && (
             <button
-              disabled={isProcessing}
+              disabled={isProcessing || disabled}
               className={`${confrimBtnClass} ${
                 onCancelClick ? "col-span-2" : "col-span-3"
               } rounded w-full py-[12px]`}

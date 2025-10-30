@@ -74,7 +74,7 @@ const Noti = () => {
   };
 
   return (
-    <div className="flex flex-col bg-custom-white">
+    <div className="flex flex-col flex-1 bg-custom-white">
       <div className="m-[20px] flex flex-col gap-y-[20px]">
         {noti.map((n, idx) => (
           <div

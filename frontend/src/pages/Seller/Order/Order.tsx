@@ -12,7 +12,7 @@ import type {
   StoreOperationType,
 } from "@interface";
 import { GetStoreOperation } from "@services";
-import { getStoreOrder } from "@services/seller/order";
+import { getStoreTodayOrder } from "@services/seller/order";
 import { useEffect, useMemo, useState } from "react";
 
 const Order = () => {
@@ -30,7 +30,7 @@ const Order = () => {
     setIsLoading(true);
     try {
       const [ordersRes, opRes] = await Promise.all([
-        getStoreOrder(),
+        getStoreTodayOrder(),
         GetStoreOperation(),
       ]);
       setOrders(ordersRes);
@@ -56,7 +56,7 @@ const Order = () => {
   const handleGetOrders = async () => {
     setIsLoading(true);
     try {
-      const res = await getStoreOrder();
+      const res = await getStoreTodayOrder();
       setOrders(res);
 
       const now = new Date();

@@ -145,7 +145,16 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
             {/* first row */}
             <div className="flex flex-row justify-between border-b border-black/10 pb-[16px]">
               {/* time */}
-              <h3>{order?.reservation_at.slice(11, 16)}</h3>
+              <h3>
+                {order?.reservation_at
+                  ? new Date(order.reservation_at).toLocaleTimeString("ko-KR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                      timeZone: "Asia/Seoul",
+                    })
+                  : "--:--"}
+              </h3>
               {/* quantity */}
               <h3>
                 <span className="font-normal">주문 수량:</span>{" "}
@@ -170,21 +179,32 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
             {/* third row */}
             <div className="flex flex-row gap-x-[10px] flex-wrap justify-start gap-y-[10px] border-b border-black/10 pb-[16px] tagFont">
               {/* nutrition_types info */}
-              <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
-                {getTitleByKey(order?.nutrition_types?.[0], NutritionList)}
-              </div>
+              {order?.nutrition_types && (
+                <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
+                  {getTitleByKey(order?.nutrition_types?.[0], NutritionList)}
+                </div>
+              )}
+
               {/* preferred_menus info */}
-              <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
-                {getTitleByKey(order?.preferred_menus?.[0], MenuList)}
-              </div>
+              {order?.preferred_menus && (
+                <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
+                  {getTitleByKey(order?.preferred_menus?.[0], MenuList)}
+                </div>
+              )}
+
               {/* topping_types info */}
-              <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
-                {getTitleByKey(order?.topping_types?.[0], ToppingList)}
-              </div>
+              {order?.topping_types && (
+                <div className="bg-main-pale border border-main-deep rounded py-[7px] px-[16px]">
+                  {getTitleByKey(order?.topping_types?.[0], ToppingList)}
+                </div>
+              )}
+
               {/* allergies info */}
-              <div className="bg-[#E7E7E7] border border-[#E7E7E7] rounded py-[7px] px-[16px]">
-                {getTitleByKey(order?.allergies?.[0], AllergyList)}
-              </div>
+              {order?.allergies && (
+                <div className="bg-[#E7E7E7] border border-[#E7E7E7] rounded py-[7px] px-[16px]">
+                  {getTitleByKey(order?.allergies?.[0], AllergyList)}
+                </div>
+              )}
             </div>
             {/* fourth row */}
             <div className="grid grid-cols-3">
@@ -242,6 +262,7 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
           desc="주문 취소 사유를 선택하세요."
           confirmLabel="주문 취소하기"
           cancelLabel="취소"
+          disabled={!reason}
           onConfirmClick={() => {
             !isProcessing &&
               handleClickCancel(selectedPaymentId ?? "", reason?.label ?? "");
