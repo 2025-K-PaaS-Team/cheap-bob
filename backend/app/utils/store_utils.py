@@ -152,7 +152,7 @@ def get_order_time_by_status(order, status) -> str:
     if isinstance(status, str):
         status = OrderStatus[status]
     
-    elif status == OrderStatus.complete:
+    if status == OrderStatus.complete:
         time_at = order.completed_at
     elif status == OrderStatus.cancel:
         time_at = order.canceled_at
