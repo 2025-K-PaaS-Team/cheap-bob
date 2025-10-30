@@ -323,7 +323,7 @@ class StoreRepository(BaseRepository[Store]):
         self,
         sido: str,
         sigungu: str,
-        bname: str,
+        bname: List[str],
         customer_email: str,
         offset: int = 0,
         limit: int = 4
@@ -342,7 +342,7 @@ class StoreRepository(BaseRepository[Store]):
                 and_(
                     StoreAddress.sido == sido,
                     StoreAddress.sigungu == sigungu,
-                    StoreAddress.bname == bname
+                    StoreAddress.bname.in_(bname)
                 )
             )
             .options(
@@ -404,7 +404,7 @@ class StoreRepository(BaseRepository[Store]):
         self, 
         sido: str,
         sigungu: str, 
-        bname: str,
+        bname: List[str],
         search_name: str,
         customer_email: str,
         offset: int = 0,
@@ -425,7 +425,7 @@ class StoreRepository(BaseRepository[Store]):
                 and_(
                     StoreAddress.sido == sido,
                     StoreAddress.sigungu == sigungu,
-                    StoreAddress.bname == bname,
+                    StoreAddress.bname.in_(bname),
                     or_(
                         Store.store_name.like(f"%{search_name}%"),
                         StoreProductInfo.product_name.like(f"%{search_name}%")
