@@ -90,7 +90,7 @@ const ChangePackageDesc = () => {
 
         <textarea
           className="w-full h-[145px] rounded border border-[#E7E7E7] text-[16px] p-[8px]"
-          placeholder="패키지의 설명을 입력해 주세요"
+          placeholder="100자 이내로 패키지 설명을 입력해주세요"
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
           maxLength={200}
