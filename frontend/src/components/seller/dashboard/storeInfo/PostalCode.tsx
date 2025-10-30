@@ -1,6 +1,7 @@
 import { postcodeTheme } from "@constant";
 import type { AddressInfoType } from "@interface";
 import { getCoordinate } from "@services";
+import { hcodeToName } from "@utils/hcodeToName";
 import { useEffect, useRef } from "react";
 
 interface DaumPostcodeProps {
@@ -54,7 +55,7 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
         url: "/icon/greenLocation.svg",
         size: new window.naver.maps.Size(40, 40),
         origin: new window.naver.maps.Point(0, 0),
-        anchor: new window.naver.maps.Point(20, 40), // 40x40 기준 하단 중앙
+        anchor: new window.naver.maps.Point(20, 40),
       };
 
       if (!markerRef.current) {
@@ -68,19 +69,16 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
         markerRef.current.setIcon(icon);
       }
 
-      console.log(data);
-
       // set form
       setForm({
         postal_code: data.zonecode,
         address: data.roadAddress,
         sido: data.sido,
         sigungu: data.sigungu,
-        bname: data.bname,
+        bname: hcodeToName(coor.hcode),
         lng: coor.lng,
         lat: coor.lat,
       });
-      console.warn(form);
     } else {
       console.warn("mapRef가 존재하지 않습니다");
     }
@@ -101,7 +99,6 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
   };
 
   useEffect(() => {
-    console.log(form);
     // Get naver map
     const loadScript = () => {
       return new Promise<void>((resolve) => {
@@ -119,7 +116,6 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
       const centerLat = form?.lat || 37.5666805;
       const centerLng = form?.lng || 126.9784147;
 
-      console.log(centerLat);
       mapRef.current = new window.naver.maps.Map("map", {
         center: new window.naver.maps.LatLng(centerLat, centerLng),
         zoom: 17,

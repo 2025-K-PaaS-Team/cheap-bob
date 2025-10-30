@@ -51,6 +51,7 @@ export type GetQrCodeType = QrBaseType & {
 export type CoorBaseType = {
   lng: string;
   lat: string;
+  hcode: string;
 };
 
 export type MapBaseType = {
