@@ -135,15 +135,16 @@ class AutoCompleteOrdersTask:
                                 continue
 
                             store_name = operation.store.store_name
+                            
                             scheduler.scheduler.add_job(
-                                func=lambda sid=operation.store_id, sname=store_name: \
-                                    AutoCompleteOrdersTask.complete_store_accepted_orders(sid, sname),
+                                func=AutoCompleteOrdersTask.complete_store_accepted_orders,
                                 trigger='date',
                                 run_date=run_datetime,
                                 id=job_id,
                                 name=f"[{store_name}] 마감 시 주문 자동 완료",
-                                misfire_grace_time=1800,  # 30분 유예
-                                replace_existing=True
+                                misfire_grace_time=1800,
+                                replace_existing=True,
+                                args=[operation.store_id, store_name],
                             )
 
                             AutoCompleteOrdersTask._registered_job_ids.append(job_id)
