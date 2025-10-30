@@ -241,8 +241,7 @@ async def decrease_product_stock(
     product_id: str,
     current_user: CurrentSellerDep,
     store_repo: StoreRepositoryDep,
-    product_repo: StoreProductInfoRepositoryDep,
-    nutrition_repo: ProductNutritionRepositoryDep
+    product_repo: StoreProductInfoRepositoryDep
 ):
     """
     상품 재고 1개 감소
