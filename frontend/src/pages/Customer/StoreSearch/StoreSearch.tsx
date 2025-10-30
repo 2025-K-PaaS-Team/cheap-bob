@@ -79,7 +79,7 @@ const StoreSearch = () => {
   }, []);
 
   return (
-    <div className="flex flex-col px-[20px]">
+    <div className="flex flex-col p-[20px]">
       {/* search bar */}
       <div className="border border-1 border-main-deep flex flex-row justify-between px-[18px] py-[16px] h-[54px] rounded-[50px]">
         <input
