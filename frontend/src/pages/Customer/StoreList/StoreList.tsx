@@ -3,6 +3,7 @@ import {
   AddFavoriteStore,
   GetPreferMenu,
   GetStoreByLocation,
+  getStores,
   RemoveFavoriteStore,
 } from "@services";
 import { Chips, CommonModal } from "@components/common";
@@ -99,13 +100,18 @@ const StoreList = () => {
     try {
       if (page === 0) setIsInitialLoading(true);
       else setIsFetchingMore(true);
+      let newStores;
 
-      const newStores = await GetStoreByLocation(
-        sido,
-        sigungu,
-        selectedDongs,
-        page
-      );
+      if (dongs && selectedDongs.length > 0) {
+        newStores = await GetStoreByLocation(
+          sido,
+          sigungu,
+          selectedDongs,
+          page
+        );
+      } else {
+        newStores = await getStores(page);
+      }
 
       setStores((prev) => {
         if (!prev || page === 0) return newStores;
