@@ -66,7 +66,7 @@ const ChangeStoreDesc = () => {
         {/* input box */}
         <textarea
           className="w-full h-[145px] rounded border border-[#E7E7E7] text-[16px] p-[8px]"
-          placeholder="매장 설명을 입력해 주세요"
+          placeholder="100자 이내로 매장 설명을 입력해주세요"
           value={value}
           onChange={(e) => setValue(e.target.value)}
         />
