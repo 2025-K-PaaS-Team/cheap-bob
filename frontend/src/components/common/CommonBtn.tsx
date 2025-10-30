@@ -13,6 +13,7 @@ type BtnProps = {
   width?: string;
   onClick?: () => void;
   type?: "button" | "submit" | "reset";
+  disabled?: boolean;
 };
 
 const CommonBtn = ({
@@ -22,6 +23,7 @@ const CommonBtn = ({
   onClick,
   className,
   width,
+  disabled,
   notBottom = false,
 }: BtnProps) => {
   const colorClass = {
@@ -38,10 +40,11 @@ const CommonBtn = ({
     <button
       type={type}
       onClick={onClick}
+      disabled={disabled}
       className={`font-bold rounded text-base h-[54px] flex justify-center items-center
         ${notBottom ? "" : "fixed-action"} 
         ${colorClass}
-        ${className ? className : ""}
+        ${disabled ? "cursor-not-allowed" : className ? className : ""}
         ${width ? width : "w-full"}`}
     >
       {label}

@@ -211,8 +211,13 @@ const ChangeStoreImg = () => {
         {/* upload picture button */}
         <div className="w-full flex justify-center">
           <CommonBtn
-            label={`제품 사진 등록 (${Math.max(imgs.length - 1, 0)}/10)`}
+            label={
+              imgs.length > 10
+                ? "사진 등록 완료 (10/10)"
+                : `제품 사진 등록 (${imgs.length - 1}/10)`
+            }
             notBottom
+            disabled={imgs.length > 10}
             onClick={() => handleClickUpload(false)}
             className="btnFont"
             category="white"
