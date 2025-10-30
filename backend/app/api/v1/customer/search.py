@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, HTTPException, status, Query
 
 from utils.docs_error import create_error_responses
@@ -109,7 +110,7 @@ async def search_stores_by_location(
     store_repo: StoreRepositoryDep,
     sido: str = Query(..., description="시/도"),
     sigungu: str = Query(..., description="시/군/구"),
-    bname: str = Query(..., description="읍/면/동"),
+    bname: List[str] = Query(..., description="읍/면/동 리스트"),
     page: int = Query(0, description="페이지 번호", ge=0)
 ):
     """
@@ -178,7 +179,7 @@ async def search_stores_by_location_name(
     store_repo: StoreRepositoryDep,
     sido: str = Query(..., description="시/도"),
     sigungu: str = Query(..., description="시/군/구"),
-    bname: str = Query(..., description="읍/면/동"),
+    bname: List[str] = Query(..., description="읍/면/동 리스트"),
     search_name: str = Query(..., description="검색할 가게 또는 상품 이름"),
     page: int = Query(0, description="페이지 번호", ge=0)
 ):
