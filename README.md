@@ -1,9 +1,9 @@
 <p align="center">
-  <img alt="저렴한끼" src="https://velog.velcdn.com/images/gimgyuwon/post/8f17ffac-e1a1-436a-9ca3-13a62dd88e88/image.png" width="900">
+  <img alt="저렴한끼" src="./docs/cover.png" width="900">
 </p>
 
 <p align="center">
-  <img alt="저렴한끼" src="https://velog.velcdn.com/images/gimgyuwon/post/5a3b1bd0-d3f8-4db5-8dec-b6782b02270a/image.svg" width="100">
+  <img alt="저렴한끼" src="./docs/name.png" width="100">
 </p>
 
 <p align="center">
