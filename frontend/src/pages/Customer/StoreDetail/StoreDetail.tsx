@@ -246,7 +246,7 @@ const StoreDetail = () => {
           {/* store representation intro */}
           <div>
             {/* store name */}
-            <h1>{product.store_name}</h1>
+            <h1 className="mr-10">{product.store_name}</h1>
 
             {/* favor */}
             <div
