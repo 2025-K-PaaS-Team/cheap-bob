@@ -26,7 +26,7 @@ const NowStatus = ({ onRefresh, lastUpdated, op }: NowStatusProps) => {
     } = todayOp;
 
     if (!is_open_enabled) {
-      statusText = "영업 전.";
+      statusText = "영업 전";
     } else if (currentTime < open_time) {
       statusText = "영업 전";
     } else if (currentTime >= open_time && currentTime < pickup_start_time) {

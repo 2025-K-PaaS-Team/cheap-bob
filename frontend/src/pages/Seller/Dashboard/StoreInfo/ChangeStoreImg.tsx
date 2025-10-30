@@ -7,6 +7,7 @@ import {
   ChangeStoreMainImg,
   DeleteStoreImg,
   GetStoreImg,
+  registerStoreImg,
 } from "@services";
 import { formatErrMsg } from "@utils";
 import React, { useEffect, useRef, useState } from "react";
@@ -82,6 +83,13 @@ const ChangeStoreImg = () => {
 
     // 업로드
     try {
+      if (isMain && !imgs.find((img) => img.is_main)) {
+        await registerStoreImg(files);
+        showToast("대표 사진이 등록되었습니다.", "success");
+        await handleGetStoreImg();
+        return;
+      }
+
       const res = await AddStoreImg(files);
       const newImgs = res.images ?? [];
       setImgs(newImgs);
@@ -124,7 +132,7 @@ const ChangeStoreImg = () => {
     init();
   }, []);
 
-  if (isLoading || !imgs || imgs.length == 0) {
+  if (isLoading) {
     return <CommonLoading type="data" isLoading={isLoading} />;
   }
 
@@ -138,11 +146,17 @@ const ChangeStoreImg = () => {
       {/* represent image */}
       <div className="flex flex-col gap-y-[20px]">
         <div className="w-full h-[125px] overflow-hidden">
-          <img
-            src={imgs[0].image_url}
-            alt="representImg"
-            className="w-full h-full object-cover object-center"
-          />
+          {imgs.find((img) => img.is_main) ? (
+            <img
+              src={imgs[0]?.image_url}
+              alt="representImg"
+              className="w-full h-full object-cover object-center"
+            />
+          ) : (
+            <div className="min-h-[125px] hintFont text-custom-black items-center flex justify-center h-full">
+              대표 이미지가 없는 것 같아요
+            </div>
+          )}
         </div>
 
         <div className="w-full flex justify-center">
@@ -167,39 +181,37 @@ const ChangeStoreImg = () => {
       <div className="flex flex-col gap-y-[20px]">
         <h2>다른 사진도 있나요?</h2>
         {/* preview */}
-        {imgs.length > 1 && imgs ? (
+        {imgs.filter((img) => !img.is_main).length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
-            {imgs.slice(1).map((img, idx) => (
-              <div className="relative" key={idx}>
-                <img
-                  key={idx}
-                  src={img.image_url}
-                  alt={`img-${idx}`}
-                  className="w-full h-[100px] object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleClickDelete(img.image_id)}
-                  className="absolute top-1 right-1 text-white text-xs w-5 h-5 flex items-center justify-center"
-                >
-                  <img src="/icon/crossWhite.svg" alt="crossIcon" />
-                </button>
-              </div>
-            ))}
+            {imgs
+              .filter((img) => !img.is_main)
+              .map((img, idx) => (
+                <div className="relative" key={idx}>
+                  <img
+                    key={idx}
+                    src={img.image_url}
+                    alt={`img-${idx}`}
+                    className="w-full h-[100px] object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleClickDelete(img.image_id)}
+                    className="absolute top-1 right-1 text-white text-xs w-5 h-5 flex items-center justify-center"
+                  >
+                    <img src="/icon/crossWhite.svg" alt="crossIcon" />
+                  </button>
+                </div>
+              ))}
           </div>
         ) : (
-          <div className="relative h-[100px]">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col">
-              <div className="hintFont text-custom-black">
-                등록된 사진이 없어요.
-              </div>
-            </div>
+          <div className="min-h-[125px] hintFont text-custom-black items-center flex justify-center h-full">
+            등록된 사진이 없어요.
           </div>
         )}
         {/* upload picture button */}
         <div className="w-full flex justify-center">
           <CommonBtn
-            label={`제품 사진 등록 (${imgs.length - 1}/10)`}
+            label={`제품 사진 등록 (${Math.max(imgs.length - 1, 0)}/10)`}
             notBottom
             onClick={() => handleClickUpload(false)}
             className="btnFont"
