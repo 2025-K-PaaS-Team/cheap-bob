@@ -145,7 +145,16 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
             {/* first row */}
             <div className="flex flex-row justify-between border-b border-black/10 pb-[16px]">
               {/* time */}
-              <h3>{order?.reservation_at.slice(11, 16)}</h3>
+              <h3>
+                {order?.reservation_at
+                  ? new Date(order.reservation_at).toLocaleTimeString("ko-KR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                      timeZone: "Asia/Seoul",
+                    })
+                  : "--:--"}
+              </h3>
               {/* quantity */}
               <h3>
                 <span className="font-normal">주문 수량:</span>{" "}
