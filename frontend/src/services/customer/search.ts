@@ -1,5 +1,6 @@
 import type { StoreSearchType } from "@interface";
 import { customerSearchApi, customerSearchHistoryApi } from "@services/client";
+import qs from "qs";
 
 // GET: get stores products
 export const getStores = async (page: number): Promise<StoreSearchType> => {
@@ -73,9 +74,11 @@ export const GetStoreByLocation = async (
     params: {
       sido: sido,
       sigungu: sigungu,
-      bname: hname.join(","),
+      bname: hname,
       page: page,
     },
+    paramsSerializer: (params) =>
+      qs.stringify(params, { arrayFormat: "repeat" }),
   });
 
   return data;

@@ -49,12 +49,13 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
                 : "영업 종료"}
             </div>
             {/* near time */}
-            {store.address.nearest_station && store.address.walking_time && (
-              <div className="tagFont bg-custom-black text-custom-white rounded-sm absolute bottom-2 right-2 z-10 py-[4px] px-[10px]">
-                {store.address.nearest_station} 도보{" "}
-                {store.address.walking_time}분
-              </div>
-            )}
+            {store.address.nearest_station &&
+              store.address.walking_time > 0 && (
+                <div className="tagFont bg-custom-black text-custom-white rounded-sm absolute bottom-2 right-2 z-10 py-[4px] px-[10px]">
+                  {store.address.nearest_station} 도보{" "}
+                  {store.address.walking_time}분
+                </div>
+              )}
 
             <img
               src={store.images.find((img) => img.is_main)?.image_url}
