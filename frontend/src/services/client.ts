@@ -15,7 +15,7 @@ const attachInterceptors = (instance: AxiosInstance) => {
       const isWithdraw = window.location.pathname.startsWith("/withdraw");
 
       // 401 Unauthorize
-      if (status === 401 && !isHome && !isWithdraw) {
+      if ((status === 401 || status === 403) && !isHome && !isWithdraw) {
         window.location.href = "/auth/role-check";
       }
 

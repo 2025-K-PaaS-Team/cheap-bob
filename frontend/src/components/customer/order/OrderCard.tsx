@@ -39,15 +39,14 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
   const handleCompletePickup = async (paymentId: string, qrData: string) => {
     try {
       await completePickup(paymentId, { qr_data: qrData });
-      setQrReaderOpen(false);
       setModalMsg("픽업이 완료되었습니다!");
       setShowModal(true);
+      setQrReaderOpen(false);
       await onRefresh?.();
     } catch (err: any) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
-      setQrReaderOpen(false);
       setPaymentIdToComplete(null);
       scannedRef.current = false;
     }
@@ -194,12 +193,12 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
                       <QrReader
                         constraints={{ facingMode: "environment" }}
                         onResult={(result) => {
-                          if (result && !scannedRef.current) {
-                            const data = result?.getText();
-                            if (data && !scannedRef.current) {
-                              scannedRef.current = true;
-                              handleCompletePickup(order.payment_id, data);
-                            }
+                          if (result?.getText() && !scannedRef.current) {
+                            scannedRef.current = true;
+                            handleCompletePickup(
+                              order.payment_id,
+                              result.getText()
+                            );
                           }
                         }}
                         videoStyle={{
