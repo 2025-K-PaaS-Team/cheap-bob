@@ -120,7 +120,15 @@ const BillingInfo = () => {
             <img src="/icon/next.svg" alt="nextIcon" />
           </div>
           {/* help */}
-          <div className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10">
+          <div
+            onClick={() =>
+              window.open(
+                "https://necessary-jodhpur-07b.notion.site/29c6c29762c280018485cc6fd2a79abc?source=copy_link",
+                "_blank"
+              )
+            }
+            className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
+          >
             <div>도움말</div>
             <img src="/icon/next.svg" alt="nextIcon" />
           </div>
