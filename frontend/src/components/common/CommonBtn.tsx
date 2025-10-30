@@ -11,6 +11,7 @@ type BtnProps = {
   notBottom?: boolean;
   className?: string;
   width?: string;
+  icon?: string;
   onClick?: () => void;
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
@@ -24,6 +25,7 @@ const CommonBtn = ({
   className,
   width,
   disabled,
+  icon,
   notBottom = false,
 }: BtnProps) => {
   const colorClass = {
@@ -45,9 +47,11 @@ const CommonBtn = ({
         ${notBottom ? "" : "fixed-action"} 
         ${colorClass}
         ${disabled ? "cursor-not-allowed" : className ? className : ""}
+        ${icon ? "flex-row gap-x-[8px]" : ""}
         ${width ? width : "w-full"}`}
     >
       {label}
+      <img src={icon} />
     </button>
   );
 };

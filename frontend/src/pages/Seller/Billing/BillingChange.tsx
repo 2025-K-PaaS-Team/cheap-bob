@@ -85,9 +85,25 @@ const BillingChange = () => {
 
   return (
     <div className="relative h-full flex flex-col m-[20px] gap-y-[10px]">
+      {/* help in a new tab */}
+      {!paymentExist && (
+        <CommonBtn
+          category="white"
+          icon="/icon/open.svg"
+          className="h-[72px]"
+          onClick={() =>
+            window.open(
+              "https://necessary-jodhpur-07b.notion.site/29c6c29762c280018485cc6fd2a79abc?source=copy_link",
+              "_blank"
+            )
+          }
+          label="연동 설정 도움말 바로가기"
+          notBottom
+        />
+      )}
       {/* id */}
       <div className="flex flex-1 flex-col">
-        <div className="bodyFont font-bold mt-[50px]">대표 상점 아이디</div>
+        <div className="bodyFont font-bold mt-[33.5px]">대표 상점 아이디</div>
         {/* input box */}
         <input
           className="w-full h-[46px] border-b border-black/80 hintFont p-1"
