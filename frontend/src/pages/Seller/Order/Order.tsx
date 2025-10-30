@@ -71,30 +71,21 @@ const Order = () => {
     }
   };
 
-  const sortByDateDesc = (a?: string | null, b?: string | null) =>
-    new Date(b ?? 0).getTime() - new Date(a ?? 0).getTime();
-
   const reservationOrders = useMemo<OrderBaseType[]>(
-    () =>
-      (orders?.orders ?? [])
-        .filter((o) => o.status === "reservation")
-        .sort((a, b) => sortByDateDesc(a.reservation_at, b.reservation_at)),
+    () => (orders?.orders ?? []).filter((o) => o.status === "reservation"),
     [orders]
   );
 
   const acceptedOrders = useMemo<OrderBaseType[]>(
-    () =>
-      (orders?.orders ?? [])
-        .filter((o) => o.status === "accept")
-        .sort((a, b) => sortByDateDesc(a.accepted_at, b.accepted_at)),
+    () => (orders?.orders ?? []).filter((o) => o.status === "accept"),
     [orders]
   );
 
   const otherOrders = useMemo<OrderBaseType[]>(
     () =>
-      (orders?.orders ?? [])
-        .filter((o) => o.status === "complete" || o.status === "cancel")
-        .sort((a, b) => sortByDateDesc(a.completed_at, b.completed_at)),
+      (orders?.orders ?? []).filter(
+        (o) => o.status === "complete" || o.status === "cancel"
+      ),
     [orders]
   );
 
