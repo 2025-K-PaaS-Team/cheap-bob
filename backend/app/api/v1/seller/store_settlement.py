@@ -79,15 +79,15 @@ async def get_store_settlement(
             if order.status in [OrderStatus.complete, OrderStatus.cancel]:
                 
                 # UTC를 KST로 변환
-                kst_time = order.reservation_at.astimezone(kst)
+                kst_date, kst_time = get_order_time_by_status(order, order.status)
                 
                 all_orders.append({
                     'product_name': order.product.product_name,
                     'quantity': order.quantity,
                     'total_amount': order.total_amount,
                     'status': order.status,
-                    'date': kst_time.date(),
-                    'time_at': get_order_time_by_status(order, order.status)
+                    'date': kst_date,
+                    'time_at': kst_time
                 })
     
     # 과거 날짜가 포함된 경우 history에서 조회
@@ -102,21 +102,20 @@ async def get_store_settlement(
         for order in history_orders:
             if order.status in ["complete", "cancel"]:
                 # UTC를 KST로 변환
-                kst_time = order.reservation_at.astimezone(kst)
-                
+                kst_date, kst_time = get_order_time_by_status(order, order.status)
                 all_orders.append({
                     'product_name': order.product_name,
                     'quantity': order.quantity,
                     'total_amount': order.total_amount,
                     'status': OrderStatus[order.status],
-                    'date': kst_time.date(),
-                    'time_at': get_order_time_by_status(order, order.status)
+                    'date': kst_date,
+                    'time_at': kst_time
                 })
     
     # 날짜별로 그룹화
     daily_data: Dict[str, List[Dict]] = defaultdict(list)
     for order in all_orders:
-        date_str = order['date'].strftime('%Y-%m-%d')
+        date_str = order['date']
         daily_data[date_str].append(order)
     
     daily_settlements = []

@@ -146,8 +146,8 @@ def get_main_image_url(store) -> Optional[str]:
     return None
 
 
-def get_order_time_by_status(order, status) -> str:
-    """주문 상태에 따른 시간을 KST로 변환하여 문자열로 반환"""
+def get_order_time_by_status(order, status) -> tuple:
+    """주문 상태에 따른 시간을 KST로 변환하여 날짜와 시간을 반환"""
     
     if isinstance(status, str):
         status = OrderStatus[status]
@@ -162,4 +162,6 @@ def get_order_time_by_status(order, status) -> str:
         time_at = order.reservation_at
     
     kst_time = time_at.astimezone(kst)
-    return kst_time.strftime('%Y-%m-%d %H:%M:%S')
+    date_str = kst_time.strftime('%Y-%m-%d')
+    time_str = kst_time.strftime('%H:%M')
+    return date_str, time_str
