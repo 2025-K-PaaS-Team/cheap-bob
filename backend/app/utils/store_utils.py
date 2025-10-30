@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from typing import Optional
+import pytz
 
 from api.deps.repository import StoreRepositoryDep
 from services.redis_cache import RedisCache
@@ -8,7 +9,9 @@ from schemas.store import StoreDetailResponseForCustomer
 from schemas.store_operation import StoreOperationResponse
 from schemas.image import ImageUploadResponse
 from core.object_storage import object_storage
+from schemas.order import OrderStatus
 
+kst = pytz.timezone('Asia/Seoul')
 
 async def get_store_id_by_email(
     seller_email: str,
@@ -141,3 +144,22 @@ def get_main_image_url(store) -> Optional[str]:
             return object_storage.get_file_url(image.image_id)
     
     return None
+
+
+def get_order_time_by_status(order, status) -> str:
+    """주문 상태에 따른 시간을 KST로 변환하여 문자열로 반환"""
+    
+    if isinstance(status, str):
+        status = OrderStatus[status]
+    
+    elif status == OrderStatus.complete:
+        time_at = order.completed_at
+    elif status == OrderStatus.cancel:
+        time_at = order.canceled_at
+    elif status == OrderStatus.accept:
+        time_at = order.accepted_at
+    else:
+        time_at = order.reservation_at
+    
+    kst_time = time_at.astimezone(kst)
+    return kst_time.strftime('%Y-%m-%d %H:%M:%S')
