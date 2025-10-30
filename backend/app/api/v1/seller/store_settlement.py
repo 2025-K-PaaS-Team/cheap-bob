@@ -5,7 +5,7 @@ from collections import defaultdict
 import pytz
 
 from utils.docs_error import create_error_responses
-from utils.store_utils import get_store_id_by_email
+from utils.store_utils import get_store_id_by_email, get_order_time_by_status
 
 from api.deps.auth import CurrentSellerDep
 from api.deps.repository import (
@@ -23,6 +23,7 @@ from schemas.order import (
 
 router = APIRouter(prefix="/store/settlement", tags=["Seller-Settlement"])
 kst = pytz.timezone('Asia/Seoul')
+
 
 @router.get("", response_model=SettlementResponse,
     responses=create_error_responses({
@@ -85,7 +86,8 @@ async def get_store_settlement(
                     'quantity': order.quantity,
                     'total_amount': order.total_amount,
                     'status': order.status,
-                    'date': kst_time.date()
+                    'date': kst_time.date(),
+                    'time_at': get_order_time_by_status(order, order.status)
                 })
     
     # 과거 날짜가 포함된 경우 history에서 조회
@@ -107,7 +109,8 @@ async def get_store_settlement(
                     'quantity': order.quantity,
                     'total_amount': order.total_amount,
                     'status': OrderStatus[order.status],
-                    'date': kst_time.date()
+                    'date': kst_time.date(),
+                    'time_at': get_order_time_by_status(order, order.status)
                 })
     
     # 날짜별로 그룹화
@@ -126,7 +129,8 @@ async def get_store_settlement(
                 product_name=order['product_name'],
                 quantity=order['quantity'],
                 total_amount=order['total_amount'],
-                status=order['status']
+                status=order['status'],
+                time_at=order['time_at']
             ))
         
         daily_settlements.append(SettlementDayGroup(

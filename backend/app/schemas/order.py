@@ -99,10 +99,11 @@ class SettlementItem(BaseModel):
     quantity: int = Field(..., description="판매된 개수")
     total_amount: int = Field(..., description="최종 판매가")
     status: OrderStatus = Field(..., description="주문 상태 (complete/cancel)")
+    time_at: str = Field(..., description="상태별 시간 (KST, YYYY-MM-DD HH:MM:SS)")
 
 
 class SettlementDayGroup(BaseModel):
-    date: str = Field(..., description="날짜 (YYYY-MM-DD)")
+    date: str = Field(..., description="날짜 KST (YYYY-MM-DD)")
     items: List[SettlementItem] = Field(default_factory=list, description="해당 날짜의 정산 아이템들")
 
 
