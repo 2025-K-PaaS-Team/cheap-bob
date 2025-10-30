@@ -329,14 +329,13 @@ class StoreRepository(BaseRepository[Store]):
         limit: int = 4
     ) -> tuple[List[tuple[Store, bool]], bool]:
         """위치로 가게 검색 (즐겨찾기 정보 포함)"""
-        subquery = (
+        favorite_stores_query = (
             select(CustomerFavorite.store_id)
             .where(CustomerFavorite.customer_email == customer_email)
-            .subquery()
         )
         
         query = (
-            select(Store, Store.store_id.in_(subquery))
+            select(Store, Store.store_id.in_(favorite_stores_query))
             .join(Store.address)
             .where(
                 and_(
@@ -411,14 +410,13 @@ class StoreRepository(BaseRepository[Store]):
         limit: int = 4
     ) -> tuple[List[tuple[Store, bool]], bool]:
         """주소와 이름으로 가게/상품 검색 (즐겨찾기 정보 포함)"""
-        subquery = (
+        favorite_stores_query = (
             select(CustomerFavorite.store_id)
             .where(CustomerFavorite.customer_email == customer_email)
-            .subquery()
         )
         
         query = (
-            select(Store, Store.store_id.in_(subquery))
+            select(Store, Store.store_id.in_(favorite_stores_query))
             .join(Store.address)
             .outerjoin(Store.products) 
             .where(
@@ -477,14 +475,13 @@ class StoreRepository(BaseRepository[Store]):
     
     async def search_by_name_with_favorites(self, search_name: str, customer_email: str, offset: int = 0, limit: int = 4) -> tuple[List[tuple[Store, bool]], bool]:
         """이름으로 가게/상품 검색 (즐겨찾기 정보 포함)"""
-        subquery = (
+        favorite_stores_query = (
             select(CustomerFavorite.store_id)
             .where(CustomerFavorite.customer_email == customer_email)
-            .subquery()
         )
         
         query = (
-            select(Store, Store.store_id.in_(subquery))
+            select(Store, Store.store_id.in_(favorite_stores_query))
             .outerjoin(Store.products)
             .where(
                 or_(
