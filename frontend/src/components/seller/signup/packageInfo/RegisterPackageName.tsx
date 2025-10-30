@@ -43,7 +43,7 @@ const RegisterPackageName = ({ pkg, setPkg }: SellerSignupPkgProps) => {
           {/* input box */}
           <input
             className="w-full h-[46px] border-b  border-[#393939] hintFont mt-[40px]"
-            placeholder="텍스트를 입력하세요"
+            placeholder="20자 이내로 패키지 이름을 입력해주세요"
             value={pkg?.product_name}
             onChange={(e) =>
               setPkg((prev) => ({ ...prev, product_name: e.target.value }))
