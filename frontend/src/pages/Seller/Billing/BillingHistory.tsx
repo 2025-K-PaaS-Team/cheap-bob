@@ -112,7 +112,7 @@ const BillingHistory = () => {
                 className="bg-white shadow rounded p-[16px] text-[16px] flex flex-col gap-y-[10px]"
               >
                 <div className="flex justify-between">
-                  <h3>{item.time_at.slice(11, 16)}</h3>
+                  <h3>{item.time_at}</h3>
                   <div>
                     주문 수량:{" "}
                     <span className="font-bold text-main-deep">
