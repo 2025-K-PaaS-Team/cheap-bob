@@ -173,19 +173,16 @@ class AutoCancelReservationOrdersTask:
                                 )
                                 continue
 
-                            # store name을 미리 추출하여 람다에서 lazy loading 방지
                             store_name = operation.store.store_name
                             scheduler.scheduler.add_job(
-                                func=lambda sid=operation.store_id, sname=store_name: \
-                                    AutoCancelReservationOrdersTask.cancel_and_refund_store_reservation_orders(
-                                        sid, sname
-                                    ),
+                                func=AutoCancelReservationOrdersTask.cancel_and_refund_store_reservation_orders,
                                 trigger='date',
                                 run_date=run_datetime,
                                 id=job_id,
                                 name=f"[{store_name}] 픽업 마감 시 주문 자동 취소/환불",
-                                misfire_grace_time=1800,  # 30분 유예
-                                replace_existing=True
+                                misfire_grace_time=1800,
+                                replace_existing=True,
+                                args=[operation.store_id, store_name],
                             )
 
                             AutoCancelReservationOrdersTask._registered_job_ids.append(job_id)
