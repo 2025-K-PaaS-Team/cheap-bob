@@ -14,6 +14,13 @@ export const getStoreOrder = async (): Promise<OrderResponseType> => {
   return data;
 };
 
+// GET: get store today orders
+export const getStoreTodayOrder = async (): Promise<OrderResponseType> => {
+  const { data } = await sellerOrderApi.get("/today");
+
+  return data;
+};
+
 // GET: get pending orders
 export const getStorePendingOrder = async (
   storeId: string
