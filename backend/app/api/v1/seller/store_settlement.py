@@ -121,10 +121,11 @@ async def get_store_settlement(
     
     daily_settlements = []
     
-    for date_str in sorted(daily_data.keys()):
+    for date_str in sorted(daily_data.keys(), reverse=True):
         orders = daily_data[date_str]
+        orders_sorted = sorted(orders, key=lambda x: x['time_at'], reverse=True)
         items = []
-        for order in orders:
+        for order in orders_sorted:
             items.append(SettlementItem(
                 product_name=order['product_name'],
                 quantity=order['quantity'],
