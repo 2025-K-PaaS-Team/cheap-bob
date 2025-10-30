@@ -32,7 +32,7 @@ const CommonProfile = ({
       {/* other row - custom white zone */}
       <div className="bg-custom-white rounded-b flex flex-col w-[322px] px-[16px] py-[20px] justify-start gap-y-[8px]">
         {/* nutrition_part */}
-        <div className="bodyFont text-custom-black">영양 목표</div>
+        <div className="bodyFont text-custom-black font-bold">영양 목표</div>
         <div className="flex flex-row flex-wrap gap-x-[10px] gap-y-[10px]">
           {nutrition_goal?.map((part, idx) => (
             <div
@@ -41,11 +41,11 @@ const CommonProfile = ({
             >
               {part}
             </div>
-          ))}
+          )) ?? "등록한 영양 목표가 없습니다"}
         </div>
 
         {/* prefer_menu */}
-        <div className="bodyFont text-custom-black">선호 메뉴</div>
+        <div className="bodyFont text-custom-black font-bold">선호 메뉴</div>
         <div className="flex flex-row flex-wrap gap-x-[10px] gap-y-[10px]">
           {prefer_menu?.map((part, idx) => (
             <div
@@ -54,11 +54,11 @@ const CommonProfile = ({
             >
               {part}
             </div>
-          ))}
+          )) ?? "등록한 선호 메뉴가 없습니다"}
         </div>
 
         {/* prefer_topping */}
-        <div className="bodyFont text-custom-black">선호 토핑</div>
+        <div className="bodyFont text-custom-black font-bold">선호 토핑</div>
         <div className="flex flex-row flex-wrap gap-x-[10px] gap-y-[10px]">
           {prefer_topping?.map((part, idx) => (
             <div
@@ -67,11 +67,11 @@ const CommonProfile = ({
             >
               {part}
             </div>
-          ))}
+          )) ?? "등록한 선호 토핑이 없습니다"}
         </div>
 
         {/* allergy */}
-        <div className="bodyFont text-custom-black">알레르기</div>
+        <div className="bodyFont text-custom-black font-bold">알레르기</div>
         <div className="flex flex-row flex-wrap gap-x-[10px] gap-y-[10px]">
           {allergy?.map((part, idx) => (
             <div
@@ -80,7 +80,7 @@ const CommonProfile = ({
             >
               {part}
             </div>
-          ))}
+          )) ?? "등록한 알러지가 없습니다"}
         </div>
       </div>
     </div>
