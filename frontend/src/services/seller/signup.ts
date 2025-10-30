@@ -5,9 +5,11 @@ import { kakaoApi } from "@services/client";
 export const getCoordinate = async (query: string): Promise<CoorBaseType> => {
   const res = await kakaoApi.get(`?query=${query}`);
   const roadAddr = res.data.documents[0].road_address;
+  const addr = res.data.documents[0].address;
 
   return {
     lng: roadAddr.x,
     lat: roadAddr.y,
+    hcode: addr.h_code,
   };
 };

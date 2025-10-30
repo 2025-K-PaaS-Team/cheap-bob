@@ -63,7 +63,14 @@ const OtherOrderList = ({ orders }: OtherOrderListProps) => {
             {/* second row */}
             <div className="flex flex-row justify-end gap-x-[16px] bodyFont">
               <div>
-                {doneOrCanceledAt ? doneOrCanceledAt.slice(11, 16) : "--:--"}
+                {doneOrCanceledAt
+                  ? new Date(order.reservation_at).toLocaleTimeString("ko-KR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                      timeZone: "Asia/Seoul",
+                    })
+                  : "--:--"}
               </div>
               <div
                 className={`font-bold ${
