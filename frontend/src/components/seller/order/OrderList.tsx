@@ -253,6 +253,7 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
           desc="주문 취소 사유를 선택하세요."
           confirmLabel="주문 취소하기"
           cancelLabel="취소"
+          disabled={!reason}
           onConfirmClick={() => {
             !isProcessing &&
               handleClickCancel(selectedPaymentId ?? "", reason?.label ?? "");
