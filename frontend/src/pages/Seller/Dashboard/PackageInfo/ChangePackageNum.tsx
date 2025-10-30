@@ -26,9 +26,18 @@ const ChangePackageNum = () => {
   const load = async (id: string) => {
     try {
       const res = await GetProduct(id);
-      const stock = await GetStoreReservation(repProductId ?? "");
+      let stock = null;
 
-      const initialStock = stock.new_stock ?? res.initial_stock;
+      try {
+        stock = await GetStoreReservation(id);
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+        } else {
+          setModalMsg(formatErrMsg(err));
+          setShowModal(true);
+        }
+      }
+      const initialStock = stock?.new_stock ?? res.initial_stock;
 
       setPkg({ ...res, initial_stock: initialStock });
     } catch (err) {
@@ -73,6 +82,8 @@ const ChangePackageNum = () => {
       setShowModal(true);
     }
   };
+
+  console.log(pkg);
 
   if (isLoading) {
     return <CommonLoading type="data" isLoading={isLoading} />;

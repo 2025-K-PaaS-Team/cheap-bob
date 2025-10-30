@@ -54,8 +54,31 @@ import {
   ChangeCustomerTopping,
 } from "@pages/Customer";
 import { ToastProvider } from "@context";
+import { Inspection } from "@pages/Common";
+import { useEffect, useState } from "react";
 
 const App = () => {
+  const [underInspection, setUnderInspection] = useState(false);
+
+  useEffect(() => {
+    const checkMaintenance = () => {
+      const now = new Date();
+      const seoulStr = now.toLocaleString("en-US", { timeZone: "Asia/Seoul" });
+      const seoulNow = new Date(seoulStr);
+      const hour = seoulNow.getHours();
+
+      setUnderInspection(hour >= 4 && hour < 5);
+    };
+
+    checkMaintenance();
+    const timer = setInterval(checkMaintenance, 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  if (underInspection) {
+    return <Inspection />;
+  }
+
   return (
     <ToastProvider>
       <BrowserRouter>
@@ -69,7 +92,6 @@ const App = () => {
             {/* role path */}
             <Route path="role-check" element={<RoleCheck />} />
           </Route>
-
           {/* withdraw */}
           <Route path="/withdraw" element={<Layout />}>
             {/* withdraw */}
@@ -77,7 +99,6 @@ const App = () => {
             {/* roleback withdraw */}
             <Route path="cancel" element={<WithdrawCancel />} />
           </Route>
-
           {/* docs */}
           <Route path="/docs" element={<Layout />}>
             <Route index element={<Navigate to="/" replace />} />
@@ -86,13 +107,11 @@ const App = () => {
             {/* privacy policy */}
             <Route path="privacy" element={<Privacy />} />
           </Route>
-
           {/* fallback */}
           <Route path="/" element={<Layout />}>
             <Route index element={<RouteHome />} />
             <Route path="404" element={<Fallback />} />
           </Route>
-
           {/* customer side */}
           <Route path="/c" element={<Layout />}>
             {/* home */}
@@ -130,7 +149,6 @@ const App = () => {
             {/* customer fallback */}
             <Route path="*" element={<Navigate to="/c" replace />} />
           </Route>
-
           {/* seller side */}
           <Route path="/s" element={<Layout />}>
             {/* home */}
@@ -180,7 +198,6 @@ const App = () => {
             {/* seller fallback */}
             <Route path="*" element={<Navigate to="/s" replace />} />
           </Route>
-
           {/* global fallback */}
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
