@@ -43,7 +43,7 @@ const RegisterPackageDesc = ({ pkg, setPkg }: SellerSignupPkgProps) => {
           {/* input box */}
           <textarea
             className="w-full h-[145px] rounded border border-[#E7E7E7] text-[16px] mt-[40px] p-[8px]"
-            placeholder="텍스트를 입력하세요"
+            placeholder="100자 이내로 패키지 소개를 입력해주세요"
             value={pkg?.description}
             onChange={(e) =>
               setPkg((prev) => ({ ...prev, description: e.target.value }))

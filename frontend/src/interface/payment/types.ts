@@ -38,6 +38,7 @@ export type SettlementItemType = {
   quantity: number;
   total_amount: number;
   status: string;
+  time_at: string;
 };
 
 export type SettlementBaseType = {

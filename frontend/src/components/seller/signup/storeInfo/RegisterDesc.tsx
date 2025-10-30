@@ -44,7 +44,7 @@ const RegisterDesc = () => {
         {/* input box */}
         <textarea
           className="w-full h-[145px] rounded border border-[#E7E7E7] text-[16px] mt-[40px] p-[8px]"
-          placeholder="텍스트를 입력하세요"
+          placeholder="100자 이내로 매장 설명을 입력해주세요"
           value={form.store_introduction}
           onChange={(e) => setForm({ store_introduction: e.target.value })}
         />

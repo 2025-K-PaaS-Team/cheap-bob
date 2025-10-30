@@ -143,6 +143,7 @@ const NowOpStatus = ({ ops }: Props) => {
           cancelLabel="취소"
           confirmLabel="변경하기"
           desc="영업 상태 변경"
+          disabled={!selectedOption}
           onCancelClick={() => setOpenChangeModal(false)}
           onConfirmClick={() => handleChangeOpStatus()}
         >
