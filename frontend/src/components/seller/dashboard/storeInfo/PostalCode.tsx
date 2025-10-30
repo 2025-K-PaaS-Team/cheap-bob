@@ -68,6 +68,8 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
         markerRef.current.setIcon(icon);
       }
 
+      console.log(data);
+
       // set form
       setForm({
         postal_code: data.zonecode,
@@ -99,6 +101,7 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
   };
 
   useEffect(() => {
+    console.log(form);
     // Get naver map
     const loadScript = () => {
       return new Promise<void>((resolve) => {

@@ -61,3 +61,22 @@ export const GetStoreByName = async (name: string, page: number = 0) => {
 
   return data;
 };
+
+// GET: get stores by location
+export const GetStoreByLocation = async (
+  sido: string,
+  sigungu: string,
+  hname: string[],
+  page: number = 0
+) => {
+  const { data } = await customerSearchApi("/by-location", {
+    params: {
+      sido: sido,
+      sigungu: sigungu,
+      bname: hname.join(","),
+      page: page,
+    },
+  });
+
+  return data;
+};

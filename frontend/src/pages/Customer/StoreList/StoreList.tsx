@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AddFavoriteStore,
   GetPreferMenu,
-  getStores,
+  GetStoreByLocation,
   RemoveFavoriteStore,
 } from "@services";
 import { Chips, CommonModal } from "@components/common";
-import { NutritionList } from "@constant";
+import { dongData, NutritionList } from "@constant";
 import type { StoreSearchType } from "@interface";
 import { StoreBox } from "@components/customer/storeList";
 import CommonLoading from "@components/common/CommonLoading";
@@ -15,10 +15,25 @@ import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 
 const StoreList = () => {
+  interface Dongs {
+    [key: string]: boolean;
+  }
+
   const navigate = useNavigate();
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const sido = localStorage.getItem("sido") || "서울";
+  const sigungu = localStorage.getItem("sigungu") || "관악구";
+  const dongsStr = localStorage.getItem("dongs") || "{}";
+  const dongs: Dongs = JSON.parse(dongsStr);
+
+  let selectedDongs: string[] = [];
+  if (dongs["관악구 전체"]) {
+    selectedDongs = dongData["관악구"];
+  } else {
+    selectedDongs = Object.keys(dongs).filter((key) => dongs[key]);
+  }
 
   const [stores, setStores] = useState<StoreSearchType>();
   const [pageIdx, setPageIdx] = useState<number>(0);
@@ -85,7 +100,12 @@ const StoreList = () => {
       if (page === 0) setIsInitialLoading(true);
       else setIsFetchingMore(true);
 
-      const newStores = await getStores(page);
+      const newStores = await GetStoreByLocation(
+        sido,
+        sigungu,
+        selectedDongs,
+        page
+      );
 
       setStores((prev) => {
         if (!prev || page === 0) return newStores;
