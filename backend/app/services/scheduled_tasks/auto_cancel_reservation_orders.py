@@ -6,10 +6,12 @@ from collections import defaultdict
 from database.session import get_session
 from repositories.order_current_item import OrderCurrentItemRepository
 from repositories.store_operation_info import StoreOperationInfoRepository
+from repositories.store_product_info import StoreProductInfoRepository, StockUpdateResult
 from repositories.store_payment_info import StorePaymentInfoRepository
 from schemas.order import OrderStatus
 from services.payment import PaymentService
 from services.email import email_service
+from config.settings import settings
 
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,7 @@ class AutoCancelReservationOrdersTask:
         try:
             async with get_session() as session:
                 order_repo = OrderCurrentItemRepository(session)
+                product_repo = StoreProductInfoRepository(session)
                 payment_info_repo = StorePaymentInfoRepository(session)
                 
                 payment_info = await payment_info_repo.get_by_store_id(store_id)
@@ -71,6 +74,16 @@ class AutoCancelReservationOrdersTask:
                                 cancel_reason="‘조기 마감’ 으로 주문이 취소되었어요."
                             )
                             
+                            max_retries = settings.MAX_RETRY_LOCK
+                            for attempt in range(max_retries):
+                                result = await product_repo.adjust_purchased_stock(order.product_id, -order.quantity)
+                                
+                                if result == StockUpdateResult.SUCCESS:
+                                    break
+                                
+                                if attempt == max_retries - 1:
+                                    continue
+
                             if email_service.is_configured():
                                 await email_service.send_template(
                                     recipient_email=order.customer_id,
