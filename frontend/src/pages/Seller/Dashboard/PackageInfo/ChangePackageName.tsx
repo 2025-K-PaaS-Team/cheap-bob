@@ -90,7 +90,7 @@ const ChangePackageName = () => {
 
         <input
           className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
-          placeholder="패키지의 이름을 입력해 주세요"
+          placeholder="20자 이내로 패키지 이름을 입력해주세요"
           value={name}
           onChange={(e) => setName(e.target.value)}
           maxLength={15}
