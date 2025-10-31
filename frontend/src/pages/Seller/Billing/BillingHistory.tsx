@@ -47,6 +47,12 @@ const BillingHistory = () => {
   }, [filteredSettlements]);
 
   useEffect(() => {
+    if (!endDate.isAfter(startDate)) {
+      setEndDate(startDate.add(1, "day"));
+      setModalMsg("시작일이 종료일보다 늦을 수 없습니다");
+      setShowModal(true);
+      return;
+    }
     const init = async () => {
       await handleGetSettlement(
         startDate.format("YYYY-MM-DD"),
