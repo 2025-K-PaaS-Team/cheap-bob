@@ -277,26 +277,27 @@ async def get_operation_reservation(
         
         for mod in modifications:
             day_of_week = mod.operation_id
-            orig_info = operation_info_dict.get(day_of_week)
+            origin_info = operation_info_dict.get(day_of_week)
             
-            if orig_info:
-                if (mod.new_open_time != orig_info.open_time or 
-                    mod.new_close_time != orig_info.close_time or 
-                    mod.new_is_open_enabled != orig_info.is_open_enabled):
+            if origin_info:
+                if (mod.new_open_time != origin_info.open_time or 
+                    mod.new_close_time != origin_info.close_time or 
+                    mod.new_is_open_enabled != origin_info.is_open_enabled):
                     has_operation_time_change = True
                 
                 mod_pickup_start_diff = (datetime.combine(datetime.today(), mod.new_close_time) - 
                                         datetime.combine(datetime.today(), mod.new_pickup_start_time))
-                orig_pickup_start_diff = (datetime.combine(datetime.today(), orig_info.close_time) - 
-                                         datetime.combine(datetime.today(), orig_info.pickup_start_time))
+                orig_pickup_start_diff = (datetime.combine(datetime.today(), origin_info.close_time) - 
+                                         datetime.combine(datetime.today(), origin_info.pickup_start_time))
                 
                 mod_pickup_end_diff = (datetime.combine(datetime.today(), mod.new_close_time) - 
                                       datetime.combine(datetime.today(), mod.new_pickup_end_time))
-                orig_pickup_end_diff = (datetime.combine(datetime.today(), orig_info.close_time) - 
-                                       datetime.combine(datetime.today(), orig_info.pickup_end_time))
+                orig_pickup_end_diff = (datetime.combine(datetime.today(), origin_info.close_time) - 
+                                       datetime.combine(datetime.today(), origin_info.pickup_end_time))
                 
-                if (mod_pickup_start_diff != orig_pickup_start_diff or 
-                    mod_pickup_end_diff != orig_pickup_end_diff):
+                if ((mod.new_is_open_enabled == origin_info.is_open_enabled) and
+                    (mod_pickup_start_diff != orig_pickup_start_diff or 
+                    mod_pickup_end_diff != orig_pickup_end_diff)):
                     has_pickup_time_change = True
         
         if has_operation_time_change and has_pickup_time_change:
