@@ -316,6 +316,7 @@ const StoreDetail = () => {
                 state: {
                   desc: store.store_introduction,
                   name: store.store_name,
+                  phone: store.store_phone,
                 },
               })
             }
