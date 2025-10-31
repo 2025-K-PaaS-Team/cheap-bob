@@ -1,8 +1,14 @@
-import { CommonBtn, CommonModal } from "@components/common";
-import { orderStatus } from "@constant";
-import type { OrderBaseType } from "@interface/common/types";
+import { CommonBtn, CommonModal, CommonProfile } from "@components/common";
+import {
+  AllergyList,
+  MenuList,
+  NutritionList,
+  orderStatus,
+  ToppingList,
+} from "@constant";
+import type { OrderBaseType } from "@interface";
 import { completePickup, deleteOrder, getCurrentOrders } from "@services";
-import { formatDate, formatErrMsg } from "@utils";
+import { formatErrMsg, getTitleByKey } from "@utils";
 import { useRef, useState } from "react";
 import { QrReader } from "react-qr-reader";
 
@@ -83,14 +89,36 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
     cancel: "canceled_at",
   };
 
+  const [showProfile, setShowProfile] = useState<boolean>(false);
+  const [selectedProfile, setSelectedProfile] = useState<OrderBaseType | null>(
+    null
+  );
+
+  const handleOpenProfile = (order: OrderBaseType) => {
+    setSelectedProfile(order);
+    setShowProfile(true);
+  };
+
   return (
     <>
       {orders.map((order, idx) => {
         const timeStampKey = timeKeyMap[order.status] ?? "reservation_at";
-        const timeStampValue = order[timeStampKey as keyof OrderBaseType];
-        const orderTime = formatDate(timeStampValue)
-          ?.slice(0, 10)
-          .replaceAll("-", ".");
+        const timeStampValue = order[timeStampKey as keyof OrderBaseType] as
+          | string
+          | number;
+        const orderTime = new Date(timeStampValue)
+          .toLocaleString("ko-KR", {
+            timeZone: "Asia/Seoul",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          })
+          .replace(/\.\s/g, ".")
+          .replace(/\.$/, "")
+          .replace(/\.(\d{2}:\d{2})$/, " $1");
         const orderState =
           orderStatus[order.status as keyof typeof orderStatus] ?? "";
 
@@ -112,10 +140,14 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
                 </div>
 
                 {/* date */}
-                <div className="tagFont flex flex-row gap-x-[3px]">
+                <div
+                  onClick={() => handleOpenProfile(order)}
+                  className="tagFont font-bold flex flex-row gap-x-[3px] items-center justify-center"
+                >
                   <div>{orderTime}</div>
                   <div>·</div>
                   <div>{order.quantity}개</div>
+                  <img src="/icon/next.svg" alt="nextIcon" width="14px" />
                 </div>
               </div>
 
@@ -280,6 +312,29 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
           </div>
         );
       })}
+
+      {/* show profile modal */}
+      {showProfile && selectedProfile && (
+        <CommonProfile
+          nickname={selectedProfile?.customer_nickname}
+          phone={selectedProfile?.customer_phone_number}
+          nutrition_goal={selectedProfile?.nutrition_types?.map((n) =>
+            getTitleByKey(n, NutritionList)
+          )}
+          prefer_menu={selectedProfile?.preferred_menus?.map((m) =>
+            getTitleByKey(m, MenuList)
+          )}
+          prefer_topping={selectedProfile?.topping_types?.map((t) =>
+            getTitleByKey(t, ToppingList)
+          )}
+          allergy={selectedProfile?.allergies?.map((a) =>
+            getTitleByKey(a, AllergyList)
+          )}
+          onCancelClick={() => setShowProfile(false)}
+          datetime={selectedProfile?.reservation_at}
+          qty={selectedProfile?.quantity}
+        />
+      )}
     </>
   );
 };

@@ -1,4 +1,5 @@
-import type { OrderBaseType, TimeStamp } from "@interface/common/types";
+import type { TimeStamp } from "@interface/common/types";
+import type { OrderBaseType } from "@interface";
 
 export type OrderResponseType = {
   orders: OrderBaseType[];

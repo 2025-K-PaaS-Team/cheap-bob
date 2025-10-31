@@ -1,7 +1,7 @@
 import { CommonBtn } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import { OrderCard } from "@components/customer/order";
-import type { OrderBaseType } from "@interface/common/types";
+import type { OrderBaseType } from "@interface";
 import { getCurrentOrders } from "@services";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";

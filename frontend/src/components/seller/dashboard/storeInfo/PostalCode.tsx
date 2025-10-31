@@ -121,6 +121,25 @@ const PostalCode = ({ form, setForm }: PostalCodeProps) => {
         zoom: 17,
         mapTypeId: window.naver.maps.MapTypeId.NORMAL,
       });
+
+      if (form?.lat && form?.lng) {
+        const initialPosition = new window.naver.maps.LatLng(
+          form.lat,
+          form.lng
+        );
+        const icon = {
+          url: "/icon/greenLocation.svg",
+          size: new window.naver.maps.Size(40, 40),
+          origin: new window.naver.maps.Point(0, 0),
+          anchor: new window.naver.maps.Point(20, 40),
+        };
+
+        markerRef.current = new window.naver.maps.Marker({
+          position: initialPosition,
+          map: mapRef.current,
+          icon,
+        });
+      }
     };
 
     loadScript().then(() => {

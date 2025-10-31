@@ -88,7 +88,7 @@ const ChangeStoreAddr = () => {
   };
 
   return (
-    <div className="my-[30px] px-[20px] w-full flex flex-col flex-1">
+    <div className="my-[30px] px-[20px] gap-y-[20px] w-full flex flex-col flex-1">
       <div className="flex flex-col gap-y-[40px] flex-1">
         {/* question */}
         <div className="titleFont">
