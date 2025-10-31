@@ -3,7 +3,7 @@ import CommonLoading from "@components/common/CommonLoading";
 import { useToast } from "@context";
 import type { CustomerDetailType } from "@interface";
 import { GetCustomerDetail, UpdateCustomerDetail } from "@services";
-import { formatErrMsg } from "@utils";
+import { formatErrMsg, formatPhoneNumber } from "@utils";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -81,17 +81,19 @@ const ChangeCustomerInfo = () => {
           {/* input box */}
           <input
             className="w-full  text-[#393939] border-b border-black text-[16px] mt-[30px] pb-1"
-            value={customer?.phone_number}
-            onChange={(e) =>
+            value={formatPhoneNumber(customer?.phone_number)}
+            maxLength={13}
+            onChange={(e) => {
+              const rawValue = e.target.value.replace(/\D/g, "");
               setCustomer((prev) =>
                 prev
-                  ? { ...prev, phone_number: e.target.value }
+                  ? { ...prev, phone_number: rawValue }
                   : ({
-                      phone_number: e.target.value,
+                      phone_number: rawValue,
                       nickname: "",
                     } as CustomerDetailType)
-              )
-            }
+              );
+            }}
           />
         </div>
         {/* email addr */}
