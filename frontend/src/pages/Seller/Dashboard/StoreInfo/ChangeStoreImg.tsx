@@ -198,7 +198,11 @@ const ChangeStoreImg = () => {
                     onClick={() => handleClickDelete(img.image_id)}
                     className="absolute top-1 right-1 text-white text-xs w-5 h-5 flex items-center justify-center"
                   >
-                    <img src="/icon/crossWhite.svg" alt="crossIcon" />
+                    <img
+                      src="/icon/cross.svg"
+                      alt="crossIcon"
+                      className="bg-white/50 rounded-full p-[3px]"
+                    />
                   </button>
                 </div>
               ))}
