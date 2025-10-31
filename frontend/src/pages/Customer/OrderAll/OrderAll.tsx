@@ -1,7 +1,7 @@
 import { CommonBtn } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import { OrderCard } from "@components/customer/order";
-import type { OrderBaseType } from "@interface/common/types";
+import type { OrderBaseType } from "@interface";
 import { getOrders } from "@services";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -14,9 +14,9 @@ const Order = () => {
   const handleGetOrders = async () => {
     try {
       const res = await getOrders();
-      const filteredOrders = res.orders.filter(
+      const filteredOrders = (res.orders as OrderBaseType[]).filter(
         (order: OrderBaseType) =>
-          order.status === "complete" || order.status === "cancel"
+          order?.status === "complete" || order?.status === "cancel"
       );
       setOrders(filteredOrders);
     } catch (err: unknown) {
