@@ -35,7 +35,7 @@ const CommonDesc = ({ desc, name, phone }: CommonDescProps) => {
   return (
     <div className="flex flex-col">
       <DetailHeader name={name || ""} />
-      <div className="absolute bodyFont top-[80px] mx-[20px] h-full w-full inset-0 flex flex-col items-start justify-start z-50">
+      <div className="bodyFont top-[80px] px-[20px] h-full w-full inset-0 flex flex-col items-start justify-start z-50">
         <div>{desc || ""}</div>
         <br />
         <div>{formattedPhone(phone) || ""}</div>
