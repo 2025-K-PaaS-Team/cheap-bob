@@ -5,6 +5,8 @@ type ProfileProps = {
   prefer_menu: string[];
   prefer_topping: string[];
   allergy: string[];
+  datetime: string;
+  qty: number;
   onCancelClick: () => void;
 };
 
@@ -15,16 +17,38 @@ const CommonProfile = ({
   prefer_menu,
   prefer_topping,
   allergy,
+  datetime,
+  qty,
   onCancelClick,
 }: ProfileProps) => {
+  const reservationAt = new Date(datetime)
+    .toLocaleString("ko-KR", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+    .replace(/\.\s/g, ".")
+    .replace(/\.$/, "")
+    .replace(/\.(\d{2}:\d{2})$/, " $1");
+
   return (
     <div className="absolute inset-0 z-[1000] flex flex-col items-center justify-center bg-black/20">
       <div className="bg-white rounded-t flex flex-col border-b border-black/80 w-[322px] px-[16px] py-[20px] gap-y-[8px]">
         {/* first row - white zone */}
-        <div className="flex flex-row justify-between">
-          <h1>{nickname ?? ""}</h1>
-          <img src="/icon/cross.svg" alt="crossIcon" onClick={onCancelClick} />
+        <div className="flex flex-row relative tagFont font-bold">
+          <div>{reservationAt}</div>·<div>{qty}개</div>
+          <img
+            src="/icon/cross.svg"
+            alt="crossIcon"
+            onClick={onCancelClick}
+            className="absolute right-0 top-0"
+          />
         </div>
+        <h1>{nickname ?? ""}</h1>
         {/* second row - white zone */}
         <div className="bodyFont text-custom-black">전화번호 {phone ?? ""}</div>
       </div>

@@ -298,6 +298,8 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
             getTitleByKey(a, AllergyList)
           )}
           onCancelClick={() => setShowProfile(false)}
+          datetime={selectedProfile?.reservation_at}
+          qty={selectedProfile?.quantity}
         />
       )}
     </div>
