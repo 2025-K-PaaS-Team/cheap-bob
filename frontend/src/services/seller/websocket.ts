@@ -2,7 +2,10 @@ export const connectOrderSocket = (
   paymentId: string,
   onStatusChange: (status: string) => void
 ) => {
-  const socketUrl = `wss://dev-back.cheap-bob.store/api/v1/test/qr/${paymentId}/callback`;
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const wsBase = baseUrl.replace(/^https/, "wss");
+
+  const socketUrl = `${wsBase}/api/v1/seller/store/orders/${paymentId}/qr/callback`;
 
   const ws = new WebSocket(socketUrl);
 
