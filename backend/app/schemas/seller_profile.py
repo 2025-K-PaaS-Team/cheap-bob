@@ -38,7 +38,7 @@ class StorePaymentInfoCheckResponse(BaseModel):
 class SellerProfileCreateRequest(BaseModel):
     """판매자 회원가입 요청"""
     # 매장 기본 정보
-    store_name: str = Field(..., description="매장 이름", min_length=1, max_length=20)
+    store_name: str = Field(..., description="매장 이름", min_length=1, max_length=30)
     store_introduction: str = Field(..., description="매장 소개", min_length=1)
     store_phone: str = Field(..., description="매장 전화번호")
     
@@ -78,7 +78,7 @@ class SellerProfileResponse(BaseModel):
 
 class StoreNameUpdateRequest(BaseModel):
     """매장 이름 수정 요청"""
-    store_name: str = Field(..., description="매장 이름", min_length=1, max_length=20)
+    store_name: str = Field(..., description="매장 이름", min_length=1, max_length=30)
 
 
 class StoreIntroductionUpdateRequest(BaseModel):
