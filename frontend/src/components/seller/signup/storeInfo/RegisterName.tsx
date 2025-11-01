@@ -35,7 +35,7 @@ const RegisterName = () => {
         {/* input box */}
         <input
           className="w-full h-[46px] border-b  border-[#393939] text-[16px] mt-[40px]"
-          placeholder="20자 이내로 매장 이름을 입력해주세요"
+          placeholder="30자 이내로 매장 이름을 입력해주세요"
           value={form.store_name}
           onChange={(e) => setForm({ store_name: e.target.value })}
         />

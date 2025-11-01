@@ -9,13 +9,18 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, jwt_service: JWTService):
         super().__init__(app)
         self.jwt_service = jwt_service
-        self.exclude_paths = [
+        self.exclude_start_paths = [
             "/api/v1/auth/",
             "/api/v1/common/",
+            "/api/v1/test/qr",
             "/docs",
             "/redoc",
             "/openapi.json",
             "/health"
+        ]
+        
+        self.exclude_end_paths = [
+            "/qr/callback"
         ]
     
     async def dispatch(
@@ -23,10 +28,19 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         request: Request, 
         call_next: RequestResponseEndpoint
     ) -> Response:
+        # WebSocket 요청 인증 제외 (웹소켓은 별도로 처리 해야 함)
+        if request.headers.get("upgrade") == "websocket":
+            path = request.url.path
+            if any(path.endswith(excluded) for excluded in self.exclude_end_paths):
+                return await call_next(request)
+        
         # 제외 경로 확인
         path = request.url.path
-        if any(path.startswith(excluded) for excluded in self.exclude_paths):
+        if any(path.startswith(excluded) for excluded in self.exclude_start_paths):
             return await call_next(request)
+        
+        # if any(path.endswith(excluded) for excluded in self.exclude_end_paths):
+        #     return await call_next(request)
         
         access_token = None
         

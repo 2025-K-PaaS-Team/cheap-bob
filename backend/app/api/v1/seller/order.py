@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, HTTPException, status, BackgroundTasks, WebSocket, WebSocketDisconnect
 from datetime import datetime, timezone
+import asyncio
 
 from utils.qr_generator import encode_qr_data
 from utils.docs_error import create_error_responses
@@ -26,6 +27,7 @@ from schemas.order import (
     DashboardStockItem
 )
 from services.payment import PaymentService
+from services.qr_callback import QRCallbackCache
 from services.background_email import send_order_accepted_email, send_seller_cancel_email
 from config.settings import settings
 
@@ -368,7 +370,7 @@ async def get_order_qr(
     order_repo: OrderCurrentItemRepositoryDep
 ):
     """
-    픽업 QR 코드 생성, 5분 유효
+    픽업 QR 코드 생성, 30초 유효
     """
     
     seller_email = current_user["sub"]
@@ -458,3 +460,71 @@ async def get_dashboard(
         items=dashboard_items,
         total_items=len(dashboard_items)
     )
+
+
+@router.websocket("/{payment_id}/qr/callback")
+async def qr_callback_websocket(
+    websocket: WebSocket,
+    payment_id: str
+):
+    """
+    QR 콜백 WebSocket 엔드포인트
+    - 30초 동안 연결 유지
+    - 완료 상태가 되면 응답 전송 후 연결 종료
+    """
+    await websocket.accept()
+    
+    try:
+        await QRCallbackCache.set_waiting_status(payment_id)
+        
+        async def check_payment_status():
+            for _ in range(31):
+                try:
+                    status = await QRCallbackCache.get_status(payment_id)
+                    
+                    if status is None:
+                        await websocket.send_json({
+                            "status": "error",
+                            "message": "Payment ID를 찾을 수 없습니다. 다시 시도 해주세요."
+                        })
+                        return
+                    
+                    if status == QRCallbackCache.COMPLETED_STATUS:
+                        await websocket.send_json({
+                            "status": "completed",
+                            "message": "Payment completed successfully"
+                        })
+                        return
+                    
+                    await asyncio.sleep(1)
+                    
+                except Exception as e:
+                    await websocket.send_json({
+                        "status": "error",
+                        "message": str(e)
+                    })
+                    return
+            
+            await websocket.send_json({
+                "status": "timeout",
+                "message": "Connection timeout after 30 seconds"
+            })
+        
+        await check_payment_status()
+        
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        try:
+            await websocket.send_json({
+                "status": "error",
+                "message": str(e)
+            })
+        except:
+            pass
+    finally:
+        await QRCallbackCache.delete_status(payment_id)
+        try:
+            await websocket.close()
+        except:
+            pass
