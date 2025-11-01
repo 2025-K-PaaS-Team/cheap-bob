@@ -15,9 +15,9 @@ const ChangeStoreName = ({}) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleUpdateStoreName = async (storeName: string) => {
-    const validMsg = "매장 이름은 1~20자여야 합니다.";
+    const validMsg = "매장 이름은 1~30자여야 합니다.";
 
-    if (!validateLength(value, 1, 20)) {
+    if (!validateLength(value, 1, 30)) {
       setModalMsg(validMsg);
       setShowModal(true);
       return;
@@ -66,7 +66,7 @@ const ChangeStoreName = ({}) => {
         {/* input box */}
         <input
           className="w-full h-[46px] border-b  border-[#393939] text-[16px]"
-          placeholder="20자 이내로 매장 이름을 입력해주세요"
+          placeholder="30자 이내로 매장 이름을 입력해주세요"
           value={value}
           onChange={(e) => setValue(e.target.value)}
         />
