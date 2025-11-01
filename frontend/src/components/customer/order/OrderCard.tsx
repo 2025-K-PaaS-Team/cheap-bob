@@ -48,11 +48,11 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
       setModalMsg("픽업이 완료되었습니다!");
       setShowModal(true);
       setQrReaderOpen(false);
-      await onRefresh?.();
     } catch (err: any) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
+      await onRefresh?.();
       setPaymentIdToComplete(null);
       scannedRef.current = false;
     }
