@@ -28,13 +28,19 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         request: Request, 
         call_next: RequestResponseEndpoint
     ) -> Response:
+        # WebSocket 요청 인증 제외 (웹소켓은 별도로 처리 해야 함)
+        if request.headers.get("upgrade") == "websocket":
+            path = request.url.path
+            if any(path.endswith(excluded) for excluded in self.exclude_end_paths):
+                return await call_next(request)
+        
         # 제외 경로 확인
         path = request.url.path
         if any(path.startswith(excluded) for excluded in self.exclude_start_paths):
             return await call_next(request)
         
-        if any(path.endswith(excluded) for excluded in self.exclude_end_paths):
-            return await call_next(request)
+        # if any(path.endswith(excluded) for excluded in self.exclude_end_paths):
+        #     return await call_next(request)
         
         access_token = None
         
