@@ -4,6 +4,7 @@ export * from "./seller/product";
 export * from "./seller/billing";
 export * from "./seller/order";
 export * from "./seller/signup";
+export * from "./seller/websocket";
 export * from "./customer/search";
 export * from "./customer/order";
 export * from "./customer/payment";

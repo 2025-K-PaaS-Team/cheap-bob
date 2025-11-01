@@ -228,7 +228,11 @@ const OrderList = ({ orders, status, onRefresh }: OrderListProps) => {
 
             {/* qr modal */}
             {openQr && qrData && (
-              <CommonQR onClick={() => setOpenQr(false)} qrData={qrData} />
+              <CommonQR
+                onClick={() => setOpenQr(false)}
+                qrData={qrData}
+                onRefresh={onRefresh}
+              />
             )}
           </div>
         );

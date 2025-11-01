@@ -61,10 +61,12 @@ const Payment = ({
         sessionStorage.setItem(`confirmed:${txId}`, "1");
         navigate(pathname, { replace: true });
         setModalMsg(
-          "결제가 정상적으로 완료되었습니다. <br/> 3초 후 주문 현황 페이지로 이동합니다."
+          "결제가 정상적으로 완료되었습니다. <br/> 1초 후 주문 현황 페이지로 이동합니다."
         );
         setShowModal(true);
-        const timer = setTimeout(() => navigate("/c/order"), 3000);
+        const timer = setTimeout(() => {
+          window.location.href = "/c/order";
+        }, 1000);
         return () => clearTimeout(timer);
       } catch (err: any) {
         setModalMsg(err?.message || "결제 확정에 실패했습니다.");
@@ -95,7 +97,9 @@ const Payment = ({
       setIsLoading(true);
       await confrimPayment({ payment_id });
       setWaitingOpen(true);
-      const timer = setTimeout(() => navigate("/c/order"), 1000);
+      const timer = setTimeout(() => {
+        window.location.href = "/c/order";
+      }, 1000);
       return () => clearTimeout(timer);
     } catch (err) {
       setModalMsg(formatErrMsg(err));
@@ -109,7 +113,7 @@ const Payment = ({
     e.preventDefault();
     if (!canPay) return;
 
-    const phoneRegex = /^01\d-\d{3,4}-\d{4}$/;
+    const phoneRegex = /^\d{2,3}-\d{3,4}-\d{4}$/;
     if (!phoneRegex.test(customer!.phone_number)) {
       setModalMsg("010-1234-5678 형식으로 입력해주세요");
       setShowModal(true);
