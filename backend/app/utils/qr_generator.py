@@ -23,7 +23,7 @@ def encode_qr_data(customer_id: str, payment_id: str, product_id: str) -> Tuple[
         "payment_id": payment_id,
         "product_id": product_id,
         "iat": now,
-        "exp": now + timedelta(minutes=5)
+        "exp": now + timedelta(seconds=30)
     }
     
     # JWT로 암호화
