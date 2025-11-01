@@ -30,6 +30,7 @@ from schemas.order import (
 )
 from services.payment import PaymentService
 from services.background_email import send_customer_cancel_email
+from services.qr_callback import QRCallbackCache
 from config.settings import settings
 
 # KST 타임존 설정
@@ -407,6 +408,12 @@ async def complete_pickup(
     
     # 주문 상태를 완료로 변경
     completed_order = await order_repo.complete_order(payment_id)
+    
+    try:
+        await QRCallbackCache.set_completed_status(payment_id)
+    except Exception:
+        # Redis 업데이트 실패는 critical하지 않으므로 무시, 30초 후 자동 타임아웃됨
+        pass
     
     return OrderItemResponse(
         payment_id=completed_order.payment_id,
