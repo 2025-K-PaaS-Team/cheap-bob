@@ -370,7 +370,7 @@ async def get_order_qr(
     order_repo: OrderCurrentItemRepositoryDep
 ):
     """
-    픽업 QR 코드 생성, 5분 유효
+    픽업 QR 코드 생성, 30초 유효
     """
     
     seller_email = current_user["sub"]
