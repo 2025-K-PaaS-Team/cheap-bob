@@ -9,7 +9,7 @@ import {
 import type { OrderBaseType } from "@interface";
 import { completePickup, deleteOrder, getCurrentOrders } from "@services";
 import { formatErrMsg, getTitleByKey } from "@utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { QrReader } from "react-qr-reader";
 
 interface OrderCardProps {
@@ -22,7 +22,6 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
   const [qrReaderOpen, setQrReaderOpen] = useState(false);
   const [currentOrderForQr, setCurrentOrderForQr] =
     useState<OrderBaseType | null>(null);
-  const [scanned, setScanned] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
@@ -41,6 +40,14 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
     null
   );
 
+  const scanLockRef = useRef(false);
+  const inflightRef = useRef<Set<string>>(new Set());
+  const processedRef = useRef<Set<string>>(new Set());
+
+  const [processingPaymentId, setProcessingPaymentId] = useState<string | null>(
+    null
+  );
+
   const getColorByStatus = (status: string) => {
     if (status === "reservation" || status === "cancel") {
       return "bg-[#E7E7E7]";
@@ -49,18 +56,27 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
   };
 
   const handleCompletePickup = async (paymentId: string, qrData: string) => {
+    if (
+      processedRef.current.has(paymentId) ||
+      inflightRef.current.has(paymentId)
+    )
+      return;
+
+    processedRef.current.add(paymentId);
+    inflightRef.current.add(paymentId);
+    setProcessingPaymentId(paymentId);
+
     try {
-      await completePickup(paymentId, { qr_data: qrData });
+      await completePickup(paymentId, { qr_data: qrData /*, axiosRetry: 0*/ });
       setModalMsg("픽업이 완료되었습니다!");
       setShowModal(true);
-      setQrReaderOpen(false);
-      setCurrentOrderForQr(null);
-      setScanned(false);
+      await onRefresh?.();
     } catch (err: any) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
-      await onRefresh?.();
+      inflightRef.current.delete(paymentId);
+      setProcessingPaymentId((cur) => (cur === paymentId ? null : cur));
     }
   };
 
@@ -82,9 +98,14 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
   };
 
   const handleClickPickupCompleteBtn = (order: OrderBaseType) => {
+    if (
+      processedRef.current.has(order.payment_id) ||
+      inflightRef.current.has(order.payment_id)
+    )
+      return;
     setCurrentOrderForQr(order);
+    scanLockRef.current = false;
     setQrReaderOpen(true);
-    setScanned(false);
   };
 
   const timeKeyMap: Record<string, keyof OrderBaseType> = {
@@ -123,8 +144,14 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
         const orderState =
           orderStatus[order.status as keyof typeof orderStatus] ?? "";
 
+        const disabledPickup =
+          order.status !== "accept" ||
+          inflightRef.current.has(order.payment_id) ||
+          processedRef.current.has(order.payment_id) ||
+          processingPaymentId === order.payment_id;
+
         return (
-          <div className="m-[20px]" key={idx}>
+          <div className="m-[20px]" key={`${order.payment_id}-${idx}`}>
             <div className="shadow p-[20px] flex flex-col gap-y-[22px]">
               {/* first row */}
               <div className="flex flex-row justify-between">
@@ -137,7 +164,7 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
                 </div>
                 <div
                   onClick={() => handleOpenProfile(order)}
-                  className="tagFont font-bold flex flex-row gap-x-[3px] items-center justify-center"
+                  className="tagFont font-bold flex flex-row gap-x-[3px] items-center justify-center cursor-pointer"
                 >
                   <div>{orderTime}</div>
                   <div>·</div>
@@ -185,15 +212,25 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
                     }}
                   />
                 )}
+
                 {order.status === "accept" && (
                   <CommonBtn
-                    label="QR 인증하고 픽업하기"
+                    label={
+                      processingPaymentId === order.payment_id
+                        ? "처리 중..."
+                        : processedRef.current.has(order.payment_id)
+                        ? "처리됨"
+                        : "QR 인증하고 픽업하기"
+                    }
                     category="green"
                     notBottom
-                    className="w-full"
+                    className={`w-full ${
+                      disabledPickup ? "opacity-60 pointer-events-none" : ""
+                    }`}
                     onClick={() => handleClickPickupCompleteBtn(order)}
                   />
                 )}
+
                 {order.status === "cancel" && (
                   <CommonBtn
                     label="취소사유 보기"
@@ -212,6 +249,7 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
         );
       })}
 
+      {/* QR Reader Modal */}
       {qrReaderOpen && currentOrderForQr && (
         <CommonModal>
           <div className="flex flex-col gap-y-[20px]">
@@ -219,24 +257,46 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
               점주가 보여주는 QR코드를 찍으면 <br />
               <span className="font-bold">픽업이 완료</span>됩니다.
             </div>
+
             <QrReader
+              key={currentOrderForQr.payment_id}
               constraints={{ facingMode: "environment" }}
-              onResult={(result) => {
-                if (result?.getText() && !scanned) {
-                  setScanned(true);
-                  handleCompletePickup(
-                    currentOrderForQr.payment_id,
-                    result.getText()
-                  );
-                }
+              scanDelay={1200}
+              onResult={(result, _error) => {
+                if (!result || scanLockRef.current) return;
+
+                const text = (result as any)?.getText?.();
+                const orderId = currentOrderForQr?.payment_id;
+
+                if (!text || !orderId) return;
+                if (
+                  processedRef.current.has(orderId) ||
+                  inflightRef.current.has(orderId)
+                )
+                  return;
+
+                scanLockRef.current = true;
+                setQrReaderOpen(false);
+                setCurrentOrderForQr(null);
+
+                handleCompletePickup(orderId, text).finally(() => {
+                  setTimeout(() => {
+                    scanLockRef.current = false;
+                  }, 500);
+                });
               }}
               videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
+
             <CommonBtn
               label="취소"
               notBottom
               category="white"
-              onClick={() => setQrReaderOpen(false)}
+              onClick={() => {
+                setQrReaderOpen(false);
+                setCurrentOrderForQr(null);
+                scanLockRef.current = false;
+              }}
             />
           </div>
         </CommonModal>
