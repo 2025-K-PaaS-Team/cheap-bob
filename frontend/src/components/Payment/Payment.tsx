@@ -109,7 +109,7 @@ const Payment = ({
     e.preventDefault();
     if (!canPay) return;
 
-    const phoneRegex = /^01\d-\d{3,4}-\d{4}$/;
+    const phoneRegex = /^\d{2,3}-\d{3,4}-\d{4}$/;
     if (!phoneRegex.test(customer!.phone_number)) {
       setModalMsg("010-1234-5678 형식으로 입력해주세요");
       setShowModal(true);
