@@ -6,3 +6,4 @@ export * from "./calculateTime";
 export * from "./getTitleByKey";
 export * from "./fotmatPhoneNum";
 export * from "./roundCalculater";
+export * from "./timeWindow";

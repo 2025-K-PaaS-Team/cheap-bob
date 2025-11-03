@@ -14,7 +14,7 @@ import {
   getStoreProduct,
   RemoveFavoriteStore,
 } from "@services";
-import { formatErrMsg, getRoundedPrice } from "@utils";
+import { buildWindow, formatErrMsg, getRoundedPrice, inWindow } from "@utils";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -57,29 +57,6 @@ const StoreDetail = () => {
   const todayOp =
     store?.operation_times.find((dow) => dow.day_of_week === todayDow) ?? null;
 
-  const parseToday = (hhmmss?: string | null) => {
-    if (!hhmmss) return null;
-    const hh = Number(hhmmss.slice(0, 2));
-    const mm = Number(hhmmss.slice(3, 5));
-    const ss = Number(hhmmss.slice(6, 8));
-    return dayjs(now).set("hour", hh).set("minute", mm).set("second", ss);
-  };
-
-  const buildWindow = (startStr?: string | null, endStr?: string | null) => {
-    const start = parseToday(startStr);
-    const endBase = parseToday(endStr);
-    if (!start || !endBase) return { start: null, end: null };
-    const end =
-      endBase.valueOf() < start.valueOf() ? endBase.add(1, "day") : endBase;
-    return { start, end };
-  };
-
-  const inWindow = (start: dayjs.Dayjs | null, end: dayjs.Dayjs | null) => {
-    if (!start || !end) return false;
-    const t = now.valueOf();
-    return t >= start.valueOf() && t <= end.valueOf();
-  };
-
   const minutesUntil = (target: dayjs.Dayjs | null) =>
     target && target.valueOf() > now.valueOf()
       ? target.diff(now, "minute")
@@ -89,17 +66,16 @@ const StoreDetail = () => {
     todayOp?.open_time,
     todayOp?.close_time
   );
-  const { start: pickupStart, end: pickupEnd } = buildWindow(
+  const { start: _pickupStart, end: pickupEnd } = buildWindow(
     todayOp?.pickup_start_time,
     todayOp?.pickup_end_time
   );
 
   const isStoreOpenWindow =
-    !!todayOp?.is_open_enabled && inWindow(openStart, openEnd);
+    !!todayOp?.is_open_enabled && inWindow(dayjs(), openStart, openEnd);
 
   const isPickupNotEnded = !!pickupEnd && now.valueOf() <= pickupEnd.valueOf();
 
-  const minutesToPickupStart = minutesUntil(pickupStart);
   const minutesToPickupEnd = minutesUntil(pickupEnd);
 
   const directionUrl = `https://map.naver.com/index.nhn?slng=${startCoord.lng}&slat=${startCoord.lat}&stext=내위치&elng=${endCoord.endLng}&elat=${endCoord.endLat}&etext=도착가게&menu=route&pathType=1`;
@@ -121,11 +97,7 @@ const StoreDetail = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        if (!storeFromState) {
-          if (!storeId) {
-            navigate("/c/stores", { replace: true });
-            return;
-          }
+        if (!storeFromState || !storeId) {
           navigate("/c/stores", { replace: true });
           return;
         }
@@ -413,13 +385,6 @@ const StoreDetail = () => {
             </div>
 
             <h3 className="text-center text-main-deep my-[16px]">
-              {minutesToPickupStart !== null && (
-                <div className="text-[#6C6C6C]">
-                  (픽업 시작까지 {Math.floor(minutesToPickupStart / 60)}시간{" "}
-                  {minutesToPickupStart % 60}분)
-                </div>
-              )}
-
               {minutesToPickupEnd !== null ? (
                 <div>
                   픽업 종료까지 {Math.floor(minutesToPickupEnd / 60)}시간{" "}
