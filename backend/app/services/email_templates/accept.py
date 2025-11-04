@@ -21,6 +21,15 @@ def get_accept_html_template(timestamp: str, recipient: str, store: str) -> str:
                     box-sizing: border-box;
                 }}
 
+                a {{
+                    color: #333 !important;
+                    text-decoration: none;
+                }}
+
+                .ii a[href] {{
+                    color: #333 !important;
+                }}
+
                 body {{
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
                     background-color: #e9e9e2;
@@ -92,19 +101,20 @@ def get_accept_html_template(timestamp: str, recipient: str, store: str) -> str:
                 }}
 
                 .confirm-button {{
+                    display: inline-block;
                     background-color: #8AE234;
                     color: #333;
-                    border: none;
+                    text-decoration: none;
                     padding: 15px 40px;
                     font-size: 18px;
                     font-weight: bold;
                     border-radius: 8px;
-                    cursor: pointer;
                     transition: background-color 0.3s ease;
                 }}
 
                 .confirm-button:hover {{
                     background-color: #7ACC2D;
+                    color: #333;
                 }}
 
                 @media (max-width: 480px) {{
@@ -152,9 +162,9 @@ def get_accept_html_template(timestamp: str, recipient: str, store: str) -> str:
                     </div>
                     
                     <div class="button-container">
-                        <button class="confirm-button" onclick="window.location.href='https://cheap-bob.vercel.app'">
+                        <a href="https://www.cheap-bob.store/c/noti" class="confirm-button">
                             주문 확인하기
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
