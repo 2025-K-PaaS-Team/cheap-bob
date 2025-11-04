@@ -44,7 +44,7 @@ const Noti = () => {
           className="pb-[26px] w-[116px]"
         />
         <div className="text-[20px] pb-[17px] font-bold">
-          관심 가게가 비어있어요.
+          주문 내역이 비어있어요.
         </div>
         <div className="text-[12px] font-base pb-[46px]">
           다양한 랜덤팩을 주문하고 픽업해보세요.
