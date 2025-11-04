@@ -12,7 +12,9 @@ const Header = ({ swiperRef }: HeaderProps) => {
   const layout = getLayoutByPath(pathname);
 
   const handleClickBefore = () => {
-    if (layout.key === "onBoarding" && swiperRef?.current) {
+    if (layout.key === "Noti") {
+      navigate("/c/stores", { replace: true });
+    } else if (layout.key === "onBoarding" && swiperRef?.current) {
       const swiper = swiperRef.current;
       if (swiper.activeIndex > 0) {
         swiper.slidePrev();
