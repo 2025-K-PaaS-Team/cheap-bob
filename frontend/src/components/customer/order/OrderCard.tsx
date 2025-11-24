@@ -11,6 +11,9 @@ import { completePickup, deleteOrder, getCurrentOrders } from "@services";
 import { formatErrMsg, getTitleByKey } from "@utils";
 import { useRef, useState } from "react";
 import { QrReader } from "react-qr-reader";
+import { OrderStatus } from "./OrderStatus";
+import { OrderInfo } from "./OrderInfo";
+import { OrderBtnRow } from "./OrderBtnRow";
 
 interface OrderCardProps {
   orders: OrderBaseType[];
@@ -18,7 +21,11 @@ interface OrderCardProps {
   onRefresh?: () => void | Promise<void>;
 }
 
-const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
+export const OrderCard = ({
+  orders,
+  isAll = false,
+  onRefresh,
+}: OrderCardProps) => {
   const [qrReaderOpen, setQrReaderOpen] = useState(false);
   const [currentOrderForQr, setCurrentOrderForQr] =
     useState<OrderBaseType | null>(null);
@@ -48,13 +55,6 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
     null
   );
 
-  const getColorByStatus = (status: string) => {
-    if (status === "reservation" || status === "cancel") {
-      return "bg-[#E7E7E7]";
-    }
-    return "bg-main-pale text-main-deep border-main-deep border";
-  };
-
   const handleCompletePickup = async (paymentId: string, qrData: string) => {
     if (
       processedRef.current.has(paymentId) ||
@@ -71,7 +71,7 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
       setModalMsg("픽업이 완료되었습니다!");
       setShowModal(true);
       await onRefresh?.();
-    } catch (err: any) {
+    } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
@@ -88,7 +88,7 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
       await deleteOrder(paymentId);
       getCurrentOrders();
       await onRefresh?.();
-    } catch (err: any) {
+    } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
@@ -154,96 +154,28 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
           <div className="m-[20px]" key={`${order.payment_id}-${idx}`}>
             <div className="shadow p-[20px] flex flex-col gap-y-[22px]">
               {/* first row */}
-              <div className="flex flex-row justify-between">
-                <div
-                  className={`px-[16px] py-[8px] rounded tagFont ${getColorByStatus(
-                    order.status
-                  )}`}
-                >
-                  {orderState}
-                </div>
-                <div
-                  onClick={() => handleOpenProfile(order)}
-                  className="tagFont font-bold flex flex-row gap-x-[3px] items-center justify-center cursor-pointer"
-                >
-                  <div>{orderTime}</div>
-                  <div>·</div>
-                  <div>{order.quantity}개</div>
-                  <img src="/icon/next.svg" alt="nextIcon" width="14px" />
-                </div>
-              </div>
+              <OrderStatus
+                order={order}
+                orderState={orderState}
+                handleOpenProfile={handleOpenProfile}
+                orderTime={orderTime}
+              />
 
               {/* second row */}
-              <div className="grid grid-cols-5 gap-x-[11px]">
-                <img
-                  src={order.main_image_url}
-                  alt="storeImg"
-                  className="rounded object-cover col-span-2"
-                />
-                <div className="col-span-3 flex flex-col">
-                  <div className="bodyFont font-bold pb-[8px]">
-                    {order.store_name}
-                  </div>
-                  <div className="tagFont pb-[22px]">
-                    {Number(order.total_amount).toLocaleString()}원
-                  </div>
-                  {isAll ? (
-                    <div className="font-bold tagFont">
-                      {order.product_name}
-                    </div>
-                  ) : (
-                    <div className="font-bold tagFont">
-                      픽업: {order.pickup_start_time} ~ {order.pickup_end_time}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <OrderInfo order={order} isAll={isAll} />
 
-              <div className="flex flex-col gap-5">
-                {order.status === "reservation" && (
-                  <CommonBtn
-                    label="주문 취소"
-                    category="red"
-                    notBottom
-                    className="w-full"
-                    onClick={() => {
-                      setPaymentIdToCancel(order.payment_id);
-                      setShowCancelModal(true);
-                    }}
-                  />
-                )}
-
-                {order.status === "accept" && (
-                  <CommonBtn
-                    label={
-                      processingPaymentId === order.payment_id
-                        ? "처리 중..."
-                        : processedRef.current.has(order.payment_id)
-                        ? "처리됨"
-                        : "QR 인증하고 픽업하기"
-                    }
-                    category="green"
-                    notBottom
-                    className={`w-full ${
-                      disabledPickup ? "opacity-60 pointer-events-none" : ""
-                    }`}
-                    onClick={() => handleClickPickupCompleteBtn(order)}
-                  />
-                )}
-
-                {order.status === "cancel" && (
-                  <CommonBtn
-                    label="취소사유 보기"
-                    category="red"
-                    notBottom
-                    className="w-full"
-                    onClick={() => {
-                      setCancelReason(order.cancel_reason);
-                      setShowCancelReason(true);
-                    }}
-                  />
-                )}
-              </div>
+              {/* button row */}
+              <OrderBtnRow
+                order={order}
+                handleClickPickupCompleteBtn={handleClickPickupCompleteBtn}
+                setShowCancelModal={setShowCancelModal}
+                setShowCancelReason={setShowCancelReason}
+                setPaymentIdToCancel={setPaymentIdToCancel}
+                processedRef={processedRef}
+                processingPaymentId={processingPaymentId}
+                disabledPickup={disabledPickup}
+                setCancelReason={setCancelReason}
+              />
             </div>
           </div>
         );
@@ -262,10 +194,10 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
               key={currentOrderForQr.payment_id}
               constraints={{ facingMode: "environment" }}
               scanDelay={1200}
-              onResult={(result, _error) => {
+              onResult={(result) => {
                 if (!result || scanLockRef.current) return;
 
-                const text = (result as any)?.getText?.();
+                const text = result?.getText?.();
                 const orderId = currentOrderForQr?.payment_id;
 
                 if (!text || !orderId) return;
@@ -375,5 +307,3 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
     </>
   );
 };
-
-export default OrderCard;

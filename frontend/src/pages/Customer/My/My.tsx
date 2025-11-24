@@ -1,16 +1,16 @@
 import { CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
-import { NutritionList } from "@constant";
+import { BottomList, MyInfo, NutritionGoal } from "@components/customer/my";
+
 import type { PreferNutritionBaseType, CustomerDetailType } from "@interface";
 import { GetCustomerDetail, GetNutrition, WithdrawCustomer } from "@services";
-import { PostLogout } from "@services/common/auth";
-import { formatErrMsg, getTitleByKey } from "@utils";
+import { formatErrMsg } from "@utils";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const My = () => {
   const navigate = useNavigate();
-  const [showWarn, setShowWarn] = useState<Boolean>(false);
+  const [showWarn, setShowWarn] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [modalMsg, setModalMsg] = useState("");
 
@@ -19,18 +19,6 @@ const My = () => {
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const isLocal = import.meta.env.VITE_IS_LOCAL === "true";
-  const state = isLocal ? "1004" : undefined;
-
-  const handleLogout = async () => {
-    try {
-      await PostLogout(state);
-      navigate("/c");
-    } catch (err) {
-      setModalMsg(formatErrMsg(err));
-      setShowModal(true);
-    }
-  };
 
   const handlePostWithdraw = async () => {
     setShowWarn(false);
@@ -48,7 +36,7 @@ const My = () => {
     try {
       const res = await GetCustomerDetail();
       setCustomer(res);
-    } catch (err) {
+    } catch {
       setModalMsg("고객 데이터 가져오기에 실패했습니다.");
       setShowModal(true);
     }
@@ -58,7 +46,7 @@ const My = () => {
     try {
       const res = await GetNutrition();
       setNutrition(res.nutrition_types);
-    } catch (err) {
+    } catch {
       setModalMsg("영양 데이터 가져오기에 실패했습니다.");
       setShowModal(true);
     }
@@ -80,93 +68,18 @@ const My = () => {
   return (
     <div className="px-[20px] w-full h-full flex flex-col gap-y-[31px]">
       {/* my info */}
-      <div
-        onClick={() => navigate("/c/change/info")}
-        className="flex flex-col gap-y-[10px]"
-      >
-        <div className="flex flex-row justify-between items-center">
-          <div className="titleFont">{customer?.nickname} 님</div>{" "}
-          <img src="/icon/next.svg" alt="nextIcon" />
-        </div>
-        <div className="bodyFont">{customer?.customer_email}</div>
-      </div>
+      <MyInfo customer={customer} />
+
       {/* nutrition goal */}
-      <div
-        onClick={() => navigate("/c/change/nutrition")}
-        className="bg-main-pale border border-main-deep rounded w-full py-[20px] px-[15px]"
-      >
-        <h1 className="pb-[21px]">영양 목표</h1>
-        <div className="flex flex-row gap-x-[5px]">
-          {nutrition?.map((n, idx) => (
-            <div
-              key={idx}
-              className="tagFont font-bold bg-black rounded text-white px-[10px] py-[7px]"
-            >
-              {getTitleByKey(n.nutrition_type, NutritionList)}
-            </div>
-          ))}
-        </div>
-      </div>
+      <NutritionGoal nutrition={nutrition} />
+
       {/* bottom list */}
-      <div className="flex flex-col">
-        {/* prefer menu */}
-        <div
-          onClick={() => navigate("/c/change/menu")}
-          className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
-        >
-          <div>선호 메뉴</div>
-          <img src="/icon/next.svg" alt="nextIcon" />
-        </div>
-        {/* prefer topping */}
-        <div
-          onClick={() => navigate("/c/change/topping")}
-          className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
-        >
-          <div>선호 토핑</div>
-          <img src="/icon/next.svg" alt="nextIcon" />
-        </div>
-        {/* allergy */}
-        <div
-          onClick={() => navigate("/c/change/allergy")}
-          className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
-        >
-          <div>못먹는 음식</div>
-          <img src="/icon/next.svg" alt="nextIcon" />
-        </div>
-        {/* order */}
-        <div
-          onClick={() => navigate("/c/order/all")}
-          className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
-        >
-          <div>주문 내역</div>
-          <img src="/icon/next.svg" alt="nextIcon" />
-        </div>
-        {/* policy */}
-        <div
-          className="bodyFont font-bold py-[20px] flex flex-row justify-between border-b border-black/10"
-          onClick={() => navigate("/docs/tos")}
-        >
-          <div>서비스 이용약관</div>
-          <img src="/icon/next.svg" alt="nextIcon" />
-        </div>
-        {/* logout */}
-        <div className="bodyFont font-bold py-[20px] border-b border-black/10">
-          <div
-            onClick={() => {
-              handleLogout();
-            }}
-          >
-            로그아웃
-          </div>
-        </div>
-        {/* withdraw */}
-        <div
-          className="bodyFont font-bold text-sub-red py-[20px]"
-          onClick={() => setShowWarn(true)}
-        >
-          <div>계정 탈퇴</div>
-        </div>
-      </div>
+      <BottomList
+        setModalMsg={setModalMsg}
+        setShowModal={setShowModal}
+        setShowWarn={setShowWarn}
+      />
+
       {/* show modal */}
       {showModal && (
         <CommonModal

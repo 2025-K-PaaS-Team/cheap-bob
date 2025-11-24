@@ -6,9 +6,9 @@ import { formatErrMsg } from "@utils";
 import { useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { Pagination } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Swiper, SwiperSlide, type SwiperClass } from "swiper/react";
 interface OutletContextType {
-  swiperRef: React.RefObject<any>;
+  swiperRef: React.RefObject<SwiperClass | null>;
 }
 
 const Signup = () => {

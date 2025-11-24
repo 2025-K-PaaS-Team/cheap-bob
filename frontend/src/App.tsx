@@ -198,8 +198,6 @@ const App = () => {
             {/* seller fallback */}
             <Route path="*" element={<Navigate to="/s" replace />} />
           </Route>
-          {/* global fallback */}
-          <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
       </BrowserRouter>
     </ToastProvider>

@@ -19,7 +19,7 @@ const ChangeCustomerAllergy = () => {
   const handleGetAllergies = async () => {
     try {
       const res = await GetAllergies();
-      const init = Array.isArray((res as any).allergies)
+      const init = Array.isArray(res.allergies)
         ? res.allergies.map((item) => item.allergy_type)
         : [];
       setSelected(init);

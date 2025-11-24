@@ -7,3 +7,4 @@ export { default as CommonDropbox } from "./CommonDropbox";
 export { default as CommonProfile } from "./CommonProfile";
 export { default as CommonDesc } from "./CommonDesc";
 export { default as CommonToast } from "./CommonToast";
+export { default as CommonLoading } from "./CommonLoading";

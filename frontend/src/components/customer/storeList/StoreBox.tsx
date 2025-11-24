@@ -1,14 +1,15 @@
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import type { StoreSearchBaseType } from "@interface";
-import { buildWindow, getRoundedPrice, inWindow } from "@utils";
+import { getRoundedPrice } from "@utils";
+import { buildWindow, inWindow } from "dayjs-time-window";
 
 interface StoreBoxProps {
   stores: StoreSearchBaseType[];
   onToggleFavorite?: (storeId: string, nowFavor: boolean) => void;
 }
 
-const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
+export const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
   const navigate = useNavigate();
 
   const handleClickStore = (store: StoreSearchBaseType) => {
@@ -27,10 +28,6 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
         const { start: openStart, end: openEnd } = buildWindow(
           todayOp?.open_time,
           todayOp?.close_time
-        );
-        const { start: _pickupStart } = buildWindow(
-          todayOp?.pickup_start_time,
-          todayOp?.pickup_end_time
         );
 
         const isStoreOpenWindow =
@@ -79,7 +76,6 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
               <img
                 src={store.images.find((img) => img.is_main)?.image_url}
                 alt="StoreImage"
-                // className="w-full object-none"
                 className="w-full h-full object-center object-cover"
               />
             </div>
@@ -151,5 +147,3 @@ const StoreBox = ({ stores, onToggleFavorite }: StoreBoxProps) => {
     </>
   );
 };
-
-export default StoreBox;

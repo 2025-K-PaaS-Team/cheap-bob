@@ -19,7 +19,7 @@ const ChangeCustomerMenu = () => {
   const handleGetMenu = async () => {
     try {
       const res = await GetPreferMenu();
-      const init = Array.isArray((res as any).preferred_menus)
+      const init = Array.isArray(res.preferred_menus)
         ? res.preferred_menus.map((item) => item.menu_type)
         : [];
       setSelected(init);
