@@ -11,6 +11,7 @@ import { completePickup, deleteOrder, getCurrentOrders } from "@services";
 import { formatErrMsg, getTitleByKey } from "@utils";
 import { useRef, useState } from "react";
 import { QrReader } from "react-qr-reader";
+import { OrderStatus } from "./OrderStatus";
 
 interface OrderCardProps {
   orders: OrderBaseType[];
@@ -18,7 +19,11 @@ interface OrderCardProps {
   onRefresh?: () => void | Promise<void>;
 }
 
-const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
+export const OrderCard = ({
+  orders,
+  isAll = false,
+  onRefresh,
+}: OrderCardProps) => {
   const [qrReaderOpen, setQrReaderOpen] = useState(false);
   const [currentOrderForQr, setCurrentOrderForQr] =
     useState<OrderBaseType | null>(null);
@@ -48,13 +53,6 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
     null
   );
 
-  const getColorByStatus = (status: string) => {
-    if (status === "reservation" || status === "cancel") {
-      return "bg-[#E7E7E7]";
-    }
-    return "bg-main-pale text-main-deep border-main-deep border";
-  };
-
   const handleCompletePickup = async (paymentId: string, qrData: string) => {
     if (
       processedRef.current.has(paymentId) ||
@@ -71,7 +69,7 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
       setModalMsg("픽업이 완료되었습니다!");
       setShowModal(true);
       await onRefresh?.();
-    } catch (err: any) {
+    } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
@@ -88,7 +86,7 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
       await deleteOrder(paymentId);
       getCurrentOrders();
       await onRefresh?.();
-    } catch (err: any) {
+    } catch (err) {
       setModalMsg(formatErrMsg(err));
       setShowModal(true);
     } finally {
@@ -154,24 +152,12 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
           <div className="m-[20px]" key={`${order.payment_id}-${idx}`}>
             <div className="shadow p-[20px] flex flex-col gap-y-[22px]">
               {/* first row */}
-              <div className="flex flex-row justify-between">
-                <div
-                  className={`px-[16px] py-[8px] rounded tagFont ${getColorByStatus(
-                    order.status
-                  )}`}
-                >
-                  {orderState}
-                </div>
-                <div
-                  onClick={() => handleOpenProfile(order)}
-                  className="tagFont font-bold flex flex-row gap-x-[3px] items-center justify-center cursor-pointer"
-                >
-                  <div>{orderTime}</div>
-                  <div>·</div>
-                  <div>{order.quantity}개</div>
-                  <img src="/icon/next.svg" alt="nextIcon" width="14px" />
-                </div>
-              </div>
+              <OrderStatus
+                order={order}
+                orderState={orderState}
+                handleOpenProfile={handleOpenProfile}
+                orderTime={orderTime}
+              />
 
               {/* second row */}
               <div className="grid grid-cols-5 gap-x-[11px]">
@@ -262,10 +248,10 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
               key={currentOrderForQr.payment_id}
               constraints={{ facingMode: "environment" }}
               scanDelay={1200}
-              onResult={(result, _error) => {
+              onResult={(result) => {
                 if (!result || scanLockRef.current) return;
 
-                const text = (result as any)?.getText?.();
+                const text = result?.getText?.();
                 const orderId = currentOrderForQr?.payment_id;
 
                 if (!text || !orderId) return;
@@ -375,5 +361,3 @@ const OrderCard = ({ orders, isAll = false, onRefresh }: OrderCardProps) => {
     </>
   );
 };
-
-export default OrderCard;
