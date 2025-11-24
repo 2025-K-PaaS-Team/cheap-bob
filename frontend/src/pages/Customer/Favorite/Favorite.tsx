@@ -43,7 +43,7 @@ const Favorite = () => {
 
       const updated = await GetFavoriteStore();
       setStores(updated);
-    } catch (err) {
+    } catch {
       setModalMsg("선호 가게 업데이트에 실패했습니다.");
       setShowModal(true);
     }
