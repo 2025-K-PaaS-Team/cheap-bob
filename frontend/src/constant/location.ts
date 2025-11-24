@@ -1,3 +1,9 @@
+export const ALL_DONG_OPTION = "관악구 전체";
+export const MAX_SELECT_COUNT = 10;
+export const SIDO_KEY = "sido";
+export const SIGUNGU_KEY = "sigungu";
+export const DONGS_KEY = "dongs";
+
 export const siDoData = ["서울"];
 
 export const siGunGuData: Record<string, string[]> = {
