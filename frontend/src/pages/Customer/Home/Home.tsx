@@ -12,25 +12,23 @@ import type { UserRoleType } from "@interface";
 
 const Home = () => {
   const navigate = useNavigate();
-  const [_userInfo, setUserInfo] = useState<UserRoleType | null>(null);
+  const [, setUserInfo] = useState<UserRoleType | null>(null);
 
   useEffect(() => {
     const init = async () => {
-      try {
-        const res = await GetUserRole();
-        setUserInfo(res);
-        if (
-          res.email &&
-          res.user_type == "customer" &&
-          res.status === "complete" &&
-          res.is_active
-        )
-          navigate("/c/stores");
-      } catch (err) {}
+      const res = await GetUserRole();
+      setUserInfo(res);
+      if (
+        res.email &&
+        res.user_type == "customer" &&
+        res.status === "complete" &&
+        res.is_active
+      )
+        navigate("/c/stores");
     };
 
     init();
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="flex flex-col flex-1 justify-center w-full py-[50px] gap-y-[15px]">
