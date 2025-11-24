@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AddFavoriteStore,
   GetPreferMenu,
@@ -8,7 +8,7 @@ import {
 } from "@services";
 import { Chips, CommonModal } from "@components/common";
 import { dongData, NutritionList } from "@constant";
-import type { StoreSearchType } from "@interface";
+import type { PreferMenuBaseType, StoreSearchType } from "@interface";
 import { StoreBox } from "@components/customer/storeList";
 import CommonLoading from "@components/common/CommonLoading";
 import { useNavigate } from "react-router-dom";
@@ -29,12 +29,13 @@ const StoreList = () => {
   const dongsStr = localStorage.getItem("dongs") || "{}";
   const dongs: Dongs = JSON.parse(dongsStr);
 
-  let selectedDongs: string[] = [];
-  if (dongs["관악구 전체"]) {
-    selectedDongs = dongData["관악구"];
-  } else {
-    selectedDongs = Object.keys(dongs).filter((key) => dongs[key]);
-  }
+  const selectedDongs = useMemo(() => {
+    if (dongs["관악구 전체"]) {
+      return dongData["관악구"];
+    } else {
+      return Object.keys(dongs).filter((key) => dongs[key]);
+    }
+  }, [dongs]);
 
   const [stores, setStores] = useState<StoreSearchType>();
   const [pageIdx, setPageIdx] = useState<number>(0);
@@ -60,7 +61,7 @@ const StoreList = () => {
         const res = await GetPreferMenu();
         const selectedFromApi: Record<string, boolean> = { all: false };
 
-        res.preferred_menus.forEach((menu: any) => {
+        res.preferred_menus.forEach((menu: PreferMenuBaseType) => {
           selectedFromApi[menu.menu_type] = true;
         });
 
@@ -93,44 +94,48 @@ const StoreList = () => {
     );
   }, [stores, selected]);
 
-  const handleGetStores = async (page: number) => {
-    if (page > 0 && stores?.is_end) return;
-    if (loadFailed) return;
+  const handleGetStores = useCallback(
+    async (page: number) => {
+      if (page > 0 && stores?.is_end) return;
+      if (loadFailed) return;
 
-    try {
-      if (page === 0) setIsInitialLoading(true);
-      else setIsFetchingMore(true);
-      let newStores;
+      try {
+        if (page === 0) setIsInitialLoading(true);
+        else setIsFetchingMore(true);
+        let newStores;
 
-      if (dongs && selectedDongs.length > 0) {
-        newStores = await GetStoreByLocation(
-          sido,
-          sigungu,
-          selectedDongs,
-          page
-        );
-      } else {
-        newStores = await getStores(page);
+        if (dongs && selectedDongs.length > 0) {
+          newStores = await GetStoreByLocation(
+            sido,
+            sigungu,
+            selectedDongs,
+            page
+          );
+        } else {
+          newStores = await getStores(page);
+        }
+
+        setStores((prev) => {
+          if (!prev || page === 0) return newStores;
+          return {
+            stores: [...prev.stores, ...newStores.stores],
+            is_end: newStores.is_end,
+          };
+        });
+
+        setLoadFailed(false);
+      } catch {
+        setModalMsg("가게 불러오기에 실패했습니다.");
+        setShowModal(true);
+        setLoadFailed(true);
+      } finally {
+        if (page === 0) setIsInitialLoading(false);
+        else setIsFetchingMore(false);
       }
+    },
+    [stores, loadFailed, dongs, selectedDongs, sido, sigungu]
+  );
 
-      setStores((prev) => {
-        if (!prev || page === 0) return newStores;
-        return {
-          stores: [...prev.stores, ...newStores.stores],
-          is_end: newStores.is_end,
-        };
-      });
-
-      setLoadFailed(false);
-    } catch (err) {
-      setModalMsg("가게 불러오기에 실패했습니다.");
-      setShowModal(true);
-      setLoadFailed(true);
-    } finally {
-      if (page === 0) setIsInitialLoading(false);
-      else setIsFetchingMore(false);
-    }
-  };
   const handleUpdateFavorStore = async (storeId: string, nowFavor: boolean) => {
     try {
       if (!nowFavor) await AddFavoriteStore(storeId);
@@ -155,7 +160,7 @@ const StoreList = () => {
   useEffect(() => {
     loadPreferredMenus();
     handleGetStores(0);
-  }, []);
+  }, [handleGetStores]);
 
   useEffect(() => {
     if (isPreferLoaded) {
@@ -166,7 +171,7 @@ const StoreList = () => {
   useEffect(() => {
     if (pageIdx === 0) return;
     handleGetStores(pageIdx);
-  }, [pageIdx]);
+  }, [pageIdx, handleGetStores]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
