@@ -1,7 +1,7 @@
-import { CommonBtn, CommonModal } from "@components/common";
+import { CommonModal } from "@components/common";
 import CommonLoading from "@components/common/CommonLoading";
 import DetailHeader from "@components/customer/storeDetail";
-import { idxToDow, NutritionList } from "@constant";
+import { NutritionList } from "@constant";
 import type {
   CustomerDetailType,
   ProductType,
@@ -19,8 +19,12 @@ import dayjs from "dayjs";
 import { buildWindow, inWindow, parseToday } from "dayjs-time-window";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import "swiper/css";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { StoreImg } from "./StoreImg";
+import { StoreIntro } from "./StoreIntro";
+import { StoreAddr } from "./StoreAddr";
+import { StoreOpTime } from "./StoreOpTime";
+import { StoreNotice } from "./StoreNotice";
+import { StoreStatus } from "./StoreStatus";
 
 const StoreDetail = () => {
   const navigate = useNavigate();
@@ -165,119 +169,26 @@ const StoreDetail = () => {
   return (
     <div className="flex flex-col">
       <DetailHeader name={product.store_name || ""} />
+
       <div className="relative flex flex-col justify-center mb-[50px]">
         {/* store image */}
-        <div className="bg-custom-white h-[230px] w-full relative">
-          <Swiper
-            loop={true}
-            onSlideChange={(swiper) => setActiveSlide(swiper.realIndex + 1)}
-            className="mySwiper h-[230px]"
-          >
-            {store.images.map((img) => (
-              <SwiperSlide key={img.image_id}>
-                <img
-                  src={img.image_url}
-                  alt="StoreImage"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/30" />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-
-          {/* overlay */}
-          <div className="absolute top-0 left-0 w-full h-full hintFont pointer-events-none">
-            {/* img idx */}
-            <div className="absolute top-3 right-3 z-10 bg-[#0A0A0A]/50 btnFont text-white rounded-lg py-[4px] px-[10px] pointer-events-auto">
-              {activeSlide} / {store.images.length}
-            </div>
-
-            <div className="absolute bottom-14 left-3 z-10 bg-custom-white rounded-lg py-[4px] px-[10px] pointer-events-auto">
-              {isStoreOpenWindow ? "영업중" : "영업 종료"}
-            </div>
-
-            <div className="absolute bottom-3 left-3 z-10 bg-[#E7E7E7] rounded py-[5.5px] px-[10px] pointer-events-auto">
-              {mainProd.current_stock === 0 ? (
-                <>
-                  패키지 <span className="text-sub-orange font-bold">품절</span>
-                </>
-              ) : (
-                <>
-                  패키지{" "}
-                  <span className="text-main-deep font-bold">
-                    {mainProd.current_stock}개 남음
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        <StoreImg
+          store={store}
+          setActiveSlide={setActiveSlide}
+          activeSlide={activeSlide}
+          isStoreOpenWindow={isStoreOpenWindow}
+          mainProd={mainProd}
+        />
 
         <div className="relative flex flex-col mx-[20px] my-[33px] gap-y-[30px]">
           {/* store representation intro */}
-          <div>
-            {/* store name */}
-            <h1 className="mr-10">{product.store_name}</h1>
-
-            {/* favor */}
-            <div
-              className="rounded-full absolute top-1 right-1 z-10 w-[41px] h-[41px] flex justify-center items-center cursor-pointer"
-              onClick={() => handleUpdateFavorStore(product.store_id, isFavor)}
-            >
-              {isFavor ? (
-                <img
-                  src="/icon/heartFull.svg"
-                  alt="FavoriteStore"
-                  className="w-5 h-5"
-                />
-              ) : (
-                <img
-                  src="/icon/heart.svg"
-                  alt="FavoriteStore"
-                  className="w-5 h-5"
-                />
-              )}
-            </div>
-
-            {/* store logo and map */}
-            <div className="flex flex-row gap-x-3 mt-[8px]">
-              <img
-                src="/icon/direction.svg"
-                alt="directionIcon"
-                onClick={handleClickDirection}
-                width={22}
-                className="cursor-pointer"
-              />
-
-              {store.sns.instagram && (
-                <img
-                  src="/icon/instagram.svg"
-                  alt="instagramIcon"
-                  onClick={() => window.open(store.sns.instagram, "_blank")}
-                  width={22}
-                  className="cursor-pointer"
-                />
-              )}
-              {store.sns.homepage && (
-                <img
-                  src="/icon/homeFull.svg"
-                  alt="homeIcon"
-                  onClick={() => window.open(store.sns.homepage, "_blank")}
-                  width={22}
-                  className="cursor-pointer"
-                />
-              )}
-              {store.sns.x && (
-                <img
-                  src="/icon/twitter.svg"
-                  alt="twitterIcon"
-                  onClick={() => window.open(store.sns.x, "_blank")}
-                  width={22}
-                  className="cursor-pointer"
-                />
-              )}
-            </div>
-          </div>
+          <StoreIntro
+            store={store}
+            product={product}
+            handleUpdateFavorStore={handleUpdateFavorStore}
+            handleClickDirection={handleClickDirection}
+            isFavor={isFavor}
+          />
 
           {/* store desc */}
           <div
@@ -296,29 +207,10 @@ const StoreDetail = () => {
           </div>
 
           {/* store addr */}
-          <div className="gap-y-[13px] flex flex-col">
-            <h3>가게 주소</h3>
-            <div className="bodyFont">
-              {store.address.address} {store.address.detail_address},{" "}
-              {store.address.postal_code}
-            </div>
-          </div>
+          <StoreAddr store={store} />
 
           {/* store op time */}
-          <div className="gap-y-[13px] flex flex-col">
-            <h3>영업 시간</h3>
-            <div className="tagFont">
-              {store.operation_times
-                .filter((dow) => dow.is_open_enabled === true)
-                .sort((a, b) => a.day_of_week - b.day_of_week)
-                .map((dow) => (
-                  <div key={dow.day_of_week}>
-                    {idxToDow[dow.day_of_week]} {dow.open_time.slice(0, 5)} ~{" "}
-                    {dow.close_time.slice(0, 5)}
-                  </div>
-                ))}
-            </div>
-          </div>
+          <StoreOpTime store={store} />
 
           {/* product name + desc */}
           <div className="gap-y-[13px] flex flex-col">
@@ -396,48 +288,16 @@ const StoreDetail = () => {
           </div>
 
           {/* notice */}
-          <div className="gap-y-[13px] flex flex-col">
-            <h3>주문 후 약속</h3>
-            <div className="hintFont">
-              <ol className="list-decimal bg-custom-white py-[18px] px-[15px] rounded">
-                <li className="ml-4">
-                  오직 픽업 시간에만 가게에서 픽업할 수 있어요.
-                </li>
-                <li className="ml-4">
-                  사장님께 따로 메뉴 요청을 할 수 없어요.
-                </li>
-                <li className="ml-4">
-                  픽업 확정 전, 가게 사정에 의해 취소될 수 있어요.
-                </li>
-                <li className="ml-4">
-                  취소사유는 구매 내역에서 확인할 수 있어요.
-                </li>
-                <li className="ml-4">
-                  주문 취소는 가게의 픽업 확정 이후에는 불가능해요.
-                </li>
-              </ol>
-            </div>
-          </div>
+          <StoreNotice />
 
           {storeId && customer && (
-            <div>
-              {!(isStoreOpenWindow && isPickupNotEnded) ? (
-                <CommonBtn category="grey" label="지금은 구매할 수 없어요" />
-              ) : mainProd.current_stock > 0 ? (
-                <CommonBtn
-                  category="green"
-                  onClick={() => setOpenCheckNoti(true)}
-                  label={`${getRoundedPrice(
-                    mainProd.price,
-                    mainProd.sale
-                  ).toLocaleString()}원 구매하기 (${
-                    mainProd.current_stock
-                  }개 남음)`}
-                />
-              ) : (
-                <CommonBtn category="grey" label="품절됐어요" />
-              )}
-            </div>
+            // storeStatus
+            <StoreStatus
+              mainProd={mainProd}
+              isStoreOpenWindow={isStoreOpenWindow}
+              isPickupNotEnded={isPickupNotEnded}
+              setOpenCheckNoti={setOpenCheckNoti}
+            />
           )}
         </div>
 

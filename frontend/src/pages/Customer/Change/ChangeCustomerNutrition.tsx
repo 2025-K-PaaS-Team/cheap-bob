@@ -19,7 +19,7 @@ const ChangeCustomerNutrition = () => {
   const handleGetNutrition = async () => {
     try {
       const res = await GetNutrition();
-      const init = Array.isArray((res as any).nutrition_types)
+      const init = Array.isArray(res.nutrition_types)
         ? res.nutrition_types.map((item) => item.nutrition_type)
         : [];
       setSelected(init);

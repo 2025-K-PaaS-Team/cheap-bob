@@ -19,7 +19,7 @@ const ChangeCustomerTopping = () => {
   const handleGetTopping = async () => {
     try {
       const res = await GetTopping();
-      const init = Array.isArray((res as any).topping_types)
+      const init = Array.isArray(res.topping_types)
         ? res.topping_types.map((item) => item.topping_type)
         : [];
       setSelected(init);

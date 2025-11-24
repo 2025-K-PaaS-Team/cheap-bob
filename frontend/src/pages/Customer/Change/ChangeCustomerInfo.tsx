@@ -20,7 +20,7 @@ const ChangeCustomerInfo = () => {
       try {
         const res = await GetCustomerDetail();
         setCustomer(res);
-      } catch (err) {
+      } catch {
         setModalMsg("고객 데이터 가져오기에 실패했습니다.");
         setShowModal(true);
       } finally {
