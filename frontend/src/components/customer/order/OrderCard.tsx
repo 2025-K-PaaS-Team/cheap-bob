@@ -12,6 +12,8 @@ import { formatErrMsg, getTitleByKey } from "@utils";
 import { useRef, useState } from "react";
 import { QrReader } from "react-qr-reader";
 import { OrderStatus } from "./OrderStatus";
+import { OrderInfo } from "./OrderInfo";
+import { OrderBtnRow } from "./OrderBtnRow";
 
 interface OrderCardProps {
   orders: OrderBaseType[];
@@ -160,76 +162,20 @@ export const OrderCard = ({
               />
 
               {/* second row */}
-              <div className="grid grid-cols-5 gap-x-[11px]">
-                <img
-                  src={order.main_image_url}
-                  alt="storeImg"
-                  className="rounded object-cover col-span-2"
-                />
-                <div className="col-span-3 flex flex-col">
-                  <div className="bodyFont font-bold pb-[8px]">
-                    {order.store_name}
-                  </div>
-                  <div className="tagFont pb-[22px]">
-                    {Number(order.total_amount).toLocaleString()}원
-                  </div>
-                  {isAll ? (
-                    <div className="font-bold tagFont">
-                      {order.product_name}
-                    </div>
-                  ) : (
-                    <div className="font-bold tagFont">
-                      픽업: {order.pickup_start_time} ~ {order.pickup_end_time}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <OrderInfo order={order} isAll={isAll} />
 
-              <div className="flex flex-col gap-5">
-                {order.status === "reservation" && (
-                  <CommonBtn
-                    label="주문 취소"
-                    category="red"
-                    notBottom
-                    className="w-full"
-                    onClick={() => {
-                      setPaymentIdToCancel(order.payment_id);
-                      setShowCancelModal(true);
-                    }}
-                  />
-                )}
-
-                {order.status === "accept" && (
-                  <CommonBtn
-                    label={
-                      processingPaymentId === order.payment_id
-                        ? "처리 중..."
-                        : processedRef.current.has(order.payment_id)
-                        ? "처리됨"
-                        : "QR 인증하고 픽업하기"
-                    }
-                    category="green"
-                    notBottom
-                    className={`w-full ${
-                      disabledPickup ? "opacity-60 pointer-events-none" : ""
-                    }`}
-                    onClick={() => handleClickPickupCompleteBtn(order)}
-                  />
-                )}
-
-                {order.status === "cancel" && (
-                  <CommonBtn
-                    label="취소사유 보기"
-                    category="red"
-                    notBottom
-                    className="w-full"
-                    onClick={() => {
-                      setCancelReason(order.cancel_reason);
-                      setShowCancelReason(true);
-                    }}
-                  />
-                )}
-              </div>
+              {/* button row */}
+              <OrderBtnRow
+                order={order}
+                handleClickPickupCompleteBtn={handleClickPickupCompleteBtn}
+                setShowCancelModal={setShowCancelModal}
+                setShowCancelReason={setShowCancelReason}
+                setPaymentIdToCancel={setPaymentIdToCancel}
+                processedRef={processedRef}
+                processingPaymentId={processingPaymentId}
+                disabledPickup={disabledPickup}
+                setCancelReason={setCancelReason}
+              />
             </div>
           </div>
         );
