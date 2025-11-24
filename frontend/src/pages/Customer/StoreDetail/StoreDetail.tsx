@@ -14,8 +14,9 @@ import {
   getStoreProduct,
   RemoveFavoriteStore,
 } from "@services";
-import { buildWindow, formatErrMsg, getRoundedPrice, inWindow } from "@utils";
+import { formatErrMsg, getRoundedPrice } from "@utils";
 import dayjs from "dayjs";
+import { buildWindow, inWindow, parseToday } from "dayjs-time-window";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "swiper/css";
@@ -66,10 +67,8 @@ const StoreDetail = () => {
     todayOp?.open_time,
     todayOp?.close_time
   );
-  const { start: _pickupStart, end: pickupEnd } = buildWindow(
-    todayOp?.pickup_start_time,
-    todayOp?.pickup_end_time
-  );
+
+  const pickupEnd = parseToday(now, todayOp?.pickup_end_time);
 
   const isStoreOpenWindow =
     !!todayOp?.is_open_enabled && inWindow(dayjs(), openStart, openEnd);
@@ -138,7 +137,7 @@ const StoreDetail = () => {
     };
 
     init();
-  }, [storeId]);
+  }, [storeId, storeFromState, navigate]);
 
   const handleUpdateFavorStore = async (
     targetStoreId: string,
@@ -151,7 +150,7 @@ const StoreDetail = () => {
         await RemoveFavoriteStore(targetStoreId);
       }
       setIsFavor((prev) => !prev);
-    } catch (err) {
+    } catch {
       setModalMsg("선호 가게 업데이트에 실패했습니다.");
       setShowModal(true);
     }
