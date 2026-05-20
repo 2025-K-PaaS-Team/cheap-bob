@@ -1,9 +1,0 @@
-export * from "./home";
-export { default as CommonBtn } from "./CommonBtn";
-export { default as Chips } from "./Chips";
-export { default as SelectedGrid } from "./SelectGrid";
-export { default as CommonModal } from "./CommonModal";
-export { default as CommonDropbox } from "./CommonDropbox";
-export { default as CommonProfile } from "./CommonProfile";
-export { default as CommonDesc } from "./CommonDesc";
-export { default as CommonToast } from "./CommonToast";
