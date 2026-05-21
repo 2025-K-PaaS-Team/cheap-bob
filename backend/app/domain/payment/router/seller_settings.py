@@ -10,6 +10,7 @@ from app.domain.payment.service.seller_payment_settings import (
 from app.domain.payment.schema.store_payment_settings import (
     StoreInitPaymentResponse,
     StorePaymentResponse,
+    StorePaymentSecretUpdateRequest,
     StorePaymentUpdateRequest,
 )
 from app.core.openapi import create_error_responses
@@ -76,4 +77,35 @@ async def update_store_payment(
         store_id=store_id,
         portone_store_id=request.portone_store_id,
         portone_channel_id=request.portone_channel_id,
+    )
+
+
+@router.put(
+    "/payment/secret",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=create_error_responses({
+        401: ["인증 정보가 없음", "토큰 만료"],
+        404: "가게를 찾을 수 없음",
+    }),
+)
+@inject
+async def rotate_store_payment_secret(
+    request: StorePaymentSecretUpdateRequest,
+    current_user: CurrentSellerDep,
+    seller_store_read_service: SellerStoreReadService = Depends(
+        Provide["seller_store_read_service"],
+    ),
+    settings_service: SellerPaymentSettingsService = Depends(
+        Provide["seller_payment_settings_service"],
+    ),
+):
+    """PortOne 콘솔에서 시크릿 키를 rotate 한 경우 갱신. 응답에는 secret 미노출."""
+    try:
+        store_id = await seller_store_read_service.get_store_id_by_seller_email(
+            current_user["sub"],
+        )
+    except StoreNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    await settings_service.rotate_secret_key(
+        store_id=store_id, portone_secret_key=request.portone_secret_key,
     )

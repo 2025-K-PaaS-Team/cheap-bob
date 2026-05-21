@@ -4,7 +4,6 @@ from app.domain.payment.schema.store_payment_settings import (
     StoreInitPaymentResponse,
     StorePaymentResponse,
 )
-from app.domain.payment.model.store_payment_info import StorePaymentInfo
 
 
 class SellerPaymentSettingsService:
@@ -59,4 +58,13 @@ class SellerPaymentSettingsService:
             store_id=store_id,
             portone_store_id=portone_store_id,
             portone_channel_id=portone_channel_id,
+        )
+
+
+    async def rotate_secret_key(
+        self, *, store_id: str, portone_secret_key: str,
+    ) -> None:
+        """PortOne 콘솔에서 secret 을 rotate 했을 때 호출. 응답에 secret 자체는 노출하지 않는다."""
+        await self.store_payment_info_service.update_secret_key(
+            store_id=store_id, portone_secret_key=portone_secret_key,
         )

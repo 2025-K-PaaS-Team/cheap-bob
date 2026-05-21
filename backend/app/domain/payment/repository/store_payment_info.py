@@ -22,20 +22,26 @@ class StorePaymentInfoRepository(BaseRepository[StorePaymentInfo]):
 
 
     async def update_portone_info(
-        self, 
+        self,
         store_id: str,
         portone_store_id: str,
-        portone_channel_id: str
+        portone_channel_id: str,
     ) -> Optional[StorePaymentInfo]:
-        """포트원 정보 업데이트"""
-        
-        update_data = {}
-        update_data["portone_store_id"] = portone_store_id
-        update_data["portone_channel_id"] = portone_channel_id
-        
-        if update_data:
-            return await self.update(store_id, **update_data)
-        return await self.get_by_pk(store_id)
+        """포트원 ID 갱신. 대상이 없으면 None."""
+        return await self.update(
+            store_id,
+            portone_store_id=portone_store_id,
+            portone_channel_id=portone_channel_id,
+        )
+
+
+    async def update_secret_key(
+        self, store_id: str, portone_secret_key: str,
+    ) -> Optional[StorePaymentInfo]:
+        """secret key 단독 갱신 — rotate 시 사용."""
+        return await self.update(
+            store_id, portone_secret_key=portone_secret_key,
+        )
 
 
     async def has_complete_info(self, store_id: str) -> bool:

@@ -74,14 +74,12 @@ class TestRegister:
 class TestDeleteByStore:
 
     async def test_returns_false_when_missing(self, service, payment_repo_mock):
-        payment_repo_mock.get_by_store_id.return_value = None
+        payment_repo_mock.exists_by_store_id.return_value = False
         assert await service.delete_by_store("STR_x") is False
 
 
     async def test_returns_true_after_delete(self, service, payment_repo_mock):
-        payment_repo_mock.get_by_store_id.return_value = SimpleNamespace(
-            store_id="STR_x",
-        )
+        payment_repo_mock.exists_by_store_id.return_value = True
         assert await service.delete_by_store("STR_x") is True
         payment_repo_mock.delete.assert_awaited_once_with("STR_x")
 

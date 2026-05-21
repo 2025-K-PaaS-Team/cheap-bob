@@ -103,10 +103,9 @@ class StorePaymentInfoService:
         cross-domain (seller withdraw) 진입점 — payment.repository 직접 import 회피.
         """
         repo = StorePaymentInfoRepository(self._session)
-        payment_info = await repo.get_by_store_id(store_id)
-        if payment_info is None:
+        if not await repo.exists_by_store_id(store_id):
             return False
-        await repo.delete(payment_info.store_id)
+        await repo.delete(store_id)
         return True
 
 
@@ -126,3 +125,13 @@ class StorePaymentInfoService:
             portone_store_id=portone_store_id,
             portone_channel_id=portone_channel_id,
         )
+
+
+    @transactional
+    async def update_secret_key(
+        self, *, store_id: str, portone_secret_key: str,
+    ) -> StorePaymentInfo:
+        """secret_key rotate — seller 가 PortOne 콘솔에서 키를 갱신했을 때 호출."""
+        return await StorePaymentInfoRepository(
+            self._session,
+        ).update_secret_key(store_id, portone_secret_key)
