@@ -1,17 +1,23 @@
-from typing import Optional
+from typing import List, Optional
 
 from app.util.id_generator import generate_store_id
 from app.domain.seller.service.exception import StoreAlreadyRegisteredError
+from app.domain.seller.repository.store_sns import StoreSNSRepository
+from app.domain.seller.repository.store_operation_info import (
+    StoreOperationInfoRepository,
+)
+from app.domain.seller.repository.store_address import StoreAddressRepository
 from app.domain.seller.repository.store import StoreRepository
 from app.domain.seller.model.store import Store
 from app.database.session import UnitOfWork, transactional
 
 
 class SellerStoreRegisterService:
-    """1차 회원가입 — Store + Address + SNS + Operation 한 트랜잭션 생성.
+    """1차 회원가입 — Store + Address + SNS + Operation 한 트랜잭션에서 생성.
 
-    payment 정보 등록은 payment 도메인의 `SellerPaymentSettingsService.register` 에 위임 (router 가
-    별도로 호출). 본 서비스는 가게 메타데이터 생성만 책임진다.
+    각 테이블 INSERT 는 본 서비스가 sub-repository 를 직접 조합해 처리한다.
+
+    payment 정보 등록은 payment 도메인의 `SellerPaymentSettingsService.register` 에 위임 (라우터가 별도로 호출).
     """
 
     def __init__(self, uow: UnitOfWork):
@@ -37,22 +43,13 @@ class SellerStoreRegisterService:
         nearest_station: Optional[str],
         walking_time: Optional[int],
         sns_info: Optional[dict],
-        operation_times: list[dict],
+        operation_times: List[dict],
     ) -> Store:
-        repo = StoreRepository(self._session)
-        existing = await repo.get_by_seller_email(seller_email)
-        if existing:
+        store_repo = StoreRepository(self._session)
+        if await store_repo.get_by_seller_email(seller_email):
             raise StoreAlreadyRegisteredError("이미 가게가 등록된 판매자입니다.")
 
-        return await repo.create_store_with_full_info(
-            store_id=generate_store_id(),
-            store_name=store_name,
-            seller_email=seller_email,
-            store_introduction=store_introduction,
-            store_phone=store_phone,
-            store_postal_code=store_postal_code,
-            store_address=store_address,
-            store_detail_address=store_detail_address,
+        address = await StoreAddressRepository(self._session).create(
             sido=sido,
             sigungu=sigungu,
             bname=bname,
@@ -60,6 +57,35 @@ class SellerStoreRegisterService:
             lng=lng,
             nearest_station=nearest_station,
             walking_time=walking_time,
-            sns_info=sns_info,
-            operation_times=operation_times,
         )
+
+        store_id = generate_store_id()
+        store = await store_repo.create(
+            store_id=store_id,
+            store_name=store_name,
+            seller_email=seller_email,
+            store_introduction=store_introduction,
+            store_phone=store_phone,
+            store_postal_code=store_postal_code,
+            store_address=store_address,
+            store_detail_address=store_detail_address,
+            address_id=address.address_id,
+        )
+
+        if sns_info:
+            await StoreSNSRepository(self._session).create(
+                store_id=store_id,
+                instagram=sns_info.get("instagram"),
+                facebook=sns_info.get("facebook"),
+                x=sns_info.get("x"),
+                homepage=sns_info.get("homepage"),
+            )
+
+        await StoreOperationInfoRepository(self._session).create_initial_operation_info(
+            store_id=store_id, operation_times=operation_times,
+        )
+
+        await self._session.refresh(
+            store, ["address", "sns_info", "payment_info", "operation_info"],
+        )
+        return store

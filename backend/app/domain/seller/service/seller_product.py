@@ -20,7 +20,11 @@ from app.domain.order.service.product_stock_reservation import (
     ProductStockReservationService,
 )
 from app.database.session import UnitOfWork, transactional
+from app.core.logger import get_logger
 from app.config.setting import settings
+
+
+logger = get_logger("seller.service.seller_product")
 
 
 class SellerProductService:
@@ -52,9 +56,6 @@ class SellerProductService:
 
         Returns: (success, failed).
         """
-        from app.core.logger import get_logger
-
-        logger = get_logger("seller.service.seller_product")
         reservations = await self.product_stock_reservation_service.get_all()
         if not reservations:
             return 0, 0
@@ -109,21 +110,37 @@ class SellerProductService:
         sale: Optional[int],
         nutrition_types: List[NutritionType],
     ) -> tuple[StoreProductInfo, List[NutritionType]]:
-        """MVP 한 가게에 상품 1개 제약."""
-        repo = StoreProductInfoRepository(self._session)
-        if await repo.get_by_store_id(store_id):
+        """MVP 한 가게에 상품 1개 제약.
+
+        상품 INSERT + N개 영양정보 INSERT 를 본 서비스가 sub-repository 로 조합한다.
+        """
+        product_repo = StoreProductInfoRepository(self._session)
+        if await product_repo.get_by_store_id(store_id):
             raise ProductAlreadyRegisteredError("이미 상품이 등록되어 있습니다.")
 
-        return await repo.create_product_with_nutrition(
-            product_id=generate_product_id(),
+        product_id = generate_product_id()
+        product = await product_repo.create(
+            product_id=product_id,
             store_id=store_id,
             product_name=product_name,
             description=description,
             initial_stock=initial_stock,
+            purchased_quantity=0,
+            admin_adjustment=0,
             price=price,
             sale=sale,
-            nutrition_types=nutrition_types,
+            version=1,
         )
+
+        if nutrition_types:
+            nutrition_repo = ProductNutritionRepository(self._session)
+            for nutrition_type in nutrition_types:
+                await nutrition_repo.create(
+                    product_id=product_id, nutrition_type=nutrition_type,
+                )
+
+        await self._session.refresh(product, ["nutrition_info"])
+        return product, list(nutrition_types)
 
 
     @transactional

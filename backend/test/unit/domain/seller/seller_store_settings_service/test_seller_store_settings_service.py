@@ -12,7 +12,7 @@ from app.domain.seller.service.exception import (
 class TestUpdateAddress:
 
     async def test_raises_when_store_missing(self, service, store_repo_mock):
-        store_repo_mock.update_store_and_address_atomic.return_value = None
+        store_repo_mock.get_with_address.return_value = None
         with pytest.raises(StoreNotFoundError):
             await service.update_address(
                 store_id="STR_x",
@@ -23,18 +23,49 @@ class TestUpdateAddress:
             )
 
 
-    async def test_returns_updated_store(self, service, store_repo_mock):
-        store_repo_mock.update_store_and_address_atomic.return_value = SimpleNamespace(
-            store_id="STR_x",
+    async def test_updates_both_address_and_store_columns(
+        self, service, store_repo_mock, address_repo_mock,
+    ):
+        store_repo_mock.get_with_address.return_value = SimpleNamespace(
+            store_id="STR_x", address_id=42,
         )
+
         result = await service.update_address(
             store_id="STR_x",
+            postal_code="06236", address="강남구", detail_address="101호",
+            sido="서울", sigungu="강남구", bname="역삼동",
+            lat="37.5", lng="127.0",
+            nearest_station=None, walking_time=None,
+        )
+        assert result.store_id == "STR_x"
+        address_repo_mock.update.assert_awaited_once()
+        # address_id (FK 값) 가 첫 인자, 주소 필드들이 kwargs.
+        assert address_repo_mock.update.await_args.args[0] == 42
+        assert address_repo_mock.update.await_args.kwargs["sido"] == "서울"
+        store_repo_mock.update.assert_awaited_once_with(
+            "STR_x",
+            store_postal_code="06236",
+            store_address="강남구",
+            store_detail_address="101호",
+        )
+
+
+    async def test_skips_address_update_when_legacy_store_has_no_address_id(
+        self, service, store_repo_mock, address_repo_mock,
+    ):
+        store_repo_mock.get_with_address.return_value = SimpleNamespace(
+            store_id="STR_legacy", address_id=None,
+        )
+
+        await service.update_address(
+            store_id="STR_legacy",
             postal_code="", address="", detail_address="",
             sido="", sigungu="", bname="",
             lat="0", lng="0",
             nearest_station=None, walking_time=None,
         )
-        assert result.store_id == "STR_x"
+        address_repo_mock.update.assert_not_awaited()
+        store_repo_mock.update.assert_awaited_once()
 
 
 @pytest.mark.unit

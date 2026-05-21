@@ -1,19 +1,12 @@
-from typing import List, Optional
-from pydantic import BaseModel, Field, HttpUrl
+from typing import List
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 
+from app.domain.seller.schema.store_sns import StoreSNSInfo
 from app.domain.seller.schema.store_settings import StoreAddressResponse
 from app.domain.seller.schema.store_operation import StoreOperationResponse
 from app.domain.seller.schema.product import ProductResponse
 from app.domain.seller.schema.image import ImageUploadResponse
-
-
-class StoreSNSInfo(BaseModel):
-    """가게 SNS 정보"""
-    instagram: Optional[HttpUrl] = Field(None, description="인스타그램 URL")
-    facebook: Optional[HttpUrl] = Field(None, description="페이스북 URL")
-    x: Optional[HttpUrl] = Field(None, description="X(구 트위터) URL")
-    homepage: Optional[HttpUrl] = Field(None, description="홈페이지 URL")
 
 
 class StoreDetailResponse(BaseModel):
@@ -35,12 +28,11 @@ class StoreDetailResponse(BaseModel):
     
     # 이미지 정보
     images: List[ImageUploadResponse] = Field(..., description="가게 이미지 목록")
-    
+
     # 상품 정보
     products: List[ProductResponse] = Field(..., description="가게 상품 목록")
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class StoreDetailResponseForCustomer(StoreDetailResponse):

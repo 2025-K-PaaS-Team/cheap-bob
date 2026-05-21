@@ -27,10 +27,9 @@ def store_read_mock():
 @pytest.fixture
 def service(monkeypatch, mock_session, favorite_repo_mock, store_read_mock):
     from datetime import datetime, timezone
-    from app.domain.seller.schema.store import (
-        StoreDetailResponseForCustomer, StoreSNSInfo,
-    )
+    from app.domain.seller.schema.store_sns import StoreSNSInfo
     from app.domain.seller.schema.store_settings import StoreAddressResponse
+    from app.domain.seller.schema.store import StoreDetailResponseForCustomer
 
     monkeypatch.setattr(
         "app.domain.customer.service.customer_search.CustomerFavoriteRepository",

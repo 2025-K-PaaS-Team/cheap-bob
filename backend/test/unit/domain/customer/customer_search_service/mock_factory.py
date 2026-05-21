@@ -36,5 +36,5 @@ class StoreReadServiceMockFactory:
         mock.search_by_location_and_name.return_value = ([], True)
         mock.get_with_full_info.return_value = None
         mock.get_store_products_with_nutrition.return_value = []
-        mock.get_favorite_stores_by_customer.return_value = []
+        mock.get_by_store_ids.return_value = []
         return mock

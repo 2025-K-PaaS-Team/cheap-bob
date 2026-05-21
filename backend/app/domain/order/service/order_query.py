@@ -1,7 +1,6 @@
 """cross-domain read 진입점.
 
-auth.RegistrationStatus / customer.Withdraw / seller.* 가 order 데이터를 봐야 할 때 모두
-본 서비스를 거친다. 직접 repository import 를 금지하는 컨벤션 §18 의 진입점.
+auth.RegistrationStatus / customer.Withdraw / seller.* 가 order 데이터를 봐야 할 때 모두 본 서비스를 거친다.
 """
 from typing import Dict, List, Optional
 import pytz

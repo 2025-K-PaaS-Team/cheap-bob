@@ -1,12 +1,12 @@
 from typing import Optional, List
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 
 from app.domain.seller.dto.nutrition import NutritionType
 
 
 class ProductCreateRequest(BaseModel):
-    """상품 생성 요청 스키마"""
+    """상품 생성 요청."""
     product_name: str = Field(..., description="상품 이름", min_length=1, max_length=255)
     description: str = Field(..., description="상품 설명", max_length=1000)
     initial_stock: int = Field(..., description="초기 재고 수량", ge=0)
@@ -16,7 +16,7 @@ class ProductCreateRequest(BaseModel):
 
 
 class ProductUpdateRequest(BaseModel):
-    """상품 정보 수정 요청 스키마"""
+    """상품 정보 수정 요청."""
     product_name: Optional[str] = Field(None, description="상품 이름", min_length=1, max_length=255)
     description: Optional[str] = Field(None, description="상품 설명", max_length=1000)
     price: Optional[int] = Field(None, description="상품 가격 (원 단위)", gt=0)
@@ -24,7 +24,7 @@ class ProductUpdateRequest(BaseModel):
 
 
 class ProductResponse(BaseModel):
-    """상품 응답 스키마"""
+    """상품 응답."""
     product_id: str = Field(..., description="상품 고유 ID")
     store_id: str = Field(..., description="가게 고유 ID")
     product_name: str = Field(..., description="상품 이름")
@@ -35,31 +35,34 @@ class ProductResponse(BaseModel):
     sale: Optional[int] = Field(None, description="세일 퍼센트")
     version: int = Field(..., description="버전 (낙관적 락)")
     nutrition_types: List[NutritionType] = Field(default_factory=list, description="영양 타입 목록")
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProductsResponse(BaseModel):
-    """가게 상품 목록 Response 스키마"""
+    """가게 상품 목록 응답."""
     store_id: str = Field(..., description="가게 고유 ID")
     store_name: str = Field(..., description="가게 이름")
     products: list[ProductResponse] = Field(default_factory=list, description="상품 정보")
 
 
 class ProductNutritionRequest(BaseModel):
-    """상품 영양 정보 추가/삭제 요청 스키마"""
-    nutrition_types: List[NutritionType] = Field(..., description="추가하거나 삭제할 영양 타입 목록", min_length=1)
+    """상품 영양 정보 추가/삭제 요청."""
+    nutrition_types: List[NutritionType] = Field(
+        ..., description="추가하거나 삭제할 영양 타입 목록", min_length=1,
+    )
 
 
 class ProductStockReservationRequest(BaseModel):
-    """상품 재고 예약 요청 스키마"""
+    """상품 재고 예약 요청."""
     new_stock: int = Field(..., description="변경할 재고 수량", ge=0)
 
 
 class ProductStockReservationResponse(BaseModel):
-    """상품 재고 예약 응답 스키마"""
+    """상품 재고 예약 응답."""
     product_id: str = Field(..., description="상품 고유 ID")
     initial_stock: int = Field(..., description="초기 재고 수량")
     new_stock: int = Field(..., description="변경할 재고 수량")
     reserved_at: datetime = Field(..., description="예약 일시")
+
+    model_config = ConfigDict(from_attributes=True)

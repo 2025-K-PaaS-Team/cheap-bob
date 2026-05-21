@@ -17,6 +17,7 @@ class FakeUnitOfWork:
 def make_mock_session() -> MagicMock:
     session = MagicMock(name="session")
     session.flush = AsyncMock()
+    session.refresh = AsyncMock()
     return session
 
 
@@ -24,7 +25,16 @@ class StoreRepoMockFactory:
     @classmethod
     def create(cls) -> AsyncMock:
         mock = AsyncMock()
-        mock.update_store_and_address_atomic.return_value = None
+        mock.get_with_address.return_value = None
+        mock.update.return_value = None
+        return mock
+
+
+class StoreAddressRepoMockFactory:
+    @classmethod
+    def create(cls) -> AsyncMock:
+        mock = AsyncMock()
+        mock.update.return_value = None
         return mock
 
 

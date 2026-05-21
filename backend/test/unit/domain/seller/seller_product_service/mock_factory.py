@@ -19,6 +19,7 @@ class FakeUnitOfWork:
 def make_mock_session() -> MagicMock:
     session = MagicMock(name="session")
     session.flush = AsyncMock()
+    session.refresh = AsyncMock()
     return session
 
 
@@ -34,6 +35,7 @@ class StoreProductInfoRepoMockFactory:
         mock.set_stock.return_value = StockUpdateResult.SUCCESS
         mock.reset_all_inventories.return_value = 0
         mock.update.return_value = None
+        mock.create.return_value = None
         return mock
 
 
@@ -43,6 +45,7 @@ class ProductNutritionRepoMockFactory:
         mock = AsyncMock()
         mock.add_nutrition_with_validation.return_value = ([], [])
         mock.remove_nutrition_from_product.return_value = True
+        mock.create.return_value = None
         return mock
 
 

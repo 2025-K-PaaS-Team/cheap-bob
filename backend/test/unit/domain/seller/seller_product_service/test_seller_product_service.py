@@ -2,8 +2,6 @@
 from types import SimpleNamespace
 import pytest
 
-from app.domain.seller.dto.nutrition import NutritionType
-from app.domain.seller.repository.store_product_info import StockUpdateResult
 from app.domain.seller.service.exception import (
     ProductAlreadyRegisteredError,
     ProductNotFoundError,
@@ -12,6 +10,8 @@ from app.domain.seller.service.exception import (
     ProductStockConflictError,
     ProductStockInsufficientError,
 )
+from app.domain.seller.repository.store_product_info import StockUpdateResult
+from app.domain.seller.dto.nutrition import NutritionType
 
 
 def _make_product(**kwargs) -> SimpleNamespace:
@@ -41,12 +41,10 @@ class TestCreate:
 
 
     async def test_delegates_to_repo_with_generated_id(
-        self, service, product_repo_mock,
+        self, service, product_repo_mock, nutrition_repo_mock,
     ):
         product_repo_mock.get_by_store_id.return_value = []
-        product_repo_mock.create_product_with_nutrition.return_value = (
-            _make_product(product_id="PRD_fixed"), [NutritionType.protein],
-        )
+        product_repo_mock.create.return_value = _make_product(product_id="PRD_fixed")
 
         product, nutritions = await service.create(
             store_id="STR_x", product_name="A", description="",
@@ -55,6 +53,12 @@ class TestCreate:
         )
         assert product.product_id == "PRD_fixed"
         assert nutritions == [NutritionType.protein]
+        product_repo_mock.create.assert_awaited_once()
+        # generate_product_id 가 주입한 고정값 + nutrition 1건이 별도 INSERT 됐는지.
+        assert product_repo_mock.create.await_args.kwargs["product_id"] == "PRD_fixed"
+        nutrition_repo_mock.create.assert_awaited_once_with(
+            product_id="PRD_fixed", nutrition_type=NutritionType.protein,
+        )
 
 
 @pytest.mark.unit

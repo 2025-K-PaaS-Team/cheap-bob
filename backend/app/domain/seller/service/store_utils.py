@@ -6,9 +6,10 @@ customer 도메인이 store 데이터를 사용할 때 본 헬퍼를 호출한�
 """
 from typing import Optional
 
+from app.domain.seller.schema.store_sns import StoreSNSInfo
 from app.domain.seller.schema.store_settings import StoreAddressResponse
 from app.domain.seller.schema.store_operation import StoreOperationResponse
-from app.domain.seller.schema.store import StoreDetailResponseForCustomer, StoreSNSInfo
+from app.domain.seller.schema.store import StoreDetailResponseForCustomer
 from app.domain.seller.schema.product import ProductResponse
 from app.domain.seller.schema.image import ImageUploadResponse
 from app.core.object_storage import object_storage

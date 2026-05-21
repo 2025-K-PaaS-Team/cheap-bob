@@ -153,9 +153,13 @@ class CustomerSearchService:
     async def list_favorite_stores(
         self, customer_email: str,
     ) -> List[StoreDetailResponseForCustomer]:
-        stores = await self.seller_store_read_service.get_favorite_stores_by_customer(
-            customer_email,
+        favorite_ids = await self._favorite_store_ids(customer_email)
+        if not favorite_ids:
+            return []
+        stores = await self.seller_store_read_service.get_by_store_ids(
+            list(favorite_ids),
         )
+        stores.sort(key=lambda s: s.store_name)
         return [convert_store_to_response(s, is_favorite=True) for s in stores]
 
 

@@ -4,13 +4,14 @@
   1) ``get_with_full_info`` 가 store + address/sns/operation/products 를 한 번에 eager-load
   2) ``list_with_products`` 는 상품 있는 가게만 페이지네이션해 반환
   3) ``search_by_location`` / ``search_by_name`` 이 조건 매칭 가게를 반환
-  4) ``get_favorite_stores_by_customer`` 는 customer 가 즐겨찾기한 가게만 반환
+  4) ``get_by_store_ids`` 는 주어진 ID 목록의 가게만 full-info 와 함께 반환
+     (customer favorite 결합은 customer 도메인 책임 — favorite 자체는 customer 통합 테스트에서 검증)
 
 Redis 캐시를 쓰는 ``get_store_id_by_seller_email`` 은 Redis 의존성이 있어 본 통합 테스트에서는 다루지 않는다.
 """
-from datetime import time
-import pytest
 import pytest_asyncio
+import pytest
+from datetime import time
 
 from app.domain.seller.service.seller_store_read import SellerStoreReadService
 
@@ -155,26 +156,22 @@ class TestSearch:
         assert miss_id not in ids
 
 
-class TestFavoriteStores:
+class TestGetByStoreIds:
 
-    async def test_returns_only_customer_favorites(
-        self, seller_store_read_service, seed_full_store, seed_customer,
-        session_factory,
+    async def test_returns_only_requested_ids_with_full_info(
+        self, seller_store_read_service, seed_full_store,
     ):
         kept_id, _ = await seed_full_store()
         skipped_id, _ = await seed_full_store()
-        [email] = await seed_customer(1)
 
-        # customer 가 kept_id 만 즐겨찾기.
-        from app.domain.customer.model.customer_favorite import CustomerFavorite
-        async with session_factory() as session:
-            session.add(CustomerFavorite(
-                customer_email=email, store_id=kept_id,
-            ))
-            await session.commit()
-
-        favorites = await seller_store_read_service.get_favorite_stores_by_customer(
-            email,
-        )
-        ids = {s.store_id for s in favorites}
+        results = await seller_store_read_service.get_by_store_ids([kept_id])
+        ids = {s.store_id for s in results}
         assert ids == {kept_id}
+        # full info eager-load 확인.
+        [store] = results
+        assert store.address is not None
+        assert len(store.products) == 1
+
+
+    async def test_empty_ids_returns_empty(self, seller_store_read_service):
+        assert await seller_store_read_service.get_by_store_ids([]) == []

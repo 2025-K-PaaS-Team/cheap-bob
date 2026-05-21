@@ -3,7 +3,6 @@
 OrderQueryService / SellerProductService / PaymentGatewayService / StorePaymentInfoService 협력.
 """
 from typing import Tuple
-from loguru import logger
 
 from app.domain.seller.service.seller_product import SellerProductService
 from app.domain.seller.service.exception import (
@@ -22,9 +21,14 @@ from app.domain.payment.service.exception import (
 from app.domain.order.service.order_query import OrderQueryService
 from app.domain.order.dto.order import OrderStatus
 from app.database.session import UnitOfWork, transactional
+from app.core.logger import get_logger
+
+
+logger = get_logger("seller.service.seller_store_close")
 
 
 class SellerStoreCloseService:
+    """가게 마감 + 진행중 주문 자동 환불 — order/payment 협력."""
 
     def __init__(
         self,

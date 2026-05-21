@@ -3,6 +3,9 @@ from typing import List, Optional, Tuple
 from app.domain.seller.service.store_id_cache import SellerStoreIdCache
 from app.domain.seller.service.exception import StoreNotFoundError
 from app.domain.seller.repository.store_product_info import StoreProductInfoRepository
+from app.domain.seller.repository.store_operation_info import (
+    StoreOperationInfoRepository,
+)
 from app.domain.seller.repository.store import StoreRepository
 from app.domain.seller.model.store_product_info import StoreProductInfo
 from app.domain.seller.model.store import Store
@@ -10,8 +13,7 @@ from app.database.session import UnitOfWork, transactional
 
 
 class SellerStoreReadService:
-    """seller 도메인 가게 조회 — 다른 도메인 (customer search/favorite, auth registration_status) 도
-    본 서비스만 호출한다. cross-domain repo 직접 import 를 금지하는 컨벤션 §18 의 진입점.
+    """seller 도메인 가게 조회 — 다른 도메인 (customer search/favorite, auth registration_status) 도 본 서비스만 호출한다.
     """
 
     def __init__(self, uow: UnitOfWork):
@@ -42,9 +44,6 @@ class SellerStoreReadService:
     @transactional
     async def get_today_operation(self, store_id: str):
         """오늘 요일의 가게 운영 정보. payment 의 영업 / 픽업 시간 검증에 사용."""
-        from app.domain.seller.repository.store_operation_info import (
-            StoreOperationInfoRepository,
-        )
         return await StoreOperationInfoRepository(
             self._session,
         ).get_today_operation_info(store_id)
@@ -54,16 +53,10 @@ class SellerStoreReadService:
     async def list_with_products(
         self, *, offset: int, limit: int,
     ) -> Tuple[List[Store], bool]:
-        """상품이 있는 가게 + 모든 관련 정보 eager-load. customer 검색용 — favorite 미포함."""
-        items, is_end = await StoreRepository(
-            self._session,
-        ).get_stores_with_products_and_favorites(
-            customer_email="",  # favorite 정보는 customer service 가 별도 결합한다.
-            offset=offset,
-            limit=limit,
+        """상품이 있는 가게 + 모든 관련 정보 eager-load. favorite 결합은 customer service 책임."""
+        return await StoreRepository(self._session).list_with_products_paginated(
+            offset=offset, limit=limit,
         )
-        # 위 메서드는 (Store, is_favorite) 튜플을 반환 — favorite 무시.
-        return [s for s, _ in items], is_end
 
 
     @transactional
@@ -76,29 +69,18 @@ class SellerStoreReadService:
         offset: int,
         limit: int,
     ) -> Tuple[List[Store], bool]:
-        items, is_end = await StoreRepository(
-            self._session,
-        ).search_by_location_with_favorites(
-            sido=sido,
-            sigungu=sigungu,
-            bname=bname,
-            customer_email="",
-            offset=offset,
-            limit=limit,
+        return await StoreRepository(self._session).search_by_location_paginated(
+            sido=sido, sigungu=sigungu, bname=bname, offset=offset, limit=limit,
         )
-        return [s for s, _ in items], is_end
 
 
     @transactional
     async def search_by_name(
         self, *, search_name: str, offset: int, limit: int,
     ) -> Tuple[List[Store], bool]:
-        items, is_end = await StoreRepository(
-            self._session,
-        ).search_by_name_with_favorites(
-            search_name, customer_email="", offset=offset, limit=limit,
+        return await StoreRepository(self._session).search_by_name_paginated(
+            search_name=search_name, offset=offset, limit=limit,
         )
-        return [s for s, _ in items], is_end
 
 
     @transactional
@@ -112,32 +94,20 @@ class SellerStoreReadService:
         offset: int,
         limit: int,
     ) -> Tuple[List[Store], bool]:
-        items, is_end = await StoreRepository(
-            self._session,
-        ).search_by_location_and_name_with_favorites(
+        return await StoreRepository(self._session).search_by_location_and_name_paginated(
             sido=sido,
             sigungu=sigungu,
             bname=bname,
             search_name=search_name,
-            customer_email="",
             offset=offset,
             limit=limit,
         )
-        return [s for s, _ in items], is_end
 
 
     @transactional
-    async def get_favorite_stores_by_customer(
-        self, customer_email: str,
-    ) -> List[Store]:
-        """customer 가 즐겨찾기한 모든 가게 (full info eager-loaded).
-
-        customer 도메인에서만 호출되는 cross-domain 진입점. customer_favorites 테이블 JOIN 은
-        Store ORM 의 favorited_by relationship 으로 SQLAlchemy 가 처리한다.
-        """
-        return await StoreRepository(
-            self._session,
-        ).get_favorite_stores_with_full_info(customer_email)
+    async def get_by_store_ids(self, store_ids: List[str]) -> List[Store]:
+        """주어진 store_id 목록을 모든 관련 정보와 함께 조회. customer favorite 결합용."""
+        return await StoreRepository(self._session).get_by_store_ids(store_ids)
 
 
     @transactional
