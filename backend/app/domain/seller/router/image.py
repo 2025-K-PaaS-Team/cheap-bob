@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from dependency_injector.wiring import Provide, inject
 
+from app.util.image_validator import validate_image_files
 from app.middleware.auth import CurrentSellerDep
 from app.domain.seller.service.seller_store_read import SellerStoreReadService
 from app.domain.seller.service.seller_store_image import SellerStoreImageService
@@ -21,27 +22,6 @@ from app.core.openapi import create_error_responses
 router = APIRouter(prefix="/store/images", tags=["Seller-Store-Images"])
 
 _MAX_IMAGES = 11
-_MAX_FILE_SIZE = 15 * 1024 * 1024
-_ALLOWED_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
-
-
-async def _validate_image_files(files: List[UploadFile]) -> list[tuple]:
-    validated = []
-    for f in files:
-        if f.content_type not in _ALLOWED_TYPES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"지원하지 않는 파일 형식입니다: {f.filename}",
-            )
-        content = await f.read()
-        if len(content) > _MAX_FILE_SIZE:
-            raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"파일 크기가 너무 큽니다 (최대 15MB): {f.filename}",
-            )
-        await f.seek(0)
-        validated.append((f.file, f.filename, f.content_type))
-    return validated
 
 
 @router.post(
@@ -77,7 +57,7 @@ async def add_store_images(
                 status_code=400,
                 detail=f"이미지는 최대 {_MAX_IMAGES}개까지 업로드 가능합니다.",
             )
-        validated = await _validate_image_files(files)
+        validated = await validate_image_files(files)
         return await image_service.add_images(
             store_id=store_id, seller_email=seller_email, files=validated,
         )
