@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, Request, Response, status
 
 from app.domain.auth.service.jwt import JwtService
 from app.domain.auth.dto.auth import UserType
+from app.domain.auth.cookie import set_auth_cookie
 from app.config.setting import settings
 
 
@@ -65,15 +66,7 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
 
         response = await call_next(request)
         if refreshed:
-            response.set_cookie(
-                key="access_token",
-                value=refreshed,
-                httponly=True,
-                secure=True,
-                samesite="lax",
-                max_age=settings.COOKIE_EXPIRE_MINUTES,
-                path="/",
-            )
+            set_auth_cookie(response, refreshed)
         return response
 
 

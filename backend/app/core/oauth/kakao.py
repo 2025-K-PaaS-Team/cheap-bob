@@ -16,10 +16,10 @@ class KakaoOAuthClient(OAuthClient):
 
         user_data = response.json()
         kakao_account = user_data.get("kakao_account", {})
-
-        email = kakao_account.get("email")
-        if not email:
-            raise ValueError("Email not provided by Kakao")
-
         name = kakao_account.get("profile", {}).get("nickname")
-        return OAuthUser(email=email, provider=self.provider, name=name)
+        # email 누락은 OAuthService 가 OAuthEmailMissingError 로 단일 분기한다.
+        return OAuthUser(
+            email=kakao_account.get("email") or "",
+            provider=self.provider,
+            name=name,
+        )

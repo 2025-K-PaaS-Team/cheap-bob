@@ -15,8 +15,9 @@ class GoogleOAuthClient(OAuthClient):
         response.raise_for_status()
 
         user_data = response.json()
+        # email 누락은 OAuthService 가 OAuthEmailMissingError 로 단일 분기한다.
         return OAuthUser(
-            email=user_data["email"],
+            email=user_data.get("email") or "",
             provider=self.provider,
             name=user_data.get("name"),
         )

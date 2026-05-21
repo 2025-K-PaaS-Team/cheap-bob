@@ -15,12 +15,9 @@ class NaverOAuthClient(OAuthClient):
         response.raise_for_status()
 
         user_data = response.json().get("response", {})
-        email = user_data.get("email")
-        if not email:
-            raise ValueError("Email not provided by Naver")
-
+        # email 누락은 OAuthService 가 OAuthEmailMissingError 로 단일 분기한다.
         return OAuthUser(
-            email=email,
+            email=user_data.get("email") or "",
             provider=self.provider,
             name=user_data.get("name"),
         )

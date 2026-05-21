@@ -5,6 +5,10 @@ from datetime import datetime, timedelta, timezone
 from app.config.setting import settings
 
 
+# 본 시스템이 발급하는 토큰의 필수 클레임. 누락된 토큰은 변조/구버전으로 간주하고 거부한다.
+_REQUIRED_CLAIMS = frozenset({"sub", "user_type", "is_active", "exp"})
+
+
 class JwtService:
     """JWT 발급 / 검증 / 갱신.
 
@@ -29,10 +33,18 @@ class JwtService:
 
 
     def decode_access_token(self, token: str) -> Optional[Dict]:
+        """서명/만료/필수 클레임을 모두 통과한 payload 만 반환. 그 외는 None.
+
+        필수 클레임 검증을 여기 한곳에 모아두면, 호출처에서 `payload["sub"]` 같은
+        직접 인덱싱이 KeyError → 500 으로 새지 않는다.
+        """
         try:
-            return jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
         except JWTError:
             return None
+        if not _REQUIRED_CLAIMS.issubset(payload):
+            return None
+        return payload
 
 
     def create_user_token(self, email: str, user_type: str, is_active: bool) -> str:
@@ -51,13 +63,13 @@ class JwtService:
             (valid, refreshed_token_or_none, payload_or_none)
         """
         payload = self.decode_access_token(token)
-        if not payload:
+        if payload is None:
             return False, None, None
 
+        # exp 는 _REQUIRED_CLAIMS 가 보장. jwt.decode 가 이미 만료를 검증하므로
+        # 본 분기는 refresh window 계산용으로만 사용한다.
         exp = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
         now = datetime.now(timezone.utc)
-        if exp < now:
-            return False, None, None
 
         if exp - now < timedelta(minutes=5):
             refreshed = self.create_user_token(

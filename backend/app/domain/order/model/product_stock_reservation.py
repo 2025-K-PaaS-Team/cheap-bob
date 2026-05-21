@@ -1,6 +1,6 @@
+from pymongo import ASCENDING, IndexModel
 from pydantic import Field
 from datetime import datetime, timezone
-from pymongo import ASCENDING, IndexModel
 
 from app.database.mongodb_document import Document
 

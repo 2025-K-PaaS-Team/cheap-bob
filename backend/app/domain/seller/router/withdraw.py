@@ -1,5 +1,5 @@
 from fastapi.responses import JSONResponse
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from dependency_injector.wiring import Provide, inject
 
 from app.middleware.auth import CurrentSellerDep, CurrentSellerNoActiveDep
@@ -15,15 +15,11 @@ from app.domain.seller.service.exception import (
 )
 from app.domain.auth.service.jwt import JwtService
 from app.domain.auth.dto.auth import UserType
+from app.domain.auth.cookie import clear_auth_cookie, set_auth_cookie
 from app.core.openapi import create_error_responses
-from app.config.setting import settings
 
 
 router = APIRouter(prefix="/withdraw", tags=["Seller-Withdraw"])
-
-
-def _samesite(state: str | None) -> str:
-    return "none" if (state == "1004" and settings.ENVIRONMENT == "dev") else "lax"
 
 
 @router.post(
@@ -39,7 +35,6 @@ def _samesite(state: str | None) -> str:
 @inject
 async def withdraw_seller(
     current_user: CurrentSellerDep,
-    state: str | None = Query(None, description="로컬 테스트 분기용"),
     store_read_service: SellerStoreReadService = Depends(
         Provide["seller_store_read_service"],
     ),
@@ -65,15 +60,7 @@ async def withdraw_seller(
     response = JSONResponse(
         content={"message": "탈퇴가 완료되었습니다"}, status_code=200,
     )
-    response.set_cookie(
-        key="access_token",
-        value="",
-        httponly=True,
-        secure=True,
-        samesite=_samesite(state),
-        max_age=0,
-        path="/",
-    )
+    clear_auth_cookie(response)
     return response
 
 
@@ -89,7 +76,6 @@ async def withdraw_seller(
 @inject
 async def cancel_withdraw(
     current_user: CurrentSellerNoActiveDep,
-    state: str | None = Query(None, description="로컬 테스트 분기용"),
     withdraw_service: SellerWithdrawService = Depends(
         Provide["seller_withdraw_service"],
     ),
@@ -111,13 +97,5 @@ async def cancel_withdraw(
     response = JSONResponse(
         content={"message": "탈퇴가 취소되었습니다"}, status_code=200,
     )
-    response.set_cookie(
-        key="access_token",
-        value=new_token,
-        httponly=True,
-        secure=True,
-        samesite=_samesite(state),
-        max_age=settings.COOKIE_EXPIRE_MINUTES,
-        path="/",
-    )
+    set_auth_cookie(response, new_token)
     return response

@@ -22,12 +22,22 @@ class OAuthClient(ABC):
     """OAuth provider 공통 동작 (authorize URL 생성, access token 교환).
 
     provider 별로 다른 user_info 응답 스키마는 `get_user_info` 에서 흡수한다.
+
+    HTTP client 는 lazy-init — login 처럼 URL 생성만 하는 경로에서는 socket / fd 를
+    소모하지 않는다. 첫 HTTP 호출 시 생성되고 `__aexit__` 에서 정리된다.
     """
 
     def __init__(self, config: OAuthConfig, provider: OAuthProvider):
         self.config = config
         self.provider = provider
-        self.client = AsyncClient()
+        self._client: Optional[AsyncClient] = None
+
+
+    @property
+    def client(self) -> AsyncClient:
+        if self._client is None:
+            self._client = AsyncClient()
+        return self._client
 
 
     async def __aenter__(self):
@@ -35,7 +45,9 @@ class OAuthClient(ABC):
 
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.client.aclose()
+        if self._client is not None:
+            await self._client.aclose()
+            self._client = None
 
 
     def get_authorization_url(self, state: str, user_type: str) -> str:

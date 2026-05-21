@@ -14,12 +14,16 @@ async def customer_oauth_login(
     provider: OAuthProvider,
     state: str = Query(None, description="추후 보안용 파라미터. 현재는 None 허용."),
 ):
-    """Customer 의 OAuth 로그인 진입점. provider 의 authorize URL 로 302 리다이렉트."""
-    oauth_client = create_oauth_client(provider)
-    auth_url = oauth_client.get_authorization_url(
-        state=state or "",
-        user_type=UserType.CUSTOMER.value,
-    )
+    """Customer 의 OAuth 로그인 진입점. provider 의 authorize URL 로 302 리다이렉트.
+
+    `async with` 는 client 리소스 라이프사이클을 명시한다. URL 생성만 하는 본 경로는
+    lazy-init 덕분에 실제 `AsyncClient` 가 만들어지지 않는다.
+    """
+    async with create_oauth_client(provider) as oauth_client:
+        auth_url = oauth_client.get_authorization_url(
+            state=state or "",
+            user_type=UserType.CUSTOMER.value,
+        )
     return RedirectResponse(url=auth_url)
 
 
@@ -29,9 +33,9 @@ async def seller_oauth_login(
     state: str = Query(None, description="추후 보안용 파라미터. 현재는 None 허용."),
 ):
     """Seller 의 OAuth 로그인 진입점."""
-    oauth_client = create_oauth_client(provider)
-    auth_url = oauth_client.get_authorization_url(
-        state=state or "",
-        user_type=UserType.SELLER.value,
-    )
+    async with create_oauth_client(provider) as oauth_client:
+        auth_url = oauth_client.get_authorization_url(
+            state=state or "",
+            user_type=UserType.SELLER.value,
+        )
     return RedirectResponse(url=auth_url)

@@ -4,7 +4,6 @@ from app.domain.auth.service.registration_status import RegistrationStatusServic
 
 from test.unit.domain.auth.registration_status_service.mock_factory import (
     CustomerStatusServiceMockFactory,
-    FakeUnitOfWork,
     SellerStatusServiceMockFactory,
 )
 
@@ -22,7 +21,6 @@ def seller_status_mock():
 @pytest.fixture
 def service(customer_status_mock, seller_status_mock):
     return RegistrationStatusService(
-        uow=FakeUnitOfWork(),
         customer_registration_status_service=customer_status_mock,
         seller_registration_status_service=seller_status_mock,
     )
