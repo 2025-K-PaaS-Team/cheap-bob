@@ -58,7 +58,7 @@ class TestAuthenticateProviderCall:
 @pytest.mark.unit
 class TestAuthenticateAsCustomer:
 
-    async def test_creates_new_customer_when_not_exists(
+    async def test_find_or_creates_customer_when_not_seller(
         self, monkeypatch, service,
         customer_account_mock, seller_account_mock, jwt_service_mock,
     ):
@@ -66,7 +66,6 @@ class TestAuthenticateAsCustomer:
         monkeypatch.setattr(
             "app.domain.auth.service.oauth.create_oauth_client", lambda provider: ctx,
         )
-        customer_account_mock.find_by_email.return_value = None
         seller_account_mock.find_by_email.return_value = None
 
         result = await service.authenticate(
@@ -75,8 +74,8 @@ class TestAuthenticateAsCustomer:
             requested_type=UserType.CUSTOMER,
         )
 
-        # 신규 customer 가 생성되었는지.
-        customer_account_mock.create.assert_awaited_once_with("new@example.com")
+        # find_or_create 가 멱등하게 customer row 를 보장하는지 확인.
+        customer_account_mock.find_or_create.assert_awaited_once_with("new@example.com")
 
         assert result.email == "new@example.com"
         assert result.user_type == UserType.CUSTOMER
@@ -87,18 +86,18 @@ class TestAuthenticateAsCustomer:
         )
 
 
-    async def test_reuses_existing_customer_with_is_active_preserved(
+    async def test_preserves_is_active_for_withdrawn_customer(
         self, monkeypatch, service,
         customer_account_mock, seller_account_mock,
     ):
+        """find_or_create 가 탈퇴 예약 (is_active=False) 인 기존 row 를 돌려주면 그대로 노출."""
         ctx, _ = make_oauth_client_mock(email="existing@example.com")
         monkeypatch.setattr(
             "app.domain.auth.service.oauth.create_oauth_client", lambda provider: ctx,
         )
         seller_account_mock.find_by_email.return_value = None
-        # 탈퇴 예약 상태 (is_active=False) 인 고객을 가정.
-        customer_account_mock.find_by_email.return_value = SimpleNamespace(
-            email="existing@example.com", is_active=False,
+        customer_account_mock.find_or_create.side_effect = lambda email: SimpleNamespace(
+            email=email, is_active=False,
         )
 
         result = await service.authenticate(
@@ -107,9 +106,8 @@ class TestAuthenticateAsCustomer:
             requested_type=UserType.CUSTOMER,
         )
 
-        customer_account_mock.create.assert_not_called()
         assert result.user_type == UserType.CUSTOMER
-        assert result.is_active is False  # 탈퇴 상태가 유지됨
+        assert result.is_active is False  # 탈퇴 상태 유지
         assert result.conflict is False
 
 
@@ -135,9 +133,9 @@ class TestAuthenticateAsCustomer:
         assert result.conflict is True
         assert result.user_type == UserType.SELLER
         assert result.is_active is True
-        # customer 쪽은 조회조차 하지 않아야 한다.
+        # customer 쪽은 손도 대지 말아야 한다.
         customer_account_mock.find_by_email.assert_not_called()
-        customer_account_mock.create.assert_not_called()
+        customer_account_mock.find_or_create.assert_not_called()
         jwt_service_mock.create_user_token.assert_called_once_with(
             email="dup@example.com", user_type="seller", is_active=True,
         )
@@ -150,7 +148,7 @@ class TestAuthenticateAsCustomer:
 @pytest.mark.unit
 class TestAuthenticateAsSeller:
 
-    async def test_creates_new_seller_when_not_exists(
+    async def test_find_or_creates_seller_when_not_customer(
         self, monkeypatch, service,
         customer_account_mock, seller_account_mock,
     ):
@@ -159,7 +157,6 @@ class TestAuthenticateAsSeller:
             "app.domain.auth.service.oauth.create_oauth_client", lambda provider: ctx,
         )
         customer_account_mock.find_by_email.return_value = None
-        seller_account_mock.find_by_email.return_value = None
 
         result = await service.authenticate(
             provider=OAuthProvider.GOOGLE,
@@ -167,7 +164,9 @@ class TestAuthenticateAsSeller:
             requested_type=UserType.SELLER,
         )
 
-        seller_account_mock.create.assert_awaited_once_with("newseller@example.com")
+        seller_account_mock.find_or_create.assert_awaited_once_with(
+            "newseller@example.com",
+        )
         assert result.user_type == UserType.SELLER
         assert result.is_active is True
         assert result.conflict is False
@@ -194,4 +193,4 @@ class TestAuthenticateAsSeller:
         assert result.conflict is True
         assert result.user_type == UserType.CUSTOMER
         seller_account_mock.find_by_email.assert_not_called()
-        seller_account_mock.create.assert_not_called()
+        seller_account_mock.find_or_create.assert_not_called()

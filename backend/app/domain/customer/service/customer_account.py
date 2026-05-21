@@ -1,4 +1,5 @@
 from typing import Optional
+from sqlalchemy.exc import IntegrityError
 
 from app.domain.customer.service.exception import CustomerNotFoundError
 from app.domain.customer.repository.customer import CustomerRepository
@@ -23,9 +24,27 @@ class CustomerAccountService:
 
 
     @transactional
-    async def create(self, email: str) -> Customer:
-        """신규 customer row 생성. is_active=True 로 시작."""
-        return await CustomerRepository(self._session).save(Customer(email=email))
+    async def find_or_create(self, email: str) -> Customer:
+        """email 에 대응하는 customer row 를 멱등하게 보장한다.
+
+        동시에 같은 신규 email 로 OAuth 콜백 두 개가 들어와도 안전 — 한쪽은 정상 INSERT,
+        다른 쪽은 PK 충돌(IntegrityError) 을 catch 한 뒤 재조회로 winner row 를 돌려준다.
+        OAuth 외 호출자(예: 관리 도구의 신규 가입) 도 같은 보장으로 묶을 수 있다.
+        """
+        repo = CustomerRepository(self._session)
+        existing = await repo.find_by_email(email)
+        if existing is not None:
+            return existing
+        try:
+            return await repo.save(Customer(email=email))
+        except IntegrityError:
+            # 다른 tx 가 먼저 INSERT 했다. session 을 깨끗하게 만들고 재조회.
+            await self._session.rollback()
+            existing = await repo.find_by_email(email)
+            if existing is None:
+                # IntegrityError 가 났는데 재조회 시 사라졌다면 진짜 비정상 — 그대로 raise.
+                raise
+            return existing
 
 
     @transactional

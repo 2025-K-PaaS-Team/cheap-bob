@@ -1,4 +1,5 @@
 from typing import Optional
+from sqlalchemy.exc import IntegrityError
 
 from app.domain.seller.service.exception import SellerNotFoundError
 from app.domain.seller.repository.seller import SellerRepository
@@ -23,9 +24,24 @@ class SellerAccountService:
 
 
     @transactional
-    async def create(self, email: str) -> Seller:
-        """신규 seller row 생성. is_active=True 로 시작."""
-        return await SellerRepository(self._session).save(Seller(email=email))
+    async def find_or_create(self, email: str) -> Seller:
+        """email 에 대응하는 seller row 를 멱등하게 보장한다.
+
+        동시에 같은 신규 email 로 OAuth 콜백 두 개가 들어와도 안전 — 한쪽은 정상 INSERT,
+        다른 쪽은 PK 충돌(IntegrityError) 을 catch 한 뒤 재조회로 winner row 를 돌려준다.
+        """
+        repo = SellerRepository(self._session)
+        existing = await repo.find_by_email(email)
+        if existing is not None:
+            return existing
+        try:
+            return await repo.save(Seller(email=email))
+        except IntegrityError:
+            await self._session.rollback()
+            existing = await repo.find_by_email(email)
+            if existing is None:
+                raise
+            return existing
 
 
     @transactional

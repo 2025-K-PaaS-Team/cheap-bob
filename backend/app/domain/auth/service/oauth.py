@@ -72,8 +72,9 @@ class OAuthService:
     async def _resolve_and_issue(
         self, *, email: str, requested_type: UserType,
     ) -> AuthResult:
+        # 반대 타입으로 이미 가입돼 있으면 충돌. 토큰은 *실제 가입 종류* 기준으로 발급.
+        # 일치하는 타입은 멱등한 `find_or_create` 로 한 번에 보장 — 동시 콜백 race 안전.
         if requested_type == UserType.CUSTOMER:
-            # 반대 타입으로 이미 가입돼 있으면 충돌. 토큰은 *실제 가입 종류* 기준으로 발급.
             seller = await self.seller_account_service.find_by_email(email)
             if seller is not None:
                 return self._issue(
@@ -82,18 +83,11 @@ class OAuthService:
                     is_active=seller.is_active,
                     conflict=True,
                 )
-
-            customer = await self.customer_account_service.find_by_email(email)
-            if customer is None:
-                customer = await self.customer_account_service.create(email)
-                is_active = True
-            else:
-                is_active = customer.is_active
-
+            customer = await self.customer_account_service.find_or_create(email)
             return self._issue(
                 email=email,
                 actual_type=UserType.CUSTOMER,
-                is_active=is_active,
+                is_active=customer.is_active,
                 conflict=False,
             )
 
@@ -106,18 +100,11 @@ class OAuthService:
                 is_active=customer.is_active,
                 conflict=True,
             )
-
-        seller = await self.seller_account_service.find_by_email(email)
-        if seller is None:
-            seller = await self.seller_account_service.create(email)
-            is_active = True
-        else:
-            is_active = seller.is_active
-
+        seller = await self.seller_account_service.find_or_create(email)
         return self._issue(
             email=email,
             actual_type=UserType.SELLER,
-            is_active=is_active,
+            is_active=seller.is_active,
             conflict=False,
         )
 

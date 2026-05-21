@@ -22,8 +22,8 @@ class CustomerAccountServiceMockFactory:
     def create(cls) -> AsyncMock:
         mock = AsyncMock()
         mock.find_by_email.return_value = None
-        # create 는 신규 row 를 그대로 만들어 반환 (실서비스 시그니처 모사).
-        mock.create.side_effect = lambda email: SimpleNamespace(
+        # find_or_create 는 멱등 — 신규/기존 동일 반환. 기본은 신규 row 를 모사.
+        mock.find_or_create.side_effect = lambda email: SimpleNamespace(
             email=email, is_active=True,
         )
         return mock
@@ -34,7 +34,7 @@ class SellerAccountServiceMockFactory:
     def create(cls) -> AsyncMock:
         mock = AsyncMock()
         mock.find_by_email.return_value = None
-        mock.create.side_effect = lambda email: SimpleNamespace(
+        mock.find_or_create.side_effect = lambda email: SimpleNamespace(
             email=email, is_active=True,
         )
         return mock
