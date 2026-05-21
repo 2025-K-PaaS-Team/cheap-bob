@@ -79,9 +79,20 @@ class CustomerPaymentService:
         self.customer_profile_service = customer_profile_service
 
 
+    @transactional
     async def init_payment(
         self, *, customer_email: str, product_id: str, quantity: int,
     ) -> PaymentInitResponse:
+        """결제 init — 사전 검증 + 재고 차감 + cart 생성 (전부 한 tx).
+
+        한 tx 로 묶는 이유: 재고 차감 후 cart 생성 전 프로세스가 비정상 종료되면
+        재고만 commit 되고 sweeper 가 복구할 cart 가 없어 재고 영구 손실. atomic 보장.
+
+        실패 분기:
+          - 사전 검증 (product/store/stock) — DB 변경 전이므로 그냥 raise.
+          - 재고 차감 / payment_info 조회 / cart 생성 중 어디서든 raise →
+            ``@transactional`` 이 outer tx 를 롤백 → 차감된 재고 자동 복원.
+        """
         product = await self.seller_product_service.find_product(product_id)
         if product is None:
             raise ProductNotFoundError("상품을 찾을 수 없습니다")
@@ -93,7 +104,15 @@ class CustomerPaymentService:
                 f"재고가 부족합니다. 현재 재고: {product.current_stock}개",
             )
 
-        # 임시 재고 차감 (낙관적 락 재시도). 실패 시 cleanup 불필요 — 아직 cart/order 생성 전.
+        # 결제 timeout 은 DB 컬럼 (cart_items.expires_at) 으로 추적 — sweeper worker 가
+        # 만료된 cart 를 분산-안전하게 처리. APScheduler in-memory job 의 단일 노드 한계를
+        # 회피하기 위한 패턴.
+        payment_id = generate_payment_id()
+        total_amount = _total_amount(price=product.price, sale=product.sale, quantity=quantity)
+        expires_at = datetime.now(timezone.utc) + _PAYMENT_TIMEOUT
+
+        # 임시 재고 차감 → payment_info 조회 → cart 생성. 어느 단계든 raise 시
+        # @transactional 롤백으로 전부 원자적 취소.
         try:
             await self.seller_product_service.consume_purchased_stock(
                 product_id=product_id, quantity=quantity,
@@ -103,22 +122,10 @@ class CustomerPaymentService:
         except ProductStockConflictError:
             raise StockConflictError("재고 차감 중 충돌이 발생했습니다")
 
-        payment_id = generate_payment_id()
-        total_amount = _total_amount(price=product.price, sale=product.sale, quantity=quantity)
+        payment_info = await self.store_payment_info_service.get_complete_by_store(
+            product.store_id,
+        )
 
-        # PortOne IDs 조회 — 실패 시 차감된 재고 복구 후 raise.
-        try:
-            payment_info = await self.store_payment_info_service.get_complete_by_store(
-                product.store_id,
-            )
-        except (PaymentInfoMissingError, PaymentInfoIncompleteError):
-            await self._safe_restore_stock(product_id, quantity)
-            raise
-
-        # 결제 timeout 은 DB 컬럼 (cart_items.expires_at) 으로 추적 — sweeper worker 가
-        # 만료된 cart 를 분산-안전하게 처리. APScheduler in-memory job 의 단일 노드 한계를
-        # 회피하기 위한 패턴.
-        expires_at = datetime.now(timezone.utc) + _PAYMENT_TIMEOUT
         await self.order_query_service.create_cart_item(
             payment_id=payment_id,
             product_id=product_id,

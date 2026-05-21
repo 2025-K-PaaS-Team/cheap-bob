@@ -139,13 +139,16 @@ class TestInitPayment:
             )
 
 
-    async def test_restores_stock_when_payment_info_missing(
+    async def test_payment_info_missing_rolls_back_consume(
         self,
         service,
         product_service_mock,
         store_read_mock,
         store_payment_info_mock,
+        order_query_mock,
     ):
+        """payment_info 조회 실패 시 raise — ``@transactional`` 이 outer tx 를 롤백해
+        차감된 재고를 자동 복원한다. 명시적 restore_purchased_stock 호출은 없다."""
         product_service_mock.find_product.return_value = ProductFactory.create(
             current_stock=10,
         )
@@ -159,10 +162,14 @@ class TestInitPayment:
                 customer_email="alice@example.com", product_id="PRD_x", quantity=2,
             )
 
-        # 차감했던 재고는 되돌려놔야 한다.
-        product_service_mock.restore_purchased_stock.assert_awaited_once_with(
+        # 재고 차감은 시도됐다 (실제 commit 은 outer tx 롤백으로 무효화됨).
+        product_service_mock.consume_purchased_stock.assert_awaited_once_with(
             product_id="PRD_x", quantity=2,
         )
+        # cart 는 생성되지 않았다.
+        order_query_mock.create_cart_item.assert_not_awaited()
+        # 명시적 restore 호출 없음 — 롤백이 책임진다.
+        product_service_mock.restore_purchased_stock.assert_not_awaited()
 
 
     async def test_happy_path_creates_cart_with_expires_at(
