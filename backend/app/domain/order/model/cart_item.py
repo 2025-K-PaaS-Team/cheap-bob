@@ -29,6 +29,9 @@ class CartItem(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(),
     )
+    # 결제 5분 timeout — sweeper worker 가 expires_at <= now() 를 만료로 처리.
+    # APScheduler in-memory job 을 대체하는 DB-backed 패턴 → 분산 배포 안전.
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
     product: Mapped["StoreProductInfo"] = relationship(
         "StoreProductInfo", back_populates="cart_items",

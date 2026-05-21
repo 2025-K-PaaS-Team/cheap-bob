@@ -95,6 +95,7 @@ class CartItemFactory:
         price: int = 10000,
         sale: Optional[int] = None,
         total_amount: int = 10000,
+        expires_at: Optional[datetime] = None,
     ) -> SimpleNamespace:
         cls._counter += 1
         return SimpleNamespace(
@@ -105,6 +106,7 @@ class CartItemFactory:
             price=price,
             sale=sale,
             total_amount=total_amount,
+            expires_at=expires_at or (datetime.now(timezone.utc) + timedelta(minutes=5)),
         )
 
 

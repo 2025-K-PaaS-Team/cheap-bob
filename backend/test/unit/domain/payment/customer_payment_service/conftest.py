@@ -9,11 +9,11 @@ from test.unit.domain.payment.customer_payment_service.model_factory import (
     ProductFactory,
 )
 from test.unit.domain.payment.customer_payment_service.mock_factory import (
+    CartItemRepoMockFactory,
     CustomerProfileServiceMockFactory,
     FakeUnitOfWork,
     OrderQueryServiceMockFactory,
     PaymentGatewayServiceMockFactory,
-    PaymentSchedulerServiceMockFactory,
     SellerProductServiceMockFactory,
     SellerStoreReadServiceMockFactory,
     StorePaymentInfoServiceMockFactory,
@@ -51,11 +51,6 @@ def store_payment_info_mock():
 
 
 @pytest.fixture
-def payment_scheduler_mock():
-    return PaymentSchedulerServiceMockFactory.create()
-
-
-@pytest.fixture
 def payment_gateway_mock():
     return PaymentGatewayServiceMockFactory.create()
 
@@ -71,12 +66,26 @@ def customer_profile_mock():
 
 
 @pytest.fixture
+def cart_repo_mock(monkeypatch):
+    """``sweep_expired_carts`` 내부의 ``CartItemRepository(self._session)`` 를 가로채는 fixture.
+
+    service 가 함수 내부에서 ``from app.domain.order.repository.cart_item import
+    CartItemRepository`` 한 뒤 즉시 ``CartItemRepository(self._session)`` 로 construct
+    하므로, 본 fixture 는 해당 클래스 자체를 호출 시 fake repo 를 반환하는 callable 로
+    교체한다.
+    """
+    repo = CartItemRepoMockFactory.create()
+    import app.domain.order.repository.cart_item as cart_item_mod
+    monkeypatch.setattr(cart_item_mod, "CartItemRepository", lambda _s: repo)
+    return repo
+
+
+@pytest.fixture
 def service(
     mock_session,
     store_read_mock,
     product_service_mock,
     store_payment_info_mock,
-    payment_scheduler_mock,
     payment_gateway_mock,
     order_query_mock,
     customer_profile_mock,
@@ -86,7 +95,6 @@ def service(
         seller_store_read_service=store_read_mock,
         seller_product_service=product_service_mock,
         store_payment_info_service=store_payment_info_mock,
-        payment_scheduler_service=payment_scheduler_mock,
         payment_gateway_service=payment_gateway_mock,
         order_query_service=order_query_mock,
         customer_profile_service=customer_profile_mock,

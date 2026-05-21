@@ -87,6 +87,7 @@ class OrderQueryService:
         price: int,
         sale: Optional[int],
         total_amount: int,
+        expires_at: datetime,
     ):
         from app.domain.order.repository.cart_item import CartItemRepository
 
@@ -98,6 +99,7 @@ class OrderQueryService:
             price=price,
             sale=sale,
             total_amount=total_amount,
+            expires_at=expires_at,
         )
 
 
@@ -106,6 +108,14 @@ class OrderQueryService:
         from app.domain.order.repository.cart_item import CartItemRepository
 
         return await CartItemRepository(self._session).get_by_payment_id(payment_id)
+
+
+    @transactional
+    async def lock_cart_item(self, payment_id: str):
+        """SELECT … FOR UPDATE — confirm/sweeper race-safe finalize 진입점."""
+        from app.domain.order.repository.cart_item import CartItemRepository
+
+        return await CartItemRepository(self._session).lock_by_payment_id(payment_id)
 
 
     @transactional
@@ -150,7 +160,7 @@ class OrderQueryService:
         """가게의 cancel 제외 product_id 별 구매 누계."""
         orders = await OrderCurrentItemRepository(
             self._session,
-        ).get_by_store_id(store_id)
+        ).get_store_orders_with_relations(store_id)
         out: Dict[str, int] = defaultdict(int)
         for order in orders:
             if order.status != OrderStatus.cancel:

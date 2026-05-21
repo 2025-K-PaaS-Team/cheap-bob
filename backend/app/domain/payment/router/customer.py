@@ -7,6 +7,7 @@ from app.domain.payment.service.exception import (
     PaymentInfoMissingError,
     PaymentNotFoundError,
     PaymentOwnershipMismatchError,
+    PaymentRefundError,
     PaymentTimeoutError,
     PaymentVerificationError,
     PickupTimeEndedError,
@@ -111,3 +112,9 @@ async def confirm_payment(
         )
     except PaymentVerificationError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except PaymentRefundError as e:
+        # 환불 자체가 실패 (예: 결제 성공 후 _persist 도 실패하고 환불 시도까지 실패).
+        # 라우터에 도달했다는 건 _rollback_after_paid 의 swallow 를 우회한 흐름 — 운영자 알람.
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e),
+        )
