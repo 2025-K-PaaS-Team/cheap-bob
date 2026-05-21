@@ -108,8 +108,9 @@ async def get_order_detail(
     "/{payment_id}/complete",
     response_model=OrderItemResponse,
     responses=create_error_responses({
-        400: ["유효하지 않은 QR 코드", "권한이 없는 소비자", "이미 픽업 완료"],
+        400: ["유효하지 않은 QR 코드", "이미 픽업 완료"],
         401: ["인증 정보가 없음", "토큰 만료"],
+        403: "본인 주문이 아님",
         404: ["주문을 찾을 수 없음", "QR 코드를 찾을 수 없음"],
     }),
 )
@@ -134,7 +135,9 @@ async def complete_pickup(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except OrderNotAcceptedError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except (OrderQrInvalidError, OrderOwnershipMismatchError) as e:
+    except OrderOwnershipMismatchError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except OrderQrInvalidError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
