@@ -19,7 +19,6 @@ dependencies = [
     "loguru>=0.7.0",
     "motor==3.3.2",
     "passlib[bcrypt]>=1.7.4",
-    "portone-server-sdk==0.16.0",
     "psycopg2-binary>=2.9.0",
     "pydantic>=2.5.0",
     "pydantic-settings>=2.1.0",
