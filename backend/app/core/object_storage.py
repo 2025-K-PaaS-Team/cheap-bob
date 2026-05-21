@@ -1,12 +1,11 @@
-import boto3
 import uuid
-from typing import BinaryIO, Optional, List, Tuple
-from datetime import datetime
+from typing import BinaryIO, List, Tuple
+from loguru import logger
 from botocore.exceptions import ClientError
 from botocore.config import Config
-from loguru import logger
+import boto3
 
-from config.settings import settings
+from app.config.setting import settings
 
 
 class ObjectStorage:
@@ -33,13 +32,15 @@ class ObjectStorage:
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
             config=config
         )
-    
+
+
     def _generate_file_key(self, extension: str, prefix: str) -> str:
         """파일 키 생성"""
         unique_id = str(uuid.uuid4())
         
         return f"{prefix}/{unique_id}.{extension}"
-    
+
+
     async def upload_file(
         self, 
         file: BinaryIO, 
@@ -83,7 +84,8 @@ class ObjectStorage:
             
         except ClientError as e:
             raise Exception(f"파일 업로드 실패: {str(e)}")
-    
+
+
     async def upload_multiple_files(
         self, 
         files: List[Tuple[BinaryIO, str, str]],
@@ -115,10 +117,12 @@ class ObjectStorage:
                 raise e
         
         return results
-    
+
+
     def get_file_url(self, file_key: str) -> str:
         """파일 키로 URL 생성"""
         return f"{settings.AWS_S3_ENDPOINT_URL}/{self.bucket_name}/{file_key}"
+
 
     async def delete_file(self, file_key: str) -> bool:
         """

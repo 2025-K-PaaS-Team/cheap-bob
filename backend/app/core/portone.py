@@ -1,8 +1,9 @@
-import json
-import portone_server_sdk as portone
-from config.settings import settings
-from fastapi import HTTPException
 from typing import Any, Optional
+import portone_server_sdk as portone
+from fastapi import HTTPException
+
+from app.config.setting import settings
+
 
 class PortOneClient:
     """
@@ -15,6 +16,7 @@ class PortOneClient:
         """
         self.secret = secret_key
         self.client = portone.PaymentClient(secret=self.secret)
+
 
     def get_payment(self, payment_id: str) -> portone.payment.PaidPayment:
         try:
@@ -32,7 +34,8 @@ class PortOneClient:
             raise HTTPException(
                 status_code=500, detail=f"예상치 못한 오류: {str(e)}"
             )
-    
+
+
     @staticmethod
     def extract_payment_details(payment: portone.payment.PaidPayment) -> dict:
  
@@ -50,7 +53,8 @@ class PortOneClient:
             "good_name": good_name,
             "payment_method": payment_method
         }
-    
+
+
     def cancel_payment(self, payment_id: str, reason: str = "고객 요청") -> dict:
         try:
 

@@ -1,0 +1,60 @@
+import pytest
+
+from app.domain.seller.service.seller_store_settings import SellerStoreSettingsService
+
+from test.unit.domain.seller.seller_store_settings_service.mock_factory import (
+    FakeUnitOfWork,
+    ModificationRepoMockFactory,
+    OperationRepoMockFactory,
+    StorePaymentInfoServiceMockFactory,
+    StoreRepoMockFactory,
+    make_mock_session,
+)
+
+
+@pytest.fixture
+def mock_session():
+    return make_mock_session()
+
+
+@pytest.fixture
+def store_repo_mock():
+    return StoreRepoMockFactory.create()
+
+
+@pytest.fixture
+def operation_repo_mock():
+    return OperationRepoMockFactory.create()
+
+
+@pytest.fixture
+def modification_repo_mock():
+    return ModificationRepoMockFactory.create()
+
+
+@pytest.fixture
+def payment_info_mock():
+    return StorePaymentInfoServiceMockFactory.create()
+
+
+@pytest.fixture
+def service(
+    monkeypatch, mock_session,
+    store_repo_mock, operation_repo_mock, modification_repo_mock, payment_info_mock,
+):
+    monkeypatch.setattr(
+        "app.domain.seller.service.seller_store_settings.StoreRepository",
+        lambda s: store_repo_mock,
+    )
+    monkeypatch.setattr(
+        "app.domain.seller.service.seller_store_settings.StoreOperationInfoRepository",
+        lambda s: operation_repo_mock,
+    )
+    monkeypatch.setattr(
+        "app.domain.seller.service.seller_store_settings.StoreOperationInfoModificationRepository",
+        lambda s: modification_repo_mock,
+    )
+    return SellerStoreSettingsService(
+        uow=FakeUnitOfWork(mock_session),
+        store_payment_info_service=payment_info_mock,
+    )

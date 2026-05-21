@@ -1,8 +1,8 @@
-from dataclasses import dataclass
-from enum import Enum
 from typing import Dict
+from enum import Enum
+from dataclasses import dataclass
 
-from config.settings import settings
+from app.config.setting import settings
 
 
 class OAuthProvider(str, Enum):

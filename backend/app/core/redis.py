@@ -1,5 +1,6 @@
 import redis.asyncio as redis
-from app.config.settings import settings
+
+from app.config.setting import settings
 
 
 class RedisClient:
@@ -23,7 +24,8 @@ class RedisClient:
                 encoding="utf-8"
             )
         return cls._client
-    
+
+
     @classmethod
     async def close(cls):
         """Redis 연결 종료"""
@@ -36,6 +38,7 @@ class RedisClient:
 async def get_redis_client() -> redis.Redis:
     """Redis 클라이언트를 반환하는 함수"""
     return await RedisClient.get_client()
+
 
 async def close_redis():
     """Redis 연결 종료"""
