@@ -6,10 +6,9 @@ Create Date: 2025-09-15 07:40:51.866054
 
 """
 from typing import Sequence, Union
-
 from sqlalchemy.dialects.postgresql import ENUM
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 
 # revision identifiers, used by Alembic.
