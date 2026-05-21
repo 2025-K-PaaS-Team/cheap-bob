@@ -1,14 +1,12 @@
-import pytest
-
-from app.domain.customer.service.customer_search import CustomerSearchService
-
 from test.unit.domain.customer.customer_search_service.mock_factory import (
     FakeUnitOfWork,
     FavoriteRepoMockFactory,
-    HistoryServiceMockFactory,
     StoreReadServiceMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.customer.service.customer_search import CustomerSearchService
 
 
 @pytest.fixture
@@ -27,15 +25,7 @@ def store_read_mock():
 
 
 @pytest.fixture
-def history_service_mock():
-    return HistoryServiceMockFactory.create()
-
-
-@pytest.fixture
-def service(
-    monkeypatch, mock_session, favorite_repo_mock,
-    store_read_mock, history_service_mock,
-):
+def service(monkeypatch, mock_session, favorite_repo_mock, store_read_mock):
     from datetime import datetime, timezone
     from app.domain.seller.schema.store import (
         StoreDetailResponseForCustomer, StoreSNSInfo,
@@ -74,6 +64,5 @@ def service(
     )
     return CustomerSearchService(
         uow=FakeUnitOfWork(mock_session),
-        history_service=history_service_mock,
         seller_store_read_service=store_read_mock,
     )

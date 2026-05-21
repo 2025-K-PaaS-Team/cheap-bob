@@ -9,9 +9,9 @@
 import pytest
 import pytest_asyncio
 
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.customer.dto.preference import (
     AllergyType,
-    NutritionType,
     PreferredMenu,
     ToppingType,
 )
@@ -75,7 +75,7 @@ class TestGetFullProfile:
     async def test_raises_when_detail_missing(
         self, customer_profile_service, session_factory,
     ):
-        from app.domain.auth.model.customer import Customer
+        from app.domain.customer.model.customer import Customer
         async with session_factory() as session:
             session.add(Customer(email="bare@example.com", is_active=True))
             await session.commit()

@@ -3,27 +3,20 @@ import pytest
 from app.domain.auth.service.oauth import OAuthService
 
 from test.unit.domain.auth.oauth_service.mock_factory import (
-    CustomerRepositoryMockFactory,
-    FakeUnitOfWork,
+    CustomerAccountServiceMockFactory,
     JwtServiceMockFactory,
-    SellerRepositoryMockFactory,
-    make_mock_session,
+    SellerAccountServiceMockFactory,
 )
 
 
 @pytest.fixture
-def mock_session():
-    return make_mock_session()
+def customer_account_mock():
+    return CustomerAccountServiceMockFactory.create()
 
 
 @pytest.fixture
-def customer_repo_mock():
-    return CustomerRepositoryMockFactory.create()
-
-
-@pytest.fixture
-def seller_repo_mock():
-    return SellerRepositoryMockFactory.create()
+def seller_account_mock():
+    return SellerAccountServiceMockFactory.create()
 
 
 @pytest.fixture
@@ -32,18 +25,9 @@ def jwt_service_mock():
 
 
 @pytest.fixture
-def service(monkeypatch, mock_session, customer_repo_mock, seller_repo_mock, jwt_service_mock):
-    """OAuthService 의 모든 DB 의존성을 Mock 으로 치환한 인스턴스.
-
-    서비스 내부에서 ``CustomerRepository(session)`` 식으로 생성자 호출하므로 모듈 레벨
-    이름을 ``lambda session: repo_mock`` 으로 치환한다.
-    """
-    monkeypatch.setattr(
-        "app.domain.auth.service.oauth.CustomerRepository",
-        lambda session: customer_repo_mock,
+def service(customer_account_mock, seller_account_mock, jwt_service_mock):
+    return OAuthService(
+        jwt_service=jwt_service_mock,
+        customer_account_service=customer_account_mock,
+        seller_account_service=seller_account_mock,
     )
-    monkeypatch.setattr(
-        "app.domain.auth.service.oauth.SellerRepository",
-        lambda session: seller_repo_mock,
-    )
-    return OAuthService(uow=FakeUnitOfWork(mock_session), jwt_service=jwt_service_mock)

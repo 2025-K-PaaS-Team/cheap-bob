@@ -10,13 +10,13 @@
 import pytest
 import pytest_asyncio
 
+from app.domain.seller.service.seller_store_read import SellerStoreReadService
+from app.domain.seller.service.exception import StoreNotFoundError
 from app.domain.customer.service.customer_favorite import CustomerFavoriteService
 from app.domain.customer.service.exception import (
     FavoriteAlreadyExistsError,
     FavoriteNotFoundError,
-    StoreNotFoundError,
 )
-from app.domain.seller.service.seller_store_read import SellerStoreReadService
 
 
 pytestmark = pytest.mark.integration

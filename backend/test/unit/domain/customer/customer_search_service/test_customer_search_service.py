@@ -2,7 +2,7 @@
 from types import SimpleNamespace
 import pytest
 
-from app.domain.customer.service.exception import StoreNotFoundError
+from app.domain.seller.service.exception import StoreNotFoundError
 
 
 def _store(store_id: str) -> SimpleNamespace:
@@ -67,15 +67,14 @@ class TestGetStoreProducts:
 @pytest.mark.unit
 class TestSearchByName:
 
-    async def test_returns_decorated_results_and_keyword(
+    async def test_returns_decorated_results(
         self, service, store_read_mock, favorite_repo_mock,
     ):
         store_read_mock.search_by_name.return_value = ([_store("STR_a")], False)
         favorite_repo_mock.find_store_ids_by_customer.return_value = set()
 
-        page, keyword = await service.search_by_name(
+        page = await service.search_by_name(
             customer_email="alice@example.com", search_name="치킨", page=0,
         )
-        assert keyword == "치킨"
         assert page.is_end is False
         assert page.stores[0].store_id == "STR_a"

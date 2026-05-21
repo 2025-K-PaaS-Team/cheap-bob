@@ -7,6 +7,11 @@ from app.database.session import Base
 
 
 class Seller(Base):
+    """판매자 계정. email 이 인증 principal 이자 PK.
+
+    customer 와 마찬가지로 auth 에서 분리해 seller 도메인 소유. auth 는 OAuth/JWT 전담.
+    """
+
     __tablename__ = "sellers"
     __mapper_args__ = {"eager_defaults": True}
 

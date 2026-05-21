@@ -1,9 +1,9 @@
 """Tests for ``app.domain.customer.service.customer_register.CustomerRegisterService``."""
 import pytest
 
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.customer.dto.preference import (
     AllergyType,
-    NutritionType,
     PreferredMenu,
     ToppingType,
 )

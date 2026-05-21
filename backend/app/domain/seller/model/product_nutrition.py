@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Enum, ForeignKey, String
 
-from app.domain.customer.dto.preference import NutritionType
+from app.domain.seller.dto.nutrition import NutritionType
 from app.database.session import Base
 
 

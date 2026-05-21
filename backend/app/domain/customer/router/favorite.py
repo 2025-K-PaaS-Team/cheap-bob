@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from dependency_injector.wiring import Provide, inject
 
 from app.middleware.auth import CurrentCustomerDep
+from app.domain.seller.service.exception import StoreNotFoundError
 from app.domain.seller.schema.store import StoreDetailResponseForCustomer, StoreFavoriteStateResponse
 from app.domain.customer.service.exception import (
     FavoriteAlreadyExistsError,
     FavoriteNotFoundError,
-    StoreNotFoundError,
 )
 from app.domain.customer.service.customer_search import CustomerSearchService
 from app.domain.customer.service.customer_favorite import CustomerFavoriteService

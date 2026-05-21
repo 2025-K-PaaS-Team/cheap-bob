@@ -4,10 +4,9 @@ from dependency_injector.wiring import Provide, inject
 from app.middleware.auth import CurrentCustomerDep
 from app.domain.customer.service.exception import CustomerAlreadyRegisteredError
 from app.domain.customer.service.customer_register import CustomerRegisterService
-from app.domain.customer.schema.customer_register import (
-    CustomerRegisterRequest,
-    CustomerRegisterResponse,
-)
+from app.domain.customer.schema.customer_register import CustomerRegisterRequest
+from app.domain.customer.schema.customer_profile import CustomerProfileResponse
+from app.domain.customer.dto.profile import CustomerFullProfile
 from app.core.openapi import create_error_responses
 
 
@@ -16,7 +15,7 @@ router = APIRouter(prefix="/register", tags=["Customer-Register"])
 
 @router.post(
     "",
-    response_model=CustomerRegisterResponse,
+    response_model=CustomerProfileResponse,
     status_code=status.HTTP_201_CREATED,
     responses=create_error_responses({
         400: ["이미 프로필이 존재함", "잘못된 입력 형식"],
@@ -45,10 +44,12 @@ async def customer_register(
     except CustomerAlreadyRegisteredError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    return CustomerRegisterResponse(
-        detail=detail,
-        preferred_menus=menus,
-        nutrition_types=nutrition,
-        allergies=allergies,
-        topping_types=toppings,
+    return CustomerProfileResponse.model_validate(
+        CustomerFullProfile(
+            detail=detail,
+            preferred_menus=menus,
+            nutrition_types=nutrition,
+            allergies=allergies,
+            topping_types=toppings,
+        ),
     )

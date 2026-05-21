@@ -17,6 +17,12 @@ if TYPE_CHECKING:
 
 
 class Customer(Base):
+    """소비자 계정. email 이 인증 principal 이자 PK.
+
+    원래 auth 도메인에 있었으나 customer 측 4종 선호 + detail + favorite 와의 관계가
+    모두 본 모델에서 출발하므로 customer 도메인 소유로 정리. auth 는 OAuth/JWT 전담.
+    """
+
     __tablename__ = "customers"
     __mapper_args__ = {"eager_defaults": True}
 
@@ -26,8 +32,6 @@ class Customer(Base):
         DateTime(timezone=True), server_default=func.now(),
     )
 
-    # 관계는 string 이름 기반이라 customer 도메인의 모델 파일을 직접 import 하지 않는다.
-    # 도메인 경계는 코드 import 기준으로만 본다는 컨벤션 §18 의 원칙과 충돌하지 않는다.
     detail: Mapped[Optional["CustomerDetail"]] = relationship(
         "CustomerDetail",
         back_populates="customer",

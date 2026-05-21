@@ -15,7 +15,7 @@
 import pytest
 import pytest_asyncio
 
-from app.domain.customer.dto.preference import NutritionType
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.seller.service.exception import (
     ProductAlreadyRegisteredError,
     ProductNotFoundError,

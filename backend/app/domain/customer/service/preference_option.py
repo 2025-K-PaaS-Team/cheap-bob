@@ -1,11 +1,10 @@
 from typing import List
 
-from app.domain.customer.schema.preference_option import PreferenceOption
+from app.domain.seller.dto.nutrition import NUTRITION_TYPE_NAMES, NutritionType
+from app.domain.customer.dto.preference_option import PreferenceOption
 from app.domain.customer.dto.preference import (
     ALLERGY_TYPE_NAMES,
     AllergyType,
-    NUTRITION_TYPE_NAMES,
-    NutritionType,
     PREFERRED_MENU_NAMES,
     PreferredMenu,
     TOPPING_TYPE_NAMES,

@@ -15,10 +15,10 @@ from app.domain.seller.repository.store_product_info import (
 )
 from app.domain.seller.repository.product_nutrition import ProductNutritionRepository
 from app.domain.seller.model.store_product_info import StoreProductInfo
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.order.service.product_stock_reservation import (
     ProductStockReservationService,
 )
-from app.domain.customer.dto.preference import NutritionType
 from app.database.session import UnitOfWork, transactional
 from app.config.setting import settings
 

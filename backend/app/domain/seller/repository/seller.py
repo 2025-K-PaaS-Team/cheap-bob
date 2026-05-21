@@ -1,8 +1,7 @@
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-from app.domain.auth.model.seller import Seller
+from app.domain.seller.model.seller import Seller
 
 
 class SellerRepository:
@@ -12,12 +11,6 @@ class SellerRepository:
 
     async def find_by_email(self, email: str) -> Optional[Seller]:
         return await self.session.get(Seller, email)
-
-
-    async def exists_by_email(self, email: str) -> bool:
-        stmt = select(Seller.email).where(Seller.email == email).limit(1)
-        result = await self.session.execute(stmt)
-        return result.scalar_one_or_none() is not None
 
 
     async def save(self, seller: Seller) -> Seller:

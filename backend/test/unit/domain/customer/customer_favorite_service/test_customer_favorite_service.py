@@ -2,10 +2,10 @@
 from types import SimpleNamespace
 import pytest
 
+from app.domain.seller.service.exception import StoreNotFoundError
 from app.domain.customer.service.exception import (
     FavoriteAlreadyExistsError,
     FavoriteNotFoundError,
-    StoreNotFoundError,
 )
 
 

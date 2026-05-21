@@ -6,9 +6,9 @@
 from types import SimpleNamespace
 import pytest
 
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.customer.dto.preference import (
     AllergyType,
-    NutritionType,
     PreferredMenu,
     ToppingType,
 )

@@ -13,8 +13,8 @@ if TYPE_CHECKING:
     from app.domain.seller.model.store_operation_info import StoreOperationInfo
     from app.domain.seller.model.store_image import StoreImage
     from app.domain.seller.model.store_address import StoreAddress
+    from app.domain.seller.model.seller import Seller
     from app.domain.customer.model.customer_favorite import CustomerFavorite
-    from app.domain.auth.model.seller import Seller
     from app.domain.payment.model.store_payment_info import StorePaymentInfo
 
 

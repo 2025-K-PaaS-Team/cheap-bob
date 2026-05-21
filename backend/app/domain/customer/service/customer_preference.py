@@ -1,5 +1,6 @@
 from typing import List
 
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.customer.service.exception import (
     PreferenceDuplicateError,
     PreferenceNotFoundError,
@@ -20,7 +21,6 @@ from app.domain.customer.model.customer_nutrition_type import CustomerNutritionT
 from app.domain.customer.model.customer_allergy import CustomerAllergy
 from app.domain.customer.dto.preference import (
     AllergyType,
-    NutritionType,
     PreferredMenu,
     ToppingType,
 )

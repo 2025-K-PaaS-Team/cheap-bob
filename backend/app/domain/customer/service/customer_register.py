@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.customer.service.exception import CustomerAlreadyRegisteredError
 from app.domain.customer.repository.customer_topping_type import (
     CustomerToppingTypeRepository,
@@ -19,7 +20,6 @@ from app.domain.customer.model.customer_detail import CustomerDetail
 from app.domain.customer.model.customer_allergy import CustomerAllergy
 from app.domain.customer.dto.preference import (
     AllergyType,
-    NutritionType,
     PreferredMenu,
     ToppingType,
 )

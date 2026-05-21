@@ -2,9 +2,6 @@
 from types import SimpleNamespace
 import pytest
 
-from app.domain.auth.service.exception import (
-    SellerNotFoundError as AuthSellerNotFoundError,
-)
 from app.domain.seller.service.exception import (
     SellerAlreadyActiveError,
     SellerAlreadyWithdrawnError,
@@ -30,10 +27,10 @@ class TestRequestWithdraw:
 
 
     async def test_raises_when_already_withdrawn(
-        self, service, operation_repo_mock, auth_account_mock,
+        self, service, operation_repo_mock, seller_account_mock,
     ):
         operation_repo_mock.get_by_store_and_day.return_value = None
-        auth_account_mock.is_seller_active.return_value = False
+        seller_account_mock.is_active.return_value = False
         with pytest.raises(SellerAlreadyWithdrawnError):
             await service.request_withdraw(
                 seller_email="seller@example.com", store_id="STR_x",
@@ -41,12 +38,10 @@ class TestRequestWithdraw:
 
 
     async def test_raises_when_seller_missing(
-        self, service, operation_repo_mock, auth_account_mock,
+        self, service, operation_repo_mock, seller_account_mock,
     ):
         operation_repo_mock.get_by_store_and_day.return_value = None
-        auth_account_mock.is_seller_active.side_effect = (
-            AuthSellerNotFoundError("missing")
-        )
+        seller_account_mock.is_active.side_effect = SellerNotFoundError("missing")
         with pytest.raises(SellerNotFoundError):
             await service.request_withdraw(
                 seller_email="seller@example.com", store_id="STR_x",
@@ -54,16 +49,16 @@ class TestRequestWithdraw:
 
 
     async def test_happy_path_deactivates_and_records(
-        self, service, operation_repo_mock, auth_account_mock, withdraw_repo_mock,
+        self, service, operation_repo_mock, seller_account_mock, withdraw_repo_mock,
     ):
         operation_repo_mock.get_by_store_and_day.return_value = None
-        auth_account_mock.is_seller_active.return_value = True
+        seller_account_mock.is_active.return_value = True
 
         await service.request_withdraw(
             seller_email="seller@example.com", store_id="STR_x",
         )
 
-        auth_account_mock.set_seller_active.assert_awaited_once_with(
+        seller_account_mock.set_active.assert_awaited_once_with(
             "seller@example.com", active=False,
         )
         withdraw_repo_mock.save.assert_awaited_once()
@@ -72,29 +67,29 @@ class TestRequestWithdraw:
 @pytest.mark.unit
 class TestCancelWithdraw:
 
-    async def test_raises_when_already_active(self, service, auth_account_mock):
-        auth_account_mock.is_seller_active.return_value = True
+    async def test_raises_when_already_active(self, service, seller_account_mock):
+        seller_account_mock.is_active.return_value = True
         with pytest.raises(SellerAlreadyActiveError):
             await service.cancel_withdraw("seller@example.com")
 
 
     async def test_raises_when_no_reservation(
-        self, service, auth_account_mock, withdraw_repo_mock,
+        self, service, seller_account_mock, withdraw_repo_mock,
     ):
-        auth_account_mock.is_seller_active.return_value = False
+        seller_account_mock.is_active.return_value = False
         withdraw_repo_mock.find_by_seller_email.return_value = None
         with pytest.raises(SellerWithdrawalRecordNotFoundError):
             await service.cancel_withdraw("seller@example.com")
 
 
     async def test_happy_path_reactivates(
-        self, service, auth_account_mock, withdraw_repo_mock,
+        self, service, seller_account_mock, withdraw_repo_mock,
     ):
-        auth_account_mock.is_seller_active.return_value = False
+        seller_account_mock.is_active.return_value = False
         withdraw_repo_mock.find_by_seller_email.return_value = SimpleNamespace()
 
         await service.cancel_withdraw("seller@example.com")
-        auth_account_mock.set_seller_active.assert_awaited_once_with(
+        seller_account_mock.set_active.assert_awaited_once_with(
             "seller@example.com", active=True,
         )
         withdraw_repo_mock.delete_by_seller_email.assert_awaited_once()
@@ -112,7 +107,7 @@ class TestProcessPendingWithdrawals:
         self,
         service,
         withdraw_repo_mock,
-        auth_account_mock,
+        seller_account_mock,
         store_repo_mock,
         product_repo_mock,
         payment_info_mock,
@@ -134,21 +129,21 @@ class TestProcessPendingWithdrawals:
         # cascade 진입점이 호출됐는지.
         payment_info_mock.delete_by_store.assert_awaited_once_with("STR_x")
         store_repo_mock.delete.assert_awaited_once_with("STR_x")
-        auth_account_mock.hard_delete_seller.assert_awaited_once_with(
+        seller_account_mock.hard_delete.assert_awaited_once_with(
             "seller@example.com",
         )
         withdraw_repo_mock.delete_by_id.assert_awaited_once_with("R1")
 
 
     async def test_per_item_error_swallowed_but_still_advances(
-        self, service, withdraw_repo_mock, auth_account_mock,
+        self, service, withdraw_repo_mock, seller_account_mock,
     ):
         withdraw_repo_mock.get_many.return_value = [
             SimpleNamespace(id="R1", seller_email="a@example.com"),
             SimpleNamespace(id="R2", seller_email="b@example.com"),
         ]
-        # hard_delete_seller 가 첫 건만 예외.
-        auth_account_mock.hard_delete_seller.side_effect = [
+        # hard_delete 가 첫 건만 예외.
+        seller_account_mock.hard_delete.side_effect = [
             RuntimeError("boom"), True,
         ]
 

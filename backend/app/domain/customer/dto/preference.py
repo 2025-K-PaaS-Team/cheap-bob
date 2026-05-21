@@ -9,16 +9,6 @@ class PreferredMenu(enum.Enum):
     sandwich = "sandwich"     # 샌드위치
 
 
-class NutritionType(enum.Enum):
-    """식품 영양."""
-    diet = "diet"             # 다이어트
-    LCHF = "LCHF"             # 저탄고지 (low carb high fat)
-    protein = "protein"       # 단백질
-    LSLS = "LSLS"             # 저당저염 (low sugar low salt)
-    balance = "balance"       # 균형잡힌
-    vegetarian = "vegetarian" # 채식
-
-
 class AllergyType(enum.Enum):
     """알레르기 / 제약 조건."""
     seafood = "seafood"
@@ -55,15 +45,6 @@ PREFERRED_MENU_NAMES: dict[PreferredMenu, str] = {
     PreferredMenu.poke: "포케",
     PreferredMenu.korean: "한식",
     PreferredMenu.sandwich: "샌드위치",
-}
-
-NUTRITION_TYPE_NAMES: dict[NutritionType, str] = {
-    NutritionType.diet: "다이어트",
-    NutritionType.LCHF: "저탄고지",
-    NutritionType.protein: "단백질",
-    NutritionType.LSLS: "저당저염",
-    NutritionType.balance: "균형잡힌",
-    NutritionType.vegetarian: "채식",
 }
 
 ALLERGY_TYPE_NAMES: dict[AllergyType, str] = {

@@ -9,7 +9,7 @@ from app.domain.seller.model.store_operation_info import StoreOperationInfo
 from app.domain.seller.model.store import Store
 from app.domain.order.model.order_current_item import OrderCurrentItem
 from app.domain.order.dto.order import OrderStatus
-from app.domain.auth.model.customer import Customer
+from app.domain.customer.model.customer import Customer
 from app.database.postgresql_repository import BaseRepository
 
 

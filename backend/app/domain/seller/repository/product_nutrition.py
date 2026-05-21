@@ -5,7 +5,7 @@ from sqlalchemy import select, delete
 from app.domain.seller.model.store_product_info import StoreProductInfo
 from app.domain.seller.model.store import Store
 from app.domain.seller.model.product_nutrition import ProductNutrition
-from app.domain.customer.dto.preference import NutritionType
+from app.domain.seller.dto.nutrition import NutritionType
 from app.database.postgresql_repository import BaseRepository
 
 

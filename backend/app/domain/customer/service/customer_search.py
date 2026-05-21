@@ -1,14 +1,13 @@
-from typing import List, Tuple
+from typing import List
 
 from app.domain.seller.service.store_utils import convert_store_to_response
 from app.domain.seller.service.seller_store_read import SellerStoreReadService
+from app.domain.seller.service.exception import StoreNotFoundError
 from app.domain.seller.schema.store import (
     PaginatedStoreResponse,
     StoreDetailResponseForCustomer,
 )
 from app.domain.seller.schema.product import ProductResponse, ProductsResponse
-from app.domain.customer.service.exception import StoreNotFoundError
-from app.domain.customer.service.customer_history import CustomerHistoryService
 from app.domain.customer.repository.customer_favorite import CustomerFavoriteRepository
 from app.database.session import UnitOfWork, transactional
 
@@ -27,11 +26,9 @@ class CustomerSearchService:
     def __init__(
         self,
         uow: UnitOfWork,
-        history_service: CustomerHistoryService,
         seller_store_read_service: SellerStoreReadService,
     ):
         self.uow = uow
-        self.history_service = history_service
         self.seller_store_read_service = seller_store_read_service
 
 
@@ -109,7 +106,7 @@ class CustomerSearchService:
 
     async def search_by_name(
         self, *, customer_email: str, search_name: str, page: int,
-    ) -> Tuple[PaginatedStoreResponse, str]:
+    ) -> PaginatedStoreResponse:
         offset = page * _PAGE_SIZE
         stores, is_end = await self.seller_store_read_service.search_by_name(
             search_name=search_name, offset=offset, limit=_PAGE_SIZE,
@@ -121,7 +118,7 @@ class CustomerSearchService:
                 for s in stores
             ],
             is_end=is_end,
-        ), search_name
+        )
 
 
     async def search_by_location_and_name(
@@ -133,7 +130,7 @@ class CustomerSearchService:
         bname: List[str],
         search_name: str,
         page: int,
-    ) -> Tuple[PaginatedStoreResponse, str]:
+    ) -> PaginatedStoreResponse:
         offset = page * _PAGE_SIZE
         stores, is_end = await self.seller_store_read_service.search_by_location_and_name(
             sido=sido,
@@ -150,7 +147,7 @@ class CustomerSearchService:
                 for s in stores
             ],
             is_end=is_end,
-        ), search_name
+        )
 
 
     async def list_favorite_stores(

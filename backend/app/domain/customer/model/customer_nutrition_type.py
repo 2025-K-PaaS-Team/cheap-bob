@@ -4,12 +4,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String
 from datetime import datetime
 
-from app.domain.customer.dto.preference import NutritionType
+from app.domain.seller.dto.nutrition import NutritionType
 from app.database.session import Base
 
 
 if TYPE_CHECKING:
-    from app.domain.auth.model.customer import Customer
+    from app.domain.customer.model.customer import Customer
 
 
 class CustomerNutritionType(Base):

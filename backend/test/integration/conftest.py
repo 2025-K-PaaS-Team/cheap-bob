@@ -71,7 +71,7 @@ async def seed_customer(session_factory):
     OrderCurrentItem.customer 관계는 CustomerDetail 까지 selectinload 되므로, 두 row 를 함께
     심어야 응답 변환 (`_seller_response`) 에서 nickname/phone 이 None 이 아닌 실값이 된다.
     """
-    from app.domain.auth.model.customer import Customer
+    from app.domain.customer.model.customer import Customer
     from app.domain.customer.model.customer_detail import CustomerDetail
 
     counter = {"value": 0}
@@ -102,7 +102,7 @@ async def seed_customer(session_factory):
 @pytest_asyncio.fixture
 async def seed_seller(session_factory):
     """Seller row 만 심는다 — Store / Product 는 각 테스트가 필요시 직접 생성."""
-    from app.domain.auth.model.seller import Seller
+    from app.domain.seller.model.seller import Seller
 
     counter = {"value": 0}
 

@@ -3,12 +3,12 @@ import pytest
 from app.domain.seller.service.seller_withdraw import SellerWithdrawService
 
 from test.unit.domain.seller.seller_withdraw_service.mock_factory import (
-    AuthAccountServiceMockFactory,
     FakeUnitOfWork,
     ImageRepoMockFactory,
     OperationRepoMockFactory,
     PaymentInfoServiceMockFactory,
     ProductRepoMockFactory,
+    SellerAccountServiceMockFactory,
     SnsRepoMockFactory,
     StoreRepoMockFactory,
     WithdrawRepoMockFactory,
@@ -27,8 +27,8 @@ def withdraw_repo_mock():
 
 
 @pytest.fixture
-def auth_account_mock():
-    return AuthAccountServiceMockFactory.create()
+def seller_account_mock():
+    return SellerAccountServiceMockFactory.create()
 
 
 @pytest.fixture
@@ -64,7 +64,7 @@ def sns_repo_mock():
 @pytest.fixture
 def service(
     monkeypatch, mock_session,
-    withdraw_repo_mock, auth_account_mock, payment_info_mock,
+    withdraw_repo_mock, seller_account_mock, payment_info_mock,
     store_repo_mock, product_repo_mock, operation_repo_mock,
     image_repo_mock, sns_repo_mock,
 ):
@@ -91,6 +91,6 @@ def service(
     return SellerWithdrawService(
         uow=FakeUnitOfWork(mock_session),
         withdraw_repo=withdraw_repo_mock,
-        auth_account_service=auth_account_mock,
+        seller_account_service=seller_account_mock,
         store_payment_info_service=payment_info_mock,
     )

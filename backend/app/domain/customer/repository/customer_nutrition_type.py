@@ -2,8 +2,8 @@ from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select
 
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.customer.model.customer_nutrition_type import CustomerNutritionType
-from app.domain.customer.dto.preference import NutritionType
 
 
 class CustomerNutritionTypeRepository:

@@ -33,13 +33,13 @@ class WithdrawRepoMockFactory:
         return mock
 
 
-class AuthAccountServiceMockFactory:
+class SellerAccountServiceMockFactory:
     @classmethod
     def create(cls) -> AsyncMock:
         mock = AsyncMock()
-        mock.is_seller_active.return_value = True
-        mock.set_seller_active.return_value = None
-        mock.hard_delete_seller.return_value = True
+        mock.is_active.return_value = True
+        mock.set_active.return_value = None
+        mock.hard_delete.return_value = True
         return mock
 
 

@@ -8,9 +8,9 @@
 import pytest
 import pytest_asyncio
 
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.customer.dto.preference import (
     AllergyType,
-    NutritionType,
     PreferredMenu,
     ToppingType,
 )
@@ -29,7 +29,7 @@ def customer_register_service(uow):
 @pytest_asyncio.fixture
 async def seed_bare_customer(session_factory):
     """detail 없는 Customer 만 만든다 (1차 OAuth 가입 직후 상태)."""
-    from app.domain.auth.model.customer import Customer
+    from app.domain.customer.model.customer import Customer
 
     counter = {"value": 0}
 

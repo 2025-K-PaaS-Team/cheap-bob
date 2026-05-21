@@ -34,7 +34,7 @@ class TestCustomerStatus:
     async def test_returns_profile_when_no_detail(
         self, registration_status_service, session_factory,
     ):
-        from app.domain.auth.model.customer import Customer
+        from app.domain.customer.model.customer import Customer
         async with session_factory() as session:
             session.add(Customer(email="newbie@example.com", is_active=True))
             await session.commit()

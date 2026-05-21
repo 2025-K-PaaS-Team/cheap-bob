@@ -2,7 +2,7 @@ from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 
-from app.domain.customer.dto.preference import NutritionType
+from app.domain.seller.dto.nutrition import NutritionType
 
 
 class ProductCreateRequest(BaseModel):

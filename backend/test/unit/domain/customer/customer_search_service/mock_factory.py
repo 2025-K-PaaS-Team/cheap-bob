@@ -38,9 +38,3 @@ class StoreReadServiceMockFactory:
         mock.get_store_products_with_nutrition.return_value = []
         mock.get_favorite_stores_by_customer.return_value = []
         return mock
-
-
-class HistoryServiceMockFactory:
-    @classmethod
-    def create(cls) -> AsyncMock:
-        return AsyncMock()

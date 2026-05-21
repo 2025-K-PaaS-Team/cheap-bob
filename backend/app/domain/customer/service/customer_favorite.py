@@ -1,8 +1,8 @@
 from app.domain.seller.service.seller_store_read import SellerStoreReadService
+from app.domain.seller.service.exception import StoreNotFoundError
 from app.domain.customer.service.exception import (
     FavoriteAlreadyExistsError,
     FavoriteNotFoundError,
-    StoreNotFoundError,
 )
 from app.domain.customer.repository.customer_favorite import CustomerFavoriteRepository
 from app.database.session import UnitOfWork, transactional

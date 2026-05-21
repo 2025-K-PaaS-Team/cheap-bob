@@ -2,9 +2,9 @@ from typing import List
 from pydantic import BaseModel, Field
 from datetime import datetime
 
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.customer.dto.preference import (
     AllergyType,
-    NutritionType,
     PreferredMenu,
     ToppingType,
 )

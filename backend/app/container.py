@@ -14,6 +14,7 @@ from app.domain.seller.service.seller_registration_status import (
     SellerRegistrationStatusService,
 )
 from app.domain.seller.service.seller_product import SellerProductService
+from app.domain.seller.service.seller_account import SellerAccountService
 from app.domain.seller.repository.seller_withdraw_reservation import (
     SellerWithdrawReservationRepository,
 )
@@ -47,13 +48,13 @@ from app.domain.customer.service.customer_preference import CustomerPreferenceSe
 from app.domain.customer.service.customer_history import CustomerHistoryService
 from app.domain.customer.service.customer_favorite import CustomerFavoriteService
 from app.domain.customer.service.customer_detail import CustomerDetailService
+from app.domain.customer.service.customer_account import CustomerAccountService
 from app.domain.customer.repository.customer_withdraw_reservation import (
     CustomerWithdrawReservationRepository,
 )
 from app.domain.auth.service.registration_status import RegistrationStatusService
 from app.domain.auth.service.oauth import OAuthService
 from app.domain.auth.service.jwt import JwtService
-from app.domain.auth.service.account import AuthAccountService
 from app.database.session import UnitOfWork
 from app.config.setting import settings
 
@@ -98,10 +99,18 @@ class Container(containers.DeclarativeContainer):
     # ───────── auth ─────────
 
     jwt_service = providers.Singleton(JwtService)
+
+    # ───────── account services (auth 가 사용하므로 auth 위에 둠) ─────────
+
+    customer_account_service = providers.Factory(CustomerAccountService, uow=uow)
+    seller_account_service = providers.Factory(SellerAccountService, uow=uow)
+
     oauth_service = providers.Factory(
-        OAuthService, uow=uow, jwt_service=jwt_service,
+        OAuthService,
+        jwt_service=jwt_service,
+        customer_account_service=customer_account_service,
+        seller_account_service=seller_account_service,
     )
-    auth_account_service = providers.Factory(AuthAccountService, uow=uow)
 
     # ───────── seller ─────────
 
@@ -170,7 +179,7 @@ class Container(containers.DeclarativeContainer):
         SellerWithdrawService,
         uow=uow,
         withdraw_repo=seller_withdraw_reservation_repository,
-        auth_account_service=auth_account_service,
+        seller_account_service=seller_account_service,
         store_payment_info_service=store_payment_info_service,
     )
 
@@ -228,7 +237,7 @@ class Container(containers.DeclarativeContainer):
         uow=uow,
         withdraw_repo=customer_withdraw_reservation_repository,
         order_query_service=order_query_service,
-        auth_account_service=auth_account_service,
+        customer_account_service=customer_account_service,
     )
     customer_history_service = providers.Singleton(CustomerHistoryService)
     customer_favorite_service = providers.Factory(
@@ -239,7 +248,6 @@ class Container(containers.DeclarativeContainer):
     customer_search_service = providers.Factory(
         CustomerSearchService,
         uow=uow,
-        history_service=customer_history_service,
         seller_store_read_service=seller_store_read_service,
     )
     customer_registration_status_service = providers.Factory(
@@ -265,7 +273,6 @@ class Container(containers.DeclarativeContainer):
 
     registration_status_service = providers.Factory(
         RegistrationStatusService,
-        uow=uow,
         customer_registration_status_service=customer_registration_status_service,
         seller_registration_status_service=seller_registration_status_service,
     )

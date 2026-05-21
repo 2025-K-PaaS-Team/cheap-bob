@@ -1,21 +1,34 @@
+import httpx
+
+from app.domain.seller.service.seller_account import SellerAccountService
+from app.domain.customer.service.customer_account import CustomerAccountService
 from app.domain.auth.service.jwt import JwtService
-from app.domain.auth.service.exception import OAuthEmailMissingError
-from app.domain.auth.repository.seller import SellerRepository
-from app.domain.auth.repository.customer import CustomerRepository
-from app.domain.auth.model.seller import Seller
-from app.domain.auth.model.customer import Customer
+from app.domain.auth.service.exception import (
+    OAuthAuthenticationError,
+    OAuthEmailMissingError,
+)
 from app.domain.auth.dto.auth import AuthResult, UserType
-from app.database.session import UnitOfWork, transactional
 from app.core.oauth import create_oauth_client
 from app.config.oauth import OAuthProvider
 
 
 class OAuthService:
-    """OAuth 인증 흐름 전체 (provider 호출 + JWT 발급 + 신규 가입 처리)."""
+    """OAuth 인증 흐름 전체 (provider 호출 + JWT 발급 + 신규 가입 처리).
 
-    def __init__(self, uow: UnitOfWork, jwt_service: JwtService):
-        self.uow = uow
+    customer / seller row 의 CRUD 는 직접 다루지 않고 각 도메인의 AccountService 에
+    위임한다 (strict service-to-service — auth 가 customer/seller model/repo 를 직접
+    import 하지 않음).
+    """
+
+    def __init__(
+        self,
+        jwt_service: JwtService,
+        customer_account_service: CustomerAccountService,
+        seller_account_service: SellerAccountService,
+    ):
         self.jwt_service = jwt_service
+        self.customer_account_service = customer_account_service
+        self.seller_account_service = seller_account_service
 
 
     async def authenticate(
@@ -28,11 +41,22 @@ class OAuthService:
         """code → access_token → user info → JWT 발급.
 
         OAuth provider 호출은 외부 I/O 라 트랜잭션 밖에서 수행한다. DB 작업 (가입/조회)
-        만 트랜잭션 안에서 처리해야 lock 점유 시간이 늘어나지 않는다.
+        은 각 AccountService 가 자체 트랜잭션으로 처리한다.
+
+        provider 통신 실패는 `OAuthAuthenticationError`, email 누락은
+        `OAuthEmailMissingError` 로 정규화한다 (callback 라우터가 단일 except 로 잡아
+        프론트 error 페이지로 분기). DB / 내부 오류는 그대로 throw 되어 글로벌 핸들러로 간다.
         """
-        async with create_oauth_client(provider) as oauth_client:
-            access_token = await oauth_client.get_access_token(code, requested_type.value)
-            oauth_user = await oauth_client.get_user_info(access_token)
+        try:
+            async with create_oauth_client(provider) as oauth_client:
+                access_token = await oauth_client.get_access_token(
+                    code, requested_type.value,
+                )
+                oauth_user = await oauth_client.get_user_info(access_token)
+        except httpx.HTTPError as e:
+            raise OAuthAuthenticationError(
+                f"{provider.value} OAuth 통신 실패: {e}",
+            ) from e
 
         if not oauth_user.email:
             raise OAuthEmailMissingError(
@@ -45,16 +69,12 @@ class OAuthService:
         )
 
 
-    @transactional
     async def _resolve_and_issue(
         self, *, email: str, requested_type: UserType,
     ) -> AuthResult:
-        customer_repo = CustomerRepository(self._session)
-        seller_repo = SellerRepository(self._session)
-
         if requested_type == UserType.CUSTOMER:
             # 반대 타입으로 이미 가입돼 있으면 충돌. 토큰은 *실제 가입 종류* 기준으로 발급.
-            seller = await seller_repo.find_by_email(email)
+            seller = await self.seller_account_service.find_by_email(email)
             if seller is not None:
                 return self._issue(
                     email=email,
@@ -63,9 +83,9 @@ class OAuthService:
                     conflict=True,
                 )
 
-            customer = await customer_repo.find_by_email(email)
+            customer = await self.customer_account_service.find_by_email(email)
             if customer is None:
-                customer = await customer_repo.save(Customer(email=email))
+                customer = await self.customer_account_service.create(email)
                 is_active = True
             else:
                 is_active = customer.is_active
@@ -78,7 +98,7 @@ class OAuthService:
             )
 
         # requested_type == UserType.SELLER
-        customer = await customer_repo.find_by_email(email)
+        customer = await self.customer_account_service.find_by_email(email)
         if customer is not None:
             return self._issue(
                 email=email,
@@ -87,9 +107,9 @@ class OAuthService:
                 conflict=True,
             )
 
-        seller = await seller_repo.find_by_email(email)
+        seller = await self.seller_account_service.find_by_email(email)
         if seller is None:
-            seller = await seller_repo.save(Seller(email=email))
+            seller = await self.seller_account_service.create(email)
             is_active = True
         else:
             is_active = seller.is_active

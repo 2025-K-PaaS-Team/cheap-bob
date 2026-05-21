@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
 
+from app.domain.seller.service.seller_account import SellerAccountService
 from app.domain.seller.service.exception import (
     SellerAlreadyActiveError,
     SellerAlreadyWithdrawnError,
-    SellerNotFoundError,
     SellerStoreOpenError,
     SellerWithdrawalRecordNotFoundError,
 )
@@ -18,62 +18,56 @@ from app.domain.seller.repository.seller_withdraw_reservation import (
     SellerWithdrawReservationRepository,
 )
 from app.domain.payment.service.store_payment_info import StorePaymentInfoService
-from app.domain.auth.service.exception import (
-    SellerNotFoundError as AuthSellerNotFoundError,
-)
-from app.domain.auth.service.account import AuthAccountService
 from app.database.session import UnitOfWork, transactional
+from app.core.logger import get_logger
 
 
 _KST = timezone(timedelta(hours=9))
+
+
+logger = get_logger("seller.service.seller_withdraw")
 
 
 class SellerWithdrawService:
     """판매자 탈퇴 / 탈퇴 취소.
 
     오늘 영업 여부 — seller.OperationInfoRepository (own domain). is_active 토글 —
-    `AuthAccountService` (cross-domain service-to-service).
+    `SellerAccountService` (own domain).
     """
 
     def __init__(
         self,
         uow: UnitOfWork,
         withdraw_repo: SellerWithdrawReservationRepository,
-        auth_account_service: AuthAccountService,
+        seller_account_service: SellerAccountService,
         store_payment_info_service: StorePaymentInfoService,
     ):
         self.uow = uow
         self.withdraw_repo = withdraw_repo
-        self.auth_account_service = auth_account_service
+        self.seller_account_service = seller_account_service
         self.store_payment_info_service = store_payment_info_service
 
 
     async def request_withdraw(self, *, seller_email: str, store_id: str) -> None:
         await self._assert_not_open_today(store_id)
-        try:
-            if not await self.auth_account_service.is_seller_active(seller_email):
-                raise SellerAlreadyWithdrawnError("이미 탈퇴 처리 되었습니다.")
-        except AuthSellerNotFoundError as e:
-            raise SellerNotFoundError(str(e))
+        if not await self.seller_account_service.is_active(seller_email):
+            raise SellerAlreadyWithdrawnError("이미 탈퇴 처리 되었습니다.")
 
-        await self.auth_account_service.set_seller_active(seller_email, active=False)
+        await self.seller_account_service.set_active(seller_email, active=False)
         await self.withdraw_repo.save(
             seller_email=seller_email, withdrawn_at=datetime.now(timezone.utc),
         )
 
 
     async def cancel_withdraw(self, seller_email: str) -> None:
-        try:
-            if await self.auth_account_service.is_seller_active(seller_email):
-                raise SellerAlreadyActiveError("이미 활성화된 계정입니다.")
-        except AuthSellerNotFoundError as e:
-            raise SellerNotFoundError(str(e))
+        if await self.seller_account_service.is_active(seller_email):
+            raise SellerAlreadyActiveError("이미 활성화된 계정입니다.")
 
         record = await self.withdraw_repo.find_by_seller_email(seller_email)
         if record is None:
             raise SellerWithdrawalRecordNotFoundError("탈퇴 기록을 찾을 수 없습니다.")
 
-        await self.auth_account_service.set_seller_active(seller_email, active=True)
+        await self.seller_account_service.set_active(seller_email, active=True)
         await self.withdraw_repo.delete_by_seller_email(seller_email)
 
 
@@ -108,20 +102,13 @@ class SellerWithdrawService:
                     processed += 1
                 await self.withdraw_repo.delete_by_id(str(reservation.id))
             except Exception:
-                from app.core.logger import get_logger
-
-                get_logger("seller.service.seller_withdraw").exception(
-                    "판매자 {} 탈퇴 처리 중 오류", email,
-                )
+                logger.exception("판매자 {} 탈퇴 처리 중 오류", email)
         return processed
 
 
     @transactional
     async def _hard_delete_seller_with_stores(self, email: str) -> bool:
         """가게 자산 cascade 정리 + Seller hard-delete. 호출자: process_pending_withdrawals."""
-        from app.core.logger import get_logger
-
-        logger = get_logger("seller.service.seller_withdraw")
         store_repo = StoreRepository(self._session)
         product_repo = StoreProductInfoRepository(self._session)
         op_repo = StoreOperationInfoRepository(self._session)
@@ -148,7 +135,7 @@ class SellerWithdrawService:
 
             await store_repo.delete(store.store_id)
 
-        deleted = await self.auth_account_service.hard_delete_seller(email)
+        deleted = await self.seller_account_service.hard_delete(email)
         if deleted:
             logger.info("판매자 {} 탈퇴 처리 완료", email)
         else:

@@ -34,11 +34,11 @@ class OrderQueryServiceMockFactory:
         return mock
 
 
-class AuthAccountServiceMockFactory:
+class CustomerAccountServiceMockFactory:
     @classmethod
     def create(cls) -> AsyncMock:
         mock = AsyncMock()
-        mock.is_customer_active.return_value = True
-        mock.set_customer_active.return_value = None
-        mock.hard_delete_customer.return_value = True
+        mock.is_active.return_value = True
+        mock.set_active.return_value = None
+        mock.hard_delete.return_value = True
         return mock

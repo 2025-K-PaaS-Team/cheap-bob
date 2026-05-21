@@ -20,9 +20,17 @@ def make_mock_session() -> MagicMock:
     return session
 
 
-class CustomerProfileRepoMockFactory:
-    @classmethod
-    def create(cls) -> AsyncMock:
-        mock = AsyncMock()
-        mock.find_full_profile.return_value = None
-        return mock
+class CustomerProfileRepoMocks:
+    """detail + 4종 선호 자식 repository 의 묶음 mock."""
+
+    def __init__(self) -> None:
+        self.detail = AsyncMock()
+        self.detail.find_by_customer.return_value = None
+        self.preferred_menus = AsyncMock()
+        self.preferred_menus.find_by_customer.return_value = []
+        self.nutrition_types = AsyncMock()
+        self.nutrition_types.find_by_customer.return_value = []
+        self.allergies = AsyncMock()
+        self.allergies.find_by_customer.return_value = []
+        self.topping_types = AsyncMock()
+        self.topping_types.find_by_customer.return_value = []

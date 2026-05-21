@@ -40,7 +40,7 @@ class TestGet:
         self, customer_detail_service, session_factory,
     ):
         # detail 없이 Customer 만 심는다.
-        from app.domain.auth.model.customer import Customer
+        from app.domain.customer.model.customer import Customer
         async with session_factory() as session:
             session.add(Customer(email="bare@example.com", is_active=True))
             await session.commit()

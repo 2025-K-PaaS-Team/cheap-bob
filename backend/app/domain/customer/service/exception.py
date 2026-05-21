@@ -38,10 +38,6 @@ class PreferenceNotFoundError(Exception):
     """삭제 대상 선호도가 존재하지 않음."""
 
 
-class StoreNotFoundError(Exception):
-    """[TRANSITIONAL] 검색/즐겨찾기 대상 가게가 없음. seller 도메인 분리 시 이관."""
-
-
 class FavoriteAlreadyExistsError(Exception):
     """이미 즐겨찾기에 등록된 가게."""
 

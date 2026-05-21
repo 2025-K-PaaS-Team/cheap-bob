@@ -17,45 +17,26 @@ class FakeAsyncContextManager:
         return False
 
 
-class FakeUnitOfWork:
-    """`@transactional` 의 ``async with self.uow as session:`` 를 만족."""
-
-    def __init__(self, session):
-        self._session = session
-
-
-    async def __aenter__(self):
-        return self._session
-
-
-    async def __aexit__(self, exc_type, exc, tb):
-        return False
-
-
-def make_mock_session() -> MagicMock:
-    """서비스가 ``self._session`` 으로 접근하는 메서드만 Mock 으로 채워준다."""
-    session = MagicMock(name="session")
-    session.flush = AsyncMock()
-    session.refresh = AsyncMock()
-    return session
-
-
-class CustomerRepositoryMockFactory:
+class CustomerAccountServiceMockFactory:
     @classmethod
     def create(cls) -> AsyncMock:
         mock = AsyncMock()
         mock.find_by_email.return_value = None
-        # save 는 입력받은 인스턴스를 그대로 돌려준다 (실 레포지토리 시그니처 모사).
-        mock.save.side_effect = lambda customer: customer
+        # create 는 신규 row 를 그대로 만들어 반환 (실서비스 시그니처 모사).
+        mock.create.side_effect = lambda email: SimpleNamespace(
+            email=email, is_active=True,
+        )
         return mock
 
 
-class SellerRepositoryMockFactory:
+class SellerAccountServiceMockFactory:
     @classmethod
     def create(cls) -> AsyncMock:
         mock = AsyncMock()
         mock.find_by_email.return_value = None
-        mock.save.side_effect = lambda seller: seller
+        mock.create.side_effect = lambda email: SimpleNamespace(
+            email=email, is_active=True,
+        )
         return mock
 
 

@@ -2,7 +2,7 @@
 from types import SimpleNamespace
 import pytest
 
-from app.domain.customer.dto.preference import NutritionType
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.seller.repository.store_product_info import StockUpdateResult
 from app.domain.seller.service.exception import (
     ProductAlreadyRegisteredError,

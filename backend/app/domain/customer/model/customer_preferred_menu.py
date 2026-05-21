@@ -9,7 +9,7 @@ from app.database.session import Base
 
 
 if TYPE_CHECKING:
-    from app.domain.auth.model.customer import Customer
+    from app.domain.customer.model.customer import Customer
 
 
 class CustomerPreferredMenu(Base):

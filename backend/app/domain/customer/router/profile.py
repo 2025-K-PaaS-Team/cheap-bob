@@ -8,7 +8,7 @@ from app.domain.customer.service.customer_detail import CustomerDetailService
 from app.domain.customer.schema.customer_profile import CustomerProfileResponse
 from app.domain.customer.schema.customer_detail import (
     CustomerDetailResponse,
-    CustomerDetailUpdate,
+    CustomerDetailUpdateRequest,
 )
 from app.domain.auth.schema.me import UserProfileMeResponse
 from app.core.openapi import create_error_responses
@@ -34,17 +34,11 @@ async def get_customer_profile(
 ):
     """소비자의 detail + 4종 선호 통합 응답."""
     try:
-        customer = await profile_service.get_full_profile(current_user["sub"])
+        profile = await profile_service.get_full_profile(current_user["sub"])
     except CustomerDetailNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
-    return CustomerProfileResponse(
-        detail=CustomerDetailResponse.model_validate(customer.detail),
-        preferred_menus=customer.preferred_menus,
-        nutrition_types=customer.nutrition_types,
-        allergies=customer.allergies,
-        topping_types=customer.topping_types,
-    )
+    return CustomerProfileResponse.model_validate(profile)
 
 
 @router.get(
@@ -90,7 +84,7 @@ async def get_customer_detail(
 @inject
 async def update_customer_detail(
     current_user: CurrentCustomerDep,
-    detail_data: CustomerDetailUpdate,
+    detail_data: CustomerDetailUpdateRequest,
     detail_service: CustomerDetailService = Depends(
         Provide["customer_detail_service"],
     ),

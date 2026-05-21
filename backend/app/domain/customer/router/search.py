@@ -3,9 +3,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from dependency_injector.wiring import Provide, inject
 
 from app.middleware.auth import CurrentCustomerDep
+from app.domain.seller.service.exception import StoreNotFoundError
 from app.domain.seller.schema.store import PaginatedStoreResponse
 from app.domain.seller.schema.product import ProductsResponse
-from app.domain.customer.service.exception import StoreNotFoundError
 from app.domain.customer.service.customer_search import CustomerSearchService
 from app.domain.customer.service.customer_history import CustomerHistoryService
 from app.core.openapi import create_error_responses
@@ -91,11 +91,11 @@ async def search_stores_by_name(
     ),
 ):
     customer_email = current_user["sub"]
-    response, recorded = await search_service.search_by_name(
+    response = await search_service.search_by_name(
         customer_email=customer_email, search_name=search_name, page=page,
     )
     # 히스토리 기록은 RDB 트랜잭션 밖 (Redis) 이므로 라우터에서 호출한다.
-    await history_service.record_search(customer_email, recorded)
+    await history_service.record_search(customer_email, search_name)
     return response
 
 
@@ -118,7 +118,7 @@ async def search_stores_by_location_name(
     ),
 ):
     customer_email = current_user["sub"]
-    response, recorded = await search_service.search_by_location_and_name(
+    response = await search_service.search_by_location_and_name(
         customer_email=customer_email,
         sido=sido,
         sigungu=sigungu,
@@ -126,5 +126,5 @@ async def search_stores_by_location_name(
         search_name=search_name,
         page=page,
     )
-    await history_service.record_search(customer_email, recorded)
+    await history_service.record_search(customer_email, search_name)
     return response
