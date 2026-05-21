@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Query
 from dependency_injector.wiring import Provide, inject
 
 from app.domain.auth.service.registration_status import RegistrationStatusService
+from app.domain.auth.service.oauth_state import OAuthStateService
 from app.domain.auth.service.oauth import OAuthService
 from app.domain.auth.service.exception import OAuthAuthenticationError
 from app.domain.auth.dto.auth import UserType
@@ -12,6 +13,19 @@ from app.config.oauth import OAuthProvider
 
 
 router = APIRouter()
+
+
+_DEV_LOCAL_STATE = "1004"
+
+
+async def _verify_state(state: str | None, *, expected_type: UserType) -> bool:
+    """CSRF state 검증. dev 환경의 매직값 ('1004') 만 우회 — 그 외엔 Redis atomic GETDEL.
+
+    Returns True 면 통과, False 면 거부 (callback 라우터가 error redirect).
+    """
+    if state == _DEV_LOCAL_STATE and settings.ENVIRONMENT == "dev":
+        return True
+    return await OAuthStateService.consume(state or "", expected_type=expected_type)
 
 
 def _frontend_base(*, is_local_dev: bool) -> str:
@@ -54,7 +68,7 @@ def _build_error_redirect(*, is_local_dev: bool, reason: str) -> RedirectRespons
 async def customer_oauth_callback(
     provider: OAuthProvider,
     code: str = Query(...),
-    state: str = Query(None, description="dev local 분기용 (1004) — 추후 CSRF state 토큰 자리."),
+    state: str = Query(None, description="login 시 발급된 CSRF state — Redis 에서 atomic 검증."),
     oauth_service: OAuthService = Depends(Provide["oauth_service"]),
     registration_status_service: RegistrationStatusService = Depends(
         Provide["registration_status_service"],
@@ -62,12 +76,18 @@ async def customer_oauth_callback(
 ):
     """Customer 진입의 OAuth 콜백.
 
+    0) state CSRF 검증 (Redis atomic GETDEL — 재사용 불가)
     1) provider code 교환 + 가입/조회 + JWT 발급
     2) 충돌(반대 타입) 여부에 따라 등록 단계 판별 대상 결정
     3) 성공: success 페이지로 302 + httpOnly 쿠키. OAuth 실패: error 페이지로 302.
        DB / 내부 오류는 catch 하지 않고 글로벌 핸들러 (5xx) 로 보낸다 — 알람/모니터링이 정상 동작해야 한다.
     """
-    is_local_dev = state == "1004" and settings.ENVIRONMENT == "dev"
+    is_local_dev = state == _DEV_LOCAL_STATE and settings.ENVIRONMENT == "dev"
+
+    if not await _verify_state(state, expected_type=UserType.CUSTOMER):
+        return _build_error_redirect(
+            is_local_dev=is_local_dev, reason="csrf_state_mismatch",
+        )
 
     try:
         result = await oauth_service.authenticate(
@@ -96,14 +116,19 @@ async def customer_oauth_callback(
 async def seller_oauth_callback(
     provider: OAuthProvider,
     code: str = Query(...),
-    state: str = Query(None, description="dev local 분기용 (1004)"),
+    state: str = Query(None, description="login 시 발급된 CSRF state — Redis 에서 atomic 검증."),
     oauth_service: OAuthService = Depends(Provide["oauth_service"]),
     registration_status_service: RegistrationStatusService = Depends(
         Provide["registration_status_service"],
     ),
 ):
     """Seller 진입의 OAuth 콜백."""
-    is_local_dev = state == "1004" and settings.ENVIRONMENT == "dev"
+    is_local_dev = state == _DEV_LOCAL_STATE and settings.ENVIRONMENT == "dev"
+
+    if not await _verify_state(state, expected_type=UserType.SELLER):
+        return _build_error_redirect(
+            is_local_dev=is_local_dev, reason="csrf_state_mismatch",
+        )
 
     try:
         result = await oauth_service.authenticate(
