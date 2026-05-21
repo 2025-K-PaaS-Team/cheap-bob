@@ -22,7 +22,6 @@ from app.domain.payment.service.store_payment_info import StorePaymentInfoServic
 from app.domain.payment.service.seller_payment_settings import (
     SellerPaymentSettingsService,
 )
-from app.domain.payment.service.payment_scheduler import PaymentSchedulerService
 from app.domain.payment.service.payment_gateway import PaymentGatewayService
 from app.domain.payment.service.customer_payment import CustomerPaymentService
 from app.domain.order.service.seller_order import SellerOrderService
@@ -31,12 +30,12 @@ from app.domain.order.service.product_stock_reservation import (
 )
 from app.domain.order.service.order_query import OrderQueryService
 from app.domain.order.service.customer_order import CustomerOrderService
-from app.domain.order.service.cart_recovery import CartRecoveryService
 from app.domain.order.repository.product_stock_reservation import (
     ProductStockReservationRepository,
 )
 from app.domain.order.repository.order_history_item import OrderHistoryItemRepository
 from app.domain.customer.service.preference_option import PreferenceOptionService
+
 from app.domain.customer.service.customer_withdraw import CustomerWithdrawService
 from app.domain.customer.service.customer_search import CustomerSearchService
 from app.domain.customer.service.customer_registration_status import (
@@ -56,16 +55,8 @@ from app.domain.auth.service.registration_status import RegistrationStatusServic
 from app.domain.auth.service.oauth import OAuthService
 from app.domain.auth.service.jwt import JwtService
 from app.database.session import UnitOfWork
+from app.core.portone import PortOnePaymentClient
 from app.config.setting import settings
-
-
-def _resolve_app_scheduler():
-    """APScheduler instance 를 lazy 로 가져온다 — container ↔ scheduler.static ↔ worker 순환
-    import 회피. scheduler.static 모듈은 worker 를 import 하고, worker 는 본 container 를
-    import 하므로 본 모듈에서 module-level import 하면 cycle 발생."""
-    from app.scheduler.static import static_scheduler
-
-    return static_scheduler.scheduler
 
 
 class Container(containers.DeclarativeContainer):
@@ -90,11 +81,6 @@ class Container(containers.DeclarativeContainer):
     )
 
     uow = providers.Factory(UnitOfWork, session=session_factory)
-
-    # APScheduler instance — 모듈 싱글톤 (scheduler.static.static_scheduler.scheduler) 을
-    # lazy 로 노출. Singleton provider 는 결과를 1회 cache 하므로 add_job 호출이 같은
-    # 인스턴스로 모임.
-    apscheduler = providers.Singleton(_resolve_app_scheduler)
 
     # ───────── auth ─────────
 
@@ -156,12 +142,9 @@ class Container(containers.DeclarativeContainer):
     store_payment_info_service = providers.Factory(
         StorePaymentInfoService, uow=uow,
     )
-    payment_gateway_service = providers.Singleton(PaymentGatewayService)
-    payment_scheduler_service = providers.Singleton(
-        PaymentSchedulerService,
-        scheduler=apscheduler,
-        seller_product_service=seller_product_service,
-        order_query_service=order_query_service,
+    portone_client = providers.Singleton(PortOnePaymentClient)
+    payment_gateway_service = providers.Singleton(
+        PaymentGatewayService, portone_client=portone_client,
     )
     seller_payment_settings_service = providers.Factory(
         SellerPaymentSettingsService,
@@ -263,7 +246,6 @@ class Container(containers.DeclarativeContainer):
         seller_store_read_service=seller_store_read_service,
         seller_product_service=seller_product_service,
         store_payment_info_service=store_payment_info_service,
-        payment_scheduler_service=payment_scheduler_service,
         payment_gateway_service=payment_gateway_service,
         order_query_service=order_query_service,
         customer_profile_service=customer_profile_service,
@@ -276,16 +258,6 @@ class Container(containers.DeclarativeContainer):
         customer_registration_status_service=customer_registration_status_service,
         seller_registration_status_service=seller_registration_status_service,
     )
-
-    # ───────── startup helpers ─────────
-
-    cart_recovery_service = providers.Singleton(
-        CartRecoveryService,
-        uow=uow,
-        seller_product_service=seller_product_service,
-        order_query_service=order_query_service,
-    )
-
 
 # Container() 를 두 번 호출하면 Singleton provider가 각 인스턴스마다 별개라서 engine / session_factory 가 중복 생성되므로 반드시 단일 instance.
 container = Container()

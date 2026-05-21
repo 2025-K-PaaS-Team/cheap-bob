@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str
     JWT_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     COOKIE_EXPIRE_SECONDS: int = 60 * 60 * 24 * 7  # 7 days (Set-Cookie max-age 단위)
-    
+
     # OAuth Redirect URIs
     OAUTH_REDIRECT_BASE_URL: str
     

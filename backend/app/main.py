@@ -23,6 +23,11 @@ from app.config.setting import settings
 from app.api.v1.router import api_router
 
 
+# 장바구니 만료/재고 복구는 ``expire_cart_items`` sweeper worker (매분) 가 담당한다.
+# in-memory APScheduler 시절의 startup 일괄 wipe 로직은 새 DB-backed 모델에서 진행 중인
+# (expires_at > now) cart 까지 같이 날려 결제 race 를 만들 수 있어 제거됨.
+
+
 logger = get_logger("app.main")
 
 
@@ -66,15 +71,6 @@ def create_app() -> FastAPI:
         logger.info("스케줄러 상태: {}", "실행 중" if scheduler.is_running else "중지됨")
 
         try:
-            recovered_carts = await container.cart_recovery_service().recover_abandoned_carts()
-            if recovered_carts > 0:
-                logger.info("장바구니 재고 복구 완료: {}개 아이템", recovered_carts)
-            else:
-                logger.info("복구할 장바구니 아이템이 없습니다")
-        except Exception:
-            logger.exception("장바구니 재고 복구 중 오류 발생")
-
-        try:
             recovered = await DynamicScheduler.recover_if_needed(scheduler)
             if recovered:
                 logger.info("서버 재시작으로 인한 동적 스케줄 복원 완료")
@@ -87,6 +83,7 @@ def create_app() -> FastAPI:
 
         logger.info("애플리케이션 종료 중...")
         scheduler.stop()
+        await container.portone_client().close()
         await close_mongodb()
 
     app = FastAPI(

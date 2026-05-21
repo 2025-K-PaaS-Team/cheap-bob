@@ -37,7 +37,7 @@ backend/test/
 │   └── domain/
 │       ├── auth/{jwt,oauth,account}_service/
 │       ├── order/{customer_order,seller_order,product_stock_reservation}_service/
-│       └── payment/{customer_payment,payment_gateway,payment_scheduler}_service/
+│       └── payment/{customer_payment,payment_gateway,seller_payment_settings,store_payment_info}_service/
 └── integration/                         # 통합 테스트 (실 DB)
     ├── conftest.py                     # NullPool engine + seed fixtures
     └── domain/
@@ -75,7 +75,7 @@ async def test_{action}_{condition_or_result}(self): ...
 async def test_accept_updates_status(self, service, order_repo_mock):
     # Arrange
     order = OrderFactory.create(status=OrderStatus.reservation)
-    order_repo_mock.get_order_with_product_relation.return_value = order
+    order_repo_mock.get_order_with_relations.return_value = order
 
     # Act
     result = await service.accept_order(...)
