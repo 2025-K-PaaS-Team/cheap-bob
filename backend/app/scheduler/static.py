@@ -3,7 +3,7 @@
 매일/매주 정해진 시각에 실행되는 task 들 (재고 리셋, 운영 정보 자동 갱신, history 이관 등) 을 APScheduler 인스턴스에 등록한다. 동적 1회성 등록은 `app.scheduler.dynamic` 에서 담당.
 """
 from typing import Any, Dict, List
-from pytz import timezone as pytz_timezone
+from datetime import timedelta, timezone
 from functools import partial
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -47,7 +47,8 @@ from app.core.logger import get_logger
 
 
 logger = get_logger("scheduler.static")
-_KST = pytz_timezone("Asia/Seoul")
+# KST 는 DST 없는 고정 +09:00 — stdlib timezone 으로 충분. dynamic.py / worker 도 동일.
+_KST = timezone(timedelta(hours=9))
 
 
 class StaticScheduler:

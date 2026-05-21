@@ -105,14 +105,17 @@ class TestTokenExtraction:
         assert middleware._extract_token(req) == "HEADER_TOKEN"
 
 
-    def test_dev_falls_back_to_query_token(self, middleware, monkeypatch):
+    def test_dev_ignores_query_token_and_falls_back_to_cookie(
+        self, middleware, monkeypatch,
+    ):
+        """``?token=`` 쿼리는 브라우저 히스토리/서버 로그 leak 위험으로 dev 에서도 지원 안 함."""
         monkeypatch.setattr("app.middleware.auth.settings.ENVIRONMENT", "dev")
         req = _make_request(
             "/api/v1/seller/store/orders",
             query="token=QUERY_TOKEN",
             cookies={"access_token": "COOKIE_TOKEN"},
         )
-        assert middleware._extract_token(req) == "QUERY_TOKEN"
+        assert middleware._extract_token(req) == "COOKIE_TOKEN"
 
 
     def test_prod_only_uses_cookie(self, middleware, monkeypatch):

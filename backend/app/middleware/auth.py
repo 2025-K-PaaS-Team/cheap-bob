@@ -37,15 +37,15 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
 
 
     def _extract_token(self, request: Request) -> Optional[str]:
-        """dev 한정으로 Authorization 헤더와 ?token 쿼리도 허용한다. prod 는 쿠키 only."""
+        """dev 한정 ``Authorization: Bearer`` 헤더 허용. prod 는 쿠키 only.
+
+        ?token 쿼리 파라미터는 브라우저 히스토리/서버 로그에 토큰이 leak 되어
+        지원하지 않는다 — Authorization 헤더 또는 쿠키만 사용.
+        """
         if settings.ENVIRONMENT == "dev":
             authorization = request.headers.get("Authorization")
             if authorization and authorization.startswith("Bearer "):
                 return authorization[7:]
-
-            query_token = request.query_params.get("token")
-            if query_token:
-                return query_token
 
         return request.cookies.get("access_token")
 

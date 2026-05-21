@@ -100,12 +100,15 @@ def create_app() -> FastAPI:
     cors_origins = [settings.FRONTEND_URL]
     if settings.ENVIRONMENT == "dev":
         cors_origins.append(settings.FRONTEND_LOCAL_URL)
+    # ``allow_credentials=True`` 와 wildcard 조합은 보안 표면을 넓힘 — 실제 사용 method/header
+    # 만 명시한다. Authorization 은 dev 한정 헤더 토큰, Content-Type 은 일반 JSON/multipart,
+    # X-Requested-With 는 일부 클라이언트의 AJAX 표시용.
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
     )
 
     app.include_router(api_router)

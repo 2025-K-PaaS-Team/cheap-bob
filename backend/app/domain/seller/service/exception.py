@@ -6,10 +6,6 @@ class StoreAlreadyRegisteredError(Exception):
     """이미 가게가 등록된 판매자."""
 
 
-class StorePaymentInfoAlreadyExistsError(Exception):
-    """가게 결제 정보가 이미 등록되어 있음."""
-
-
 class StorePaymentMissingError(Exception):
     """가게 마감 처리 시 포트원 secret_key 누락."""
 
@@ -24,10 +20,6 @@ class StoreImageNotFoundError(Exception):
 
 class StoreImageMainDeleteError(Exception):
     """대표 이미지는 삭제할 수 없음."""
-
-
-class StoreOperationReservationDuplicateError(Exception):
-    """이미 예약이 존재함."""
 
 
 class StoreOperationReservationNotFoundError(Exception):

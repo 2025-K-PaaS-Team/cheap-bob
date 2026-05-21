@@ -28,8 +28,14 @@ def _ts() -> str:
 
 
 async def _safe_send(*, recipient_email: str, subject: str, body: str, html_body: str) -> Dict[str, Any]:
+    """이메일 발송 — 결제/주문 이벤트 알림용. 실패 시 fire-and-forget caller 가 result dict
+    를 무시하므로, 실패는 본 함수에서 ``[CRITICAL]`` 마커로 로깅해 운영자 알람을 보장한다.
+
+    이메일 발송 실패가 비즈니스 흐름을 막아선 안 되지만 (예약 확정/취소 알림은 운영적으로
+    중요), silent 실패는 고객이 모르고 지나치게 만들므로 운영자가 즉시 인지하도록 한다.
+    """
     if not email_sender.is_configured():
-        logger.warning("이메일 서비스가 설정되지 않음")
+        logger.warning("이메일 서비스가 설정되지 않음 - {}", recipient_email)
         return {"success": False, "message": "Email service not configured"}
     try:
         result = await email_sender.send(
@@ -40,12 +46,16 @@ async def _safe_send(*, recipient_email: str, subject: str, body: str, html_body
         )
         if not result["success"]:
             logger.error(
-                f"이메일 전송 실패: {recipient_email} - {result.get('message')}",
+                "[CRITICAL] 이메일 전송 실패 - 수신자={} 제목={} 사유={}",
+                recipient_email, subject, result.get("message"),
             )
         return result
-    except Exception as e:
-        logger.error(f"이메일 전송 중 예외: {e}")
-        return {"success": False, "message": str(e)}
+    except Exception:
+        logger.exception(
+            "[CRITICAL] 이메일 전송 중 예외 - 수신자={} 제목={}",
+            recipient_email, subject,
+        )
+        return {"success": False, "message": "email send exception"}
 
 
 async def send_reservation_email(customer_email: str) -> Dict[str, Any]:
