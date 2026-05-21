@@ -14,6 +14,7 @@ from app.domain.order.service.exception import (
     OrderAlreadyCanceledError,
     OrderNotFoundError,
     OrderNotInReservationError,
+    OrderOwnershipMismatchError,
     OrderRefundError,
 )
 from app.domain.order.schema.order import (
@@ -27,6 +28,10 @@ from app.domain.order.repository.order_history_item import OrderHistoryItemRepos
 from app.domain.order.repository.order_current_item import OrderCurrentItemRepository
 from app.domain.order.dto.order import OrderStatus
 from app.database.session import UnitOfWork, transactional
+from app.core.logger import get_logger
+
+
+logger = get_logger("order.service.seller_order")
 
 
 class SellerOrderService:
@@ -93,7 +98,9 @@ class SellerOrderService:
     async def accept_order(
         self, *, store_id: str, payment_id: str, background_tasks: BackgroundTasks,
     ) -> OrderItemResponse:
-        order, updated = await self._accept_record(payment_id)
+        order, updated = await self._accept_record(
+            store_id=store_id, payment_id=payment_id,
+        )
         if order is None:
             raise OrderNotFoundError("주문을 찾을 수 없습니다")
         if updated is None:
@@ -128,6 +135,8 @@ class SellerOrderService:
         order = await self._get_with_product_relation(payment_id)
         if order is None:
             raise OrderNotFoundError("주문을 찾을 수 없습니다")
+        if order.product.store_id != store_id:
+            raise OrderOwnershipMismatchError("본인 가게 주문만 취소할 수 있습니다")
         if order.status == OrderStatus.cancel:
             raise OrderAlreadyCanceledError("이미 취소된 주문입니다")
 
@@ -147,10 +156,24 @@ class SellerOrderService:
         except PaymentRefundError as e:
             raise OrderRefundError(str(e))
 
-        quantity = await self._cancel_record(payment_id, reason)
-        await self.seller_product_service.restore_purchased_stock(
-            product_id=order.product_id, quantity=quantity,
-        )
+        # 환불 성공 후의 실패는 silent 금지 — 사용자에게는 정상 응답하되 운영자 critical 로깅.
+        try:
+            quantity = await self._cancel_record(payment_id, reason)
+        except Exception:
+            logger.exception(
+                "[CRITICAL] 환불 성공 후 주문 취소 갱신 실패 - payment_id={}, store={}",
+                payment_id, store_id,
+            )
+            quantity = order.quantity
+        try:
+            await self.seller_product_service.restore_purchased_stock(
+                product_id=order.product_id, quantity=quantity,
+            )
+        except Exception:
+            logger.exception(
+                "[CRITICAL] 환불 성공 후 재고 복원 실패 - payment_id={}, product={}, quantity={}",
+                payment_id, order.product_id, quantity,
+            )
 
         store = await self.seller_store_read_service.get_with_full_info(store_id)
         background_tasks.add_task(
@@ -175,9 +198,11 @@ class SellerOrderService:
     ) -> SellerPickupQRResponse:
         order = await OrderCurrentItemRepository(
             self._session,
-        ).get_order_with_product_relation(payment_id)
+        ).get_order_with_relations(payment_id)
         if order is None:
             raise OrderNotFoundError("주문을 찾을 수 없습니다")
+        if order.product.store_id != store_id:
+            raise OrderOwnershipMismatchError("본인 가게 주문만 QR 발급 가능합니다")
         if order.status != OrderStatus.accept:
             raise OrderNotInReservationError("주문이 수락되지 않았습니다")
 
@@ -226,15 +251,12 @@ class SellerOrderService:
 
         Returns: (cancelled, failed, total_refund_amount).
         """
-        from app.core.logger import get_logger
-
         from app.domain.payment.service.exception import (
             PaymentInfoIncompleteError,
             PaymentInfoMissingError,
             PaymentRefundError,
         )
 
-        logger = get_logger("order.service.seller_order")
         try:
             payment_info = await self.store_payment_info_service.get_complete_by_store(
                 store_id,
@@ -301,15 +323,12 @@ class SellerOrderService:
         """
         from collections import defaultdict
 
-        from app.core.logger import get_logger
-
         from app.domain.payment.service.exception import (
             PaymentInfoIncompleteError,
             PaymentInfoMissingError,
             PaymentRefundError,
         )
 
-        logger = get_logger("order.service.seller_order")
         all_orders = await self._list_all_current_with_relations()
         uncompleted = [
             o for o in all_orders
@@ -348,7 +367,10 @@ class SellerOrderService:
                         secret_key=payment_info.portone_secret_key,
                         reason=reason,
                     )
-                    await self._cancel_record(order.payment_id, reason)
+                    quantity = await self._cancel_record(order.payment_id, reason)
+                    await self.seller_product_service.restore_purchased_stock(
+                        product_id=order.product_id, quantity=quantity,
+                    )
                     await self._send_cancel_email_safe(
                         order.customer_id, store_name,
                     )
@@ -381,9 +403,6 @@ class SellerOrderService:
 
         Returns: (completed, failed).
         """
-        from app.core.logger import get_logger
-
-        logger = get_logger("order.service.seller_order")
         orders = await self.order_query_service.list_store_current_orders(store_id)
         accepted = [o for o in orders if o.status == OrderStatus.accept]
         if not accepted:
@@ -428,23 +447,24 @@ class SellerOrderService:
 
     async def _send_cancel_email_safe(self, customer_id: str, store_name: str) -> None:
         """이메일 발송 실패가 batch 흐름을 막지 않도록 swallow."""
-        from app.core.logger import get_logger
         from app.core.email.notifier import send_seller_cancel_email
 
         try:
             await send_seller_cancel_email(customer_id, store_name)
         except Exception:
-            get_logger("order.service.seller_order").exception(
+            logger.exception(
                 "취소 이메일 발송 실패 (customer: {})", customer_id,
             )
 
 
     @transactional
-    async def _accept_record(self, payment_id: str):
+    async def _accept_record(self, *, store_id: str, payment_id: str):
         repo = OrderCurrentItemRepository(self._session)
-        order = await repo.get_order_with_product_relation(payment_id)
+        order = await repo.get_order_with_relations(payment_id)
         if order is None:
             return None, None
+        if order.product.store_id != store_id:
+            raise OrderOwnershipMismatchError("본인 가게 주문만 처리할 수 있습니다")
         if order.status != OrderStatus.reservation:
             return order, None
         updated = await repo.update(
@@ -459,7 +479,7 @@ class SellerOrderService:
     async def _get_with_product_relation(self, payment_id: str):
         return await OrderCurrentItemRepository(
             self._session,
-        ).get_order_with_product_relation(payment_id)
+        ).get_order_with_relations(payment_id)
 
 
     @transactional
@@ -467,6 +487,20 @@ class SellerOrderService:
         return await OrderCurrentItemRepository(self._session).cancel_order(
             payment_id, cancel_reason=reason,
         )
+
+
+    @transactional
+    async def assert_order_belongs_to_store(
+        self, *, store_id: str, payment_id: str,
+    ) -> None:
+        """WebSocket 등 service 외부 진입점에서 호출하는 권한 검증 helper."""
+        order = await OrderCurrentItemRepository(
+            self._session,
+        ).get_order_with_relations(payment_id)
+        if order is None:
+            raise OrderNotFoundError("주문을 찾을 수 없습니다")
+        if order.product.store_id != store_id:
+            raise OrderOwnershipMismatchError("본인 가게 주문이 아닙니다")
 
 
 def _seller_response(

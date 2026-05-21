@@ -82,6 +82,7 @@ async def get_today_alarm(
     response_model=OrderItemResponse,
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
+        403: "본인 주문이 아님",
         404: "주문을 찾을 수 없음",
     }),
 )
@@ -94,9 +95,13 @@ async def get_order_detail(
     ),
 ):
     try:
-        return await customer_order_service.get_detail(payment_id)
+        return await customer_order_service.get_detail(
+            customer_email=current_user["sub"], payment_id=payment_id,
+        )
     except OrderNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except OrderOwnershipMismatchError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
 @router.patch(
@@ -139,6 +144,7 @@ async def complete_pickup(
     responses=create_error_responses({
         400: ["이미 취소된 주문", "이미 승인된 주문"],
         401: ["인증 정보가 없음", "토큰 만료"],
+        403: "본인 주문 아님",
         404: "상품을 찾을 수 없음",
         409: "동시성 충돌 발생",
     }),
@@ -162,6 +168,8 @@ async def cancel_order(
         )
     except OrderNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except OrderOwnershipMismatchError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
     except OrderAlreadyCanceledError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except OrderNotInReservationError as e:

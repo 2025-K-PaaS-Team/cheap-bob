@@ -62,7 +62,7 @@ class TestListOrders:
 class TestAcceptOrder:
 
     async def test_raises_when_order_not_found(self, service, order_repo_mock):
-        order_repo_mock.get_order_with_product_relation.return_value = None
+        order_repo_mock.get_order_with_relations.return_value = None
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderNotFoundError):
             await service.accept_order(
@@ -71,8 +71,8 @@ class TestAcceptOrder:
 
 
     async def test_raises_when_not_in_reservation(self, service, order_repo_mock):
-        order = OrderFactory.create(status=OrderStatus.accept)
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order = OrderFactory.create(status=OrderStatus.accept, store_id="STR_x")
+        order_repo_mock.get_order_with_relations.return_value = order
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderNotInReservationError):
             await service.accept_order(
@@ -83,8 +83,8 @@ class TestAcceptOrder:
     async def test_accepts_and_schedules_email(
         self, service, order_repo_mock, store_read_mock,
     ):
-        order = OrderFactory.create(status=OrderStatus.reservation)
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order = OrderFactory.create(status=OrderStatus.reservation, store_id="STR_x")
+        order_repo_mock.get_order_with_relations.return_value = order
         order_repo_mock.update.return_value = SimpleNamespace(
             status=OrderStatus.accept, accepted_at=datetime.now(timezone.utc),
         )
@@ -109,7 +109,7 @@ class TestAcceptOrder:
 class TestCancelOrder:
 
     async def test_raises_when_order_not_found(self, service, order_repo_mock):
-        order_repo_mock.get_order_with_product_relation.return_value = None
+        order_repo_mock.get_order_with_relations.return_value = None
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderNotFoundError):
             await service.cancel_order(
@@ -121,8 +121,8 @@ class TestCancelOrder:
 
 
     async def test_raises_when_already_canceled(self, service, order_repo_mock):
-        order = OrderFactory.create(status=OrderStatus.cancel)
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order = OrderFactory.create(status=OrderStatus.cancel, store_id="STR_x")
+        order_repo_mock.get_order_with_relations.return_value = order
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderAlreadyCanceledError):
             await service.cancel_order(
@@ -136,8 +136,8 @@ class TestCancelOrder:
     async def test_raises_refund_error_on_portone_fail(
         self, service, order_repo_mock, payment_gateway_mock,
     ):
-        order = OrderFactory.create(status=OrderStatus.reservation)
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order = OrderFactory.create(status=OrderStatus.reservation, store_id="STR_x")
+        order_repo_mock.get_order_with_relations.return_value = order
         payment_gateway_mock.refund.side_effect = PaymentRefundError("network")
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderRefundError):
@@ -156,8 +156,11 @@ class TestCancelOrder:
         payment_gateway_mock,
         product_service_mock,
     ):
-        order = OrderFactory.create(status=OrderStatus.reservation, quantity=2, total_amount=20000)
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order = OrderFactory.create(
+            status=OrderStatus.reservation, quantity=2, total_amount=20000,
+            store_id="STR_x",
+        )
+        order_repo_mock.get_order_with_relations.return_value = order
         order_repo_mock.cancel_order.return_value = 2
 
         bt, tasks = BackgroundTasksFakeFactory.create()
@@ -184,21 +187,23 @@ class TestCancelOrder:
 class TestGetPickupQR:
 
     async def test_raises_when_not_found(self, service, order_repo_mock):
-        order_repo_mock.get_order_with_product_relation.return_value = None
+        order_repo_mock.get_order_with_relations.return_value = None
         with pytest.raises(OrderNotFoundError):
             await service.get_pickup_qr(store_id="STR_x", payment_id="PAY_missing")
 
 
     async def test_raises_when_not_accepted(self, service, order_repo_mock):
-        order = OrderFactory.create(status=OrderStatus.reservation)
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order = OrderFactory.create(status=OrderStatus.reservation, store_id="STR_x")
+        order_repo_mock.get_order_with_relations.return_value = order
         with pytest.raises(OrderNotInReservationError):
             await service.get_pickup_qr(store_id="STR_x", payment_id=order.payment_id)
 
 
     async def test_returns_qr_data_when_accepted(self, service, order_repo_mock):
-        order = OrderFactory.create(status=OrderStatus.accept, payment_id="PAY_qr")
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order = OrderFactory.create(
+            status=OrderStatus.accept, payment_id="PAY_qr", store_id="STR_x",
+        )
+        order_repo_mock.get_order_with_relations.return_value = order
 
         result = await service.get_pickup_qr(store_id="STR_x", payment_id="PAY_qr")
 

@@ -18,6 +18,7 @@ from app.domain.order.service.exception import (
     OrderAlreadyCanceledError,
     OrderNotFoundError,
     OrderNotInReservationError,
+    OrderOwnershipMismatchError,
     OrderRefundError,
     OrderStockConflictError,
 )
@@ -29,7 +30,9 @@ from app.domain.order.schema.order import (
     SellerPickupQRResponse,
 )
 from app.domain.order.schema.dashboard import DashboardResponse
+from app.domain.auth.dto.auth import UserType
 from app.core.openapi import create_error_responses
+from app.config.setting import settings
 
 
 router = APIRouter(prefix="/seller/store/orders", tags=["Seller-Order"])
@@ -90,6 +93,7 @@ async def get_order_today(
     responses=create_error_responses({
         400: "이미 처리한 주문",
         401: ["인증 정보가 없음", "토큰 만료"],
+        403: "본인 가게 주문 아님",
         404: "등록된 가게를 찾을 수 없음",
     }),
 )
@@ -116,6 +120,8 @@ async def update_order_accept(
         )
     except OrderNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except OrderOwnershipMismatchError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
     except OrderNotInReservationError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -126,6 +132,7 @@ async def update_order_accept(
     responses=create_error_responses({
         400: "이미 취소한 주문",
         401: ["인증 정보가 없음", "토큰 만료"],
+        403: "본인 가게 주문 아님",
         404: "등록된 가게를 찾을 수 없음",
         409: "재고 복구 중, 충돌 발생",
     }),
@@ -155,6 +162,8 @@ async def cancel_order(
         )
     except OrderNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except OrderOwnershipMismatchError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
     except OrderAlreadyCanceledError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except OrderRefundError as e:
@@ -171,6 +180,7 @@ async def cancel_order(
     responses=create_error_responses({
         400: "픽업 준비가 되지 않은 주문",
         401: ["인증 정보가 없음", "토큰 만료"],
+        403: "본인 가게 주문 아님",
         404: "주문을 찾을 수 없음",
     }),
 )
@@ -195,6 +205,8 @@ async def get_order_qr(
         )
     except OrderNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except OrderOwnershipMismatchError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
     except OrderNotInReservationError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -224,9 +236,47 @@ async def get_dashboard(
     return await seller_order_service.get_dashboard(store_id)
 
 
+def _extract_ws_token(websocket: WebSocket) -> str | None:
+    """WebSocket 은 BaseHTTPMiddleware 가 동작하지 않으므로 토큰을 직접 추출.
+
+    dev 환경 한정으로 ?token=... query param 도 허용 (HTTP 미들웨어와 동일 정책).
+    """
+    if settings.ENVIRONMENT == "dev":
+        token = websocket.query_params.get("token")
+        if token:
+            return token
+    return websocket.cookies.get("access_token")
+
+
 @router.websocket("/{payment_id}/qr/callback")
 async def qr_callback_websocket(websocket: WebSocket, payment_id: str):
-    """30초 동안 QR 콜백 상태를 polling. 픽업 완료 시 신호 송신 후 종료."""
+    """30초 동안 QR 콜백 상태를 polling. 픽업 완료 시 신호 송신 후 종료.
+
+    인증/인가는 accept() 이전에 처리 — 통과 못하면 1008 로 즉시 close.
+    DI 는 worker 와 동일하게 container 직접 호출 (BaseHTTPMiddleware/Depends 가
+    WebSocket 에서 신뢰성 있게 동작하지 않으므로).
+    """
+    from app.container import container
+
+    token = _extract_ws_token(websocket)
+    payload = container.jwt_service().decode_access_token(token) if token else None
+    if payload is None or payload.get("user_type") != UserType.SELLER.value:
+        await websocket.close(code=1008, reason="인증 실패")
+        return
+    try:
+        store_id = await container.seller_store_read_service(
+        ).get_store_id_by_seller_email(payload["sub"])
+        await container.seller_order_service().assert_order_belongs_to_store(
+            store_id=store_id, payment_id=payment_id,
+        )
+    except (OrderNotFoundError, OrderOwnershipMismatchError):
+        await websocket.close(code=1008, reason="권한 없음")
+        return
+    except Exception:
+        # 예상치 못한 인증/인가 단계 오류는 절대 leak 하지 않고 일괄 1008.
+        await websocket.close(code=1008, reason="인증 확인 실패")
+        return
+
     await websocket.accept()
     try:
         await QRCallbackCacheService.set_waiting(payment_id)

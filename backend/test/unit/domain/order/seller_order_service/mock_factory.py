@@ -28,7 +28,7 @@ class OrderCurrentItemRepoMockFactory:
         mock = AsyncMock()
         mock.get_store_orders_with_relations.return_value = []
         mock.get_store_current_orders_with_relations.return_value = []
-        mock.get_order_with_product_relation.return_value = None
+        mock.get_order_with_relations.return_value = None
         mock.get_all_orders_with_relations.return_value = []
         mock.update.return_value = None
         mock.cancel_order.return_value = 0

@@ -28,8 +28,7 @@ class OrderCurrentItemRepoMockFactory:
         mock.get_customer_current_orders.return_value = []
         mock.get_customer_current_orders_with_pickup_time.return_value = []
         mock.get_today_alarm_orders.return_value = []
-        mock.get_order_with_store_relation.return_value = None
-        mock.get_order_with_product_relation.return_value = None
+        mock.get_order_with_relations.return_value = None
         mock.complete_order.return_value = None
         mock.cancel_order.return_value = 0
         return mock

@@ -73,16 +73,22 @@ class TestListOrders:
 class TestGetDetail:
 
     async def test_raises_when_not_found(self, service, order_repo_mock):
-        order_repo_mock.get_order_with_store_relation.return_value = None
+        order_repo_mock.get_order_with_relations.return_value = None
         with pytest.raises(OrderNotFoundError):
-            await service.get_detail("PAY_missing")
+            await service.get_detail(
+                customer_email="customer@example.com", payment_id="PAY_missing",
+            )
 
 
     async def test_returns_response_when_found(self, service, order_repo_mock):
-        order = OrderFactory.create(payment_id="PAY_x")
-        order_repo_mock.get_order_with_store_relation.return_value = order
+        order = OrderFactory.create(
+            payment_id="PAY_x", customer_id="customer@example.com",
+        )
+        order_repo_mock.get_order_with_relations.return_value = order
 
-        result = await service.get_detail("PAY_x")
+        result = await service.get_detail(
+            customer_email="customer@example.com", payment_id="PAY_x",
+        )
 
         assert result.payment_id == "PAY_x"
         assert result.status == order.status
@@ -96,7 +102,7 @@ class TestGetDetail:
 class TestCompletePickup:
 
     async def test_raises_when_order_not_found(self, service, order_repo_mock):
-        order_repo_mock.get_order_with_store_relation.return_value = None
+        order_repo_mock.get_order_with_relations.return_value = None
         with pytest.raises(OrderNotFoundError):
             await service.complete_pickup(
                 customer_email="alice@example.com",
@@ -106,8 +112,10 @@ class TestCompletePickup:
 
 
     async def test_raises_when_already_completed(self, service, order_repo_mock):
-        order = OrderFactory.create(status=OrderStatus.complete)
-        order_repo_mock.get_order_with_store_relation.return_value = order
+        order = OrderFactory.create(
+            status=OrderStatus.complete, customer_id="alice@example.com",
+        )
+        order_repo_mock.get_order_with_relations.return_value = order
         with pytest.raises(OrderAlreadyCompletedError):
             await service.complete_pickup(
                 customer_email="alice@example.com",
@@ -117,8 +125,10 @@ class TestCompletePickup:
 
 
     async def test_raises_when_not_accepted(self, service, order_repo_mock):
-        order = OrderFactory.create(status=OrderStatus.reservation)
-        order_repo_mock.get_order_with_store_relation.return_value = order
+        order = OrderFactory.create(
+            status=OrderStatus.reservation, customer_id="alice@example.com",
+        )
+        order_repo_mock.get_order_with_relations.return_value = order
         with pytest.raises(OrderNotAcceptedError):
             await service.complete_pickup(
                 customer_email="alice@example.com",
@@ -128,8 +138,11 @@ class TestCompletePickup:
 
 
     async def test_raises_when_qr_invalid(self, service, order_repo_mock):
-        order = OrderFactory.create(status=OrderStatus.accept)
-        order_repo_mock.get_order_with_store_relation.return_value = order
+        # ownership 은 통과시키고 QR 검증 단계에서 실패하는 것을 확인.
+        order = OrderFactory.create(
+            status=OrderStatus.accept, customer_id="alice@example.com",
+        )
+        order_repo_mock.get_order_with_relations.return_value = order
 
         # validate_qr_data 가 호출되며 invalid QR 은 (False, None, "msg") 반환.
         with patch(
@@ -151,7 +164,7 @@ class TestCompletePickup:
             product_id="PRD_x",
             payment_id="PAY_x",
         )
-        order_repo_mock.get_order_with_store_relation.return_value = order
+        order_repo_mock.get_order_with_relations.return_value = order
 
         # QR 의 customer_id 가 JWT customer 와 일치하지 않는 케이스.
         with patch(
@@ -177,7 +190,7 @@ class TestCompletePickup:
             product_id="PRD_x",
             payment_id="PAY_x",
         )
-        order_repo_mock.get_order_with_store_relation.return_value = order
+        order_repo_mock.get_order_with_relations.return_value = order
         completed = SimpleNamespace(
             status=OrderStatus.complete,
             completed_at=datetime.now(timezone.utc),
@@ -210,7 +223,7 @@ class TestCompletePickup:
 class TestCancel:
 
     async def test_raises_when_order_not_found(self, service, order_repo_mock):
-        order_repo_mock.get_order_with_product_relation.return_value = None
+        order_repo_mock.get_order_with_relations.return_value = None
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderNotFoundError):
             await service.cancel(
@@ -222,8 +235,10 @@ class TestCancel:
 
 
     async def test_raises_when_already_canceled(self, service, order_repo_mock):
-        order = OrderFactory.create(status=OrderStatus.cancel)
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order = OrderFactory.create(
+            status=OrderStatus.cancel, customer_id="alice@example.com",
+        )
+        order_repo_mock.get_order_with_relations.return_value = order
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderAlreadyCanceledError):
             await service.cancel(
@@ -236,8 +251,10 @@ class TestCancel:
 
     async def test_raises_when_already_accepted(self, service, order_repo_mock):
         """customer 는 accept/complete 된 주문을 취소할 수 없다."""
-        order = OrderFactory.create(status=OrderStatus.accept)
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order = OrderFactory.create(
+            status=OrderStatus.accept, customer_id="alice@example.com",
+        )
+        order_repo_mock.get_order_with_relations.return_value = order
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderNotInReservationError):
             await service.cancel(
@@ -251,8 +268,10 @@ class TestCancel:
     async def test_raises_refund_error_when_payment_info_missing(
         self, service, order_repo_mock, store_payment_info_mock,
     ):
-        order = OrderFactory.create(status=OrderStatus.reservation)
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order = OrderFactory.create(
+            status=OrderStatus.reservation, customer_id="alice@example.com",
+        )
+        order_repo_mock.get_order_with_relations.return_value = order
         store_payment_info_mock.get_complete_by_store.side_effect = (
             PaymentInfoMissingError("payment info missing")
         )
@@ -269,8 +288,10 @@ class TestCancel:
     async def test_raises_refund_error_when_portone_refund_fails(
         self, service, order_repo_mock, payment_gateway_mock,
     ):
-        order = OrderFactory.create(status=OrderStatus.reservation)
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order = OrderFactory.create(
+            status=OrderStatus.reservation, customer_id="alice@example.com",
+        )
+        order_repo_mock.get_order_with_relations.return_value = order
         payment_gateway_mock.refund.side_effect = PaymentRefundError("network err")
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderRefundError):
@@ -296,7 +317,7 @@ class TestCancel:
             quantity=3,
             total_amount=30000,
         )
-        order_repo_mock.get_order_with_product_relation.return_value = order
+        order_repo_mock.get_order_with_relations.return_value = order
         order_repo_mock.cancel_order.return_value = 3
         store_read_mock.get_with_full_info.return_value = SimpleNamespace(store_name="가게")
 

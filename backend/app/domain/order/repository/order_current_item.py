@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from app.domain.seller.model.store_product_info import StoreProductInfo
 from app.domain.seller.model.store_operation_info import StoreOperationInfo
 from app.domain.seller.model.store import Store
+from app.domain.order.service.exception import OrderNotFoundError
 from app.domain.order.model.order_current_item import OrderCurrentItem
 from app.domain.order.dto.order import OrderStatus
 from app.domain.customer.model.customer import Customer
@@ -19,59 +20,24 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         super().__init__(OrderCurrentItem, session)
 
 
-    async def get_by_payment_id(self, payment_id: str) -> Optional[OrderCurrentItem]:
-        """결제 ID로 조회"""
-        return await self.get_by_pk(payment_id)
-
-
-    async def get_by_store_id(self, store_id: str) -> List[OrderCurrentItem]:
-        """가게의 현재 주문 목록 조회"""
-        return await self.get_many(
-            filters={"store_id": store_id},
-            order_by=["-order_time"],
-            load_relations=["product"]
-        )
-
-
-    async def get_by_customer_id(self, customer_id: str) -> List[OrderCurrentItem]:
-        """사용자의 현재 주문 목록 조회"""
-        return await self.get_many(
-            filters={"customer_id": customer_id},
-            order_by=["-order_time"]
-        )
-
-
-    async def get_unprocessed_orders(self, store_id: str) -> List[OrderCurrentItem]:
-        """처리되지 않은 주문 조회"""
-        return await self.get_many(
-            filters={
-                "store_id": store_id,
-                "status": OrderStatus.reservation
-            },
-            order_by=["order_time"]
-        )
-
-
-    async def accept_order(self, payment_id: str) -> Optional[OrderCurrentItem]:
-        """주문 수락 처리"""
-        return await self.update(payment_id, status=OrderStatus.accept, accepted_at=datetime.now(timezone.utc))
-
-
     async def complete_order(self, payment_id: str) -> Optional[OrderCurrentItem]:
         """픽업 완료 처리"""
         return await self.update(payment_id, status=OrderStatus.complete, completed_at=datetime.now(timezone.utc))
 
 
     async def cancel_order(self, payment_id: str, cancel_reason: Optional[str] = None) -> int:
-        """주문 취소 처리"""
+        """주문 취소 처리 — quantity 반환 (재고 복원용). update 실패 시 OrderNotFoundError."""
         canceled_item = await self.update(
             payment_id,
             status=OrderStatus.cancel,
             canceled_at=datetime.now(timezone.utc),
             cancel_reason=cancel_reason
         )
-        if canceled_item:
-            return canceled_item.quantity
+        if canceled_item is None:
+            raise OrderNotFoundError(
+                f"주문 취소 갱신 실패: payment_id={payment_id}",
+            )
+        return canceled_item.quantity
 
 
     async def delete_all_items(self) -> List[OrderCurrentItem]:
@@ -93,22 +59,6 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         
         result = await self.session.execute(stmt)
         return result.scalars().all()
-
-
-    async def migrate_from_current_orders(self, cart_item: dict) -> None:
-        """장바구니에서 주문으로 마이그레이션"""
-        
-        await self.create(
-            payment_id=cart_item["payment_id"],
-            product_id=cart_item["product_id"],
-            customer_id=cart_item["customer_id"],
-            quantity=cart_item["quantity"],
-            price=cart_item["price"],
-            status=OrderStatus.reservation,
-            reservation_at=cart_item.get("order_time", datetime.now(timezone.utc))
-        )
-        
-        return None
 
 
     async def get_customer_current_orders(self, customer_id: str) -> List[OrderCurrentItem]:
@@ -169,22 +119,8 @@ class OrderCurrentItemRepository(BaseRepository[OrderCurrentItem]):
         return orders
 
 
-    async def get_order_with_store_relation(self, payment_id: str) -> Optional[OrderCurrentItem]:
-        """주문 상세 정보 조회 (상품 및 가게 정보 포함)"""
-        stmt = (
-            select(OrderCurrentItem)
-            .where(OrderCurrentItem.payment_id == payment_id)
-            .options(
-                selectinload(OrderCurrentItem.product).selectinload(StoreProductInfo.store),
-                selectinload(OrderCurrentItem.customer).selectinload(Customer.detail)
-            )
-        )
-        result = await self.session.execute(stmt)
-        return result.scalar_one_or_none()
-
-
-    async def get_order_with_product_relation(self, payment_id: str) -> Optional[OrderCurrentItem]:
-        """주문 정보 조회 (상품 정보 포함)"""
+    async def get_order_with_relations(self, payment_id: str) -> Optional[OrderCurrentItem]:
+        """단건 조회 — product/store/customer/customer.detail 까지 한 번에 load."""
         stmt = (
             select(OrderCurrentItem)
             .where(OrderCurrentItem.payment_id == payment_id)

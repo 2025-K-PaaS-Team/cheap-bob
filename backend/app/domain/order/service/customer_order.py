@@ -34,9 +34,11 @@ from app.domain.order.repository.order_history_item import OrderHistoryItemRepos
 from app.domain.order.repository.order_current_item import OrderCurrentItemRepository
 from app.domain.order.dto.order import OrderStatus
 from app.database.session import UnitOfWork, transactional
+from app.core.logger import get_logger
 
 
 _KST = timezone(timedelta(hours=9))
+logger = get_logger("order.service.customer_order")
 
 
 class CustomerOrderService:
@@ -149,12 +151,16 @@ class CustomerOrderService:
 
 
     @transactional
-    async def get_detail(self, payment_id: str) -> OrderItemResponse:
+    async def get_detail(
+        self, *, customer_email: str, payment_id: str,
+    ) -> OrderItemResponse:
         order = await OrderCurrentItemRepository(
             self._session,
-        ).get_order_with_store_relation(payment_id)
+        ).get_order_with_relations(payment_id)
         if order is None:
             raise OrderNotFoundError("주문을 찾을 수 없습니다")
+        if order.customer_id != customer_email:
+            raise OrderOwnershipMismatchError("본인 주문만 조회할 수 있습니다")
         return _order_response(order)
 
 
@@ -163,9 +169,13 @@ class CustomerOrderService:
         self, *, customer_email: str, payment_id: str, qr_data: str,
     ) -> OrderItemResponse:
         repo = OrderCurrentItemRepository(self._session)
-        order = await repo.get_order_with_store_relation(payment_id)
+        order = await repo.get_order_with_relations(payment_id)
         if order is None:
             raise OrderNotFoundError("주문을 찾을 수 없습니다")
+        # ownership 검증을 status 검사 앞에 둔다 — 다른 고객의 주문 상태가
+        # 응답 메시지로 누설되는 것을 막기 위함.
+        if order.customer_id != customer_email:
+            raise OrderOwnershipMismatchError("본인 주문이 아닙니다")
         if order.status == OrderStatus.complete:
             raise OrderAlreadyCompletedError("이미 픽업이 완료된 주문입니다")
         if order.status != OrderStatus.accept:
@@ -175,8 +185,8 @@ class CustomerOrderService:
         if not is_valid:
             raise OrderQrInvalidError(error_msg)
 
-        # 세 가지 ID 가 모두 일치해야 한다 — JWT / QR / DB 주문의 customer_id.
-        if not (customer_email == parsed["customer_id"] == order.customer_id):
+        # JWT/QR/DB 의 customer_id 와 product_id 가 모두 일치해야 한다.
+        if parsed["customer_id"] != order.customer_id:
             raise OrderOwnershipMismatchError("권한이 없는 소비자입니다")
         if parsed["payment_id"] != payment_id:
             raise OrderQrInvalidError("잘못된 QR 코드입니다")
@@ -214,6 +224,8 @@ class CustomerOrderService:
         order = await self._get_with_product_relation(payment_id)
         if order is None:
             raise OrderNotFoundError("주문을 찾을 수 없습니다")
+        if order.customer_id != customer_email:
+            raise OrderOwnershipMismatchError("본인 주문만 취소할 수 있습니다")
         if order.status == OrderStatus.cancel:
             raise OrderAlreadyCanceledError("이미 취소된 주문입니다")
         if order.status in (OrderStatus.accept, OrderStatus.complete):
@@ -235,10 +247,25 @@ class CustomerOrderService:
         except PaymentRefundError as e:
             raise OrderRefundError(str(e))
 
-        quantity = await self._cancel_record(payment_id, reason)
-        await self.seller_product_service.restore_purchased_stock(
-            product_id=order.product_id, quantity=quantity,
-        )
+        # 환불 성공 후의 실패는 절대 silent 하면 안 된다 — 돈은 이미 돌아갔으므로
+        # 사용자에게는 정상 응답하되, 내부 상태 부정합은 critical 로깅으로 운영자에게 알림.
+        try:
+            quantity = await self._cancel_record(payment_id, reason)
+        except Exception:
+            logger.exception(
+                "[CRITICAL] 환불 성공 후 주문 취소 갱신 실패 - payment_id={}, customer={}",
+                payment_id, customer_email,
+            )
+            quantity = order.quantity
+        try:
+            await self.seller_product_service.restore_purchased_stock(
+                product_id=order.product_id, quantity=quantity,
+            )
+        except Exception:
+            logger.exception(
+                "[CRITICAL] 환불 성공 후 재고 복원 실패 - payment_id={}, product={}, quantity={}",
+                payment_id, order.product_id, quantity,
+            )
 
         store = await self.seller_store_read_service.get_with_full_info(
             order.product.store_id,
@@ -286,7 +313,7 @@ class CustomerOrderService:
     async def _get_with_product_relation(self, payment_id: str):
         return await OrderCurrentItemRepository(
             self._session,
-        ).get_order_with_product_relation(payment_id)
+        ).get_order_with_relations(payment_id)
 
 
     @transactional
