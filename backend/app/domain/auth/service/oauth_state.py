@@ -11,6 +11,7 @@ state 에 user_type 까지 묶는 이유: customer login 으로 발급된 state 
 에서 재사용하는 cross-type replay 도 차단.
 """
 import uuid
+from typing import Optional
 
 from app.domain.auth.dto.auth import UserType
 from app.core.redis import RedisClient
@@ -18,6 +19,10 @@ from app.core.redis import RedisClient
 
 _KEY_PREFIX = "oauth:state:"
 _TTL_SECONDS = 5 * 60  # OAuth provider 왕복 시간 + 사용자 입력 여유.
+
+# dev 환경의 frontend 로컬 분기용 매직값 — login 에서 state 발급을 건너뛰고
+# callback 에서 CSRF 검증을 우회한다. ENVIRONMENT=dev 일 때만 효력 있음.
+DEV_LOCAL_STATE = "1004"
 
 
 class OAuthStateService:
@@ -37,7 +42,7 @@ class OAuthStateService:
 
 
     @classmethod
-    async def consume(cls, state: str, *, expected_type: UserType) -> bool:
+    async def consume(cls, state: Optional[str], *, expected_type: UserType) -> bool:
         """state 가 expected_type 으로 발급됐는지 검증 + atomic 삭제.
 
         Returns:

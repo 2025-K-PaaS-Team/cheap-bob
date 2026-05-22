@@ -1,7 +1,7 @@
 from fastapi.responses import RedirectResponse
 from fastapi import APIRouter, Query
 
-from app.domain.auth.service.oauth_state import OAuthStateService
+from app.domain.auth.service.oauth_state import DEV_LOCAL_STATE, OAuthStateService
 from app.domain.auth.dto.auth import UserType
 from app.core.oauth import create_oauth_client
 from app.config.setting import settings
@@ -11,17 +11,15 @@ from app.config.oauth import OAuthProvider
 router = APIRouter()
 
 
-_DEV_LOCAL_STATE = "1004"  # dev 환경의 frontend 로컬 분기용 매직값.
-
-
 async def _resolve_state(provided_state: str | None, user_type: UserType) -> str:
     """OAuth state 결정.
 
-    dev 환경의 매직값 (``1004``) 은 그대로 통과 — frontend 로컬 분기 호환을 위해 유지.
-    그 외엔 항상 서버가 UUID state 를 발급하고 Redis 에 저장 → callback 에서 atomic 검증.
+    dev 환경의 매직값 (``DEV_LOCAL_STATE``) 은 그대로 통과 — frontend 로컬 분기 호환을
+    위해 유지. 그 외엔 항상 서버가 UUID state 를 발급하고 Redis 에 저장 → callback 에서
+    atomic 검증.
     """
-    if provided_state == _DEV_LOCAL_STATE and settings.ENVIRONMENT == "dev":
-        return _DEV_LOCAL_STATE
+    if provided_state == DEV_LOCAL_STATE and settings.ENVIRONMENT == "dev":
+        return DEV_LOCAL_STATE
     return await OAuthStateService.issue(user_type)
 
 

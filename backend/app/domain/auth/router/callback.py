@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query
 from dependency_injector.wiring import Provide, inject
 
 from app.domain.auth.service.registration_status import RegistrationStatusService
-from app.domain.auth.service.oauth_state import OAuthStateService
+from app.domain.auth.service.oauth_state import DEV_LOCAL_STATE, OAuthStateService
 from app.domain.auth.service.oauth import OAuthService
 from app.domain.auth.service.exception import OAuthAuthenticationError
 from app.domain.auth.dto.auth import UserType
@@ -15,17 +15,14 @@ from app.config.oauth import OAuthProvider
 router = APIRouter()
 
 
-_DEV_LOCAL_STATE = "1004"
-
-
 async def _verify_state(state: str | None, *, expected_type: UserType) -> bool:
-    """CSRF state 검증. dev 환경의 매직값 ('1004') 만 우회 — 그 외엔 Redis atomic GETDEL.
+    """CSRF state 검증. dev 환경 매직값만 우회 — 그 외엔 Redis atomic GETDEL.
 
     Returns True 면 통과, False 면 거부 (callback 라우터가 error redirect).
     """
-    if state == _DEV_LOCAL_STATE and settings.ENVIRONMENT == "dev":
+    if state == DEV_LOCAL_STATE and settings.ENVIRONMENT == "dev":
         return True
-    return await OAuthStateService.consume(state or "", expected_type=expected_type)
+    return await OAuthStateService.consume(state, expected_type=expected_type)
 
 
 def _frontend_base(*, is_local_dev: bool) -> str:
@@ -82,7 +79,7 @@ async def customer_oauth_callback(
     3) 성공: success 페이지로 302 + httpOnly 쿠키. OAuth 실패: error 페이지로 302.
        DB / 내부 오류는 catch 하지 않고 글로벌 핸들러 (5xx) 로 보낸다 — 알람/모니터링이 정상 동작해야 한다.
     """
-    is_local_dev = state == _DEV_LOCAL_STATE and settings.ENVIRONMENT == "dev"
+    is_local_dev = state == DEV_LOCAL_STATE and settings.ENVIRONMENT == "dev"
 
     if not await _verify_state(state, expected_type=UserType.CUSTOMER):
         return _build_error_redirect(
@@ -123,7 +120,7 @@ async def seller_oauth_callback(
     ),
 ):
     """Seller 진입의 OAuth 콜백."""
-    is_local_dev = state == _DEV_LOCAL_STATE and settings.ENVIRONMENT == "dev"
+    is_local_dev = state == DEV_LOCAL_STATE and settings.ENVIRONMENT == "dev"
 
     if not await _verify_state(state, expected_type=UserType.SELLER):
         return _build_error_redirect(
