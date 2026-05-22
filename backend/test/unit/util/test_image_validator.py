@@ -7,10 +7,10 @@
   - 미지원 content_type → 400
   - 크기 초과 → 413
 """
-from io import BytesIO
 from unittest.mock import AsyncMock, MagicMock
-from fastapi import HTTPException, UploadFile
 import pytest
+from io import BytesIO
+from fastapi import HTTPException, UploadFile
 
 
 _JPEG_MAGIC = b"\xff\xd8\xff\xe0\x00\x10JFIF" + b"\x00" * 100

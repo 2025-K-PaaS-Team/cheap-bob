@@ -9,15 +9,15 @@
 
     POSTGRES_TEST_URL="postgresql+asyncpg://cho:hyeonsang@localhost:5432/chohyeonsang_test"
 """
-import os
-import pytest
-import pytest_asyncio
-from sqlalchemy import text
 from sqlalchemy.pool import NullPool
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy import text
+import pytest_asyncio
+import pytest
+import os
 
-import app.database.model  # noqa: F401 — Base.metadata 채우기
 from app.database.session import Base, UnitOfWork
+import app.database.model  # noqa: F401 — Base.metadata 채우기
 
 
 def _require_test_db_url() -> str:

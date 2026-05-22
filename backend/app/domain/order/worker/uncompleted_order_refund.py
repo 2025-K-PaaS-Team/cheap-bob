@@ -5,6 +5,7 @@
 """
 from datetime import datetime, timezone
 
+from app.scheduler.decorators import log_and_swallow
 from app.core.logger import get_logger
 from app.container import container
 
@@ -16,15 +17,11 @@ class UncompletedOrderRefundTask:
     """미완료 주문(reservation, accept) 자동 환불 스케줄 작업."""
 
     @staticmethod
+    @log_and_swallow("미완료 주문 환불 처리", logger)
     async def refund_uncompleted_orders():
         start = datetime.now(timezone.utc)
-        try:
-            cancelled, failed, total_amount = await container.seller_order_service(
-            ).refund_all_uncompleted()
-        except Exception:
-            logger.exception("미완료 주문 환불 처리 중 오류 발생")
-            return
-
+        cancelled, failed, total_amount = await container.seller_order_service(
+        ).refund_all_uncompleted()
         elapsed = (datetime.now(timezone.utc) - start).total_seconds()
         logger.info(
             "미완료 주문 환불 처리 완료: 성공 {}건, 실패 {}건, 총 환불 금액 {:,}원 ({:.2f}s)",

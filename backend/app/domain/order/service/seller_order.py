@@ -2,12 +2,18 @@
 from typing import Optional
 from fastapi import BackgroundTasks
 from datetime import datetime, timezone
+from collections import defaultdict
 
 from app.util.comma_separated import parse_comma_separated_string
 from app.domain.seller.service.seller_store_read import SellerStoreReadService
 from app.domain.seller.service.seller_product import SellerProductService
 from app.domain.payment.service.store_payment_info import StorePaymentInfoService
 from app.domain.payment.service.payment_gateway import PaymentGatewayService
+from app.domain.payment.service.exception import (
+    PaymentInfoIncompleteError,
+    PaymentInfoMissingError,
+    PaymentRefundError,
+)
 from app.domain.order.service.qr import encode_qr_data
 from app.domain.order.service.order_query import OrderQueryService
 from app.domain.order.service.exception import (
@@ -29,6 +35,10 @@ from app.domain.order.repository.order_current_item import OrderCurrentItemRepos
 from app.domain.order.dto.order import OrderStatus
 from app.database.session import UnitOfWork, transactional
 from app.core.logger import get_logger
+from app.core.email.notifier import (
+    send_order_accepted_email,
+    send_seller_cancel_email,
+)
 
 
 logger = get_logger("order.service.seller_order")
@@ -106,9 +116,6 @@ class SellerOrderService:
         if updated is None:
             raise OrderNotInReservationError("이미 처리된 주문입니다")
 
-        # [TRANSITIONAL] background_email — payment 도메인 분리와 무관, 그대로 사용.
-        from app.core.email.notifier import send_order_accepted_email
-
         store = await self.seller_store_read_service.get_with_full_info(store_id)
         background_tasks.add_task(
             send_order_accepted_email, order.customer_id, store.store_name,
@@ -125,13 +132,6 @@ class SellerOrderService:
         reason: str,
         background_tasks: BackgroundTasks,
     ) -> OrderCancelResponse:
-        from app.domain.payment.service.exception import (
-            PaymentInfoIncompleteError,
-            PaymentInfoMissingError,
-            PaymentRefundError,
-        )
-        from app.core.email.notifier import send_seller_cancel_email
-
         order = await self._get_with_product_relation(payment_id)
         if order is None:
             raise OrderNotFoundError("주문을 찾을 수 없습니다")
@@ -251,12 +251,6 @@ class SellerOrderService:
 
         Returns: (cancelled, failed, total_refund_amount).
         """
-        from app.domain.payment.service.exception import (
-            PaymentInfoIncompleteError,
-            PaymentInfoMissingError,
-            PaymentRefundError,
-        )
-
         try:
             payment_info = await self.store_payment_info_service.get_complete_by_store(
                 store_id,
@@ -321,14 +315,6 @@ class SellerOrderService:
 
         Returns: (cancelled, failed, total_refund_amount).
         """
-        from collections import defaultdict
-
-        from app.domain.payment.service.exception import (
-            PaymentInfoIncompleteError,
-            PaymentInfoMissingError,
-            PaymentRefundError,
-        )
-
         all_orders = await self._list_all_current_with_relations()
         uncompleted = [
             o for o in all_orders
@@ -447,8 +433,6 @@ class SellerOrderService:
 
     async def _send_cancel_email_safe(self, customer_id: str, store_name: str) -> None:
         """이메일 발송 실패가 batch 흐름을 막지 않도록 swallow."""
-        from app.core.email.notifier import send_seller_cancel_email
-
         try:
             await send_seller_cancel_email(customer_id, store_name)
         except Exception:

@@ -1,18 +1,7 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends
 from dependency_injector.wiring import Provide, inject
 
 from app.middleware.auth import CurrentCustomerDep
-from app.domain.order.service.exception import (
-    OrderAlreadyCanceledError,
-    OrderAlreadyCompletedError,
-    OrderNotAcceptedError,
-    OrderNotFoundError,
-    OrderNotInReservationError,
-    OrderOwnershipMismatchError,
-    OrderQrInvalidError,
-    OrderRefundError,
-    OrderStockConflictError,
-)
 from app.domain.order.service.customer_order import CustomerOrderService
 from app.domain.order.schema.order import (
     CustomerOrderListResponse,
@@ -94,14 +83,9 @@ async def get_order_detail(
         Provide["customer_order_service"],
     ),
 ):
-    try:
-        return await customer_order_service.get_detail(
-            customer_email=current_user["sub"], payment_id=payment_id,
-        )
-    except OrderNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except OrderOwnershipMismatchError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    return await customer_order_service.get_detail(
+        customer_email=current_user["sub"], payment_id=payment_id,
+    )
 
 
 @router.patch(
@@ -123,22 +107,11 @@ async def complete_pickup(
         Provide["customer_order_service"],
     ),
 ):
-    try:
-        return await customer_order_service.complete_pickup(
-            customer_email=current_user["sub"],
-            payment_id=payment_id,
-            qr_data=request.qr_data,
-        )
-    except OrderNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except OrderAlreadyCompletedError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except OrderNotAcceptedError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except OrderOwnershipMismatchError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-    except OrderQrInvalidError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    return await customer_order_service.complete_pickup(
+        customer_email=current_user["sub"],
+        payment_id=payment_id,
+        qr_data=request.qr_data,
+    )
 
 
 @router.delete(
@@ -162,24 +135,9 @@ async def cancel_order(
         Provide["customer_order_service"],
     ),
 ):
-    try:
-        return await customer_order_service.cancel(
-            customer_email=current_user["sub"],
-            payment_id=payment_id,
-            reason=request.reason,
-            background_tasks=background_tasks,
-        )
-    except OrderNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except OrderOwnershipMismatchError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-    except OrderAlreadyCanceledError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except OrderNotInReservationError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except OrderRefundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e),
-        )
-    except OrderStockConflictError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    return await customer_order_service.cancel(
+        customer_email=current_user["sub"],
+        payment_id=payment_id,
+        reason=request.reason,
+        background_tasks=background_tasks,
+    )

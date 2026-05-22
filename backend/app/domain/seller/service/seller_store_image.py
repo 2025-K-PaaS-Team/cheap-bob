@@ -27,8 +27,8 @@ class SellerStoreImageService:
         self.uow = uow
 
 
-    @transactional
     async def _assert_owner(self, store_id: str, seller_email: str) -> None:
+        """caller 의 @transactional 안에서만 호출 — self._session 이 설정돼 있어야 함."""
         store = await StoreRepository(self._session).get_by_store_id(store_id)
         if store is None:
             raise StoreNotFoundError("가게를 찾을 수 없습니다.")
@@ -45,13 +45,8 @@ class SellerStoreImageService:
         files: List[Tuple[BinaryIO, str, str]],
     ) -> StoreImagesUploadResponse:
         """첫 등록 — 첫 번째 파일이 대표 이미지."""
+        await self._assert_owner(store_id, seller_email)
         repo = StoreImageRepository(self._session)
-
-        store = await StoreRepository(self._session).get_by_store_id(store_id)
-        if store is None:
-            raise StoreNotFoundError("가게를 찾을 수 없습니다.")
-        if store.seller_email != seller_email:
-            raise StoreImageNotFoundError("권한이 없습니다.")
 
         if await repo.get_by_store_id(store_id):
             raise StoreImageDuplicateError("이미 등록된 이미지가 있습니다.")
@@ -90,13 +85,8 @@ class SellerStoreImageService:
         seller_email: str,
         files: List[Tuple[BinaryIO, str, str]],
     ) -> StoreImagesUploadResponse:
+        await self._assert_owner(store_id, seller_email)
         repo = StoreImageRepository(self._session)
-
-        store = await StoreRepository(self._session).get_by_store_id(store_id)
-        if store is None:
-            raise StoreNotFoundError("가게를 찾을 수 없습니다.")
-        if store.seller_email != seller_email:
-            raise StoreImageNotFoundError("권한이 없습니다.")
 
         existing = await repo.get_by_store_id(store_id)
         uploaded = await object_storage.upload_multiple_files(
@@ -158,12 +148,8 @@ class SellerStoreImageService:
     async def delete_image(
         self, *, store_id: str, seller_email: str, image_id: str,
     ) -> bool:
+        await self._assert_owner(store_id, seller_email)
         repo = StoreImageRepository(self._session)
-        store = await StoreRepository(self._session).get_by_store_id(store_id)
-        if store is None:
-            raise StoreNotFoundError("가게를 찾을 수 없습니다.")
-        if store.seller_email != seller_email:
-            raise StoreImageNotFoundError("권한이 없습니다.")
 
         image = await repo.get_by_pk(image_id)
         if image is None or image.store_id != store_id:
@@ -179,12 +165,8 @@ class SellerStoreImageService:
     async def change_main_image(
         self, *, store_id: str, seller_email: str, new_main_image_id: str,
     ) -> ImageUploadResponse:
+        await self._assert_owner(store_id, seller_email)
         repo = StoreImageRepository(self._session)
-        store = await StoreRepository(self._session).get_by_store_id(store_id)
-        if store is None:
-            raise StoreNotFoundError("가게를 찾을 수 없습니다.")
-        if store.seller_email != seller_email:
-            raise StoreImageNotFoundError("권한이 없습니다.")
 
         image = await repo.get_by_pk(new_main_image_id)
         if image is None or image.store_id != store_id:

@@ -6,6 +6,7 @@
 """
 from datetime import datetime, timezone
 
+from app.scheduler.decorators import log_and_swallow
 from app.core.logger import get_logger
 from app.container import container
 
@@ -17,15 +18,11 @@ class ProductStockUpdateTask:
     """Mongo 재고 예약을 SQL 상품 정보에 적용하는 스케줄 작업."""
 
     @staticmethod
+    @log_and_swallow("예약된 재고 업데이트", logger)
     async def update_reserved_stocks():
         start = datetime.now(timezone.utc)
-        try:
-            success, failed = await container.seller_product_service(
-            ).apply_pending_stock_updates()
-        except Exception:
-            logger.exception("예약된 재고 업데이트 중 오류 발생")
-            return
-
+        success, failed = await container.seller_product_service(
+        ).apply_pending_stock_updates()
         elapsed = (datetime.now(timezone.utc) - start).total_seconds()
         logger.info(
             "예약된 재고 업데이트 완료: 성공 {}건, 실패 {}건 ({:.2f}s)",

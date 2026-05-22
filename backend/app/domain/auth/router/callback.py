@@ -6,8 +6,8 @@ from app.domain.auth.service.registration_status import RegistrationStatusServic
 from app.domain.auth.service.oauth_state import DEV_LOCAL_STATE, OAuthStateService
 from app.domain.auth.service.oauth import OAuthService
 from app.domain.auth.service.exception import OAuthAuthenticationError
-from app.domain.auth.dto.auth import UserType
 from app.domain.auth.service.cookie import set_auth_cookie
+from app.domain.auth.dto.auth import UserType
 from app.config.setting import settings
 from app.config.oauth import OAuthProvider
 

@@ -5,8 +5,8 @@ from fastapi.responses import JSONResponse
 from fastapi import Depends, HTTPException, Request, Response, status
 
 from app.domain.auth.service.jwt import JwtService
-from app.domain.auth.dto.auth import UserType
 from app.domain.auth.service.cookie import set_auth_cookie
+from app.domain.auth.dto.auth import UserType
 
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):

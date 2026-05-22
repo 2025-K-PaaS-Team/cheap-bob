@@ -1,7 +1,3 @@
-import pytest
-
-from app.domain.customer.service.customer_register import CustomerRegisterService
-
 from test.unit.domain.customer.customer_register_service.mock_factory import (
     AllergyRepoMockFactory,
     DetailRepoMockFactory,
@@ -11,6 +7,9 @@ from test.unit.domain.customer.customer_register_service.mock_factory import (
     ToppingTypeRepoMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.customer.service.customer_register import CustomerRegisterService
 
 
 @pytest.fixture

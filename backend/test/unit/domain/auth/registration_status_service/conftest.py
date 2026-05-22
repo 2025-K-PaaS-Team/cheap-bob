@@ -1,11 +1,10 @@
-import pytest
-
-from app.domain.auth.service.registration_status import RegistrationStatusService
-
 from test.unit.domain.auth.registration_status_service.mock_factory import (
     CustomerStatusServiceMockFactory,
     SellerStatusServiceMockFactory,
 )
+import pytest
+
+from app.domain.auth.service.registration_status import RegistrationStatusService
 
 
 @pytest.fixture

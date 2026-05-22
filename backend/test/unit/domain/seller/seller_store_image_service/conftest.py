@@ -1,7 +1,3 @@
-import pytest
-
-from app.domain.seller.service.seller_store_image import SellerStoreImageService
-
 from test.unit.domain.seller.seller_store_image_service.mock_factory import (
     FakeUnitOfWork,
     ObjectStorageMockFactory,
@@ -9,6 +5,9 @@ from test.unit.domain.seller.seller_store_image_service.mock_factory import (
     StoreRepoMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.seller.service.seller_store_image import SellerStoreImageService
 
 
 @pytest.fixture

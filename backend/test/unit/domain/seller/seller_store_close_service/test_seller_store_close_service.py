@@ -2,12 +2,12 @@
 from types import SimpleNamespace
 import pytest
 
-from app.domain.order.dto.order import OrderStatus
+from app.domain.seller.service.exception import StorePaymentMissingError
 from app.domain.payment.service.exception import (
     PaymentInfoIncompleteError,
     PaymentInfoMissingError,
 )
-from app.domain.seller.service.exception import StorePaymentMissingError
+from app.domain.order.dto.order import OrderStatus
 
 
 @pytest.mark.unit

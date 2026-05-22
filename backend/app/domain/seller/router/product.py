@@ -1,19 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from dependency_injector.wiring import Provide, inject
 
-from app.middleware.auth import CurrentSellerDep
-from app.domain.seller.service.seller_store_read import SellerStoreReadService
 from app.domain.seller.service.seller_product import SellerProductService
-from app.domain.seller.service.exception import (
-    ProductAlreadyRegisteredError,
-    ProductNotFoundError,
-    ProductNutritionDuplicateError,
-    ProductNutritionNotFoundError,
-    ProductStockConflictError,
-    ProductStockInsufficientError,
-    ProductStockReservationNotFoundError,
-    StoreNotFoundError,
-)
 from app.domain.seller.schema.product import (
     ProductCreateRequest,
     ProductNutritionRequest,
@@ -22,6 +10,7 @@ from app.domain.seller.schema.product import (
     ProductStockReservationResponse,
     ProductUpdateRequest,
 )
+from app.domain.seller.router.deps import CurrentSellerStoreIdDep
 from app.core.openapi import create_error_responses
 
 
@@ -56,29 +45,18 @@ def _to_response(product, nutrition_types) -> ProductResponse:
 @inject
 async def create_product(
     request: ProductCreateRequest,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     product_service: SellerProductService = Depends(Provide["seller_product_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        product, nutrition = await product_service.create(
-            store_id=store_id,
-            product_name=request.product_name,
-            description=request.description,
-            initial_stock=request.initial_stock,
-            price=request.price,
-            sale=request.sale,
-            nutrition_types=request.nutrition_types,
-        )
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except ProductAlreadyRegisteredError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    product, nutrition = await product_service.create(
+        store_id=store_id,
+        product_name=request.product_name,
+        description=request.description,
+        initial_stock=request.initial_stock,
+        price=request.price,
+        sale=request.sale,
+        nutrition_types=request.nutrition_types,
+    )
     return _to_response(product, nutrition)
 
 
@@ -93,21 +71,12 @@ async def create_product(
 @inject
 async def get_product(
     product_id: str,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     product_service: SellerProductService = Depends(Provide["seller_product_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        product, nutrition = await product_service.get(
-            store_id=store_id, product_id=product_id,
-        )
-    except (StoreNotFoundError, ProductNotFoundError) as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    product, nutrition = await product_service.get(
+        store_id=store_id, product_id=product_id,
+    )
     return _to_response(product, nutrition)
 
 
@@ -123,23 +92,14 @@ async def get_product(
 async def update_product(
     product_id: str,
     request: ProductUpdateRequest,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     product_service: SellerProductService = Depends(Provide["seller_product_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        product, nutrition = await product_service.update(
-            store_id=store_id,
-            product_id=product_id,
-            update_data=request.model_dump(exclude_unset=True),
-        )
-    except (StoreNotFoundError, ProductNotFoundError) as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    product, nutrition = await product_service.update(
+        store_id=store_id,
+        product_id=product_id,
+        update_data=request.model_dump(exclude_unset=True),
+    )
     return _to_response(product, nutrition)
 
 
@@ -155,23 +115,12 @@ async def update_product(
 @inject
 async def increase_product_stock(
     product_id: str,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     product_service: SellerProductService = Depends(Provide["seller_product_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        product, nutrition = await product_service.adjust_admin_stock(
-            store_id=store_id, product_id=product_id, delta=1,
-        )
-    except (StoreNotFoundError, ProductNotFoundError) as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except ProductStockConflictError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    product, nutrition = await product_service.adjust_admin_stock(
+        store_id=store_id, product_id=product_id, delta=1,
+    )
     return _to_response(product, nutrition)
 
 
@@ -187,25 +136,12 @@ async def increase_product_stock(
 @inject
 async def decrease_product_stock(
     product_id: str,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     product_service: SellerProductService = Depends(Provide["seller_product_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        product, nutrition = await product_service.adjust_admin_stock(
-            store_id=store_id, product_id=product_id, delta=-1,
-        )
-    except (StoreNotFoundError, ProductNotFoundError) as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except ProductStockInsufficientError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
-    except ProductStockConflictError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    product, nutrition = await product_service.adjust_admin_stock(
+        store_id=store_id, product_id=product_id, delta=-1,
+    )
     return _to_response(product, nutrition)
 
 
@@ -220,23 +156,12 @@ async def decrease_product_stock(
 @inject
 async def get_stock_reservation(
     product_id: str,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     product_service: SellerProductService = Depends(Provide["seller_product_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        reservation = await product_service.get_stock_reservation(
-            store_id=store_id, product_id=product_id,
-        )
-    except (StoreNotFoundError, ProductNotFoundError) as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except ProductStockReservationNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    reservation = await product_service.get_stock_reservation(
+        store_id=store_id, product_id=product_id,
+    )
 
     return ProductStockReservationResponse(
         product_id=reservation.product_id,
@@ -260,21 +185,12 @@ async def get_stock_reservation(
 async def upsert_stock_reservation(
     product_id: str,
     request: ProductStockReservationRequest,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     product_service: SellerProductService = Depends(Provide["seller_product_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        reservation = await product_service.upsert_stock_reservation(
-            store_id=store_id, product_id=product_id, new_stock=request.new_stock,
-        )
-    except (StoreNotFoundError, ProductNotFoundError) as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    reservation = await product_service.upsert_stock_reservation(
+        store_id=store_id, product_id=product_id, new_stock=request.new_stock,
+    )
 
     return ProductStockReservationResponse(
         product_id=reservation.product_id,
@@ -295,23 +211,12 @@ async def upsert_stock_reservation(
 @inject
 async def delete_stock_reservation(
     product_id: str,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     product_service: SellerProductService = Depends(Provide["seller_product_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        await product_service.delete_stock_reservation(
-            store_id=store_id, product_id=product_id,
-        )
-    except (StoreNotFoundError, ProductNotFoundError) as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except ProductStockReservationNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    await product_service.delete_stock_reservation(
+        store_id=store_id, product_id=product_id,
+    )
 
 
 @router.post(
@@ -327,28 +232,14 @@ async def delete_stock_reservation(
 async def add_product_nutrition(
     product_id: str,
     request: ProductNutritionRequest,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     product_service: SellerProductService = Depends(Provide["seller_product_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        product, nutrition = await product_service.add_nutrition(
-            store_id=store_id,
-            product_id=product_id,
-            nutrition_types=request.nutrition_types,
-        )
-    except (StoreNotFoundError, ProductNotFoundError) as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except ProductNutritionDuplicateError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"이미 존재하는 영양 타입: {', '.join(e.duplicates)}",
-        )
+    product, nutrition = await product_service.add_nutrition(
+        store_id=store_id,
+        product_id=product_id,
+        nutrition_types=request.nutrition_types,
+    )
     return _to_response(product, nutrition)
 
 
@@ -364,26 +255,12 @@ async def add_product_nutrition(
 async def remove_product_nutrition(
     product_id: str,
     request: ProductNutritionRequest,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     product_service: SellerProductService = Depends(Provide["seller_product_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        product, nutrition = await product_service.remove_nutrition(
-            store_id=store_id,
-            product_id=product_id,
-            nutrition_types=request.nutrition_types,
-        )
-    except (StoreNotFoundError, ProductNotFoundError) as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except ProductNutritionNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"존재하지 않는 영양 타입: {', '.join(e.missing)}",
-        )
+    product, nutrition = await product_service.remove_nutrition(
+        store_id=store_id,
+        product_id=product_id,
+        nutrition_types=request.nutrition_types,
+    )
     return _to_response(product, nutrition)

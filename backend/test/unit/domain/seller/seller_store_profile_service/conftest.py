@@ -1,12 +1,11 @@
-import pytest
-
-from app.domain.seller.service.seller_store_profile import SellerStoreProfileService
-
 from test.unit.domain.seller.seller_store_profile_service.mock_factory import (
     FakeUnitOfWork,
     StoreRepoMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.seller.service.seller_store_profile import SellerStoreProfileService
 
 
 @pytest.fixture

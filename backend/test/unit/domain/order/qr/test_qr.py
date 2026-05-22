@@ -2,10 +2,10 @@
 
 QR 은 JWT 기반이라 stateless — UoW / repository 없이 함수만 검증한다.
 """
-from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 import pytest
 from jose import jwt
+from datetime import datetime, timedelta, timezone
 
 from app.domain.order.service.qr import (
     decode_qr_data,

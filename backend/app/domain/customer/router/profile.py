@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from dependency_injector.wiring import Provide, inject
 
 from app.middleware.auth import CurrentCustomerDep, CurrentCustomerNoActiveDep
-from app.domain.customer.service.exception import CustomerDetailNotFoundError
 from app.domain.customer.service.customer_profile import CustomerProfileService
 from app.domain.customer.service.customer_detail import CustomerDetailService
 from app.domain.customer.schema.customer_profile import CustomerProfileResponse
@@ -33,11 +32,7 @@ async def get_customer_profile(
     ),
 ):
     """소비자의 detail + 4종 선호 통합 응답."""
-    try:
-        profile = await profile_service.get_full_profile(current_user["sub"])
-    except CustomerDetailNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-
+    profile = await profile_service.get_full_profile(current_user["sub"])
     return CustomerProfileResponse.model_validate(profile)
 
 
@@ -66,10 +61,7 @@ async def get_customer_detail(
         Provide["customer_detail_service"],
     ),
 ):
-    try:
-        return await detail_service.get(current_user["sub"])
-    except CustomerDetailNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    return await detail_service.get(current_user["sub"])
 
 
 @router.patch(
@@ -95,11 +87,8 @@ async def update_customer_detail(
             status_code=status.HTTP_400_BAD_REQUEST, detail="수정할 정보가 없습니다",
         )
 
-    try:
-        return await detail_service.update(
-            customer_email=current_user["sub"],
-            nickname=update_dict.get("nickname"),
-            phone_number=update_dict.get("phone_number"),
-        )
-    except CustomerDetailNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    return await detail_service.update(
+        customer_email=current_user["sub"],
+        nickname=update_dict.get("nickname"),
+        phone_number=update_dict.get("phone_number"),
+    )

@@ -1,14 +1,9 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from dependency_injector.wiring import Provide, inject
 
 from app.middleware.auth import CurrentCustomerDep
-from app.domain.seller.service.exception import StoreNotFoundError
 from app.domain.seller.schema.store import StoreDetailResponseForCustomer, StoreFavoriteStateResponse
-from app.domain.customer.service.exception import (
-    FavoriteAlreadyExistsError,
-    FavoriteNotFoundError,
-)
 from app.domain.customer.service.customer_search import CustomerSearchService
 from app.domain.customer.service.customer_favorite import CustomerFavoriteService
 from app.core.openapi import create_error_responses
@@ -48,14 +43,9 @@ async def add_favorite_store(
         Provide["customer_favorite_service"],
     ),
 ):
-    try:
-        await favorite_service.add(
-            customer_email=current_user["sub"], store_id=store_id,
-        )
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except FavoriteAlreadyExistsError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    await favorite_service.add(
+        customer_email=current_user["sub"], store_id=store_id,
+    )
     return StoreFavoriteStateResponse(message="즐겨찾기에 추가되었습니다")
 
 
@@ -75,10 +65,7 @@ async def remove_favorite_store(
         Provide["customer_favorite_service"],
     ),
 ):
-    try:
-        await favorite_service.remove(
-            customer_email=current_user["sub"], store_id=store_id,
-        )
-    except FavoriteNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    await favorite_service.remove(
+        customer_email=current_user["sub"], store_id=store_id,
+    )
     return StoreFavoriteStateResponse(message="즐겨찾기가 삭제 되었습니다")

@@ -1,7 +1,3 @@
-import pytest
-
-from app.domain.seller.service.seller_withdraw import SellerWithdrawService
-
 from test.unit.domain.seller.seller_withdraw_service.mock_factory import (
     FakeUnitOfWork,
     ImageRepoMockFactory,
@@ -14,6 +10,9 @@ from test.unit.domain.seller.seller_withdraw_service.mock_factory import (
     WithdrawRepoMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.seller.service.seller_withdraw import SellerWithdrawService
 
 
 @pytest.fixture

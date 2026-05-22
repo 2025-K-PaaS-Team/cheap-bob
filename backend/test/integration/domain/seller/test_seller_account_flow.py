@@ -6,8 +6,8 @@
   3) hard_delete 가 seller 를 비운다
   4) hard_delete 의 반환값이 대상 부재 시 False
 """
-import pytest
 import pytest_asyncio
+import pytest
 
 from app.domain.seller.service.seller_account import SellerAccountService
 from app.domain.seller.service.exception import SellerNotFoundError

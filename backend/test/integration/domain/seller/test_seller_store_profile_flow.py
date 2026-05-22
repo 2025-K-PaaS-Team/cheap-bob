@@ -4,11 +4,11 @@
   1) name / introduction / phone 각각이 DB 에 반영
   2) 미존재 store 에 대한 update 는 ``StoreNotFoundError``
 """
-import pytest
 import pytest_asyncio
+import pytest
 
-from app.domain.seller.service.exception import StoreNotFoundError
 from app.domain.seller.service.seller_store_profile import SellerStoreProfileService
+from app.domain.seller.service.exception import StoreNotFoundError
 
 
 pytestmark = pytest.mark.integration

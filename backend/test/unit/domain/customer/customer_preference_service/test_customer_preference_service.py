@@ -7,14 +7,14 @@ from types import SimpleNamespace
 import pytest
 
 from app.domain.seller.dto.nutrition import NutritionType
+from app.domain.customer.service.exception import (
+    PreferenceDuplicateError,
+    PreferenceNotFoundError,
+)
 from app.domain.customer.dto.preference import (
     AllergyType,
     PreferredMenu,
     ToppingType,
-)
-from app.domain.customer.service.exception import (
-    PreferenceDuplicateError,
-    PreferenceNotFoundError,
 )
 
 

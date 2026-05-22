@@ -1,12 +1,11 @@
 """Tests for ``app.domain.auth.service.oauth.OAuthService``."""
 from types import SimpleNamespace
+from test.unit.domain.auth.oauth_service.mock_factory import make_oauth_client_mock
 import pytest
 
-from app.config.oauth import OAuthProvider
-from app.domain.auth.dto.auth import UserType
 from app.domain.auth.service.exception import OAuthEmailMissingError
-
-from test.unit.domain.auth.oauth_service.mock_factory import make_oauth_client_mock
+from app.domain.auth.dto.auth import UserType
+from app.config.oauth import OAuthProvider
 
 
 # ────────────────────────────────────────────────────────────────────

@@ -6,11 +6,11 @@
   3) row 없는 store 에 대한 ``update`` 는 ``StoreSNSNotFoundError``
   4) ``delete_field`` 는 해당 필드를 None 으로 만든다
 """
-import pytest
 import pytest_asyncio
+import pytest
 
-from app.domain.seller.service.exception import StoreSNSNotFoundError
 from app.domain.seller.service.seller_store_sns import SellerStoreSNSService
+from app.domain.seller.service.exception import StoreSNSNotFoundError
 
 
 pytestmark = pytest.mark.integration

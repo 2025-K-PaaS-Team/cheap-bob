@@ -1,12 +1,11 @@
-import pytest
-
-from app.domain.seller.service.seller_store_sns import SellerStoreSNSService
-
 from test.unit.domain.seller.seller_store_sns_service.mock_factory import (
     FakeUnitOfWork,
     StoreSNSRepoMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.seller.service.seller_store_sns import SellerStoreSNSService
 
 
 @pytest.fixture

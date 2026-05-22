@@ -1,16 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from dependency_injector.wiring import Provide, inject
 
-from app.middleware.auth import CurrentSellerDep, CurrentSellerNoActiveDep
-from app.domain.seller.service.seller_store_read import SellerStoreReadService
+from app.middleware.auth import CurrentSellerNoActiveDep
 from app.domain.seller.service.seller_store_profile import SellerStoreProfileService
-from app.domain.seller.service.exception import StoreNotFoundError
 from app.domain.seller.schema.seller_profile import (
     StoreIntroductionUpdateRequest,
     StoreNameUpdateRequest,
     StorePhoneUpdateRequest,
     StoreProfileResponse,
 )
+from app.domain.seller.router.deps import CurrentSellerStoreIdDep
 from app.domain.auth.schema.me import UserProfileMeResponse
 from app.core.openapi import create_error_responses
 
@@ -47,21 +46,12 @@ async def get_seller_me(current_user: CurrentSellerNoActiveDep):
 @inject
 async def update_store_name(
     request: StoreNameUpdateRequest,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     profile_service: SellerStoreProfileService = Depends(
         Provide["seller_store_profile_service"],
     ),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        store = await profile_service.update_name(store_id, request.store_name)
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    store = await profile_service.update_name(store_id, request.store_name)
     return _to_profile(store)
 
 
@@ -76,23 +66,14 @@ async def update_store_name(
 @inject
 async def update_store_introduction(
     request: StoreIntroductionUpdateRequest,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     profile_service: SellerStoreProfileService = Depends(
         Provide["seller_store_profile_service"],
     ),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        store = await profile_service.update_introduction(
-            store_id, request.store_introduction,
-        )
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    store = await profile_service.update_introduction(
+        store_id, request.store_introduction,
+    )
     return _to_profile(store)
 
 
@@ -108,19 +89,10 @@ async def update_store_introduction(
 @inject
 async def update_store_phone(
     request: StorePhoneUpdateRequest,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     profile_service: SellerStoreProfileService = Depends(
         Provide["seller_store_profile_service"],
     ),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        store = await profile_service.update_phone(store_id, request.store_phone)
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    store = await profile_service.update_phone(store_id, request.store_phone)
     return _to_profile(store)

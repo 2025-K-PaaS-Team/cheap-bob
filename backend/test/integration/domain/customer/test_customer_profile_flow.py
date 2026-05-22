@@ -6,17 +6,17 @@
   3) ``get_preference_snapshot`` 은 comma-joined 문자열로 customer 4종 선호를 패키징
   4) customer 자체가 없으면 snapshot 의 모든 값이 None
 """
-import pytest
 import pytest_asyncio
+import pytest
 
 from app.domain.seller.dto.nutrition import NutritionType
+from app.domain.customer.service.exception import CustomerDetailNotFoundError
+from app.domain.customer.service.customer_profile import CustomerProfileService
 from app.domain.customer.dto.preference import (
     AllergyType,
     PreferredMenu,
     ToppingType,
 )
-from app.domain.customer.service.customer_profile import CustomerProfileService
-from app.domain.customer.service.exception import CustomerDetailNotFoundError
 
 
 pytestmark = pytest.mark.integration

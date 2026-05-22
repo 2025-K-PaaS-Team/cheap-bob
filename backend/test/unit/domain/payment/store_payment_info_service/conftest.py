@@ -1,12 +1,11 @@
-import pytest
-
-from app.domain.payment.service.store_payment_info import StorePaymentInfoService
-
 from test.unit.domain.payment.store_payment_info_service.mock_factory import (
     FakeUnitOfWork,
     StorePaymentInfoRepoMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.payment.service.store_payment_info import StorePaymentInfoService
 
 
 @pytest.fixture

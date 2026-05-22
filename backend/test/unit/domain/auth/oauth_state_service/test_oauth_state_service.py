@@ -11,8 +11,8 @@ Redis 는 가짜 in-memory dict 로 대체하고, ``getdel`` / ``set`` 의 atomi
 from unittest.mock import AsyncMock
 import pytest
 
-from app.domain.auth.dto.auth import UserType
 from app.domain.auth.service.oauth_state import OAuthStateService
+from app.domain.auth.dto.auth import UserType
 
 
 class FakeRedis:

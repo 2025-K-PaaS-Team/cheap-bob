@@ -9,8 +9,8 @@ S3 와 결합한 ``init_images`` / ``add_images`` / ``delete_image`` 는 ``objec
 실시간 통신이 필요해 본 integration 에서는 생략한다. URL 생성 (``get_file_url``) 은 단순
 문자열 조합이라 외부 호출 없이 안전.
 """
-import pytest
 import pytest_asyncio
+import pytest
 
 from app.domain.seller.service.seller_store_image import SellerStoreImageService
 

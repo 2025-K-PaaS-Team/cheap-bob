@@ -1,7 +1,3 @@
-import pytest
-
-from app.domain.order.service.customer_order import CustomerOrderService
-
 from test.unit.domain.order.customer_order_service.model_factory import (
     CustomerDetailFactory,
     CustomerFactory,
@@ -21,6 +17,9 @@ from test.unit.domain.order.customer_order_service.mock_factory import (
     StorePaymentInfoServiceMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.order.service.customer_order import CustomerOrderService
 
 
 @pytest.fixture(autouse=True)

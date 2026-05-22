@@ -1,9 +1,9 @@
 """customer 의 /payment/init / /payment/confirm — 다도메인 오케스트레이션 진입점."""
 from typing import List, Optional
-from dataclasses import dataclass, field
 from math import ceil
 from fastapi import BackgroundTasks
 from datetime import datetime, timedelta, timezone
+from dataclasses import dataclass, field
 
 from app.util.id_generator import generate_payment_id
 from app.domain.seller.service.seller_store_read import SellerStoreReadService
@@ -37,6 +37,7 @@ from app.domain.customer.service.customer_profile import CustomerProfileService
 from app.database.session import UnitOfWork, transactional
 from app.core.portone import PortOnePaymentStatus, PortOneTransientError
 from app.core.logger import get_logger
+from app.core.email.notifier import send_reservation_email
 
 
 @dataclass
@@ -181,7 +182,6 @@ class CustomerPaymentService:
             raise PaymentNotFoundError("결제 정보를 찾을 수 없습니다")
 
         # 예약 완료 이메일은 RDB 트랜잭션과 무관 — background.
-        from app.core.email.notifier import send_reservation_email
         background_tasks.add_task(send_reservation_email, customer_email)
 
         return PaymentResponse(payment_id=payment_id)
@@ -243,7 +243,7 @@ class CustomerPaymentService:
         except PaymentVerificationError:
             # 돈 안 빠짐 (또는 빠졌어도 amount 조작 등 우리 책임 아닌 케이스).
             # cart + 재고는 같은 tx 에서 정리. tx commit 으로 cart 사라지면 멱등 보장.
-            await self._restore_stock_in_tx(cart_item.product_id, cart_item.quantity)
+            await self._safe_restore_stock(cart_item.product_id, cart_item.quantity)
             await self.order_query_service.delete_cart_item(payment_id)
             raise
 
@@ -269,19 +269,6 @@ class CustomerPaymentService:
         return True
 
 
-    async def _restore_stock_in_tx(self, product_id: str, quantity: int) -> None:
-        """현재 tx 안에서 재고 복구. verify 실패 분기에서 사용."""
-        try:
-            await self.seller_product_service.restore_purchased_stock(
-                product_id=product_id, quantity=quantity,
-            )
-        except Exception:
-            logger.exception(
-                "[CRITICAL] verify 실패 분기에서 재고 복구 실패 product_id={} quantity={}",
-                product_id, quantity,
-            )
-
-
     # ───────── sweeper 진입점 ─────────
 
 
@@ -303,10 +290,7 @@ class CustomerPaymentService:
         각 cart 처리는 SAVEPOINT 로 격리 — 한 cart 의 DB 오류가 batch 전체를
         ``InFailedSqlTransaction`` 으로 망가뜨리지 못하게.
         """
-        from app.domain.order.repository.cart_item import CartItemRepository
-
-        repo = CartItemRepository(self._session)
-        expired = await repo.claim_expired_for_processing(
+        expired = await self.order_query_service.claim_expired_carts_for_processing(
             now=datetime.now(timezone.utc), limit=limit,
         )
         result = SweepResult()
@@ -438,6 +422,11 @@ class CustomerPaymentService:
 
 
     async def _safe_restore_stock(self, product_id: str, quantity: int) -> None:
+        """재고 복구 — 예외는 swallow + critical 로깅.
+
+        outer tx 가 있으면 (verify 실패 분기) 같은 세션에 참여, 없으면 (rollback_after_paid)
+        ``restore_purchased_stock`` 의 ``@transactional`` 이 새 tx 를 열어 commit.
+        """
         try:
             await self.seller_product_service.restore_purchased_stock(
                 product_id=product_id, quantity=quantity,

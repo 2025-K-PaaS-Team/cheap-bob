@@ -1,9 +1,8 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query
 from dependency_injector.wiring import Provide, inject
 
 from app.middleware.auth import CurrentCustomerDep
-from app.domain.seller.service.exception import StoreNotFoundError
 from app.domain.seller.schema.store import PaginatedStoreResponse
 from app.domain.seller.schema.product import ProductsResponse
 from app.domain.customer.service.customer_search import CustomerSearchService
@@ -46,10 +45,7 @@ async def get_store_products(
     search_service: CustomerSearchService = Depends(Provide["customer_search_service"]),
 ):
     """특정 가게의 모든 상품 + 영양 정보."""
-    try:
-        return await search_service.get_store_products(store_id)
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    return await search_service.get_store_products(store_id)
 
 
 @router.get(

@@ -1,21 +1,7 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends
 from dependency_injector.wiring import Provide, inject
 
 from app.middleware.auth import CurrentCustomerDep
-from app.domain.payment.service.exception import (
-    PaymentInfoIncompleteError,
-    PaymentInfoMissingError,
-    PaymentNotFoundError,
-    PaymentOwnershipMismatchError,
-    PaymentRefundError,
-    PaymentTimeoutError,
-    PaymentVerificationError,
-    PickupTimeEndedError,
-    ProductNotFoundError,
-    StockConflictError,
-    StockInsufficientError,
-    StoreNotOpenError,
-)
 from app.domain.payment.service.customer_payment import CustomerPaymentService
 from app.domain.payment.schema.customer_payment import (
     PaymentConfirmRequest,
@@ -49,22 +35,11 @@ async def init_payment(
     ),
 ):
     """결제 초기화 — 재고 차감 + 장바구니 등록 + 5분 타임아웃 스케줄."""
-    try:
-        return await customer_payment_service.init_payment(
-            customer_email=current_user["sub"],
-            product_id=request.product_id,
-            quantity=request.quantity,
-        )
-    except ProductNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except (StoreNotOpenError, PickupTimeEndedError, StockInsufficientError) as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except StockConflictError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
-    except (PaymentInfoMissingError, PaymentInfoIncompleteError) as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e),
-        )
+    return await customer_payment_service.init_payment(
+        customer_email=current_user["sub"],
+        product_id=request.product_id,
+        quantity=request.quantity,
+    )
 
 
 @router.post(
@@ -88,33 +63,8 @@ async def confirm_payment(
     ),
 ):
     """결제 최종 확인 — PortOne 검증 + 주문 생성 + 장바구니 삭제. 실패 시 자동 환불 + 복구."""
-    try:
-        return await customer_payment_service.confirm_payment(
-            customer_email=current_user["sub"],
-            payment_id=request.payment_id,
-            background_tasks=background_tasks,
-        )
-    except PaymentTimeoutError as e:
-        raise HTTPException(
-            status_code=status.HTTP_408_REQUEST_TIMEOUT, detail=str(e),
-        )
-    except PaymentNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except ProductNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except PaymentOwnershipMismatchError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-    except (StoreNotOpenError, PickupTimeEndedError) as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except (PaymentInfoMissingError, PaymentInfoIncompleteError) as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e),
-        )
-    except PaymentVerificationError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except PaymentRefundError as e:
-        # 환불 자체가 실패 (예: 결제 성공 후 _persist 도 실패하고 환불 시도까지 실패).
-        # 라우터에 도달했다는 건 _rollback_after_paid 의 swallow 를 우회한 흐름 — 운영자 알람.
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e),
-        )
+    return await customer_payment_service.confirm_payment(
+        customer_email=current_user["sub"],
+        payment_id=request.payment_id,
+        background_tasks=background_tasks,
+    )

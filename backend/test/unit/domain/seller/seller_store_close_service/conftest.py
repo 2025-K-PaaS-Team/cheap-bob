@@ -1,7 +1,3 @@
-import pytest
-
-from app.domain.seller.service.seller_store_close import SellerStoreCloseService
-
 from test.unit.domain.seller.seller_store_close_service.mock_factory import (
     FakeUnitOfWork,
     OperationRepoMockFactory,
@@ -11,6 +7,9 @@ from test.unit.domain.seller.seller_store_close_service.mock_factory import (
     StorePaymentInfoServiceMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.seller.service.seller_store_close import SellerStoreCloseService
 
 
 @pytest.fixture

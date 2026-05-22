@@ -6,11 +6,11 @@
   3) hard_delete 가 customer 의 cascade (detail / preference / favorite) 를 모두 비운다
   4) hard_delete 의 반환값이 대상 부재 시 False
 """
-import pytest
 import pytest_asyncio
+import pytest
 
-from app.domain.customer.service.customer_account import CustomerAccountService
 from app.domain.customer.service.exception import CustomerNotFoundError
+from app.domain.customer.service.customer_account import CustomerAccountService
 
 
 pytestmark = pytest.mark.integration

@@ -8,13 +8,13 @@
   5) ``store_purchased_quantities`` 가 가게의 product 별 누계 반환 (cancel 제외)
   6) ``has_active_orders_for_customer`` 가 reservation/accept 만 카운트
 """
-from datetime import datetime, timezone
-import pytest
 import pytest_asyncio
+import pytest
+from datetime import datetime, timezone
 
-from app.domain.order.dto.order import OrderStatus
-from app.domain.order.repository.order_history_item import OrderHistoryItemRepository
 from app.domain.order.service.order_query import OrderQueryService
+from app.domain.order.repository.order_history_item import OrderHistoryItemRepository
+from app.domain.order.dto.order import OrderStatus
 
 
 pytestmark = pytest.mark.integration

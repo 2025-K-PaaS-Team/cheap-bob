@@ -1,10 +1,9 @@
-import pytest
-
-from app.domain.order.service.product_stock_reservation import ProductStockReservationService
-
 from test.unit.domain.order.product_stock_reservation_service.mock_factory import (
     ReservationRepositoryMockFactory,
 )
+import pytest
+
+from app.domain.order.service.product_stock_reservation import ProductStockReservationService
 
 
 @pytest.fixture

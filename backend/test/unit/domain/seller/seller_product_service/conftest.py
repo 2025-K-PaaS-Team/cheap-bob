@@ -1,7 +1,3 @@
-import pytest
-
-from app.domain.seller.service.seller_product import SellerProductService
-
 from test.unit.domain.seller.seller_product_service.mock_factory import (
     FakeUnitOfWork,
     ProductNutritionRepoMockFactory,
@@ -9,6 +5,9 @@ from test.unit.domain.seller.seller_product_service.mock_factory import (
     StoreProductInfoRepoMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.seller.service.seller_product import SellerProductService
 
 
 @pytest.fixture

@@ -1,11 +1,10 @@
+from test.unit.domain.payment.seller_payment_settings_service.mock_factory import (
+    StorePaymentInfoServiceMockFactory,
+)
 import pytest
 
 from app.domain.payment.service.seller_payment_settings import (
     SellerPaymentSettingsService,
-)
-
-from test.unit.domain.payment.seller_payment_settings_service.mock_factory import (
-    StorePaymentInfoServiceMockFactory,
 )
 
 

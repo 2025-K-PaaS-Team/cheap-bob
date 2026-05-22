@@ -12,10 +12,10 @@
 ``SellerProductService`` 가 생성자에서 받는 ``product_stock_reservation_service`` 는 Mongo 의존이라
 본 통합 테스트에서는 ``None`` 으로 주입한다 — 재고 예약 경로 메서드는 호출하지 않으므로 안전.
 """
-import pytest
 import pytest_asyncio
+import pytest
 
-from app.domain.seller.dto.nutrition import NutritionType
+from app.domain.seller.service.seller_product import SellerProductService
 from app.domain.seller.service.exception import (
     ProductAlreadyRegisteredError,
     ProductNotFoundError,
@@ -23,7 +23,7 @@ from app.domain.seller.service.exception import (
     ProductNutritionNotFoundError,
     ProductStockInsufficientError,
 )
-from app.domain.seller.service.seller_product import SellerProductService
+from app.domain.seller.dto.nutrition import NutritionType
 
 
 pytestmark = pytest.mark.integration

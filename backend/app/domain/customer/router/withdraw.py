@@ -1,19 +1,12 @@
 from fastapi.responses import JSONResponse
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from dependency_injector.wiring import Provide, inject
 
 from app.middleware.auth import CurrentCustomerDep, CurrentCustomerNoActiveDep
-from app.domain.customer.service.exception import (
-    CustomerActiveOrdersExistError,
-    CustomerAlreadyActiveError,
-    CustomerAlreadyWithdrawnError,
-    CustomerNotFoundError,
-    WithdrawalRecordNotFoundError,
-)
 from app.domain.customer.service.customer_withdraw import CustomerWithdrawService
 from app.domain.auth.service.jwt import JwtService
-from app.domain.auth.dto.auth import UserType
 from app.domain.auth.service.cookie import clear_auth_cookie, set_auth_cookie
+from app.domain.auth.dto.auth import UserType
 from app.core.openapi import create_error_responses
 
 
@@ -38,14 +31,7 @@ async def withdraw_customer(
     ),
 ):
     """소비자 탈퇴 — 30일 유예 reservation 등록 + 쿠키 만료."""
-    try:
-        await withdraw_service.request_withdraw(current_user["sub"])
-    except CustomerNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except CustomerAlreadyWithdrawnError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
-    except CustomerActiveOrdersExistError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    await withdraw_service.request_withdraw(current_user["sub"])
 
     response = JSONResponse(
         content={"message": "탈퇴가 완료되었습니다"}, status_code=200,
@@ -73,14 +59,7 @@ async def cancel_withdraw(
 ):
     """탈퇴 취소 — 계정 재활성 + 새 access_token 발급."""
     customer_email = current_user["sub"]
-    try:
-        await withdraw_service.cancel_withdraw(customer_email)
-    except CustomerNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except WithdrawalRecordNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except CustomerAlreadyActiveError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    await withdraw_service.cancel_withdraw(customer_email)
 
     new_token = jwt_service.create_user_token(
         email=customer_email,

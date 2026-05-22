@@ -1,12 +1,11 @@
-import pytest
-
-from app.domain.auth.service.oauth import OAuthService
-
 from test.unit.domain.auth.oauth_service.mock_factory import (
     CustomerAccountServiceMockFactory,
     JwtServiceMockFactory,
     SellerAccountServiceMockFactory,
 )
+import pytest
+
+from app.domain.auth.service.oauth import OAuthService
 
 
 @pytest.fixture

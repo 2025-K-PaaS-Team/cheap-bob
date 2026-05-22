@@ -1,16 +1,11 @@
 from typing import Literal
 from pydantic import HttpUrl
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from dependency_injector.wiring import Provide, inject
 
-from app.middleware.auth import CurrentSellerDep
 from app.domain.seller.service.seller_store_sns import SellerStoreSNSService
-from app.domain.seller.service.seller_store_read import SellerStoreReadService
-from app.domain.seller.service.exception import (
-    StoreNotFoundError,
-    StoreSNSNotFoundError,
-)
 from app.domain.seller.schema.store_sns import StoreSNSResponse, StoreSNSUpdateRequest
+from app.domain.seller.router.deps import CurrentSellerStoreIdDep
 from app.core.openapi import create_error_responses
 
 
@@ -43,19 +38,10 @@ def _to_response(store_id: str, sns) -> StoreSNSResponse:
 )
 @inject
 async def get_store_sns(
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     sns_service: SellerStoreSNSService = Depends(Provide["seller_store_sns_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        sns = await sns_service.get(store_id)
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    sns = await sns_service.get(store_id)
     return _to_response(store_id, sns)
 
 
@@ -70,28 +56,16 @@ async def get_store_sns(
 @inject
 async def update_store_sns(
     request: StoreSNSUpdateRequest,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     sns_service: SellerStoreSNSService = Depends(Provide["seller_store_sns_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        updated = await sns_service.update(
-            store_id=store_id,
-            instagram=str(request.instagram) if request.instagram is not None else None,
-            facebook=str(request.facebook) if request.facebook is not None else None,
-            x=str(request.x) if request.x is not None else None,
-            homepage=str(request.homepage) if request.homepage is not None else None,
-        )
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except StoreSNSNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-
+    updated = await sns_service.update(
+        store_id=store_id,
+        instagram=str(request.instagram) if request.instagram is not None else None,
+        facebook=str(request.facebook) if request.facebook is not None else None,
+        x=str(request.x) if request.x is not None else None,
+        homepage=str(request.homepage) if request.homepage is not None else None,
+    )
     return _to_response(store_id, updated)
 
 
@@ -107,18 +81,7 @@ async def update_store_sns(
 @inject
 async def delete_store_sns_field(
     sns_type: SNSType,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     sns_service: SellerStoreSNSService = Depends(Provide["seller_store_sns_service"]),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        await sns_service.delete_field(store_id, sns_type)
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except StoreSNSNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    await sns_service.delete_field(store_id, sns_type)

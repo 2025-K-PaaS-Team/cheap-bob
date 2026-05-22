@@ -8,6 +8,13 @@ from app.domain.seller.service.store_utils import get_main_image_url
 from app.domain.seller.service.seller_store_read import SellerStoreReadService
 from app.domain.seller.service.seller_store_image import SellerStoreImageService
 from app.domain.seller.service.seller_product import SellerProductService
+from app.domain.payment.service.store_payment_info import StorePaymentInfoService
+from app.domain.payment.service.payment_gateway import PaymentGatewayService
+from app.domain.payment.service.exception import (
+    PaymentInfoIncompleteError,
+    PaymentInfoMissingError,
+    PaymentRefundError,
+)
 from app.domain.order.service.qr_callback_cache import QRCallbackCacheService
 from app.domain.order.service.qr import validate_qr_data
 from app.domain.order.service.exception import (
@@ -35,6 +42,7 @@ from app.domain.order.repository.order_current_item import OrderCurrentItemRepos
 from app.domain.order.dto.order import OrderStatus
 from app.database.session import UnitOfWork, transactional
 from app.core.logger import get_logger
+from app.core.email.notifier import send_customer_cancel_email
 
 
 _KST = timezone(timedelta(hours=9))
@@ -50,8 +58,8 @@ class CustomerOrderService:
         seller_store_read_service: SellerStoreReadService,
         seller_store_image_service: SellerStoreImageService,
         seller_product_service: SellerProductService,
-        payment_gateway_service,
-        store_payment_info_service,
+        payment_gateway_service: PaymentGatewayService,
+        store_payment_info_service: StorePaymentInfoService,
     ):
         self.uow = uow
         self.history_repo = history_repo
@@ -214,13 +222,6 @@ class CustomerOrderService:
         reason: str,
         background_tasks: BackgroundTasks,
     ) -> OrderCancelResponse:
-        from app.domain.payment.service.exception import (
-            PaymentInfoIncompleteError,
-            PaymentInfoMissingError,
-            PaymentRefundError,
-        )
-        from app.core.email.notifier import send_customer_cancel_email
-
         order = await self._get_with_product_relation(payment_id)
         if order is None:
             raise OrderNotFoundError("주문을 찾을 수 없습니다")
@@ -323,31 +324,38 @@ class CustomerOrderService:
         )
 
 
+def _common_order_fields(o) -> dict:
+    """current order entity / OrderHistoryItem 양쪽에 같은 attribute 이름으로 존재하는 필드."""
+    return {
+        "payment_id": o.payment_id,
+        "customer_id": o.customer_id,
+        "product_id": o.product_id,
+        "quantity": o.quantity,
+        "price": o.price,
+        "sale": o.sale,
+        "total_amount": o.total_amount,
+        "status": o.status,
+        "reservation_at": o.reservation_at,
+        "accepted_at": o.accepted_at,
+        "completed_at": o.completed_at,
+        "canceled_at": o.canceled_at,
+        "cancel_reason": o.cancel_reason,
+        "preferred_menus": parse_comma_separated_string(o.preferred_menus),
+        "nutrition_types": parse_comma_separated_string(o.nutrition_types),
+        "allergies": parse_comma_separated_string(o.allergies),
+        "topping_types": parse_comma_separated_string(o.topping_types),
+    }
+
+
 def _customer_order_response(order) -> CustomerOrderItemResponse:
     return CustomerOrderItemResponse(
-        payment_id=order.payment_id,
-        customer_id=order.customer_id,
+        **_common_order_fields(order),
         customer_nickname=order.customer.detail.nickname,
         customer_phone_number=order.customer.detail.phone_number,
-        product_id=order.product_id,
         product_name=order.product.product_name,
         store_id=order.product.store_id,
         store_name=order.product.store.store_name,
         main_image_url=get_main_image_url(order.product.store),
-        quantity=order.quantity,
-        price=order.price,
-        sale=order.sale,
-        total_amount=order.total_amount,
-        status=order.status,
-        reservation_at=order.reservation_at,
-        accepted_at=order.accepted_at,
-        completed_at=order.completed_at,
-        canceled_at=order.canceled_at,
-        cancel_reason=order.cancel_reason,
-        preferred_menus=parse_comma_separated_string(order.preferred_menus),
-        nutrition_types=parse_comma_separated_string(order.nutrition_types),
-        allergies=parse_comma_separated_string(order.allergies),
-        topping_types=parse_comma_separated_string(order.topping_types),
     )
 
 
@@ -355,29 +363,13 @@ def _customer_order_response_from_history(
     h, *, main_image_url: Optional[str],
 ) -> CustomerOrderItemResponse:
     return CustomerOrderItemResponse(
-        payment_id=h.payment_id,
-        customer_id=h.customer_id,
+        **_common_order_fields(h),
         customer_nickname=h.customer_nickname,
         customer_phone_number=h.customer_phone_number,
-        product_id=h.product_id,
         product_name=h.product_name,
         store_id=h.store_id,
         store_name=h.store_name,
         main_image_url=main_image_url,
-        quantity=h.quantity,
-        price=h.price,
-        sale=h.sale,
-        total_amount=h.total_amount,
-        status=h.status,
-        reservation_at=h.reservation_at,
-        accepted_at=h.accepted_at,
-        completed_at=h.completed_at,
-        canceled_at=h.canceled_at,
-        cancel_reason=h.cancel_reason,
-        preferred_menus=parse_comma_separated_string(h.preferred_menus),
-        nutrition_types=parse_comma_separated_string(h.nutrition_types),
-        allergies=parse_comma_separated_string(h.allergies),
-        topping_types=parse_comma_separated_string(h.topping_types),
     )
 
 

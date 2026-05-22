@@ -3,10 +3,10 @@
 BaseHTTPMiddleware 의 ``dispatch`` 만 단위 검증한다. WebSocket scope 는 BaseHTTPMiddleware
 가 자체적으로 우회하므로 본 단위에선 다루지 않는다 (그 보장 자체가 Starlette 책임).
 """
-from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock
 from starlette.types import Receive, Scope, Send
 import pytest
+from datetime import datetime, timedelta, timezone
 
 from app.middleware.auth import JWTAuthMiddleware
 

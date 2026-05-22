@@ -18,6 +18,7 @@ from app.middleware.auth import JWTAuthMiddleware
 from app.database.session import close_mongodb, init_mongodb
 import app.database.model  # noqa: F401 — Base.metadata 채우기 위한 부수효과 import.
 from app.core.logger import get_logger, setup_logging
+from app.core.exceptions import register_domain_exception_handler
 from app.container import container
 from app.config.setting import settings
 from app.api.v1.router import api_router
@@ -107,6 +108,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(api_router)
+    register_domain_exception_handler(app)
 
     @app.get("/health")
     async def health_check():

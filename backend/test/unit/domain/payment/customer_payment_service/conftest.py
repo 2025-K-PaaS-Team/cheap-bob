@@ -1,7 +1,3 @@
-import pytest
-
-from app.domain.payment.service.customer_payment import CustomerPaymentService
-
 from test.unit.domain.payment.customer_payment_service.model_factory import (
     CartItemFactory,
     OperationInfoFactory,
@@ -19,6 +15,9 @@ from test.unit.domain.payment.customer_payment_service.mock_factory import (
     StorePaymentInfoServiceMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.payment.service.customer_payment import CustomerPaymentService
 
 
 @pytest.fixture(autouse=True)

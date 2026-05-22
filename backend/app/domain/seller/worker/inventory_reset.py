@@ -6,6 +6,7 @@
 from typing import Any, Dict
 from datetime import datetime, timezone
 
+from app.scheduler.decorators import log_and_swallow
 from app.core.logger import get_logger
 from app.container import container
 
@@ -17,23 +18,15 @@ class InventoryResetTask:
     """상품 재고를 초기화하는 스케줄 작업."""
 
     @staticmethod
+    @log_and_swallow("재고 초기화", logger)
     async def reset_inventory():
         logger.info("재고 초기화 작업 시작...")
-        start_time = datetime.now(timezone.utc)
-
-        try:
-            updated_count = await container.seller_product_service().reset_all_inventories()
-            elapsed_time = (datetime.now(timezone.utc) - start_time).total_seconds()
-            logger.info(
-                "재고 초기화 완료: {}개의 상품 재고가 초기화됨 (소요시간: {:.2f}초)",
-                updated_count, elapsed_time,
-            )
-            logger.info(
-                "재고 초기화 통계 - 초기화된 상품 수: {}, 초기화 시각: {}",
-                updated_count, datetime.now(timezone.utc).isoformat(),
-            )
-        except Exception:
-            logger.exception("재고 초기화 중 오류 발생")
+        start = datetime.now(timezone.utc)
+        updated_count = await container.seller_product_service().reset_all_inventories()
+        elapsed = (datetime.now(timezone.utc) - start).total_seconds()
+        logger.info(
+            "재고 초기화 완료: {}개 ({:.2f}s)", updated_count, elapsed,
+        )
 
 
     @staticmethod

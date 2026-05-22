@@ -5,12 +5,12 @@
   2) 같은 seller 의 두 번째 ``register`` → ``StoreAlreadyRegisteredError``
   3) ``sns_info=None`` 이면 StoreSNS row 가 생기지 않는다
 """
-from datetime import time
-import pytest
 import pytest_asyncio
+import pytest
+from datetime import time
 
-from app.domain.seller.service.exception import StoreAlreadyRegisteredError
 from app.domain.seller.service.seller_store_register import SellerStoreRegisterService
+from app.domain.seller.service.exception import StoreAlreadyRegisteredError
 
 
 pytestmark = pytest.mark.integration

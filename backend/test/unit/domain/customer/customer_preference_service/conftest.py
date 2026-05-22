@@ -1,7 +1,3 @@
-import pytest
-
-from app.domain.customer.service.customer_preference import CustomerPreferenceService
-
 from test.unit.domain.customer.customer_preference_service.mock_factory import (
     AllergyRepoMockFactory,
     FakeUnitOfWork,
@@ -10,6 +6,9 @@ from test.unit.domain.customer.customer_preference_service.mock_factory import (
     ToppingRepoMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.customer.service.customer_preference import CustomerPreferenceService
 
 
 @pytest.fixture

@@ -1,12 +1,11 @@
-import pytest
-
-from app.domain.customer.service.customer_detail import CustomerDetailService
-
 from test.unit.domain.customer.customer_detail_service.mock_factory import (
     CustomerDetailRepoMockFactory,
     FakeUnitOfWork,
     make_mock_session,
 )
+import pytest
+
+from app.domain.customer.service.customer_detail import CustomerDetailService
 
 
 @pytest.fixture

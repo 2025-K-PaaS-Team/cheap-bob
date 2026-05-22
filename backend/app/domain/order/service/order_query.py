@@ -4,20 +4,20 @@ auth.RegistrationStatus / customer.Withdraw / seller.* 가 order 데이터를 �
 """
 from typing import Dict, List, Optional
 import pytz
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from collections import defaultdict
 
 from app.domain.order.repository.order_history_item import OrderHistoryItemRepository
 from app.domain.order.repository.order_current_item import (
     OrderCurrentItemRepository,
 )
+from app.domain.order.repository.cart_item import CartItemRepository
 from app.domain.order.model.order_current_item import OrderCurrentItem
 from app.domain.order.dto.order import OrderStatus
 from app.database.session import UnitOfWork, transactional
 
 
 _KST = pytz.timezone("Asia/Seoul")
-_ACTIVE_STATUSES = (OrderStatus.reservation, OrderStatus.accept)
 
 
 class OrderQueryService:
@@ -89,8 +89,6 @@ class OrderQueryService:
         total_amount: int,
         expires_at: datetime,
     ):
-        from app.domain.order.repository.cart_item import CartItemRepository
-
         return await CartItemRepository(self._session).create(
             payment_id=payment_id,
             product_id=product_id,
@@ -105,24 +103,28 @@ class OrderQueryService:
 
     @transactional
     async def get_cart_item(self, payment_id: str):
-        from app.domain.order.repository.cart_item import CartItemRepository
-
         return await CartItemRepository(self._session).get_by_payment_id(payment_id)
 
 
     @transactional
     async def lock_cart_item(self, payment_id: str):
         """SELECT … FOR UPDATE — confirm/sweeper race-safe finalize 진입점."""
-        from app.domain.order.repository.cart_item import CartItemRepository
-
         return await CartItemRepository(self._session).lock_by_payment_id(payment_id)
 
 
     @transactional
     async def delete_cart_item(self, payment_id: str) -> bool:
-        from app.domain.order.repository.cart_item import CartItemRepository
-
         return await CartItemRepository(self._session).delete(payment_id)
+
+
+    @transactional
+    async def claim_expired_carts_for_processing(
+        self, *, now: datetime, limit: int,
+    ):
+        """만료된 cart_item batch 를 SKIP LOCKED 로 선점 — sweeper 진입점."""
+        return await CartItemRepository(self._session).claim_expired_for_processing(
+            now=now, limit=limit,
+        )
 
 
     @transactional
@@ -133,8 +135,6 @@ class OrderQueryService:
         preference_snapshot: Dict[str, Optional[str]],
     ):
         """cart_item 에 customer preference 스냅샷을 결합해 OrderCurrentItem 생성."""
-        from datetime import datetime, timezone
-
         return await OrderCurrentItemRepository(self._session).create(
             payment_id=cart_item.payment_id,
             product_id=cart_item.product_id,

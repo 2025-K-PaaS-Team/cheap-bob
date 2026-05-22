@@ -1,10 +1,18 @@
 """Tests for ``app.domain.order.service.customer_order.CustomerOrderService``."""
-from datetime import datetime, timedelta, timezone
-from types import SimpleNamespace
 from unittest.mock import patch
+from types import SimpleNamespace
+from test.unit.domain.order.customer_order_service.model_factory import (
+    OrderFactory,
+    OrderHistoryFactory,
+)
+from test.unit.domain.order.customer_order_service.mock_factory import BackgroundTasksFakeFactory
 import pytest
+from datetime import datetime, timedelta, timezone
 
-from app.domain.order.dto.order import OrderStatus
+from app.domain.payment.service.exception import (
+    PaymentInfoMissingError,
+    PaymentRefundError,
+)
 from app.domain.order.service.exception import (
     OrderAlreadyCanceledError,
     OrderAlreadyCompletedError,
@@ -15,16 +23,7 @@ from app.domain.order.service.exception import (
     OrderQrInvalidError,
     OrderRefundError,
 )
-from app.domain.payment.service.exception import (
-    PaymentInfoMissingError,
-    PaymentRefundError,
-)
-
-from test.unit.domain.order.customer_order_service.model_factory import (
-    OrderFactory,
-    OrderHistoryFactory,
-)
-from test.unit.domain.order.customer_order_service.mock_factory import BackgroundTasksFakeFactory
+from app.domain.order.dto.order import OrderStatus
 
 
 # ────────────────────────────────────────────────────────────────────

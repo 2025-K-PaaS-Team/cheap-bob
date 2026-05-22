@@ -5,6 +5,7 @@
 """
 from datetime import datetime, timezone
 
+from app.scheduler.decorators import log_and_swallow
 from app.core.logger import get_logger
 from app.container import container
 
@@ -16,15 +17,11 @@ class StoreOperationStatusUpdateTask:
     """오늘 요일 기준 가게 운영 상태를 업데이트하는 스케줄 작업."""
 
     @staticmethod
+    @log_and_swallow("가게 운영 상태 업데이트", logger)
     async def update_store_operation_status():
         start = datetime.now(timezone.utc)
-        try:
-            updated, skipped = await container.seller_store_settings_service(
-            ).update_today_open_status()
-        except Exception:
-            logger.exception("가게 운영 상태 업데이트 중 오류 발생")
-            return
-
+        updated, skipped = await container.seller_store_settings_service(
+        ).update_today_open_status()
         elapsed = (datetime.now(timezone.utc) - start).total_seconds()
         logger.info(
             "가게 운영 상태 업데이트 완료: 업데이트 {}건, 건너뜀 {}건 ({:.2f}s)",

@@ -136,14 +136,9 @@ class AutoCompleteOrdersTask:
             logger.info("기존 동적 스케줄 {}개 삭제됨", removed)
 
 
-scheduled_task = {
-    "func": None,
-    "trigger": "cron",
-    "trigger_args": {
-        "hour": 4,
-        "minute": 35,
-    },
-    "job_id": "register_auto_complete_schedules",
-    "job_name": "가게 마감 시간 동적 스케줄 등록",
-    "misfire_grace_time": 3600,
+# 동적 스케줄 일괄 등록의 cron trigger args 만 export.
+# 실제 job 등록은 ``app.scheduler.static._configure_auto_complete_task`` 가 담당.
+registration_cron_args = {
+    "hour": 4,
+    "minute": 35,
 }

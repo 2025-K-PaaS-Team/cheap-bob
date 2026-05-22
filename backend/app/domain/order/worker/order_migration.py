@@ -5,6 +5,7 @@
 """
 from datetime import datetime, timezone
 
+from app.scheduler.decorators import log_and_swallow
 from app.core.logger import get_logger
 from app.container import container
 
@@ -16,15 +17,11 @@ class OrderMigrationTask:
     """OrderCurrentItem (SQL) → OrderHistoryItem (Mongo) 이관 스케줄 작업."""
 
     @staticmethod
+    @log_and_swallow("주문 마이그레이션", logger)
     async def migrate_current_orders_to_history():
         start = datetime.now(timezone.utc)
-        try:
-            archived = await container.order_query_service(
-            ).migrate_finished_orders_to_history()
-        except Exception:
-            logger.exception("주문 마이그레이션 중 오류 발생")
-            return
-
+        archived = await container.order_query_service(
+        ).migrate_finished_orders_to_history()
         elapsed = (datetime.now(timezone.utc) - start).total_seconds()
         logger.info(
             "주문 마이그레이션 완료: {}건 히스토리로 이동됨 ({:.2f}s)",

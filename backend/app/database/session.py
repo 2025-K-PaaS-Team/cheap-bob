@@ -6,6 +6,7 @@ from functools import wraps
 from contextvars import ContextVar
 from beanie import init_beanie
 
+from app.database.document_registry import DOCUMENT_MODELS
 from app.config.setting import settings
 
 
@@ -78,28 +79,9 @@ class MongoDB:
     async def connect(self) -> None:
         self.client = AsyncIOMotorClient(settings.MONGODB_URL)
         self.database = self.client[settings.MONGODB_NAME]
-
-        # 도메인 추가 시 본 리스트에 Document 모델을 등록한다.
-        # auth / customer / seller / order 모두 도메인 분리 완료.
-        from app.domain.seller.model.seller_withdraw_reservation import (
-            SellerWithdrawReservation,
-        )
-        from app.domain.order.model.product_stock_reservation import (
-            ProductStockReservation,
-        )
-        from app.domain.order.model.order_history_item import OrderHistoryItem
-        from app.domain.customer.model.customer_withdraw_reservation import (
-            CustomerWithdrawReservation,
-        )
-
         await init_beanie(
             database=self.database,
-            document_models=[
-                OrderHistoryItem,
-                ProductStockReservation,
-                SellerWithdrawReservation,
-                CustomerWithdrawReservation,
-            ],
+            document_models=DOCUMENT_MODELS,
         )
 
 

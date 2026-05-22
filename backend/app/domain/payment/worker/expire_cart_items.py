@@ -15,7 +15,9 @@ webhook 미사용 모델에서 본 sweeper 가 결제 누락 복구를 담당한
 """
 from datetime import datetime, timezone
 
+from app.scheduler.decorators import log_and_swallow
 from app.core.logger import get_logger
+from app.core.email.notifier import send_reservation_email
 from app.container import container
 
 
@@ -28,18 +30,12 @@ class ExpireCartItemsTask:
     _BATCH_LIMIT = 100
 
     @staticmethod
+    @log_and_swallow("만료 cart sweep", logger)
     async def sweep():
-        from app.core.email.notifier import send_reservation_email
-
         start = datetime.now(timezone.utc)
-        try:
-            result = await container.customer_payment_service().sweep_expired_carts(
-                limit=ExpireCartItemsTask._BATCH_LIMIT,
-            )
-        except Exception:
-            logger.exception("만료 cart sweep 중 오류 발생")
-            return
-
+        result = await container.customer_payment_service().sweep_expired_carts(
+            limit=ExpireCartItemsTask._BATCH_LIMIT,
+        )
         elapsed = (datetime.now(timezone.utc) - start).total_seconds()
         if result.finalized or result.cancelled or result.transient:
             logger.info(

@@ -4,17 +4,17 @@
   1) customer 분기 — detail 미등록 → "profile", 등록 후 "complete"
   2) seller 분기 — store 미등록 → "store", store 만 → "product", product 까지 → "complete"
 """
-import pytest
 import pytest_asyncio
+import pytest
 
-from app.domain.auth.dto.auth import UserType
-from app.domain.auth.service.registration_status import RegistrationStatusService
-from app.domain.customer.service.customer_registration_status import (
-    CustomerRegistrationStatusService,
-)
 from app.domain.seller.service.seller_registration_status import (
     SellerRegistrationStatusService,
 )
+from app.domain.customer.service.customer_registration_status import (
+    CustomerRegistrationStatusService,
+)
+from app.domain.auth.service.registration_status import RegistrationStatusService
+from app.domain.auth.dto.auth import UserType
 
 
 pytestmark = pytest.mark.integration

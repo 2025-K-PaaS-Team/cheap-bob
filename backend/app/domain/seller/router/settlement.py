@@ -2,10 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from dependency_injector.wiring import Provide, inject
 from datetime import date
 
-from app.middleware.auth import CurrentSellerDep
-from app.domain.seller.service.seller_store_read import SellerStoreReadService
 from app.domain.seller.service.seller_settlement import SellerSettlementService
-from app.domain.seller.service.exception import StoreNotFoundError
+from app.domain.seller.router.deps import CurrentSellerStoreIdDep
 from app.domain.order.schema.settlement import (
     SettlementDayGroup,
     SettlementItem,
@@ -29,12 +27,9 @@ router = APIRouter(prefix="/store/settlement", tags=["Seller-Settlement"])
 )
 @inject
 async def get_store_settlement(
-    current_user: CurrentSellerDep,
+    store_id: CurrentSellerStoreIdDep,
     start_date: date = Query(..., description="조회 시작일"),
     end_date: date = Query(..., description="조회 종료일"),
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
     settlement_service: SellerSettlementService = Depends(
         Provide["seller_settlement_service"],
     ),
@@ -44,15 +39,9 @@ async def get_store_settlement(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="시작일이 종료일보다 늦을 수 없습니다",
         )
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        daily = await settlement_service.get_daily_settlement(
-            store_id=store_id, start_date=start_date, end_date=end_date,
-        )
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    daily = await settlement_service.get_daily_settlement(
+        store_id=store_id, start_date=start_date, end_date=end_date,
+    )
 
     return SettlementResponse(
         daily_settlements=[
@@ -84,20 +73,11 @@ async def get_store_settlement(
 )
 @inject
 async def get_weekly_revenue(
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     settlement_service: SellerSettlementService = Depends(
         Provide["seller_settlement_service"],
     ),
 ):
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        total = await settlement_service.get_weekly_revenue(store_id)
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    total = await settlement_service.get_weekly_revenue(store_id)
 
     return WeeklyRevenueResponse(total_revenue=total)

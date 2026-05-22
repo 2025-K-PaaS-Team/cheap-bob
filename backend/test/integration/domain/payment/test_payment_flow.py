@@ -7,15 +7,15 @@
   4) 같은 가게에 두 번째 등록 시도 → ``PaymentInfoAlreadyExistsError``
   5) 탈퇴 cleanup 흐름 → ``delete_by_store`` True/False
 """
-import pytest
 import pytest_asyncio
+import pytest
 
+from app.domain.payment.service.store_payment_info import StorePaymentInfoService
 from app.domain.payment.service.exception import (
     PaymentInfoAlreadyExistsError,
     PaymentInfoIncompleteError,
     PaymentInfoMissingError,
 )
-from app.domain.payment.service.store_payment_info import StorePaymentInfoService
 
 
 pytestmark = pytest.mark.integration

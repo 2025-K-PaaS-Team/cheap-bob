@@ -1,7 +1,7 @@
 """Tests for ``app.domain.auth.service.jwt.JwtService``."""
-from datetime import datetime, timedelta, timezone
-from jose import jwt
 import pytest
+from jose import jwt
+from datetime import datetime, timedelta, timezone
 
 from app.config.setting import settings
 

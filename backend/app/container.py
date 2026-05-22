@@ -35,7 +35,6 @@ from app.domain.order.repository.product_stock_reservation import (
 )
 from app.domain.order.repository.order_history_item import OrderHistoryItemRepository
 from app.domain.customer.service.preference_option import PreferenceOptionService
-
 from app.domain.customer.service.customer_withdraw import CustomerWithdrawService
 from app.domain.customer.service.customer_search import CustomerSearchService
 from app.domain.customer.service.customer_registration_status import (

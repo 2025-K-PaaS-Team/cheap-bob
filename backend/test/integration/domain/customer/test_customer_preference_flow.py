@@ -8,19 +8,19 @@
 (4종 중 PreferredMenu / Allergy 두 가지만 검증해도 동일 패턴 확인에 충분하지만,
 나머지 두 종류도 회귀 방지를 위해 동일하게 한 케이스씩 검사한다.)
 """
-import pytest
 import pytest_asyncio
+import pytest
 
 from app.domain.seller.dto.nutrition import NutritionType
+from app.domain.customer.service.exception import (
+    PreferenceDuplicateError,
+    PreferenceNotFoundError,
+)
+from app.domain.customer.service.customer_preference import CustomerPreferenceService
 from app.domain.customer.dto.preference import (
     AllergyType,
     PreferredMenu,
     ToppingType,
-)
-from app.domain.customer.service.customer_preference import CustomerPreferenceService
-from app.domain.customer.service.exception import (
-    PreferenceDuplicateError,
-    PreferenceNotFoundError,
 )
 
 

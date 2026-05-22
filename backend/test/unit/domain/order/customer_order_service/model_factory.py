@@ -5,9 +5,9 @@ OrderCurrentItem 의 응답 변환 (`_customer_order_response`) 은 ``order.cust
 직접 만들면 backref 이벤트가 `_sa_instance_state` 를 요구해 실패하므로 SimpleNamespace 로
 이 nested 구조를 흉내낸다.
 """
-from datetime import datetime, timezone
-from types import SimpleNamespace
 from typing import Optional
+from types import SimpleNamespace
+from datetime import datetime, timezone
 
 from app.domain.order.dto.order import OrderStatus
 

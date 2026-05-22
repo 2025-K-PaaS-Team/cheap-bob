@@ -7,16 +7,16 @@
   4) 존재하지 않는 store → ``StoreNotFoundError``
   5) remove 후 row 없음 / 비존재 remove 시 ``FavoriteNotFoundError``
 """
-import pytest
 import pytest_asyncio
+import pytest
 
 from app.domain.seller.service.seller_store_read import SellerStoreReadService
 from app.domain.seller.service.exception import StoreNotFoundError
-from app.domain.customer.service.customer_favorite import CustomerFavoriteService
 from app.domain.customer.service.exception import (
     FavoriteAlreadyExistsError,
     FavoriteNotFoundError,
 )
+from app.domain.customer.service.customer_favorite import CustomerFavoriteService
 
 
 pytestmark = pytest.mark.integration

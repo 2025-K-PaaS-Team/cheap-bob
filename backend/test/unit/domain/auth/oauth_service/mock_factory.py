@@ -1,5 +1,5 @@
-from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
+from types import SimpleNamespace
 
 
 class FakeAsyncContextManager:

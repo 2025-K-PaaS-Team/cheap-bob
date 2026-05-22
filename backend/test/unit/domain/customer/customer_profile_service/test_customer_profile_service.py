@@ -2,9 +2,9 @@
 from types import SimpleNamespace
 import pytest
 
+from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.customer.service.exception import CustomerDetailNotFoundError
 from app.domain.customer.dto.profile import CustomerFullProfile
-from app.domain.seller.dto.nutrition import NutritionType
 from app.domain.customer.dto.preference import (
     AllergyType,
     PreferredMenu,

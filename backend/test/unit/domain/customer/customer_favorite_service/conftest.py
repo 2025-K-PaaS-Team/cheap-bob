@@ -1,13 +1,12 @@
-import pytest
-
-from app.domain.customer.service.customer_favorite import CustomerFavoriteService
-
 from test.unit.domain.customer.customer_favorite_service.mock_factory import (
     FakeUnitOfWork,
     FavoriteRepoMockFactory,
     StoreReadServiceMockFactory,
     make_mock_session,
 )
+import pytest
+
+from app.domain.customer.service.customer_favorite import CustomerFavoriteService
 
 
 @pytest.fixture

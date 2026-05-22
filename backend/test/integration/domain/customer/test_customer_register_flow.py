@@ -5,17 +5,17 @@
   2) 이미 detail 이 있는 customer 의 재등록 시도는 ``CustomerAlreadyRegisteredError``
   3) 선호도 인자가 None 인 항목은 row 가 생기지 않는다
 """
-import pytest
 import pytest_asyncio
+import pytest
 
 from app.domain.seller.dto.nutrition import NutritionType
+from app.domain.customer.service.exception import CustomerAlreadyRegisteredError
+from app.domain.customer.service.customer_register import CustomerRegisterService
 from app.domain.customer.dto.preference import (
     AllergyType,
     PreferredMenu,
     ToppingType,
 )
-from app.domain.customer.service.customer_register import CustomerRegisterService
-from app.domain.customer.service.exception import CustomerAlreadyRegisteredError
 
 
 pytestmark = pytest.mark.integration

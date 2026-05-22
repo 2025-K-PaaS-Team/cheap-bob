@@ -9,13 +9,13 @@
 ``weekly_revenue`` 는 월요일이 아닌 날 Mongo history 조회로 분기하므로, history_repo 만
 빈 결과를 돌려주는 stub 으로 주입해 외부 의존을 끊는다.
 """
-from datetime import datetime, timezone
-import pytest
 import pytest_asyncio
+import pytest
+from datetime import datetime, timezone
 
-from app.domain.order.dto.order import OrderStatus
-from app.domain.order.service.order_query import OrderQueryService
 from app.domain.seller.service.seller_settlement import SellerSettlementService
+from app.domain.order.service.order_query import OrderQueryService
+from app.domain.order.dto.order import OrderStatus
 
 
 pytestmark = pytest.mark.integration

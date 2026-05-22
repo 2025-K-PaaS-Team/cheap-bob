@@ -1,13 +1,12 @@
-import pytest
-
-from app.domain.customer.service.customer_registration_status import (
-    CustomerRegistrationStatusService,
-)
-
 from test.unit.domain.customer.customer_registration_status_service.mock_factory import (
     DetailRepoMockFactory,
     FakeUnitOfWork,
     make_mock_session,
+)
+import pytest
+
+from app.domain.customer.service.customer_registration_status import (
+    CustomerRegistrationStatusService,
 )
 
 

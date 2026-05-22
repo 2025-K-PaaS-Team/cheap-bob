@@ -5,22 +5,16 @@ from dependency_injector.wiring import Provide, inject
 from app.util.image_validator import validate_image_files
 from app.middleware.auth import CurrentSellerDep
 from app.domain.seller.service.seller_store_register import SellerStoreRegisterService
-from app.domain.seller.service.seller_store_read import SellerStoreReadService
 from app.domain.seller.service.seller_store_image import SellerStoreImageService
-from app.domain.seller.service.exception import (
-    StoreAlreadyRegisteredError,
-    StoreImageDuplicateError,
-    StoreNotFoundError,
-)
 from app.domain.seller.schema.seller_profile import (
     SellerProfileCreateRequest,
     SellerProfileResponse,
 )
 from app.domain.seller.schema.image import StoreImagesUploadResponse
+from app.domain.seller.router.deps import CurrentSellerStoreIdDep
 from app.domain.payment.service.seller_payment_settings import (
     SellerPaymentSettingsService,
 )
-from app.domain.payment.service.exception import PaymentInfoAlreadyExistsError
 from app.domain.payment.schema.store_payment_settings import (
     StorePaymentInfoCheckResponse,
     StorePaymentInfoCreateRequest,
@@ -71,27 +65,24 @@ async def register_seller_store(
         for op in request.operation_times
     ]
 
-    try:
-        store = await register_service.register(
-            seller_email=current_user["sub"],
-            store_name=request.store_name,
-            store_introduction=request.store_introduction,
-            store_phone=request.store_phone,
-            store_postal_code=request.address_info.postal_code,
-            store_address=request.address_info.address,
-            store_detail_address=request.address_info.detail_address,
-            sido=request.address_info.sido,
-            sigungu=request.address_info.sigungu,
-            bname=request.address_info.bname,
-            lat=request.address_info.lat,
-            lng=request.address_info.lng,
-            nearest_station=request.address_info.nearest_station,
-            walking_time=request.address_info.walking_time,
-            sns_info=sns_info,
-            operation_times=operation_times,
-        )
-    except StoreAlreadyRegisteredError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    store = await register_service.register(
+        seller_email=current_user["sub"],
+        store_name=request.store_name,
+        store_introduction=request.store_introduction,
+        store_phone=request.store_phone,
+        store_postal_code=request.address_info.postal_code,
+        store_address=request.address_info.address,
+        store_detail_address=request.address_info.detail_address,
+        sido=request.address_info.sido,
+        sigungu=request.address_info.sigungu,
+        bname=request.address_info.bname,
+        lat=request.address_info.lat,
+        lng=request.address_info.lng,
+        nearest_station=request.address_info.nearest_station,
+        walking_time=request.address_info.walking_time,
+        sns_info=sns_info,
+        operation_times=operation_times,
+    )
 
     return SellerProfileResponse(store_id=store.store_id, store_name=store.store_name)
 
@@ -111,10 +102,8 @@ async def register_seller_store(
 @inject
 async def register_store_images(
     current_user: CurrentSellerDep,
+    store_id: CurrentSellerStoreIdDep,
     files: List[UploadFile] = File(..., description="첫 번째가 대표 이미지. 최대 11개 / 15MB / jpeg/png/webp"),
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
     image_service: SellerStoreImageService = Depends(
         Provide["seller_store_image_service"],
     ),
@@ -129,15 +118,10 @@ async def register_store_images(
         )
 
     try:
-        store_id = await store_read_service.get_store_id_by_seller_email(seller_email)
         validated = await validate_image_files(files)
         return await image_service.init_images(
             store_id=store_id, seller_email=seller_email, files=validated,
         )
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except StoreImageDuplicateError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
     finally:
         for f in files:
             await f.close()
@@ -155,29 +139,18 @@ async def register_store_images(
 @inject
 async def register_payment_info(
     request: StorePaymentInfoCreateRequest,
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     payment_settings_service: SellerPaymentSettingsService = Depends(
         Provide["seller_payment_settings_service"],
     ),
 ):
     """가게 1차 가입의 결제 정보 등록 — payment 도메인의 service 에 위임."""
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        await payment_settings_service.register(
-            store_id=store_id,
-            portone_store_id=request.portone_store_id,
-            portone_channel_id=request.portone_channel_id,
-            portone_secret_key=request.portone_secret_key,
-        )
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except PaymentInfoAlreadyExistsError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    await payment_settings_service.register(
+        store_id=store_id,
+        portone_store_id=request.portone_store_id,
+        portone_channel_id=request.portone_channel_id,
+        portone_secret_key=request.portone_secret_key,
+    )
 
 
 @router.get(
@@ -190,20 +163,11 @@ async def register_payment_info(
 )
 @inject
 async def check_payment_info(
-    current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     payment_settings_service: SellerPaymentSettingsService = Depends(
         Provide["seller_payment_settings_service"],
     ),
 ):
     """결제 정보 등록 여부 확인."""
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(
-            current_user["sub"],
-        )
-        exists = await payment_settings_service.exists(store_id)
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    exists = await payment_settings_service.exists(store_id)
     return StorePaymentInfoCheckResponse(is_exist=exists)

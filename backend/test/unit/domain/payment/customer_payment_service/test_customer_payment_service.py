@@ -1,9 +1,12 @@
 """Tests for ``app.domain.payment.service.customer_payment.CustomerPaymentService``."""
-from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 import pytest
+from datetime import datetime, timedelta, timezone
 
-from app.core.portone import PortOnePaymentStatus, PortOneTransientError
+from app.domain.seller.service.exception import (
+    ProductStockConflictError,
+    ProductStockInsufficientError,
+)
 from app.domain.payment.service.exception import (
     PaymentInfoIncompleteError,
     PaymentInfoMissingError,
@@ -17,10 +20,7 @@ from app.domain.payment.service.exception import (
     StockInsufficientError,
     StoreNotOpenError,
 )
-from app.domain.seller.service.exception import (
-    ProductStockConflictError,
-    ProductStockInsufficientError,
-)
+from app.core.portone import PortOnePaymentStatus, PortOneTransientError
 
 
 def _paid(amount: int) -> SimpleNamespace:

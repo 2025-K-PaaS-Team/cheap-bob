@@ -5,6 +5,7 @@
 """
 from datetime import datetime, timezone
 
+from app.scheduler.decorators import log_and_swallow
 from app.core.logger import get_logger
 from app.container import container
 
@@ -16,15 +17,11 @@ class OperationModificationApplyTask:
     """가게 운영 정보 변경 예약을 적용하는 스케줄 작업."""
 
     @staticmethod
+    @log_and_swallow("운영 정보 변경 예약 적용", logger)
     async def apply_operation_modifications():
         start = datetime.now(timezone.utc)
-        try:
-            applied, failed = await container.seller_store_settings_service(
-            ).apply_pending_modifications()
-        except Exception:
-            logger.exception("운영 정보 변경 예약 적용 중 오류 발생")
-            return
-
+        applied, failed = await container.seller_store_settings_service(
+        ).apply_pending_modifications()
         elapsed = (datetime.now(timezone.utc) - start).total_seconds()
         logger.info(
             "운영 정보 변경 예약 적용 완료: 적용 {}건, 실패 {}건 ({:.2f}s)",

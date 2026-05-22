@@ -1,21 +1,13 @@
 from fastapi.responses import JSONResponse
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from dependency_injector.wiring import Provide, inject
 
 from app.middleware.auth import CurrentSellerDep, CurrentSellerNoActiveDep
 from app.domain.seller.service.seller_withdraw import SellerWithdrawService
-from app.domain.seller.service.seller_store_read import SellerStoreReadService
-from app.domain.seller.service.exception import (
-    SellerAlreadyActiveError,
-    SellerAlreadyWithdrawnError,
-    SellerNotFoundError,
-    SellerStoreOpenError,
-    SellerWithdrawalRecordNotFoundError,
-    StoreNotFoundError,
-)
+from app.domain.seller.router.deps import CurrentSellerStoreIdDep
 from app.domain.auth.service.jwt import JwtService
-from app.domain.auth.dto.auth import UserType
 from app.domain.auth.service.cookie import clear_auth_cookie, set_auth_cookie
+from app.domain.auth.dto.auth import UserType
 from app.core.openapi import create_error_responses
 
 
@@ -35,27 +27,15 @@ router = APIRouter(prefix="/withdraw", tags=["Seller-Withdraw"])
 @inject
 async def withdraw_seller(
     current_user: CurrentSellerDep,
-    store_read_service: SellerStoreReadService = Depends(
-        Provide["seller_store_read_service"],
-    ),
+    store_id: CurrentSellerStoreIdDep,
     withdraw_service: SellerWithdrawService = Depends(
         Provide["seller_withdraw_service"],
     ),
 ):
     seller_email = current_user["sub"]
-    try:
-        store_id = await store_read_service.get_store_id_by_seller_email(seller_email)
-        await withdraw_service.request_withdraw(
-            seller_email=seller_email, store_id=store_id,
-        )
-    except StoreNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except SellerStoreOpenError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-    except SellerNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except SellerAlreadyWithdrawnError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    await withdraw_service.request_withdraw(
+        seller_email=seller_email, store_id=store_id,
+    )
 
     response = JSONResponse(
         content={"message": "탈퇴가 완료되었습니다"}, status_code=200,
@@ -82,14 +62,7 @@ async def cancel_withdraw(
     jwt_service: JwtService = Depends(Provide["jwt_service"]),
 ):
     seller_email = current_user["sub"]
-    try:
-        await withdraw_service.cancel_withdraw(seller_email)
-    except SellerNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except SellerWithdrawalRecordNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except SellerAlreadyActiveError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    await withdraw_service.cancel_withdraw(seller_email)
 
     new_token = jwt_service.create_user_token(
         email=seller_email, user_type=UserType.SELLER.value, is_active=True,

@@ -46,8 +46,9 @@ class CustomerWithdrawService:
                 "진행 중인 주문이 있어 탈퇴할 수 없습니다",
             )
 
-        # RDB (is_active=False) ↔ Mongo (reservation insert) 는 분리된 데이터 저장소이므로 단일 트랜잭션으로 묶을 수 없다. is_active 만 false 가 되고 reservation 이
-        # 되돌리는 보상 트랜잭션으로 마감.
+        # RDB (is_active=False) ↔ Mongo (reservation insert) 는 분리된 데이터 저장소이므로
+        # 단일 트랜잭션으로 묶을 수 없다. reservation insert 가 실패하면 is_active 를 다시
+        # True 로 되돌리는 보상 트랜잭션으로 일관성을 맞춘다.
         await self.customer_account_service.set_active(customer_email, active=False)
         try:
             await self.withdraw_repo.save(

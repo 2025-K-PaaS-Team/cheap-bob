@@ -6,11 +6,11 @@
   3) ``update`` 는 None 이 아닌 필드만 갱신 (partial patch)
   4) 미등록 customer 에 대한 update 는 ``CustomerDetailNotFoundError``
 """
-import pytest
 import pytest_asyncio
+import pytest
 
-from app.domain.customer.service.customer_detail import CustomerDetailService
 from app.domain.customer.service.exception import CustomerDetailNotFoundError
+from app.domain.customer.service.customer_detail import CustomerDetailService
 
 
 pytestmark = pytest.mark.integration

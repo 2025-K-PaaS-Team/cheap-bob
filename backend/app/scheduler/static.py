@@ -3,8 +3,8 @@
 매일/매주 정해진 시각에 실행되는 task 들 (재고 리셋, 운영 정보 자동 갱신, history 이관 등) 을 APScheduler 인스턴스에 등록한다. 동적 1회성 등록은 `app.scheduler.dynamic` 에서 담당.
 """
 from typing import Any, Dict, List
-from datetime import timedelta, timezone
 from functools import partial
+from datetime import timedelta, timezone
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -34,11 +34,11 @@ from app.domain.order.worker.order_migration import (
 )
 from app.domain.order.worker.auto_complete_orders import (
     AutoCompleteOrdersTask,
-    scheduled_task as auto_complete_order_task,
+    registration_cron_args as auto_complete_cron_args,
 )
 from app.domain.order.worker.auto_cancel_reservation_orders import (
     AutoCancelReservationOrdersTask,
-    scheduled_task as auto_cancel_reservation_order_task,
+    registration_cron_args as auto_cancel_cron_args,
 )
 from app.domain.customer.worker.withdraw_cleanup import (
     scheduled_task as customer_withdraw_cleanup_task,
@@ -113,10 +113,7 @@ class StaticScheduler:
     def _configure_auto_cancel_refund_task(self):
         """매일 새벽 픽업 마감 시 주문 자동 취소/환불 — 동적 스케줄 일괄 등록 task."""
         try:
-            trigger = CronTrigger(
-                **auto_cancel_reservation_order_task.get("trigger_args", {}),
-                timezone=_KST,
-            )
+            trigger = CronTrigger(**auto_cancel_cron_args, timezone=_KST)
             self.scheduler.add_job(
                 func=partial(AutoCancelReservationOrdersTask.register_daily_schedules, self),
                 trigger=trigger,
@@ -132,10 +129,7 @@ class StaticScheduler:
     def _configure_auto_complete_task(self):
         """매일 새벽 가게 마감 시 주문 자동 완료 — 동적 스케줄 일괄 등록 task."""
         try:
-            trigger = CronTrigger(
-                **auto_complete_order_task.get("trigger_args", {}),
-                timezone=_KST,
-            )
+            trigger = CronTrigger(**auto_complete_cron_args, timezone=_KST)
             self.scheduler.add_job(
                 func=partial(AutoCompleteOrdersTask.register_daily_schedules, self),
                 trigger=trigger,
