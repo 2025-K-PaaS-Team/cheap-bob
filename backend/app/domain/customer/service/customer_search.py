@@ -18,9 +18,8 @@ _PAGE_SIZE = 4
 class CustomerSearchService:
     """소비자의 가게/상품 검색.
 
-    가게 데이터는 seller 도메인의 `SellerStoreReadService` 를 통해서만 접근한다 (strict
-    service-to-service). 즐겨찾기 정보는 customer 자신의 `CustomerFavoriteRepository` 에서
-    별도 조회 후 in-memory 결합한다.
+    가게 데이터는 seller 도메인의 `SellerStoreReadService` 를 통해서만 접근한다. 
+    즐겨찾기 정보는 customer 자신의 `CustomerFavoriteRepository` 에서 별도 조회 후 in-memory 결합한다.
     """
 
     def __init__(

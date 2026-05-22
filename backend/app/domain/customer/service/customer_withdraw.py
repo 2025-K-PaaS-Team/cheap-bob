@@ -5,7 +5,6 @@ from app.domain.customer.service.exception import (
     CustomerActiveOrdersExistError,
     CustomerAlreadyActiveError,
     CustomerAlreadyWithdrawnError,
-    CustomerNotFoundError,
     WithdrawalRecordNotFoundError,
 )
 from app.domain.customer.service.customer_account import CustomerAccountService
@@ -47,10 +46,7 @@ class CustomerWithdrawService:
                 "진행 중인 주문이 있어 탈퇴할 수 없습니다",
             )
 
-        # RDB (is_active=False) ↔ Mongo (reservation insert) 는 분리된 데이터 저장소이므로
-        # 단일 트랜잭션으로 묶을 수 없다. is_active 만 false 가 되고 reservation 이
-        # 누락되면 cleanup worker 가 영구히 처리하지 못하고 cancel_withdraw 도 reservation 을
-        # 요구하므로 사용자가 복구 불가능한 상태가 된다. → Mongo 실패 시 is_active 를
+        # RDB (is_active=False) ↔ Mongo (reservation insert) 는 분리된 데이터 저장소이므로 단일 트랜잭션으로 묶을 수 없다. is_active 만 false 가 되고 reservation 이
         # 되돌리는 보상 트랜잭션으로 마감.
         await self.customer_account_service.set_active(customer_email, active=False)
         try:

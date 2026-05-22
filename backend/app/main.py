@@ -23,11 +23,6 @@ from app.config.setting import settings
 from app.api.v1.router import api_router
 
 
-# 장바구니 만료/재고 복구는 ``expire_cart_items`` sweeper worker (매분) 가 담당한다.
-# in-memory APScheduler 시절의 startup 일괄 wipe 로직은 새 DB-backed 모델에서 진행 중인
-# (expires_at > now) cart 까지 같이 날려 결제 race 를 만들 수 있어 제거됨.
-
-
 logger = get_logger("app.main")
 
 

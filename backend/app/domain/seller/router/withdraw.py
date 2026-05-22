@@ -15,7 +15,7 @@ from app.domain.seller.service.exception import (
 )
 from app.domain.auth.service.jwt import JwtService
 from app.domain.auth.dto.auth import UserType
-from app.domain.auth.cookie import clear_auth_cookie, set_auth_cookie
+from app.domain.auth.service.cookie import clear_auth_cookie, set_auth_cookie
 from app.core.openapi import create_error_responses
 
 

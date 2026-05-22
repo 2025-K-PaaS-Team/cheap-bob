@@ -93,45 +93,27 @@ class TestExcludedPrefixes:
 
 @pytest.mark.unit
 class TestTokenExtraction:
-    """``_extract_token`` 의 dev/prod 분기."""
+    """``_extract_token`` — ``access_token`` 쿠키만 사용한다."""
 
-    def test_dev_prefers_authorization_header(self, middleware, monkeypatch):
-        monkeypatch.setattr("app.middleware.auth.settings.ENVIRONMENT", "dev")
+    def test_returns_cookie_value(self, middleware):
         req = _make_request(
             "/api/v1/seller/store/orders",
-            headers={"Authorization": "Bearer HEADER_TOKEN"},
-            cookies={"access_token": "COOKIE_TOKEN"},
-        )
-        assert middleware._extract_token(req) == "HEADER_TOKEN"
-
-
-    def test_dev_ignores_query_token_and_falls_back_to_cookie(
-        self, middleware, monkeypatch,
-    ):
-        """``?token=`` 쿼리는 브라우저 히스토리/서버 로그 leak 위험으로 dev 에서도 지원 안 함."""
-        monkeypatch.setattr("app.middleware.auth.settings.ENVIRONMENT", "dev")
-        req = _make_request(
-            "/api/v1/seller/store/orders",
-            query="token=QUERY_TOKEN",
             cookies={"access_token": "COOKIE_TOKEN"},
         )
         assert middleware._extract_token(req) == "COOKIE_TOKEN"
 
 
-    def test_prod_only_uses_cookie(self, middleware, monkeypatch):
-        monkeypatch.setattr("app.middleware.auth.settings.ENVIRONMENT", "prod")
+    def test_ignores_authorization_header_and_query_token(self, middleware):
+        """Bearer 헤더 / ?token 쿼리는 모두 무시 — 쿠키만 인정한다."""
         req = _make_request(
             "/api/v1/seller/store/orders",
             headers={"Authorization": "Bearer HEADER_TOKEN"},
             query="token=QUERY_TOKEN",
-            cookies={"access_token": "COOKIE_TOKEN"},
         )
-        # prod 는 header / query 모두 무시.
-        assert middleware._extract_token(req) == "COOKIE_TOKEN"
+        assert middleware._extract_token(req) is None
 
 
-    def test_returns_none_when_no_token_present(self, middleware, monkeypatch):
-        monkeypatch.setattr("app.middleware.auth.settings.ENVIRONMENT", "prod")
+    def test_returns_none_when_no_cookie(self, middleware):
         req = _make_request("/api/v1/seller/store/orders")
         assert middleware._extract_token(req) is None
 
@@ -143,8 +125,7 @@ class TestTokenExtraction:
 @pytest.mark.unit
 class TestDispatchAuth:
 
-    async def test_returns_401_when_no_token(self, middleware, monkeypatch):
-        monkeypatch.setattr("app.middleware.auth.settings.ENVIRONMENT", "prod")
+    async def test_returns_401_when_no_token(self, middleware):
         request = _make_request("/api/v1/customer/orders")
         call_next = AsyncMock()
 
@@ -154,10 +135,7 @@ class TestDispatchAuth:
         call_next.assert_not_awaited()
 
 
-    async def test_returns_401_when_token_invalid(
-        self, middleware, monkeypatch, jwt_service_mock,
-    ):
-        monkeypatch.setattr("app.middleware.auth.settings.ENVIRONMENT", "prod")
+    async def test_returns_401_when_token_invalid(self, middleware, jwt_service_mock):
         jwt_service_mock.verify_and_refresh_token.return_value = (False, None, None)
         request = _make_request(
             "/api/v1/customer/orders", cookies={"access_token": "BAD"},
@@ -168,9 +146,8 @@ class TestDispatchAuth:
 
 
     async def test_sets_request_state_user_on_valid_token(
-        self, middleware, monkeypatch, jwt_service_mock,
+        self, middleware, jwt_service_mock,
     ):
-        monkeypatch.setattr("app.middleware.auth.settings.ENVIRONMENT", "prod")
         request = _make_request(
             "/api/v1/customer/orders", cookies={"access_token": "OK"},
         )
@@ -185,10 +162,9 @@ class TestDispatchAuth:
 
 
     async def test_sets_refreshed_cookie_when_returned(
-        self, middleware, monkeypatch, jwt_service_mock,
+        self, middleware, jwt_service_mock,
     ):
         """verify_and_refresh_token 이 새 토큰을 반환하면 응답에 set_cookie 가 호출된다."""
-        monkeypatch.setattr("app.middleware.auth.settings.ENVIRONMENT", "prod")
         jwt_service_mock.verify_and_refresh_token.return_value = (
             True, "NEW_TOKEN", {"sub": "alice@example.com", "user_type": "customer", "is_active": True},
         )

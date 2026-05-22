@@ -6,8 +6,7 @@ from fastapi import Depends, HTTPException, Request, Response, status
 
 from app.domain.auth.service.jwt import JwtService
 from app.domain.auth.dto.auth import UserType
-from app.domain.auth.cookie import set_auth_cookie
-from app.config.setting import settings
+from app.domain.auth.service.cookie import set_auth_cookie
 
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):
@@ -37,16 +36,11 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
 
 
     def _extract_token(self, request: Request) -> Optional[str]:
-        """dev 한정 ``Authorization: Bearer`` 헤더 허용. prod 는 쿠키 only.
+        """``access_token`` 쿠키만 사용한다.
 
-        ?token 쿼리 파라미터는 브라우저 히스토리/서버 로그에 토큰이 leak 되어
-        지원하지 않는다 — Authorization 헤더 또는 쿠키만 사용.
+        Bearer 헤더 / ?token 쿼리는 지원하지 않는다 — 토큰은 HttpOnly 쿠키로만
+        다닌다.
         """
-        if settings.ENVIRONMENT == "dev":
-            authorization = request.headers.get("Authorization")
-            if authorization and authorization.startswith("Bearer "):
-                return authorization[7:]
-
         return request.cookies.get("access_token")
 
 

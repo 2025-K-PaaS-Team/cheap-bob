@@ -57,7 +57,7 @@ class CustomerProfileService:
     async def get_preference_snapshot(
         self, customer_email: str,
     ) -> Dict[str, Optional[str]]:
-        """payment 가 OrderCurrentItem 에 결합할 customer 선호 스냅샷 (comma-joined).
+        """payment 가 OrderCurrentItem 에 결합할 customer 선호 스냅샷.
 
         등록 전 / 선호 없음 / customer 부재 모두 None 으로 통일.
         """

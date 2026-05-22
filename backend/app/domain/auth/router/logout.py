@@ -1,7 +1,7 @@
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter
 
-from app.domain.auth.cookie import clear_auth_cookie
+from app.domain.auth.service.cookie import clear_auth_cookie
 
 
 router = APIRouter()
