@@ -19,7 +19,7 @@ services:
       retries: 5
 
   postgres-payment:
-    # payment-svc 전용 별도 인스턴스. MSA 데이터 분리 — 같은 호스트에서 다른 컨테이너로 운용.
+    # payment-backend 전용 별도 인스턴스. MSA 데이터 분리 — 같은 호스트에서 다른 컨테이너로 운용.
     image: postgres:16-alpine
     container_name: cheapbob-postgres-payment
     environment:
@@ -67,16 +67,16 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
+  main-backend:
     build:
-      context: ./backend
+      context: ./main-backend
       dockerfile: Dockerfile
-    container_name: cheapbob-backend
+    container_name: cheapbob-main-backend
     env_file:
-      - ./backend/.env
+      - ./main-backend/.env
     environment:
-      # backend → payment-svc 호출 — 컨테이너 네트워크 내부 주소.
-      PAYMENT_SERVICE_URL: http://backend-payment:8001
+      # main-backend → payment-backend 호출 — 컨테이너 네트워크 내부 주소.
+      PAYMENT_SERVICE_URL: http://payment-backend:8001
     ports:
       - "8000:8000"
     depends_on:
@@ -89,21 +89,21 @@ services:
     networks:
       - cheapbob-network
     volumes:
-      - ./backend/app:/backend/app:ro
-      - ./backend/migration:/backend/migration
-      - ./backend/data:/backend/data
-      - ./backend/logs:/backend/logs
+      - ./main-backend/app:/main-backend/app:ro
+      - ./main-backend/migration:/main-backend/migration
+      - ./main-backend/data:/main-backend/data
+      - ./main-backend/logs:/main-backend/logs
 
-  backend-payment:
+  payment-backend:
     build:
-      context: ./backend-payment
+      context: ./payment-backend
       dockerfile: Dockerfile
-    container_name: cheapbob-backend-payment
+    container_name: cheapbob-payment-backend
     env_file:
-      - ./backend-payment/.env
+      - ./payment-backend/.env
     environment:
-      # payment-svc → backend 호출 — 컨테이너 네트워크 내부 주소.
-      BACKEND_SERVICE_URL: http://backend:8000
+      # payment-backend → main-backend 호출 — 컨테이너 네트워크 내부 주소.
+      BACKEND_SERVICE_URL: http://main-backend:8000
     ports:
       # /api/internal/* 는 외부 노출 금지 — host port 매핑은 v1 만 위한 것이지만, 같은 8001
       # 포트에 prefix 로 공존한다. 운영 환경에서는 reverse proxy (nginx/traefik) 가
@@ -115,9 +115,9 @@ services:
     networks:
       - cheapbob-network
     volumes:
-      - ./backend-payment/app:/backend-payment/app:ro
-      - ./backend-payment/migration:/backend-payment/migration
-      - ./backend-payment/logs:/backend-payment/logs
+      - ./payment-backend/app:/payment-backend/app:ro
+      - ./payment-backend/migration:/payment-backend/migration
+      - ./payment-backend/logs:/payment-backend/logs
 
 networks:
   cheapbob-network:
