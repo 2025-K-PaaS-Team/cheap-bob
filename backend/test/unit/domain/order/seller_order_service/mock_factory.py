@@ -70,21 +70,14 @@ class OrderQueryServiceMockFactory:
         return mock
 
 
-class PaymentGatewayServiceMockFactory:
+class InternalPaymentClientMockFactory:
+    """payment-svc HTTP 호출 mock — seller_order 가 refund + has_complete_info 사용."""
+
     @classmethod
     def create(cls) -> AsyncMock:
         mock = AsyncMock()
-        mock.refund.return_value = {"refunded": True}
-        return mock
-
-
-class StorePaymentInfoServiceMockFactory:
-    @classmethod
-    def create(cls) -> AsyncMock:
-        mock = AsyncMock()
-        mock.get_complete_by_store.return_value = SimpleNamespace(
-            portone_secret_key="secret-stub",
-        )
+        mock.refund.return_value = None
+        mock.has_complete_info.return_value = True
         return mock
 
 

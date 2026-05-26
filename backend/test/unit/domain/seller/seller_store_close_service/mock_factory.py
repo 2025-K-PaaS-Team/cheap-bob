@@ -1,5 +1,4 @@
 from unittest.mock import AsyncMock, MagicMock
-from types import SimpleNamespace
 
 
 class FakeUnitOfWork:
@@ -47,19 +46,12 @@ class SellerProductServiceMockFactory:
         return mock
 
 
-class PaymentGatewayServiceMockFactory:
+class InternalPaymentClientMockFactory:
+    """payment-svc 호출 mock — has_complete_info / refund 두 메서드만 본 서비스에서 사용."""
+
     @classmethod
     def create(cls) -> AsyncMock:
         mock = AsyncMock()
-        mock.refund.return_value = {"refunded": True}
-        return mock
-
-
-class StorePaymentInfoServiceMockFactory:
-    @classmethod
-    def create(cls) -> AsyncMock:
-        mock = AsyncMock()
-        mock.get_complete_by_store.return_value = SimpleNamespace(
-            portone_secret_key="secret",
-        )
+        mock.has_complete_info.return_value = True
+        mock.refund.return_value = None
         return mock

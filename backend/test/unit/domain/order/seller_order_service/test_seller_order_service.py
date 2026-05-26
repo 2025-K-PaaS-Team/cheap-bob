@@ -10,9 +10,9 @@ from test.unit.domain.order.customer_order_service.model_factory import (
 import pytest
 from datetime import datetime, timezone
 
-from app.domain.payment.service.exception import (
-    PaymentInfoMissingError,
-    PaymentRefundError,
+from app.core.internal_client.payment import (
+    PaymentServiceError,
+    PaymentServiceUnavailableError,
 )
 from app.domain.order.service.exception import (
     OrderAlreadyCanceledError,
@@ -132,12 +132,14 @@ class TestCancelOrder:
             )
 
 
-    async def test_raises_refund_error_on_portone_fail(
-        self, service, order_repo_mock, payment_gateway_mock,
+    async def test_raises_refund_error_on_payment_svc_fail(
+        self, service, order_repo_mock, payment_client_mock,
     ):
         order = OrderFactory.create(status=OrderStatus.reservation, store_id="STR_x")
         order_repo_mock.get_order_with_relations.return_value = order
-        payment_gateway_mock.refund.side_effect = PaymentRefundError("network")
+        payment_client_mock.refund.side_effect = PaymentServiceUnavailableError(
+            503, "network",
+        )
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderRefundError):
             await service.cancel_order(
@@ -152,7 +154,7 @@ class TestCancelOrder:
         self,
         service,
         order_repo_mock,
-        payment_gateway_mock,
+        payment_client_mock,
         product_service_mock,
     ):
         order = OrderFactory.create(
@@ -170,12 +172,12 @@ class TestCancelOrder:
             background_tasks=bt,
         )
 
-        payment_gateway_mock.refund.assert_awaited_once()
+        payment_client_mock.refund.assert_awaited_once()
         product_service_mock.restore_purchased_stock.assert_awaited_once_with(
             product_id=order.product_id, quantity=2,
         )
         assert result.total_amount == 20000
-        assert len(tasks) == 1  # 취소 이메일
+        assert len(tasks) == 1
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -277,11 +279,9 @@ class TestGetDashboard:
 class TestCancelStoreReservationOrders:
 
     async def test_returns_zero_when_payment_info_missing(
-        self, service, store_payment_info_mock,
+        self, service, payment_client_mock,
     ):
-        store_payment_info_mock.get_complete_by_store.side_effect = (
-            PaymentInfoMissingError("nope")
-        )
+        payment_client_mock.has_complete_info.return_value = False
         cancelled, failed, total = await service.cancel_store_reservation_orders(
             store_id="STR_x", store_name="가게", reason="픽업 마감",
         )
@@ -305,7 +305,7 @@ class TestCancelStoreReservationOrders:
         service,
         order_query_mock,
         order_repo_mock,
-        payment_gateway_mock,
+        payment_client_mock,
         product_service_mock,
     ):
         a = OrderFactory.create(status=OrderStatus.reservation, total_amount=10000)
@@ -320,7 +320,7 @@ class TestCancelStoreReservationOrders:
         assert cancelled == 2
         assert failed == 0
         assert total == 25000
-        assert payment_gateway_mock.refund.await_count == 2
+        assert payment_client_mock.refund.await_count == 2
 
 
     async def test_swallows_one_failure_and_continues(
@@ -328,15 +328,15 @@ class TestCancelStoreReservationOrders:
         service,
         order_query_mock,
         order_repo_mock,
-        payment_gateway_mock,
+        payment_client_mock,
     ):
         a = OrderFactory.create(status=OrderStatus.reservation, total_amount=10000)
         b = OrderFactory.create(status=OrderStatus.reservation, total_amount=15000)
         order_query_mock.list_store_current_orders.return_value = [a, b]
         # a 환불 실패, b 성공.
-        payment_gateway_mock.refund.side_effect = [
-            PaymentRefundError("net"),
-            {"refunded": True},
+        payment_client_mock.refund.side_effect = [
+            PaymentServiceError(500, "net"),
+            None,
         ]
         order_repo_mock.cancel_order.return_value = 1
 

@@ -50,12 +50,13 @@ class StoreRepository(BaseRepository[Store]):
 
 
     async def get_with_full_info(self, store_id: str) -> Optional[Store]:
+        # payment_info 는 MSA 분리로 backend-payment 가 소유 — 필요한 caller 는
+        # InternalPaymentClient 로 별도 조회한다.
         query = (
             select(Store)
             .options(
                 *(selectinload(getattr(Store, rel)) for rel in _FULL_RELATIONS),
                 selectinload(Store.seller),
-                selectinload(Store.payment_info),
                 selectinload(Store.products).selectinload(StoreProductInfo.nutrition_info),
             )
             .where(Store.store_id == store_id)

@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Optional
+from pydantic import BaseModel, Field
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from dependency_injector.wiring import Provide, inject
 
@@ -12,19 +13,33 @@ from app.domain.seller.schema.seller_profile import (
 )
 from app.domain.seller.schema.image import StoreImagesUploadResponse
 from app.domain.seller.router.deps import CurrentSellerStoreIdDep
-from app.domain.payment.service.seller_payment_settings import (
-    SellerPaymentSettingsService,
-)
-from app.domain.payment.schema.store_payment_settings import (
-    StorePaymentInfoCheckResponse,
-    StorePaymentInfoCreateRequest,
-)
 from app.core.openapi import create_error_responses
+from app.core.internal_client.payment import (
+    InternalPaymentClient,
+    PaymentServiceError,
+    PaymentServiceUnavailableError,
+)
 
 
 router = APIRouter(prefix="/store/register", tags=["Seller-Store-Register"])
 
 _MAX_IMAGES = 11
+
+
+# ───────── 결제 정보 schema — payment 도메인 분리 후 backend 자체 정의 (shared 미적용) ─────────
+
+
+class StorePaymentInfoCreateRequest(BaseModel):
+    portone_store_id: str = Field(..., description="포트원 가게 ID")
+    portone_channel_id: str = Field(..., description="포트원 채널 ID")
+    portone_secret_key: str = Field(..., min_length=1, description="포트원 시크릿 키")
+
+
+class StorePaymentInfoCheckResponse(BaseModel):
+    is_exist: bool = Field(..., description="결제 정보 등록 여부")
+
+
+# ───────── routes ─────────
 
 
 @router.post(
@@ -44,7 +59,6 @@ async def register_seller_store(
         Provide["seller_store_register_service"],
     ),
 ):
-    """판매자 1차 가게 등록 — store + address + sns + operation 한 트랜잭션 생성."""
     sns_info = None
     if request.sns_info:
         sns_info = {
@@ -108,7 +122,6 @@ async def register_store_images(
         Provide["seller_store_image_service"],
     ),
 ):
-    """가게 이미지 최초 등록 — 첫 번째 파일이 대표 이미지."""
     seller_email = current_user["sub"]
     if not files:
         raise HTTPException(status_code=400, detail="업로드할 이미지가 없습니다.")
@@ -134,23 +147,29 @@ async def register_store_images(
         401: ["인증 정보가 없음", "토큰 만료"],
         404: "가게를 찾을 수 없음",
         409: "이미 결제 정보가 등록되어 있음",
+        502: "payment-svc 일시 장애",
     }),
 )
 @inject
 async def register_payment_info(
     request: StorePaymentInfoCreateRequest,
     store_id: CurrentSellerStoreIdDep,
-    payment_settings_service: SellerPaymentSettingsService = Depends(
-        Provide["seller_payment_settings_service"],
+    internal_payment_client: InternalPaymentClient = Depends(
+        Provide["internal_payment_client"],
     ),
 ):
-    """가게 1차 가입의 결제 정보 등록 — payment 도메인의 service 에 위임."""
-    await payment_settings_service.register(
-        store_id=store_id,
-        portone_store_id=request.portone_store_id,
-        portone_channel_id=request.portone_channel_id,
-        portone_secret_key=request.portone_secret_key,
-    )
+    """가게 1차 가입의 결제 정보 등록 — payment-svc 에 HTTP 위임."""
+    try:
+        await internal_payment_client.register_store_payment_info(
+            store_id=store_id,
+            portone_store_id=request.portone_store_id,
+            portone_channel_id=request.portone_channel_id,
+            portone_secret_key=request.portone_secret_key,
+        )
+    except PaymentServiceUnavailableError as e:
+        raise HTTPException(status_code=502, detail=f"payment-svc 일시 장애: {e.detail}")
+    except PaymentServiceError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
 
 
 @router.get(
@@ -159,15 +178,23 @@ async def register_payment_info(
     responses=create_error_responses({
         401: ["인증 정보가 없음", "토큰 만료"],
         404: "가게를 찾을 수 없음",
+        502: "payment-svc 일시 장애",
     }),
 )
 @inject
 async def check_payment_info(
     store_id: CurrentSellerStoreIdDep,
-    payment_settings_service: SellerPaymentSettingsService = Depends(
-        Provide["seller_payment_settings_service"],
+    internal_payment_client: InternalPaymentClient = Depends(
+        Provide["internal_payment_client"],
     ),
 ):
-    """결제 정보 등록 여부 확인."""
-    exists = await payment_settings_service.exists(store_id)
+    """결제 정보 등록 여부 확인 — row 존재만 본다 (완전성 무관).
+
+    register 가 partial 상태에서도 409 로 거부되므로, 이 check 역시 partial 을 "등록됨"
+    으로 취급해야 1차 가입 흐름이 일관된다. 완전성 체크 (get_store_payment_info) 와 혼동 금지.
+    """
+    try:
+        exists = await internal_payment_client.exists_info(store_id)
+    except PaymentServiceUnavailableError as e:
+        raise HTTPException(status_code=502, detail=f"payment-svc 일시 장애: {e.detail}")
     return StorePaymentInfoCheckResponse(is_exist=exists)

@@ -23,9 +23,6 @@ from app.domain.seller.worker.operation_modification_apply import (
 from app.domain.seller.worker.inventory_reset import (
     scheduled_task as inventory_reset_task,
 )
-from app.domain.payment.worker.expire_cart_items import (
-    scheduled_task as expire_cart_items_task,
-)
 from app.domain.order.worker.uncompleted_order_refund import (
     scheduled_task as uncompleted_order_refund_task,
 )
@@ -66,8 +63,8 @@ class StaticScheduler:
             store_operation_status_update_task,
             customer_withdraw_cleanup_task,
             seller_withdraw_cleanup_task,
-            expire_cart_items_task,
         ]
+        # expire_cart_items_task 는 backend-payment 가 소유 (MSA 분리).
 
 
     def start(self):

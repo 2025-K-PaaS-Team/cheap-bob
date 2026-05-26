@@ -70,6 +70,12 @@ class Settings(BaseSettings):
     AWS_S3_BUCKET_NAME: str
     AWS_S3_ENDPOINT_URL: str
     
+    # MSA — service-to-service.
+    # 양 서비스가 서로의 /api/internal/* 를 호출할 때 X-Internal-Token 헤더에 본 값을 실어 보낸다.
+    INTERNAL_SERVICE_TOKEN: str
+    # 본 backend 가 payment-svc 의 /api/internal/* 를 호출할 base URL.
+    PAYMENT_SERVICE_URL: str
+
     # 슈퍼 어드민 이메일 정보 설정
     SUPER_ADMIN_SMTP_USER: str
     SUPER_ADMIN_SMTP_PASSWORD: str

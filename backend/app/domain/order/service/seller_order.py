@@ -1,4 +1,7 @@
-"""seller-side 주문 조회/수락/취소/QR/대시보드."""
+"""seller-side 주문 조회/수락/취소/QR/대시보드.
+
+payment 도메인 분리 후 refund 는 payment-svc internal API 한 번에 위임.
+"""
 from typing import Optional
 from fastapi import BackgroundTasks
 from datetime import datetime, timezone
@@ -7,13 +10,6 @@ from collections import defaultdict
 from app.util.comma_separated import parse_comma_separated_string
 from app.domain.seller.service.seller_store_read import SellerStoreReadService
 from app.domain.seller.service.seller_product import SellerProductService
-from app.domain.payment.service.store_payment_info import StorePaymentInfoService
-from app.domain.payment.service.payment_gateway import PaymentGatewayService
-from app.domain.payment.service.exception import (
-    PaymentInfoIncompleteError,
-    PaymentInfoMissingError,
-    PaymentRefundError,
-)
 from app.domain.order.service.qr import encode_qr_data
 from app.domain.order.service.order_query import OrderQueryService
 from app.domain.order.service.exception import (
@@ -35,6 +31,11 @@ from app.domain.order.repository.order_current_item import OrderCurrentItemRepos
 from app.domain.order.dto.order import OrderStatus
 from app.database.session import UnitOfWork, transactional
 from app.core.logger import get_logger
+from app.core.internal_client.payment import (
+    InternalPaymentClient,
+    PaymentServiceError,
+    PaymentServiceUnavailableError,
+)
 from app.core.email.notifier import (
     send_order_accepted_email,
     send_seller_cancel_email,
@@ -53,16 +54,14 @@ class SellerOrderService:
         seller_store_read_service: SellerStoreReadService,
         seller_product_service: SellerProductService,
         order_query_service: OrderQueryService,
-        payment_gateway_service: PaymentGatewayService,
-        store_payment_info_service: StorePaymentInfoService,
+        internal_payment_client: InternalPaymentClient,
     ):
         self.uow = uow
         self.history_repo = history_repo
         self.seller_store_read_service = seller_store_read_service
         self.seller_product_service = seller_product_service
         self.order_query_service = order_query_service
-        self.payment_gateway_service = payment_gateway_service
-        self.store_payment_info_service = store_payment_info_service
+        self.internal_payment_client = internal_payment_client
 
 
     # ───────── list ─────────
@@ -141,22 +140,12 @@ class SellerOrderService:
             raise OrderAlreadyCanceledError("이미 취소된 주문입니다")
 
         try:
-            payment_info = await self.store_payment_info_service.get_complete_by_store(
-                store_id,
+            await self.internal_payment_client.refund(
+                payment_id=payment_id, store_id=store_id, reason=reason,
             )
-        except (PaymentInfoMissingError, PaymentInfoIncompleteError) as e:
+        except (PaymentServiceError, PaymentServiceUnavailableError) as e:
             raise OrderRefundError(str(e))
 
-        try:
-            await self.payment_gateway_service.refund(
-                payment_id=payment_id,
-                secret_key=payment_info.portone_secret_key,
-                reason=reason,
-            )
-        except PaymentRefundError as e:
-            raise OrderRefundError(str(e))
-
-        # 환불 성공 후의 실패는 silent 금지 — 사용자에게는 정상 응답하되 운영자 critical 로깅.
         try:
             quantity = await self._cancel_record(payment_id, reason)
         except Exception:
@@ -244,21 +233,14 @@ class SellerOrderService:
     async def cancel_store_reservation_orders(
         self, *, store_id: str, store_name: str, reason: str,
     ) -> tuple[int, int, int]:
-        """가게의 모든 reservation 상태 주문을 환불 + 취소 + 재고 복원.
-
-        호출자: 픽업 마감 시간 worker / 미완료 자동 환불 worker.
-        한 건 실패는 swallow + per-item logger.
-
-        Returns: (cancelled, failed, total_refund_amount).
-        """
+        """가게의 모든 reservation 상태 주문을 환불 + 취소 + 재고 복원."""
         try:
-            payment_info = await self.store_payment_info_service.get_complete_by_store(
-                store_id,
-            )
-        except (PaymentInfoMissingError, PaymentInfoIncompleteError):
-            logger.error(
-                "[{}] 결제 설정이 없어 reservation 주문 환불 불가", store_name,
-            )
+            has = await self.internal_payment_client.has_complete_info(store_id)
+        except PaymentServiceUnavailableError:
+            logger.exception("[{}] payment-svc 일시 장애 — reservation 주문 환불 보류", store_name)
+            return 0, 0, 0
+        if not has:
+            logger.error("[{}] 결제 설정이 없어 reservation 주문 환불 불가", store_name)
             return 0, 0, 0
 
         orders = await self.order_query_service.list_store_current_orders(store_id)
@@ -274,10 +256,8 @@ class SellerOrderService:
         total_amount = 0
         for order in reservation_orders:
             try:
-                await self.payment_gateway_service.refund(
-                    payment_id=order.payment_id,
-                    secret_key=payment_info.portone_secret_key,
-                    reason=reason,
+                await self.internal_payment_client.refund(
+                    payment_id=order.payment_id, store_id=store_id, reason=reason,
                 )
                 quantity = await self._cancel_record(order.payment_id, reason)
                 await self.seller_product_service.restore_purchased_stock(
@@ -292,7 +272,7 @@ class SellerOrderService:
                     store_name, order.payment_id, order.customer_id,
                     order.total_amount,
                 )
-            except PaymentRefundError as e:
+            except (PaymentServiceError, PaymentServiceUnavailableError) as e:
                 failed += 1
                 logger.error(
                     "[{}] 주문 {} 환불 실패: {}",
@@ -308,13 +288,7 @@ class SellerOrderService:
 
 
     async def refund_all_uncompleted(self) -> tuple[int, int, int]:
-        """모든 가게의 reservation/accept 상태 미완료 주문을 환불 + 취소.
-
-        가게별로 group 후 `cancel_store_reservation_orders` 와 유사한 처리를 진행한다.
-        영업 시간 종료 후 일괄 정리용 worker 진입점.
-
-        Returns: (cancelled, failed, total_refund_amount).
-        """
+        """모든 가게의 reservation/accept 상태 미완료 주문을 환불 + 취소."""
         all_orders = await self._list_all_current_with_relations()
         uncompleted = [
             o for o in all_orders
@@ -334,10 +308,15 @@ class SellerOrderService:
         reason = "영업 시간 종료로 인한 자동 환불"
         for store_id, store_orders in orders_by_store.items():
             try:
-                payment_info = await self.store_payment_info_service.get_complete_by_store(
-                    store_id,
+                has = await self.internal_payment_client.has_complete_info(store_id)
+            except PaymentServiceUnavailableError:
+                logger.exception(
+                    "가게 {} payment-svc 일시 장애 — {}개 주문 환불 보류",
+                    store_id, len(store_orders),
                 )
-            except (PaymentInfoMissingError, PaymentInfoIncompleteError):
+                failed += len(store_orders)
+                continue
+            if not has:
                 logger.error(
                     "가게 {}의 결제 설정이 없어 {}개 주문 환불 실패",
                     store_id, len(store_orders),
@@ -348,10 +327,8 @@ class SellerOrderService:
             store_name = store_orders[0].product.store.store_name
             for order in store_orders:
                 try:
-                    await self.payment_gateway_service.refund(
-                        payment_id=order.payment_id,
-                        secret_key=payment_info.portone_secret_key,
-                        reason=reason,
+                    await self.internal_payment_client.refund(
+                        payment_id=order.payment_id, store_id=store_id, reason=reason,
                     )
                     quantity = await self._cancel_record(order.payment_id, reason)
                     await self.seller_product_service.restore_purchased_stock(
@@ -367,7 +344,7 @@ class SellerOrderService:
                         order.payment_id, order.customer_id,
                         order.product.product_name, order.total_amount,
                     )
-                except PaymentRefundError as e:
+                except (PaymentServiceError, PaymentServiceUnavailableError) as e:
                     failed += 1
                     logger.error(
                         "주문 {} 환불 실패: {}", order.payment_id, e,
@@ -383,12 +360,6 @@ class SellerOrderService:
     async def complete_store_accepted_orders(
         self, *, store_id: str, store_name: str,
     ) -> tuple[int, int]:
-        """가게의 모든 accept 상태 주문을 complete 로 변경.
-
-        호출자: 마감 시간 worker. 한 건 실패는 swallow + per-item logger.
-
-        Returns: (completed, failed).
-        """
         orders = await self.order_query_service.list_store_current_orders(store_id)
         accepted = [o for o in orders if o.status == OrderStatus.accept]
         if not accepted:
@@ -432,7 +403,6 @@ class SellerOrderService:
 
 
     async def _send_cancel_email_safe(self, customer_id: str, store_name: str) -> None:
-        """이메일 발송 실패가 batch 흐름을 막지 않도록 swallow."""
         try:
             await send_seller_cancel_email(customer_id, store_name)
         except Exception:
@@ -477,7 +447,6 @@ class SellerOrderService:
     async def assert_order_belongs_to_store(
         self, *, store_id: str, payment_id: str,
     ) -> None:
-        """WebSocket 등 service 외부 진입점에서 호출하는 권한 검증 helper."""
         order = await OrderCurrentItemRepository(
             self._session,
         ).get_order_with_relations(payment_id)

@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     from app.domain.seller.model.store import Store
     from app.domain.seller.model.product_nutrition import ProductNutrition
     from app.domain.order.model.order_current_item import OrderCurrentItem
-    from app.domain.order.model.cart_item import CartItem
 
 
 class StoreProductInfo(Base):
@@ -32,9 +31,7 @@ class StoreProductInfo(Base):
     version: Mapped[int] = mapped_column(Integer, default=1)
 
     store: Mapped["Store"] = relationship("Store", back_populates="products")
-    cart_items: Mapped[list["CartItem"]] = relationship(
-        "CartItem", back_populates="product",
-    )
+    # cart_items 는 backend-payment 가 소유 (MSA). 관계 제거.
     order_current_items: Mapped[list["OrderCurrentItem"]] = relationship(
         "OrderCurrentItem", back_populates="product",
     )

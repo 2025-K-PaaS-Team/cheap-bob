@@ -9,12 +9,11 @@ from test.unit.domain.order.customer_order_service.model_factory import (
 from test.unit.domain.order.customer_order_service.mock_factory import (
     FakeUnitOfWork,
     HistoryRepoMockFactory,
+    InternalPaymentClientMockFactory,
     OrderCurrentItemRepoMockFactory,
-    PaymentGatewayServiceMockFactory,
     SellerProductServiceMockFactory,
     SellerStoreImageServiceMockFactory,
     SellerStoreReadServiceMockFactory,
-    StorePaymentInfoServiceMockFactory,
     make_mock_session,
 )
 import pytest
@@ -64,13 +63,8 @@ def product_service_mock():
 
 
 @pytest.fixture
-def payment_gateway_mock():
-    return PaymentGatewayServiceMockFactory.create()
-
-
-@pytest.fixture
-def store_payment_info_mock():
-    return StorePaymentInfoServiceMockFactory.create()
+def payment_client_mock():
+    return InternalPaymentClientMockFactory.create()
 
 
 @pytest.fixture
@@ -82,17 +76,12 @@ def service(
     store_read_mock,
     store_image_mock,
     product_service_mock,
-    payment_gateway_mock,
-    store_payment_info_mock,
+    payment_client_mock,
 ):
-    # `@transactional` 메서드 내부에서 ``OrderCurrentItemRepository(self._session)`` 호출
-    # — 모듈 레벨 이름을 lambda 로 치환한다.
     monkeypatch.setattr(
         "app.domain.order.service.customer_order.OrderCurrentItemRepository",
         lambda session: order_repo_mock,
     )
-    # 이메일 전송은 background_tasks 에 등록만 되므로 호출 자체는 일어나지 않지만,
-    # 안전을 위해 import 경로를 no-op 으로 치환.
     monkeypatch.setattr(
         "app.core.email.notifier.send_customer_cancel_email",
         lambda *a, **kw: None, raising=False,
@@ -103,6 +92,5 @@ def service(
         seller_store_read_service=store_read_mock,
         seller_store_image_service=store_image_mock,
         seller_product_service=product_service_mock,
-        payment_gateway_service=payment_gateway_mock,
-        store_payment_info_service=store_payment_info_mock,
+        internal_payment_client=payment_client_mock,
     )

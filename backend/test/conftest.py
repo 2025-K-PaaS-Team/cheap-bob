@@ -48,6 +48,9 @@ _DEFAULTS = {
     "SUPER_ADMIN_SMTP_HOST": "smtp.example.com",
     "SUPER_ADMIN_SMTP_PORT": "587",
     "SUPER_ADMIN_SMTP_NAME": "test",
+    # MSA — payment-svc 호출 설정 (테스트는 실제 HTTP 호출 안 함, mock 으로 대체).
+    "INTERNAL_SERVICE_TOKEN": "test-internal-token",
+    "PAYMENT_SERVICE_URL": "http://localhost:8001",
 }
 for _k, _v in _DEFAULTS.items():
     os.environ.setdefault(_k, _v)

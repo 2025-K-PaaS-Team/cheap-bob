@@ -17,9 +17,9 @@ from app.domain.seller.repository.store import StoreRepository
 from app.domain.seller.repository.seller_withdraw_reservation import (
     SellerWithdrawReservationRepository,
 )
-from app.domain.payment.service.store_payment_info import StorePaymentInfoService
 from app.database.session import UnitOfWork, transactional
 from app.core.logger import get_logger
+from app.core.internal_client.payment import InternalPaymentClient
 
 
 _KST = timezone(timedelta(hours=9))
@@ -31,8 +31,7 @@ logger = get_logger("seller.service.seller_withdraw")
 class SellerWithdrawService:
     """판매자 탈퇴 / 탈퇴 취소.
 
-    오늘 영업 여부 — seller.OperationInfoRepository (own domain). is_active 토글 —
-    `SellerAccountService` (own domain).
+    payment 도메인 분리 후 store_payment_info 삭제는 payment-svc internal API 호출.
     """
 
     def __init__(
@@ -40,12 +39,12 @@ class SellerWithdrawService:
         uow: UnitOfWork,
         withdraw_repo: SellerWithdrawReservationRepository,
         seller_account_service: SellerAccountService,
-        store_payment_info_service: StorePaymentInfoService,
+        internal_payment_client: InternalPaymentClient,
     ):
         self.uow = uow
         self.withdraw_repo = withdraw_repo
         self.seller_account_service = seller_account_service
-        self.store_payment_info_service = store_payment_info_service
+        self.internal_payment_client = internal_payment_client
 
 
     async def request_withdraw(self, *, seller_email: str, store_id: str) -> None:
@@ -82,14 +81,6 @@ class SellerWithdrawService:
 
 
     async def process_pending_withdrawals(self) -> int:
-        """예약된 seller 탈퇴 row 를 hard-delete 로 확정. 호출자: worker.
-
-        가게 자산 (Store / Product / Operation / Image / SNS) + `StorePaymentInfo` +
-        `Seller` 순서로 정리. 일부 cascade 가 부족해 명시적 삭제 필요.
-        한 건 실패가 batch 를 무산시키지 않도록 per-item swallow.
-
-        Returns: 실제 처리된 seller 수.
-        """
         reservations = await self.withdraw_repo.get_many()
         if not reservations:
             return 0
@@ -108,7 +99,11 @@ class SellerWithdrawService:
 
     @transactional
     async def _hard_delete_seller_with_stores(self, email: str) -> bool:
-        """가게 자산 cascade 정리 + Seller hard-delete. 호출자: process_pending_withdrawals."""
+        """가게 자산 cascade 정리 + Seller hard-delete. store_payment_info 삭제는 payment-svc 호출.
+
+        주의: payment-svc 호출은 본 tx 와 별개. 실패 시 cascade 가 끊겨 상태 부정합 위험.
+        1차 cut 에서는 실패 시 critical 로깅 후 계속 진행 — 운영자 수동 청소.
+        """
         store_repo = StoreRepository(self._session)
         product_repo = StoreProductInfoRepository(self._session)
         op_repo = StoreOperationInfoRepository(self._session)
@@ -121,7 +116,16 @@ class SellerWithdrawService:
             for product in await product_repo.get_by_store_id(store.store_id):
                 await product_repo.delete(product.product_id)
 
-            await self.store_payment_info_service.delete_by_store(store.store_id)
+            try:
+                await self.internal_payment_client.delete_store_payment_info(
+                    store.store_id,
+                )
+            except Exception:
+                logger.exception(
+                    "[CRITICAL] payment-svc store_payment_info 삭제 실패 store_id={} "
+                    "— 운영자 수동 청소 필요",
+                    store.store_id,
+                )
 
             for op in await op_repo.get_many(
                 filters={"store_id": store.store_id},

@@ -1,8 +1,8 @@
 from test.unit.domain.seller.seller_withdraw_service.mock_factory import (
     FakeUnitOfWork,
     ImageRepoMockFactory,
+    InternalPaymentClientMockFactory,
     OperationRepoMockFactory,
-    PaymentInfoServiceMockFactory,
     ProductRepoMockFactory,
     SellerAccountServiceMockFactory,
     SnsRepoMockFactory,
@@ -31,8 +31,8 @@ def seller_account_mock():
 
 
 @pytest.fixture
-def payment_info_mock():
-    return PaymentInfoServiceMockFactory.create()
+def payment_client_mock():
+    return InternalPaymentClientMockFactory.create()
 
 
 @pytest.fixture
@@ -63,7 +63,7 @@ def sns_repo_mock():
 @pytest.fixture
 def service(
     monkeypatch, mock_session,
-    withdraw_repo_mock, seller_account_mock, payment_info_mock,
+    withdraw_repo_mock, seller_account_mock, payment_client_mock,
     store_repo_mock, product_repo_mock, operation_repo_mock,
     image_repo_mock, sns_repo_mock,
 ):
@@ -91,5 +91,5 @@ def service(
         uow=FakeUnitOfWork(mock_session),
         withdraw_repo=withdraw_repo_mock,
         seller_account_service=seller_account_mock,
-        store_payment_info_service=payment_info_mock,
+        internal_payment_client=payment_client_mock,
     )

@@ -63,7 +63,9 @@ class ModificationRepoMockFactory:
         return mock
 
 
-class StorePaymentInfoServiceMockFactory:
+class InternalPaymentClientMockFactory:
+    """payment-svc 호출 mock — settings 서비스가 사용하는 has_complete_info 만."""
+
     @classmethod
     def create(cls) -> AsyncMock:
         mock = AsyncMock()

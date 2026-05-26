@@ -1,10 +1,9 @@
 from test.unit.domain.seller.seller_store_close_service.mock_factory import (
     FakeUnitOfWork,
+    InternalPaymentClientMockFactory,
     OperationRepoMockFactory,
     OrderQueryServiceMockFactory,
-    PaymentGatewayServiceMockFactory,
     SellerProductServiceMockFactory,
-    StorePaymentInfoServiceMockFactory,
     make_mock_session,
 )
 import pytest
@@ -33,20 +32,15 @@ def product_service_mock():
 
 
 @pytest.fixture
-def payment_gateway_mock():
-    return PaymentGatewayServiceMockFactory.create()
-
-
-@pytest.fixture
-def payment_info_mock():
-    return StorePaymentInfoServiceMockFactory.create()
+def payment_client_mock():
+    return InternalPaymentClientMockFactory.create()
 
 
 @pytest.fixture
 def service(
     monkeypatch, mock_session,
     operation_repo_mock, order_query_mock,
-    product_service_mock, payment_gateway_mock, payment_info_mock,
+    product_service_mock, payment_client_mock,
 ):
     monkeypatch.setattr(
         "app.domain.seller.service.seller_store_close.StoreOperationInfoRepository",
@@ -56,6 +50,5 @@ def service(
         uow=FakeUnitOfWork(mock_session),
         order_query_service=order_query_mock,
         seller_product_service=product_service_mock,
-        payment_gateway_service=payment_gateway_mock,
-        store_payment_info_service=payment_info_mock,
+        internal_payment_client=payment_client_mock,
     )

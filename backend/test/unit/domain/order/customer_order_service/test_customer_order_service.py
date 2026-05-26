@@ -9,9 +9,9 @@ from test.unit.domain.order.customer_order_service.mock_factory import Backgroun
 import pytest
 from datetime import datetime, timedelta, timezone
 
-from app.domain.payment.service.exception import (
-    PaymentInfoMissingError,
-    PaymentRefundError,
+from app.core.internal_client.payment import (
+    PaymentServiceError,
+    PaymentServiceUnavailableError,
 )
 from app.domain.order.service.exception import (
     OrderAlreadyCanceledError,
@@ -264,15 +264,16 @@ class TestCancel:
             )
 
 
-    async def test_raises_refund_error_when_payment_info_missing(
-        self, service, order_repo_mock, store_payment_info_mock,
+    async def test_raises_refund_error_when_payment_svc_4xx(
+        self, service, order_repo_mock, payment_client_mock,
     ):
         order = OrderFactory.create(
             status=OrderStatus.reservation, customer_id="alice@example.com",
         )
         order_repo_mock.get_order_with_relations.return_value = order
-        store_payment_info_mock.get_complete_by_store.side_effect = (
-            PaymentInfoMissingError("payment info missing")
+        # payment-svc refund 가 400 — 가게 결제 설정 누락 등.
+        payment_client_mock.refund.side_effect = PaymentServiceError(
+            400, "payment info missing",
         )
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderRefundError):
@@ -284,14 +285,16 @@ class TestCancel:
             )
 
 
-    async def test_raises_refund_error_when_portone_refund_fails(
-        self, service, order_repo_mock, payment_gateway_mock,
+    async def test_raises_refund_error_when_payment_svc_unavailable(
+        self, service, order_repo_mock, payment_client_mock,
     ):
         order = OrderFactory.create(
             status=OrderStatus.reservation, customer_id="alice@example.com",
         )
         order_repo_mock.get_order_with_relations.return_value = order
-        payment_gateway_mock.refund.side_effect = PaymentRefundError("network err")
+        payment_client_mock.refund.side_effect = PaymentServiceUnavailableError(
+            503, "network err",
+        )
         bt, _ = BackgroundTasksFakeFactory.create()
         with pytest.raises(OrderRefundError):
             await service.cancel(
@@ -306,7 +309,7 @@ class TestCancel:
         self,
         service,
         order_repo_mock,
-        payment_gateway_mock,
+        payment_client_mock,
         product_service_mock,
         store_read_mock,
     ):
@@ -328,11 +331,10 @@ class TestCancel:
             background_tasks=bt,
         )
 
-        payment_gateway_mock.refund.assert_awaited_once()
+        payment_client_mock.refund.assert_awaited_once()
         product_service_mock.restore_purchased_stock.assert_awaited_once_with(
             product_id=order.product_id, quantity=3,
         )
-        # 이메일 발송 background task 가 등록됐는지 확인.
         assert len(tasks) == 1
         assert result.payment_id == order.payment_id
         assert result.quantity == 3

@@ -18,12 +18,6 @@ from app.domain.seller.service.seller_account import SellerAccountService
 from app.domain.seller.repository.seller_withdraw_reservation import (
     SellerWithdrawReservationRepository,
 )
-from app.domain.payment.service.store_payment_info import StorePaymentInfoService
-from app.domain.payment.service.seller_payment_settings import (
-    SellerPaymentSettingsService,
-)
-from app.domain.payment.service.payment_gateway import PaymentGatewayService
-from app.domain.payment.service.customer_payment import CustomerPaymentService
 from app.domain.order.service.seller_order import SellerOrderService
 from app.domain.order.service.product_stock_reservation import (
     ProductStockReservationService,
@@ -54,12 +48,12 @@ from app.domain.auth.service.registration_status import RegistrationStatusServic
 from app.domain.auth.service.oauth import OAuthService
 from app.domain.auth.service.jwt import JwtService
 from app.database.session import UnitOfWork
-from app.core.portone import PortOnePaymentClient
+from app.core.internal_client.payment import InternalPaymentClient
 from app.config.setting import settings
 
 
 class Container(containers.DeclarativeContainer):
-    """DI 컨테이너. 5개 도메인 (auth / customer / seller / order / payment) 전부 분리 완료."""
+    """DI 컨테이너. payment 도메인은 MSA 분리되어 InternalPaymentClient 로 호출."""
 
     # ───────── infra ─────────
 
@@ -96,6 +90,10 @@ class Container(containers.DeclarativeContainer):
         customer_account_service=customer_account_service,
         seller_account_service=seller_account_service,
     )
+
+    # ───────── internal payment client (MSA 호출) ─────────
+
+    internal_payment_client = providers.Singleton(InternalPaymentClient)
 
     # ───────── seller ─────────
 
@@ -136,36 +134,22 @@ class Container(containers.DeclarativeContainer):
         product_stock_reservation_service=product_stock_reservation_service,
     )
 
-    # ───────── payment ─────────
-
-    store_payment_info_service = providers.Factory(
-        StorePaymentInfoService, uow=uow,
-    )
-    portone_client = providers.Singleton(PortOnePaymentClient)
-    payment_gateway_service = providers.Singleton(
-        PaymentGatewayService, portone_client=portone_client,
-    )
-    seller_payment_settings_service = providers.Factory(
-        SellerPaymentSettingsService,
-        store_payment_info_service=store_payment_info_service,
-    )
-
-    # ───────── seller (settings/withdraw) — payment 의존 ─────────
+    # ───────── seller (settings/withdraw) — payment-svc 호출 ─────────
 
     seller_store_settings_service = providers.Factory(
         SellerStoreSettingsService,
         uow=uow,
-        store_payment_info_service=store_payment_info_service,
+        internal_payment_client=internal_payment_client,
     )
     seller_withdraw_service = providers.Factory(
         SellerWithdrawService,
         uow=uow,
         withdraw_repo=seller_withdraw_reservation_repository,
         seller_account_service=seller_account_service,
-        store_payment_info_service=store_payment_info_service,
+        internal_payment_client=internal_payment_client,
     )
 
-    # ───────── order — payment 에 의존 (close, cancel) ─────────
+    # ───────── order — payment-svc 호출 ─────────
 
     customer_order_service = providers.Factory(
         CustomerOrderService,
@@ -174,8 +158,7 @@ class Container(containers.DeclarativeContainer):
         seller_store_read_service=seller_store_read_service,
         seller_store_image_service=seller_store_image_service,
         seller_product_service=seller_product_service,
-        payment_gateway_service=payment_gateway_service,
-        store_payment_info_service=store_payment_info_service,
+        internal_payment_client=internal_payment_client,
     )
     seller_order_service = providers.Factory(
         SellerOrderService,
@@ -184,8 +167,7 @@ class Container(containers.DeclarativeContainer):
         seller_store_read_service=seller_store_read_service,
         seller_product_service=seller_product_service,
         order_query_service=order_query_service,
-        payment_gateway_service=payment_gateway_service,
-        store_payment_info_service=store_payment_info_service,
+        internal_payment_client=internal_payment_client,
     )
 
     # ───────── seller — order/payment 의존 서비스 ─────────
@@ -195,8 +177,7 @@ class Container(containers.DeclarativeContainer):
         uow=uow,
         order_query_service=order_query_service,
         seller_product_service=seller_product_service,
-        payment_gateway_service=payment_gateway_service,
-        store_payment_info_service=store_payment_info_service,
+        internal_payment_client=internal_payment_client,
     )
     seller_settlement_service = providers.Factory(
         SellerSettlementService,
@@ -237,20 +218,7 @@ class Container(containers.DeclarativeContainer):
     )
     preference_option_service = providers.Singleton(PreferenceOptionService)
 
-    # ───────── payment.CustomerPayment (가장 많은 의존) ─────────
-
-    customer_payment_service = providers.Factory(
-        CustomerPaymentService,
-        uow=uow,
-        seller_store_read_service=seller_store_read_service,
-        seller_product_service=seller_product_service,
-        store_payment_info_service=store_payment_info_service,
-        payment_gateway_service=payment_gateway_service,
-        order_query_service=order_query_service,
-        customer_profile_service=customer_profile_service,
-    )
-
-    # ───────── auth.registration_status (cross-domain 위임) ─────────
+    # ───────── auth.registration_status ─────────
 
     registration_status_service = providers.Factory(
         RegistrationStatusService,
@@ -258,5 +226,5 @@ class Container(containers.DeclarativeContainer):
         seller_registration_status_service=seller_registration_status_service,
     )
 
-# Container() 를 두 번 호출하면 Singleton provider가 각 인스턴스마다 별개라서 engine / session_factory 가 중복 생성되므로 반드시 단일 instance.
+
 container = Container()

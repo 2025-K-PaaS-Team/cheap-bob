@@ -19,6 +19,7 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
     EXCLUDE_PREFIXES: Sequence[str] = (
         "/api/v1/auth/",
         "/api/v1/common/",
+        "/api/internal/",
         "/docs",
         "/redoc",
         "/openapi.json",

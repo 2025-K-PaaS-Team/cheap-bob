@@ -22,12 +22,14 @@ from app.core.exceptions import register_domain_exception_handler
 from app.container import container
 from app.config.setting import settings
 from app.api.v1.router import api_router
+from app.api.internal.router import internal_router
 
 
 logger = get_logger("app.main")
 
 
 # `@inject` 데코레이터를 쓰는 라우터 모듈만 wire 에 추가한다. 그 외 service / 일반 모듈은 불필요.
+# payment 도메인은 MSA 분리 — backend-payment 에 wire.
 _WIRED_MODULES = [
     "app.domain.auth.router.callback",
     "app.domain.auth.router.role",
@@ -48,10 +50,10 @@ _WIRED_MODULES = [
     "app.domain.seller.router.product",
     "app.domain.seller.router.settlement",
     "app.domain.seller.router.withdraw",
+    "app.domain.seller.router.internal",
     "app.domain.order.router.customer_order",
     "app.domain.order.router.seller_order",
-    "app.domain.payment.router.customer",
-    "app.domain.payment.router.seller_settings",
+    "app.domain.order.router.internal",
 ]
 
 
@@ -79,7 +81,7 @@ def create_app() -> FastAPI:
 
         logger.info("애플리케이션 종료 중...")
         scheduler.stop()
-        await container.portone_client().close()
+        await container.internal_payment_client().close()
         await close_mongodb()
 
     app = FastAPI(
@@ -108,6 +110,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(api_router)
+    app.include_router(internal_router)
     register_domain_exception_handler(app)
 
     @app.get("/health")

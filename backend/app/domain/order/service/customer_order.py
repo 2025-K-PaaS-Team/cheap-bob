@@ -1,4 +1,7 @@
-"""customer-side 주문 조회/취소/픽업완료."""
+"""customer-side 주문 조회/취소/픽업완료.
+
+payment 도메인 분리 후 refund 는 payment-svc internal API 한 번에 위임.
+"""
 from typing import Optional
 from fastapi import BackgroundTasks
 from datetime import datetime, timedelta, timezone
@@ -8,13 +11,6 @@ from app.domain.seller.service.store_utils import get_main_image_url
 from app.domain.seller.service.seller_store_read import SellerStoreReadService
 from app.domain.seller.service.seller_store_image import SellerStoreImageService
 from app.domain.seller.service.seller_product import SellerProductService
-from app.domain.payment.service.store_payment_info import StorePaymentInfoService
-from app.domain.payment.service.payment_gateway import PaymentGatewayService
-from app.domain.payment.service.exception import (
-    PaymentInfoIncompleteError,
-    PaymentInfoMissingError,
-    PaymentRefundError,
-)
 from app.domain.order.service.qr_callback_cache import QRCallbackCacheService
 from app.domain.order.service.qr import validate_qr_data
 from app.domain.order.service.exception import (
@@ -42,6 +38,11 @@ from app.domain.order.repository.order_current_item import OrderCurrentItemRepos
 from app.domain.order.dto.order import OrderStatus
 from app.database.session import UnitOfWork, transactional
 from app.core.logger import get_logger
+from app.core.internal_client.payment import (
+    InternalPaymentClient,
+    PaymentServiceError,
+    PaymentServiceUnavailableError,
+)
 from app.core.email.notifier import send_customer_cancel_email
 
 
@@ -58,16 +59,14 @@ class CustomerOrderService:
         seller_store_read_service: SellerStoreReadService,
         seller_store_image_service: SellerStoreImageService,
         seller_product_service: SellerProductService,
-        payment_gateway_service: PaymentGatewayService,
-        store_payment_info_service: StorePaymentInfoService,
+        internal_payment_client: InternalPaymentClient,
     ):
         self.uow = uow
         self.history_repo = history_repo
         self.seller_store_read_service = seller_store_read_service
         self.seller_store_image_service = seller_store_image_service
         self.seller_product_service = seller_product_service
-        self.payment_gateway_service = payment_gateway_service
-        self.store_payment_info_service = store_payment_info_service
+        self.internal_payment_client = internal_payment_client
 
 
     # ───────── list ─────────
@@ -77,7 +76,6 @@ class CustomerOrderService:
         current_orders = await self._list_current_for_customer(customer_email)
         history_orders = await self.history_repo.get_customer_history(customer_email)
 
-        # 과거 주문 응답에 main_image_url 을 결합 — seller service 호출.
         history_store_ids = list({o.store_id for o in history_orders})
         store_main_images = await self.seller_store_image_service.get_main_image_urls(
             history_store_ids,
@@ -180,8 +178,6 @@ class CustomerOrderService:
         order = await repo.get_order_with_relations(payment_id)
         if order is None:
             raise OrderNotFoundError("주문을 찾을 수 없습니다")
-        # ownership 검증을 status 검사 앞에 둔다 — 다른 고객의 주문 상태가
-        # 응답 메시지로 누설되는 것을 막기 위함.
         if order.customer_id != customer_email:
             raise OrderOwnershipMismatchError("본인 주문이 아닙니다")
         if order.status == OrderStatus.complete:
@@ -193,7 +189,6 @@ class CustomerOrderService:
         if not is_valid:
             raise OrderQrInvalidError(error_msg)
 
-        # JWT/QR/DB 의 customer_id 와 product_id 가 모두 일치해야 한다.
         if parsed["customer_id"] != order.customer_id:
             raise OrderOwnershipMismatchError("권한이 없는 소비자입니다")
         if parsed["payment_id"] != payment_id:
@@ -203,13 +198,11 @@ class CustomerOrderService:
 
         completed = await repo.complete_order(payment_id)
 
-        # 실패는 critical 하지 않다 — TTL 30초 후 자동 만료. 예외는 무시.
         try:
             await QRCallbackCacheService.set_completed(payment_id)
         except Exception:
             pass
 
-        # completed 는 relationship 이 lazy 일 수 있어 원본 order 의 필드를 사용.
         return _order_response(order, override_status=completed.status,
                                 override_completed_at=completed.completed_at)
 
@@ -233,23 +226,15 @@ class CustomerOrderService:
             raise OrderNotInReservationError("이미 처리 중인 주문은 취소할 수 없습니다")
 
         try:
-            payment_info = await self.store_payment_info_service.get_complete_by_store(
-                order.product.store_id,
-            )
-        except (PaymentInfoMissingError, PaymentInfoIncompleteError) as e:
-            raise OrderRefundError(str(e))
-
-        try:
-            await self.payment_gateway_service.refund(
+            await self.internal_payment_client.refund(
                 payment_id=payment_id,
-                secret_key=payment_info.portone_secret_key,
+                store_id=order.product.store_id,
                 reason=reason,
             )
-        except PaymentRefundError as e:
+        except (PaymentServiceError, PaymentServiceUnavailableError) as e:
             raise OrderRefundError(str(e))
 
-        # 환불 성공 후의 실패는 절대 silent 하면 안 된다 — 돈은 이미 돌아갔으므로
-        # 사용자에게는 정상 응답하되, 내부 상태 부정합은 critical 로깅으로 운영자에게 알림.
+        # 환불 성공 후의 실패는 silent 금지.
         try:
             quantity = await self._cancel_record(payment_id, reason)
         except Exception:
@@ -325,7 +310,6 @@ class CustomerOrderService:
 
 
 def _common_order_fields(o) -> dict:
-    """current order entity / OrderHistoryItem 양쪽에 같은 attribute 이름으로 존재하는 필드."""
     return {
         "payment_id": o.payment_id,
         "customer_id": o.customer_id,

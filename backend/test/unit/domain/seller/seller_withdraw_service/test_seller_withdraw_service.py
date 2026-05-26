@@ -110,7 +110,7 @@ class TestProcessPendingWithdrawals:
         seller_account_mock,
         store_repo_mock,
         product_repo_mock,
-        payment_info_mock,
+        payment_client_mock,
         operation_repo_mock,
         image_repo_mock,
         sns_repo_mock,
@@ -126,8 +126,10 @@ class TestProcessPendingWithdrawals:
         processed = await service.process_pending_withdrawals()
 
         assert processed == 1
-        # cascade 진입점이 호출됐는지.
-        payment_info_mock.delete_by_store.assert_awaited_once_with("STR_x")
+        # cascade 진입점이 호출됐는지 — payment 는 internal API 위임.
+        payment_client_mock.delete_store_payment_info.assert_awaited_once_with(
+            "STR_x",
+        )
         store_repo_mock.delete.assert_awaited_once_with("STR_x")
         seller_account_mock.hard_delete.assert_awaited_once_with(
             "seller@example.com",

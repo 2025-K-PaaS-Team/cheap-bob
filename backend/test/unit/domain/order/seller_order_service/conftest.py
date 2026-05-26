@@ -1,11 +1,10 @@
 from test.unit.domain.order.seller_order_service.mock_factory import (
     FakeUnitOfWork,
     HistoryRepoMockFactory,
+    InternalPaymentClientMockFactory,
     OrderCurrentItemRepoMockFactory,
     OrderQueryServiceMockFactory,
-    PaymentGatewayServiceMockFactory,
     SellerProductServiceMockFactory,
-    StorePaymentInfoServiceMockFactory,
     StoreReadServiceMockFactory,
     make_mock_session,
 )
@@ -64,13 +63,8 @@ def order_query_mock():
 
 
 @pytest.fixture
-def payment_gateway_mock():
-    return PaymentGatewayServiceMockFactory.create()
-
-
-@pytest.fixture
-def store_payment_info_mock():
-    return StorePaymentInfoServiceMockFactory.create()
+def payment_client_mock():
+    return InternalPaymentClientMockFactory.create()
 
 
 @pytest.fixture
@@ -82,8 +76,7 @@ def service(
     store_read_mock,
     product_service_mock,
     order_query_mock,
-    payment_gateway_mock,
-    store_payment_info_mock,
+    payment_client_mock,
 ):
     monkeypatch.setattr(
         "app.domain.order.service.seller_order.OrderCurrentItemRepository",
@@ -95,6 +88,5 @@ def service(
         seller_store_read_service=store_read_mock,
         seller_product_service=product_service_mock,
         order_query_service=order_query_mock,
-        payment_gateway_service=payment_gateway_mock,
-        store_payment_info_service=store_payment_info_mock,
+        internal_payment_client=payment_client_mock,
     )

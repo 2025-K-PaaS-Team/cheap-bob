@@ -1,9 +1,9 @@
 from test.unit.domain.seller.seller_store_settings_service.mock_factory import (
     FakeUnitOfWork,
+    InternalPaymentClientMockFactory,
     ModificationRepoMockFactory,
     OperationRepoMockFactory,
     StoreAddressRepoMockFactory,
-    StorePaymentInfoServiceMockFactory,
     StoreRepoMockFactory,
     make_mock_session,
 )
@@ -38,15 +38,15 @@ def modification_repo_mock():
 
 
 @pytest.fixture
-def payment_info_mock():
-    return StorePaymentInfoServiceMockFactory.create()
+def payment_client_mock():
+    return InternalPaymentClientMockFactory.create()
 
 
 @pytest.fixture
 def service(
     monkeypatch, mock_session,
     store_repo_mock, address_repo_mock,
-    operation_repo_mock, modification_repo_mock, payment_info_mock,
+    operation_repo_mock, modification_repo_mock, payment_client_mock,
 ):
     monkeypatch.setattr(
         "app.domain.seller.service.seller_store_settings.StoreRepository",
@@ -66,5 +66,5 @@ def service(
     )
     return SellerStoreSettingsService(
         uow=FakeUnitOfWork(mock_session),
-        store_payment_info_service=payment_info_mock,
+        internal_payment_client=payment_client_mock,
     )

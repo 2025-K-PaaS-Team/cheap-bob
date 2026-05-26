@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from app.domain.seller.model.store_address import StoreAddress
     from app.domain.seller.model.seller import Seller
     from app.domain.customer.model.customer_favorite import CustomerFavorite
-    from app.domain.payment.model.store_payment_info import StorePaymentInfo
 
 
 class Store(Base):
@@ -64,7 +63,4 @@ class Store(Base):
     favorited_by: Mapped[list["CustomerFavorite"]] = relationship(
         "CustomerFavorite", back_populates="store", cascade="all, delete-orphan",
     )
-    # payment 도메인 분리 시 StorePaymentInfo 가 그쪽으로 이동. 본 관계는 string 이라 OK.
-    payment_info: Mapped[Optional["StorePaymentInfo"]] = relationship(
-        "StorePaymentInfo", back_populates="store", uselist=False,
-    )
+    # payment 도메인 분리 — store_payment_info 는 backend-payment 가 소유. 관계 제거.

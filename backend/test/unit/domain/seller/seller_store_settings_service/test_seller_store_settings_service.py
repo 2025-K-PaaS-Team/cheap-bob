@@ -165,18 +165,17 @@ class TestApplyPendingModifications:
 class TestUpdateTodayOpenStatus:
 
     async def test_skips_stores_without_payment_info(
-        self, service, operation_repo_mock, payment_info_mock,
+        self, service, operation_repo_mock, payment_client_mock,
     ):
         operation_repo_mock.get_by_day_of_week.return_value = [
             SimpleNamespace(store_id="STR_a"),
             SimpleNamespace(store_id="STR_b"),
         ]
-        payment_info_mock.has_complete_info.side_effect = [True, False]
+        payment_client_mock.has_complete_info.side_effect = [True, False]
         operation_repo_mock.update_today_open_status_for_stores.return_value = 1
 
         updated, skipped = await service.update_today_open_status()
         assert updated == 1
         assert skipped == 1
-        # STR_a 만 update 대상으로 전달됐는지.
         called_ids = operation_repo_mock.update_today_open_status_for_stores.await_args.args[0]
         assert called_ids == ["STR_a"]

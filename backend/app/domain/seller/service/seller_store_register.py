@@ -85,7 +85,8 @@ class SellerStoreRegisterService:
             store_id=store_id, operation_times=operation_times,
         )
 
+        # payment_info 는 MSA 분리로 backend-payment 가 소유 — refresh 대상 아님.
         await self._session.refresh(
-            store, ["address", "sns_info", "payment_info", "operation_info"],
+            store, ["address", "sns_info", "operation_info"],
         )
         return store

@@ -11,12 +11,13 @@ import pytest_asyncio
 import pytest
 from datetime import time
 
+from unittest.mock import AsyncMock
+
 from app.domain.seller.service.seller_store_settings import SellerStoreSettingsService
 from app.domain.seller.service.exception import (
     StoreNotFoundError,
     StoreOperationReservationNotFoundError,
 )
-from app.domain.payment.service.store_payment_info import StorePaymentInfoService
 
 
 pytestmark = pytest.mark.integration
@@ -24,9 +25,13 @@ pytestmark = pytest.mark.integration
 
 @pytest_asyncio.fixture
 def seller_store_settings_service(uow):
+    # payment-svc 는 MSA 분리 — HTTP client 를 mock 으로 주입 (integration 테스트는 backend
+    # DB 만 검증, payment-svc 는 별도 서비스).
+    payment_client = AsyncMock()
+    payment_client.has_complete_info.return_value = True
     return SellerStoreSettingsService(
         uow=uow,
-        store_payment_info_service=StorePaymentInfoService(uow=uow),
+        internal_payment_client=payment_client,
     )
 
 

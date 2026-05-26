@@ -18,6 +18,24 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres-payment:
+    # payment-svc 전용 별도 인스턴스. MSA 데이터 분리 — 같은 호스트에서 다른 컨테이너로 운용.
+    image: postgres:16-alpine
+    container_name: cheapbob-postgres-payment
+    environment:
+      POSTGRES_USER: cho
+      POSTGRES_PASSWORD: hyeonsang
+      POSTGRES_DB: chohyeonsang_payment
+    volumes:
+      - postgresql-payment-data:/var/lib/postgresql/data
+    networks:
+      - cheapbob-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cho -d chohyeonsang_payment"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   mongodb:
     image: mongo:7-jammy
     container_name: cheapbob-mongodb
@@ -56,6 +74,9 @@ services:
     container_name: cheapbob-backend
     env_file:
       - ./backend/.env
+    environment:
+      # backend → payment-svc 호출 — 컨테이너 네트워크 내부 주소.
+      PAYMENT_SERVICE_URL: http://backend-payment:8001
     ports:
       - "8000:8000"
     depends_on:
@@ -73,6 +94,31 @@ services:
       - ./backend/data:/backend/data
       - ./backend/logs:/backend/logs
 
+  backend-payment:
+    build:
+      context: ./backend-payment
+      dockerfile: Dockerfile
+    container_name: cheapbob-backend-payment
+    env_file:
+      - ./backend-payment/.env
+    environment:
+      # payment-svc → backend 호출 — 컨테이너 네트워크 내부 주소.
+      BACKEND_SERVICE_URL: http://backend:8000
+    ports:
+      # /api/internal/* 는 외부 노출 금지 — host port 매핑은 v1 만 위한 것이지만, 같은 8001
+      # 포트에 prefix 로 공존한다. 운영 환경에서는 reverse proxy (nginx/traefik) 가
+      # /api/internal/* 를 거부해야 한다. dev 한정 localhost 접근만 허용.
+      - "8001:8001"
+    depends_on:
+      postgres-payment:
+        condition: service_healthy
+    networks:
+      - cheapbob-network
+    volumes:
+      - ./backend-payment/app:/backend-payment/app:ro
+      - ./backend-payment/migration:/backend-payment/migration
+      - ./backend-payment/logs:/backend-payment/logs
+
 networks:
   cheapbob-network:
     driver: bridge
@@ -80,6 +126,8 @@ networks:
 volumes:
   postgresql-data:
     name: cheapbob-postgres-data
+  postgresql-payment-data:
+    name: cheapbob-postgres-payment-data
   mongodb-data:
     name: cheapbob-mongodb-data
   redis-data:

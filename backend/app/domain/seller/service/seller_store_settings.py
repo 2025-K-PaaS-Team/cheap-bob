@@ -22,9 +22,12 @@ from app.domain.seller.model.store_operation_info_modification import (
 )
 from app.domain.seller.model.store_operation_info import StoreOperationInfo
 from app.domain.seller.model.store import Store
-from app.domain.payment.service.store_payment_info import StorePaymentInfoService
 from app.database.session import UnitOfWork, transactional
 from app.core.logger import get_logger
+from app.core.internal_client.payment import (
+    InternalPaymentClient,
+    PaymentServiceUnavailableError,
+)
 
 
 _KST = timezone(timedelta(hours=9))
@@ -36,15 +39,18 @@ logger = get_logger("seller.service.seller_store_settings")
 
 
 class SellerStoreSettingsService:
-    """가게 주소 + 운영 정보 + 운영 변경 예약 의 CRUD."""
+    """가게 주소 + 운영 정보 + 운영 변경 예약 의 CRUD.
+
+    payment 도메인 분리 후 store_payment_info 조회는 payment-svc internal API 호출로 변경.
+    """
 
     def __init__(
         self,
         uow: UnitOfWork,
-        store_payment_info_service: StorePaymentInfoService,
+        internal_payment_client: InternalPaymentClient,
     ):
         self.uow = uow
-        self.store_payment_info_service = store_payment_info_service
+        self.internal_payment_client = internal_payment_client
 
 
     @transactional
@@ -63,7 +69,6 @@ class SellerStoreSettingsService:
         nearest_station: Optional[str],
         walking_time: Optional[int],
     ) -> Store:
-        """가게의 주소 컬럼 + StoreAddress row 를 동일 트랜잭션에서 갱신."""
         store_repo = StoreRepository(self._session)
         store = await store_repo.get_with_address(store_id)
         if store is None:
@@ -112,10 +117,6 @@ class SellerStoreSettingsService:
     async def get_operation_reservation_summary(
         self, store_id: str,
     ) -> StoreOperationReservationResponse:
-        """예약된 운영 변경 사항 + 변경 타입 + pickup 간격을 한 번에 계산.
-
-        라우터는 본 메서드 결과를 그대로 응답하면 된다 (시간 산술/분류는 모두 본 메서드 안).
-        """
         modifications = await StoreOperationInfoModificationRepository(
             self._session,
         ).get_by_store_id(store_id)
@@ -196,10 +197,6 @@ class SellerStoreSettingsService:
 
     @transactional
     async def apply_pending_modifications(self) -> tuple[int, int]:
-        """모든 운영 정보 변경 예약을 해당 operation_info 에 적용 + 적용한 modification 삭제.
-
-        Returns: (applied, failed). 한 건 실패는 swallow + per-item logger.
-        """
         mod_repo = StoreOperationInfoModificationRepository(self._session)
         op_repo = StoreOperationInfoRepository(self._session)
 
@@ -248,10 +245,6 @@ class SellerStoreSettingsService:
 
     @transactional
     async def list_today_open_operations(self) -> List[StoreOperationInfo]:
-        """오늘 요일에 운영 중(is_open_enabled=True) 인 모든 operation_info 를 store 와 함께 반환.
-
-        호출자: 스케줄러 worker (auto_cancel / auto_complete dynamic 등록).
-        """
         today_dow = datetime.now(_KST).weekday()
         return await StoreOperationInfoRepository(self._session).get_many(
             filters={"day_of_week": today_dow, "is_open_enabled": True},
@@ -259,39 +252,59 @@ class SellerStoreSettingsService:
         )
 
 
-    @transactional
     async def update_today_open_status(self) -> tuple[int, int]:
         """오늘 요일의 모든 StoreOperationInfo 중, 결제(포트원) 정보가 있는 가게만
         `is_currently_open = is_open_enabled` 로 일괄 업데이트.
 
-        Returns: (updated, skipped). store_payment_info 결제 정보가 없는 가게 = skipped.
+        결제 정보 확인은 payment-svc 의 has-complete-info internal API 호출.
+        Returns: (updated, skipped). 결제 정보가 없는 가게 = skipped.
         """
         today_dow = datetime.now(_KST).weekday()
 
-        op_repo = StoreOperationInfoRepository(self._session)
-        op_infos = await op_repo.get_by_day_of_week(today_dow)
+        op_infos = await self._list_today_dow_operations(today_dow)
         if not op_infos:
             return 0, 0
 
         store_ids_to_update: list[str] = []
         skipped = 0
         for op in op_infos:
-            if await self.store_payment_info_service.has_complete_info(op.store_id):
+            try:
+                has = await self.internal_payment_client.has_complete_info(op.store_id)
+            except PaymentServiceUnavailableError:
+                logger.exception(
+                    "[CRITICAL] payment-svc 일시 장애 — has_complete_info 실패 store_id={}",
+                    op.store_id,
+                )
+                skipped += 1
+                continue
+            if has:
                 store_ids_to_update.append(op.store_id)
             else:
                 skipped += 1
 
-        updated = await op_repo.update_today_open_status_for_stores(
-            store_ids_to_update, today_dow,
+        return await self._apply_today_open_status(today_dow, store_ids_to_update), skipped
+
+
+    @transactional
+    async def _list_today_dow_operations(self, today_dow: int) -> List[StoreOperationInfo]:
+        return await StoreOperationInfoRepository(self._session).get_by_day_of_week(
+            today_dow,
         )
-        return updated, skipped
+
+
+    @transactional
+    async def _apply_today_open_status(
+        self, today_dow: int, store_ids: list[str],
+    ) -> int:
+        return await StoreOperationInfoRepository(
+            self._session,
+        ).update_today_open_status_for_stores(store_ids, today_dow)
 
 
 def _classify_modification_type(
     modifications: List[StoreOperationInfoModification],
     operations: List[StoreOperationInfo],
 ) -> int:
-    """수정 유형 분류 — 0: 변화없음, 1: 운영시간만, 2: 픽업시간만, 3: 모두."""
     op_map = {info.operation_id: info for info in operations}
     has_time = False
     has_pickup = False
@@ -312,7 +325,6 @@ def _classify_modification_type(
         orig_pstart = _minutes_until_close(origin.close_time, origin.pickup_start_time)
         mod_pend = _minutes_until_close(mod.new_close_time, mod.new_pickup_end_time)
         orig_pend = _minutes_until_close(origin.close_time, origin.pickup_end_time)
-        # 운영여부가 같으면서 픽업 간격만 바뀐 경우만 픽업 변경으로 분류.
         if (
             mod.new_is_open_enabled == origin.is_open_enabled
             and (mod_pstart != orig_pstart or mod_pend != orig_pend)
@@ -331,7 +343,6 @@ def _classify_modification_type(
 def _pickup_intervals_from_operation(
     op: Optional[StoreOperationInfo],
 ) -> tuple[int, int]:
-    """오픈 가능한 첫 operation 기준 (pickup_start_interval, pickup_end_interval) 분 단위."""
     if op is None:
         return _DEFAULT_PICKUP_START_INTERVAL, _DEFAULT_PICKUP_END_INTERVAL
     return (
@@ -352,7 +363,6 @@ def _pickup_intervals_from_modification(
 
 
 def _minutes_until_close(close_time: time, target_time: time) -> int:
-    """`target_time` 이 `close_time` 보다 얼마 전인지 분 단위로 반환 (음수면 close 이후)."""
     today = datetime.today()
     close_dt = datetime.combine(today, close_time)
     target_dt = datetime.combine(today, target_time)
