@@ -12,6 +12,7 @@ from app.domain.seller.model.store_operation_info import StoreOperationInfo
 from app.domain.seller.model.store_image import StoreImage
 from app.domain.seller.model.store_address import StoreAddress
 from app.domain.seller.model.store import Store
+from app.domain.seller.model.stock_operation_log import StockOperationLog
 from app.domain.seller.model.seller import Seller
 from app.domain.seller.model.product_nutrition import ProductNutrition
 from app.domain.order.model.order_current_item import OrderCurrentItem
@@ -41,5 +42,6 @@ __all__ = [
     "StoreOperationInfoModification",
     "StoreProductInfo",
     "ProductNutrition",
+    "StockOperationLog",
     "OrderCurrentItem",
 ]

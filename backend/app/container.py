@@ -13,6 +13,7 @@ from app.domain.seller.service.seller_settlement import SellerSettlementService
 from app.domain.seller.service.seller_registration_status import (
     SellerRegistrationStatusService,
 )
+from app.domain.seller.service.stock_idempotency import StockIdempotencyService
 from app.domain.seller.service.seller_product import SellerProductService
 from app.domain.seller.service.seller_account import SellerAccountService
 from app.domain.seller.repository.seller_withdraw_reservation import (
@@ -132,6 +133,14 @@ class Container(containers.DeclarativeContainer):
         SellerProductService,
         uow=uow,
         product_stock_reservation_service=product_stock_reservation_service,
+    )
+
+    # ───────── stock idempotency (payment-svc internal call dedupe) ─────────
+
+    stock_idempotency_service = providers.Factory(
+        StockIdempotencyService,
+        uow=uow,
+        seller_product_service=seller_product_service,
     )
 
     # ───────── seller (settings/withdraw) — payment-svc 호출 ─────────

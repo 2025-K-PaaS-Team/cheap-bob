@@ -2,6 +2,9 @@
 
 shared 패턴 미적용 — payment-svc 의 dto/internal.py 와 일치하는 schema 를 본 모듈에 자체
 정의한다. 계약 변경 시 양쪽을 같이 수정.
+
+consume/restore 는 (payment_id, op_type) 기준 **진짜 멱등** — StockIdempotencyService 의
+stock_operation_log INSERT ON CONFLICT DO NOTHING 으로 retry / 중복 호출 안전.
 """
 from typing import Optional
 from pydantic import BaseModel
@@ -9,6 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from dependency_injector.wiring import Provide, inject
 
 from app.middleware.internal_token import require_internal_token
+from app.domain.seller.service.stock_idempotency import StockIdempotencyService
 from app.domain.seller.service.seller_store_read import SellerStoreReadService
 from app.domain.seller.service.seller_product import SellerProductService
 from app.domain.seller.service.exception import (
@@ -40,7 +44,7 @@ class TodayOperationResponse(BaseModel):
 
 
 class StockOpRequest(BaseModel):
-    payment_id: str  # 멱등 키 (1차 cut: 로깅 용도, 실제 dedupe 없음)
+    payment_id: str  # (payment_id, op_type) 멱등 키. stock_operation_log PK.
     product_id: str
     quantity: int
 
@@ -117,20 +121,21 @@ async def get_today_operation(
 async def consume_stock(
     product_id: str,
     request: StockOpRequest,
-    seller_product_service: SellerProductService = Depends(
-        Provide["seller_product_service"],
+    stock_idempotency_service: StockIdempotencyService = Depends(
+        Provide["stock_idempotency_service"],
     ),
 ):
     """payment-svc 의 결제 init 시 호출. 재고 부족 → 400, 낙관적 락 충돌 → 409.
 
-    payment_id 는 로깅/추적 용. 1차 cut 에서는 실제 dedupe 없음 — cart_items 의 lifecycle
-    이 source-of-truth 로 작동.
+    (payment_id, "consume") PK 로 멱등 — 같은 키의 재호출은 204 with no-op.
     """
     if request.product_id != product_id:
         raise HTTPException(status_code=400, detail="product_id 불일치")
     try:
-        await seller_product_service.consume_purchased_stock(
-            product_id=product_id, quantity=request.quantity,
+        await stock_idempotency_service.consume(
+            payment_id=request.payment_id,
+            product_id=product_id,
+            quantity=request.quantity,
         )
     except ProductStockInsufficientError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -146,15 +151,17 @@ async def consume_stock(
 async def restore_stock(
     product_id: str,
     request: StockOpRequest,
-    seller_product_service: SellerProductService = Depends(
-        Provide["seller_product_service"],
+    stock_idempotency_service: StockIdempotencyService = Depends(
+        Provide["stock_idempotency_service"],
     ),
 ):
-    """payment-svc 의 보상/취소 시 호출."""
+    """payment-svc 의 보상/취소 시 호출. (payment_id, "restore") PK 로 멱등."""
     if request.product_id != product_id:
         raise HTTPException(status_code=400, detail="product_id 불일치")
-    await seller_product_service.restore_purchased_stock(
-        product_id=product_id, quantity=request.quantity,
+    await stock_idempotency_service.restore(
+        payment_id=request.payment_id,
+        product_id=product_id,
+        quantity=request.quantity,
     )
 
 

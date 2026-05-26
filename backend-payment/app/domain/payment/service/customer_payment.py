@@ -10,7 +10,8 @@ MSA 분리 후 변경점:
     cart_item_service.lock / claim_expired_for_processing 가 외부 tx 에 참여해 lock 이 함수
     전체 동안 유지된다. 원본 single-process 와 동일한 직렬화 의미.
   - HTTP 호출 동안 payment-svc DB 세션 + cart row lock 이 잡혀 있다 — connection pool
-    부담은 1차 cut 트레이드오프. 향후 stock_operation_log 기반 멱등화로 lock 제거 가능.
+    부담은 1차 cut 트레이드오프. backend 측 stock_operation_log 가 stock 조작 멱등을 보장
+    하므로, 향후 cart lock 제거 + 더 짧은 tx 로 리팩토링 시에도 stock 정합성은 유지된다.
 
 원자성:
   - init: stock(HTTP) 과 cart(local) 가 다른 시스템. cart 생성 실패 시 stock 보상 호출.
@@ -240,8 +241,9 @@ class CustomerPaymentService:
         except PaymentVerificationError:
             # 돈 안 빠짐. cart + stock 정리. 같은 outer tx 안의 cart 삭제는 raise 로 롤백되지만
             # restore_stock 은 HTTP (별도 tx in backend) — 적용됨. raise 후 outer tx 롤백되어
-            # cart 가 남으면 sweep 이 CANCELLED 로 인지하고 restore + delete 멱등 처리.
-            # (stock 멱등이 없어 sweep 의 restore 가 중복 호출되면 stock 과적용 가능 — 별도 PR 의 이슈.)
+            # cart 가 남으면 sweep 이 CANCELLED 로 인지하고 restore + delete 처리.
+            # backend 의 (payment_id, "restore") stock_operation_log PK 로 sweep restore 가
+            # 중복 호출되어도 한 번만 적용 — 재고 과복원 없음.
             await self._safe_restore_stock(
                 payment_id=payment_id,
                 product_id=cart_item.product_id,

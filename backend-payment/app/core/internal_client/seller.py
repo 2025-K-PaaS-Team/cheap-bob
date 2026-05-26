@@ -93,10 +93,11 @@ class InternalSellerClient:
     async def consume_stock(
         self, *, payment_id: str, product_id: str, quantity: int,
     ) -> None:
-        """payment_id 멱등 — 같은 payment_id 로 두 번 호출되면 두 번째는 no-op.
+        """(payment_id, "consume") 단위로 진짜 멱등 — backend 의 stock_operation_log INSERT
+        ON CONFLICT DO NOTHING 이 같은 키의 재호출을 SQL 레벨에서 차단한다. retry 안전.
 
         Raises:
-            StockInsufficientError: 재고 부족 (HTTP 400 with code stock_insufficient).
+            StockInsufficientError: 재고 부족 (HTTP 400).
             StockConflictError:     낙관적 락 충돌 (HTTP 409).
             BackendUnavailableError: 그 외 5xx / 네트워크.
         """
