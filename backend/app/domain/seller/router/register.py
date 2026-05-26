@@ -1,5 +1,4 @@
-from typing import List, Optional
-from pydantic import BaseModel, Field
+from typing import List
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from dependency_injector.wiring import Provide, inject
 
@@ -7,6 +6,10 @@ from app.util.image_validator import validate_image_files
 from app.middleware.auth import CurrentSellerDep
 from app.domain.seller.service.seller_store_register import SellerStoreRegisterService
 from app.domain.seller.service.seller_store_image import SellerStoreImageService
+from app.domain.seller.schema.store_payment import (
+    StorePaymentInfoCheckResponse,
+    StorePaymentInfoCreateRequest,
+)
 from app.domain.seller.schema.seller_profile import (
     SellerProfileCreateRequest,
     SellerProfileResponse,
@@ -24,22 +27,6 @@ from app.core.internal_client.payment import (
 router = APIRouter(prefix="/store/register", tags=["Seller-Store-Register"])
 
 _MAX_IMAGES = 11
-
-
-# ───────── 결제 정보 schema — payment 도메인 분리 후 backend 자체 정의 (shared 미적용) ─────────
-
-
-class StorePaymentInfoCreateRequest(BaseModel):
-    portone_store_id: str = Field(..., description="포트원 가게 ID")
-    portone_channel_id: str = Field(..., description="포트원 채널 ID")
-    portone_secret_key: str = Field(..., min_length=1, description="포트원 시크릿 키")
-
-
-class StorePaymentInfoCheckResponse(BaseModel):
-    is_exist: bool = Field(..., description="결제 정보 등록 여부")
-
-
-# ───────── routes ─────────
 
 
 @router.post(
