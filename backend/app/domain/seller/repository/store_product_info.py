@@ -63,22 +63,36 @@ class StoreProductInfoRepository(BaseRepository[StoreProductInfo]):
 
 
     async def adjust_purchased_stock(self, product_id: str, quantity: int) -> StockUpdateResult:
-        """소비자가 상품을 사고/환불 할 때 업데이트"""
+        """``purchased_quantity`` 를 ``quantity`` 만큼 누적 (delta).
+
+        consume 흐름은 quantity > 0, restore 흐름은 quantity < 0.
+
+        가드:
+          - product 가 없거나 (race) 검증 실패 시 INSUFFICIENT_STOCK 반환.
+          - consume (quantity > 0): 차감 후 ``current_stock`` 이 음수가 되면 거부.
+          - restore (quantity < 0): 누계 차감 ``purchased_quantity + delta`` 가 음수가
+            되면 거부 (구매한 양보다 많이 복원하려는 경우).
+
+        검증을 통과하면 낙관적 락으로 update — 실패 시 LOCK_CONFLICT.
+        """
         product = await self.get_by_pk(product_id)
-        if quantity < 0 and product.current_stock < quantity:
+        if product is None:
             return StockUpdateResult.INSUFFICIENT_STOCK
-        
+
+        if quantity > 0 and product.current_stock < quantity:
+            return StockUpdateResult.INSUFFICIENT_STOCK
+        if quantity < 0 and product.purchased_quantity + quantity < 0:
+            return StockUpdateResult.INSUFFICIENT_STOCK
+
         success = await self.update_lock(
             product_id,
             conditions={"version": product.version},
             purchased_quantity=product.purchased_quantity + quantity,
-            version=product.version + 1
+            version=product.version + 1,
         )
-        
         if success:
             return StockUpdateResult.SUCCESS
-        else:
-            return StockUpdateResult.LOCK_CONFLICT
+        return StockUpdateResult.LOCK_CONFLICT
 
 
     async def adjust_admin_stock(self, product_id: str, adjustment: int) -> StockUpdateResult:

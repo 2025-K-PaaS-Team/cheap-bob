@@ -155,14 +155,23 @@ async def restore_stock(
         Provide["stock_idempotency_service"],
     ),
 ):
-    """payment-svc 의 보상/취소 시 호출. (payment_id, "restore") PK 로 멱등."""
+    """payment-svc 의 보상/취소 시 호출. (payment_id, "restore") PK 로 멱등.
+
+    누계 차감보다 많이 복원 요청 → 400 (정상 흐름에서는 발생 안 함, caller 버그 신호).
+    낙관적 락 충돌 → 409.
+    """
     if request.product_id != product_id:
         raise HTTPException(status_code=400, detail="product_id 불일치")
-    await stock_idempotency_service.restore(
-        payment_id=request.payment_id,
-        product_id=product_id,
-        quantity=request.quantity,
-    )
+    try:
+        await stock_idempotency_service.restore(
+            payment_id=request.payment_id,
+            product_id=product_id,
+            quantity=request.quantity,
+        )
+    except ProductStockInsufficientError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except ProductStockConflictError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
 
 @internal_router.get(

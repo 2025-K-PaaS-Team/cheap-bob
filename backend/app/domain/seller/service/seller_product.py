@@ -213,7 +213,13 @@ class SellerProductService:
             if result == StockUpdateResult.SUCCESS:
                 return
             if result == StockUpdateResult.INSUFFICIENT_STOCK:
-                raise ProductStockInsufficientError("재고가 부족합니다.")
+                # delta 부호에 따라 의미가 다르다.
+                # consume (>0) — 현재 재고 부족; restore (<0) — 누계 차감보다 많이 복원.
+                if delta > 0:
+                    raise ProductStockInsufficientError("재고가 부족합니다.")
+                raise ProductStockInsufficientError(
+                    "복원 수량이 누계 차감 수량을 초과합니다.",
+                )
         raise ProductStockConflictError("재고 변경 중 충돌이 발생했습니다.")
 
 

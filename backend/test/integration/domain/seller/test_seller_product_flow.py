@@ -174,6 +174,45 @@ class TestStockAdjust:
             assert p.purchased_quantity == 1
 
 
+    async def test_consume_overshoots_current_stock_raises(
+        self, seller_product_service, seed_store,
+    ):
+        store_id = await seed_store()
+        product, _ = await seller_product_service.create(
+            store_id=store_id,
+            product_name="P", description="", initial_stock=5, price=1000,
+            sale=None, nutrition_types=[],
+        )
+        with pytest.raises(ProductStockInsufficientError):
+            await seller_product_service.consume_purchased_stock(
+                product_id=product.product_id, quantity=10,
+            )
+
+
+    async def test_restore_overshoots_purchased_raises(
+        self, seller_product_service, seed_store, session_factory,
+    ):
+        """누계 차감 (purchased_quantity) 보다 많이 복원하려는 시도는 거부."""
+        store_id = await seed_store()
+        product, _ = await seller_product_service.create(
+            store_id=store_id,
+            product_name="P", description="", initial_stock=5, price=1000,
+            sale=None, nutrition_types=[],
+        )
+        await seller_product_service.consume_purchased_stock(
+            product_id=product.product_id, quantity=2,
+        )
+        with pytest.raises(ProductStockInsufficientError):
+            await seller_product_service.restore_purchased_stock(
+                product_id=product.product_id, quantity=3,
+            )
+        # purchased_quantity 는 첫 consume 분만 남아야 한다.
+        from app.domain.seller.model.store_product_info import StoreProductInfo
+        async with session_factory() as session:
+            p = await session.get(StoreProductInfo, product.product_id)
+            assert p.purchased_quantity == 2
+
+
     async def test_admin_adjust_negative_below_zero_raises(
         self, seller_product_service, seed_store,
     ):

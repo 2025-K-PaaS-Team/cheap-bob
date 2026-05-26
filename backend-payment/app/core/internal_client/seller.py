@@ -136,6 +136,11 @@ class InternalSellerClient:
         """payment_id 단위 멱등 (서버 측 ledger 가 보장). retry / sweep 중복 트리거 안전.
 
         실패는 무조건 raise (caller 가 critical 로깅 결정).
+
+        Raises:
+            StockInsufficientError: 누계 차감보다 많이 복원 요청 (400) — caller 버그 신호.
+            StockConflictError:     낙관적 락 충돌 (409).
+            BackendUnavailableError: 5xx / 네트워크 / 그 외.
         """
         body = RestoreStockRequest(
             payment_id=payment_id, product_id=product_id, quantity=quantity,
@@ -151,14 +156,21 @@ class InternalSellerClient:
 
         if resp.status_code in (200, 204):
             return
+        if resp.status_code == 400:
+            raise StockInsufficientError(
+                _extract_detail(resp) or "복원 수량이 누계 차감을 초과합니다",
+            )
+        if resp.status_code == 409:
+            raise StockConflictError(
+                _extract_detail(resp) or "재고 변경 중 충돌이 발생했습니다",
+            )
         if 500 <= resp.status_code < 600:
             raise BackendUnavailableError(
                 f"backend 5xx (status={resp.status_code})",
             )
-        if resp.status_code >= 400:
-            raise BackendUnavailableError(
-                f"backend {resp.status_code}: {resp.text[:200]}",
-            )
+        raise BackendUnavailableError(
+            f"backend {resp.status_code}: {resp.text[:200]}",
+        )
 
 
     async def get_store_id_by_seller_email(self, seller_email: str) -> str:

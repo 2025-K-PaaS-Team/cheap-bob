@@ -80,8 +80,8 @@ class ProductStockConflictError(DomainError):
 
 
 class ProductStockInsufficientError(DomainError):
-    """재고 부족."""
-    status_code = 409
+    """재고 부족 — 잘못된 요청. 낙관적 락 충돌 (409) 과 의미가 다르므로 400."""
+    status_code = 400
 
 
 class SellerNotFoundError(DomainError):
