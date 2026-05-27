@@ -112,7 +112,10 @@ class Container(containers.DeclarativeContainer):
         OutboxRelay, uow=uow, producer=kafka_producer,
     )
     # 컨슈머 — 도메인별 핸들러는 main.py lifespan 에서 .register() 로 등록 후 .run().
-    kafka_consumer_runner = providers.Singleton(KafkaConsumerRunner)
+    # producer 는 DLQ 발행에 사용 (Relay 와 같은 Singleton 공유).
+    kafka_consumer_runner = providers.Singleton(
+        KafkaConsumerRunner, producer=kafka_producer,
+    )
 
     # ───────── seller ─────────
 

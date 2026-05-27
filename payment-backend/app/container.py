@@ -62,7 +62,10 @@ class Container(containers.DeclarativeContainer):
     outbox_relay = providers.Singleton(
         OutboxRelay, uow=uow, producer=kafka_producer,
     )
-    kafka_consumer_runner = providers.Singleton(KafkaConsumerRunner)
+    # DLQ 발행을 위해 producer 공유 (Relay 와 같은 Singleton).
+    kafka_consumer_runner = providers.Singleton(
+        KafkaConsumerRunner, producer=kafka_producer,
+    )
 
     # ───────── payment ─────────
 

@@ -27,6 +27,7 @@ from app.domain.order.event.refund import (
 from app.database.session import UnitOfWork, transactional
 from app.core.outbox.repository import ProcessedEventRepository
 from app.core.logger import get_logger
+from app.core.kafka.consumer import TerminalEventError, extract_event_id_header
 from app.core.email.notifier import send_seller_cancel_email
 
 
@@ -45,15 +46,14 @@ class PaymentRefundCompletedEventHandler:
 
 
     async def handle(self, msg: ConsumerRecord) -> None:
-        event_id = _extract_event_id(msg)
+        event_id = extract_event_id_header(msg)
         try:
             payload = PaymentRefundCompletedPayload.model_validate(msg.value)
-        except ValidationError:
-            logger.exception(
-                "[CRITICAL] payload 검증 실패 skip event_id={} value={}",
-                event_id, msg.value,
-            )
-            return
+        except ValidationError as e:
+            # schema 위배 — retry 무의미. DLQ 로 보내 운영자가 검사.
+            raise TerminalEventError(
+                f"payload 검증 실패 event_id={event_id}: {e}",
+            ) from e
 
         applied = await self._apply(event_id=event_id, payload=payload)
         if not applied:
@@ -99,11 +99,3 @@ class PaymentRefundCompletedEventHandler:
             payload.payment_id, payload.product_id, quantity,
         )
         return True
-
-
-def _extract_event_id(msg: ConsumerRecord) -> UUID:
-    headers = {k: v.decode("utf-8") for k, v in (msg.headers or [])}
-    raw = headers.get("event_id")
-    if raw is None:
-        raise ValueError(f"event_id 헤더 누락 offset={msg.offset}")
-    return UUID(raw)

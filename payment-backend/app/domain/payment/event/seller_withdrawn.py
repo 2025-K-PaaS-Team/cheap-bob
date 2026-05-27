@@ -11,9 +11,9 @@ shared 패턴 미적용 정책 — 양쪽이 같은 schema 를 자체 정의로 
   5. ProcessedEvent INSERT 와 delete 가 같은 트랜잭션 — at-least-once 가 effectively-once.
 
 실패 정책:
-  - 메시지 파싱 실패 (event_id 누락 / payload 불량) → ValueError raise → Runner 가 offset
-    commit 보류 → 같은 메시지 재배달. 데이터 자체가 깨졌으면 영원히 재시도되니, DLQ 도입 전에는 운영자가 토픽에서 manual offset advance 필요.
-  - delete_by_store 가 DB 오류 raise → tx rollback (try_mark 도 무효) → 다음 배달에 재시도.
+  - 메시지 파싱 실패 (event_id 누락 / payload schema 위배) → TerminalEventError →
+    Runner 가 즉시 `<topic>.dlq` 로 격리 + offset 전진. 운영자가 DLQ 검사.
+  - delete_by_store 가 DB 오류 raise → tx rollback (try_mark 도 무효) → 재배달 → 결국 max_attempts 도달 시 DLQ.
 """
 from uuid import UUID
 from pydantic import BaseModel, ValidationError
@@ -23,6 +23,7 @@ from app.domain.payment.service.store_payment_info import StorePaymentInfoServic
 from app.database.session import UnitOfWork, transactional
 from app.core.outbox.repository import ProcessedEventRepository
 from app.core.logger import get_logger
+from app.core.kafka.consumer import TerminalEventError, extract_event_id_header
 
 
 logger = get_logger("event.seller_withdrawn")
@@ -55,18 +56,15 @@ class SellerStoreWithdrawnEventHandler:
 
 
     async def handle(self, msg: ConsumerRecord) -> None:
-        """Kafka 메시지 1건 처리. raise 하면 Runner 가 offset commit 보류 (재배달)."""
-        event_id = _extract_event_id(msg)
+        """Kafka 메시지 1건 처리. raise 하면 Runner 가 retry/DLQ 분기."""
+        event_id = extract_event_id_header(msg)
         try:
             payload = SellerStoreWithdrawnPayload.model_validate(msg.value)
-        except ValidationError:
-            # payload 가 schema 와 안 맞으면 처리 불가 — raise 하면 재배달 무한루프.
-            # 본 케이스는 producer 측 버그/스키마 깨짐이므로 CRITICAL 로그만 남기고 skip.
-            logger.exception(
-                "[CRITICAL] payload 검증 실패 — skip event_id={} value={}",
-                event_id, msg.value,
-            )
-            return
+        except ValidationError as e:
+            # schema 위배 — retry 무의미. DLQ 로 격리 (Runner 가 처리).
+            raise TerminalEventError(
+                f"payload 검증 실패 event_id={event_id}: {e}",
+            ) from e
 
         await self._apply(event_id=event_id, payload=payload)
 
@@ -92,13 +90,3 @@ class SellerStoreWithdrawnEventHandler:
             "SellerStoreWithdrawn 처리 store_id={} seller_email={} deleted={}",
             payload.store_id, payload.seller_email, deleted,
         )
-
-
-def _extract_event_id(msg: ConsumerRecord) -> UUID:
-    """헤더에서 event_id 추출 — Relay 가 항상 채워넣는다."""
-    headers = {k: v.decode("utf-8") for k, v in (msg.headers or [])}
-    raw = headers.get("event_id")
-    if raw is None:
-        # event_id 없는 메시지는 producer 가 outbox 가 아닌 직접 produce 한 케이스 — 비정상.
-        raise ValueError(f"event_id 헤더 누락 offset={msg.offset}")
-    return UUID(raw)

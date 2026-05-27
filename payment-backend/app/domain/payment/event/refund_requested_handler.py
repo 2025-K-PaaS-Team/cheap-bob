@@ -46,6 +46,7 @@ from app.database.session import UnitOfWork, transactional
 from app.core.outbox.repository import ProcessedEventRepository
 from app.core.outbox.enqueue import enqueue_event
 from app.core.logger import get_logger
+from app.core.kafka.consumer import TerminalEventError, extract_event_id_header
 
 
 logger = get_logger("event.refund_requested")
@@ -65,15 +66,13 @@ class OrderRefundRequestedEventHandler:
 
 
     async def handle(self, msg: ConsumerRecord) -> None:
-        event_id = _extract_event_id(msg)
+        event_id = extract_event_id_header(msg)
         try:
             payload = OrderRefundRequestedPayload.model_validate(msg.value)
-        except ValidationError:
-            logger.exception(
-                "[CRITICAL] payload 검증 실패 skip event_id={} value={}",
-                event_id, msg.value,
-            )
-            return
+        except ValidationError as e:
+            raise TerminalEventError(
+                f"payload 검증 실패 event_id={event_id}: {e}",
+            ) from e
 
         await self._process(event_id=event_id, payload=payload)
 
@@ -171,11 +170,3 @@ class OrderRefundRequestedEventHandler:
             payload=failed.model_dump(),
             headers={"schema_version": SCHEMA_VERSION},
         )
-
-
-def _extract_event_id(msg: ConsumerRecord) -> UUID:
-    headers = {k: v.decode("utf-8") for k, v in (msg.headers or [])}
-    raw = headers.get("event_id")
-    if raw is None:
-        raise ValueError(f"event_id 헤더 누락 offset={msg.offset}")
-    return UUID(raw)

@@ -89,6 +89,10 @@ class Settings(BaseSettings):
     OUTBOX_RELAY_POLL_INTERVAL_MS: int = 200
     OUTBOX_RELAY_IDLE_BACKOFF_MS: int = 1000
 
+    # DLQ — consumer 가 N회 처리 실패한 메시지를 <topic>.dlq 로 보내 partition stall 차단.
+    # TerminalEventError 는 retry 없이 즉시 DLQ. 0 이면 DLQ 비활성 (무한 retry).
+    CONSUMER_MAX_ATTEMPTS: int = 5
+
     # Resilience — Circuit Breaker / Retry. internal_client 의 HTTP 호출에 wrap.
     CB_FAILURE_THRESHOLD: int = 5
     CB_RECOVERY_TIMEOUT_SEC: float = 10.0
