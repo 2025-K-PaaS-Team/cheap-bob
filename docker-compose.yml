@@ -87,8 +87,9 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      # 토픽 auto-create — dev 편의. 운영에서는 false 로 두고 명시 생성 권장.
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # 토픽 auto-create 끔 — 운영과 동일한 동작. 모든 토픽은 kafka-init 가 명시 생성.
+      # 오타 토픽 produce / 누락된 .dlq 토픽 등을 dev 단계에서 즉시 발견.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
     networks:
       - cheapbob-network
     healthcheck:
@@ -96,6 +97,40 @@ services:
       interval: 5s
       timeout: 10s
       retries: 10
+
+  kafka-init:
+    # 비즈니스 토픽 + DLQ 토픽 명시 생성. kafka 가 healthy 된 후 1회 실행.
+    # --if-not-exists 로 멱등 — 재기동 시 안전. 새 토픽 추가는 아래 TOPICS 배열에 한 줄.
+    image: apache/kafka:latest
+    container_name: cheapbob-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - cheapbob-network
+    restart: "no"
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -euo pipefail
+        BROKER=kafka:9092
+        # 비즈니스 토픽 — DLQ 는 같은 이름 + .dlq 로 자동 생성됨.
+        TOPICS=(
+          order.refund.requested
+          payment.refund.completed
+          payment.refund.failed
+          seller.store.withdrawn
+        )
+        # DLQ retention — 30일 (운영자 조사 / replay 시간 확보).
+        DLQ_RETENTION_MS=2592000000
+        for t in "$${TOPICS[@]}"; do
+          /opt/kafka/bin/kafka-topics.sh --bootstrap-server $$BROKER --create --if-not-exists \
+            --topic "$$t" --partitions 3 --replication-factor 1
+          /opt/kafka/bin/kafka-topics.sh --bootstrap-server $$BROKER --create --if-not-exists \
+            --topic "$$t.dlq" --partitions 3 --replication-factor 1 \
+            --config retention.ms=$$DLQ_RETENTION_MS
+        done
+        echo "[kafka-init] 토픽 생성 완료 — $${#TOPICS[@]} 개 비즈니스 + $${#TOPICS[@]} 개 DLQ"
 
   kafka-ui:
     # dev 편의용. 운영 배포 제외.
@@ -133,6 +168,8 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     networks:
       - cheapbob-network
     volumes:
@@ -161,6 +198,8 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     networks:
       - cheapbob-network
     volumes:
