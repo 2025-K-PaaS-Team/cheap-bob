@@ -14,11 +14,11 @@ _DEFAULTS = {
     "ENVIRONMENT": "test",
     "FRONTEND_URL": "http://localhost:3000",
     "FRONTEND_LOCAL_URL": "http://localhost:3000",
-    "DB_HOST": "localhost",
-    "DB_PORT": "5432",
-    "DB_USER": "test",
-    "DB_PASSWORD": "test",
-    "DB_NAME": "test",
+    "POSTGRESQL_HOST": "localhost",
+    "POSTGRESQL_PORT": "5432",
+    "POSTGRESQL_USER": "test",
+    "POSTGRESQL_PASSWORD": "test",
+    "POSTGRESQL_NAME": "test",
     "REDIS_HOST": "localhost",
     "REDIS_PORT": "6379",
     "REDIS_DB": "0",
@@ -51,6 +51,8 @@ _DEFAULTS = {
     # MSA — payment-backend 호출 설정 (테스트는 실제 HTTP 호출 안 함, mock 으로 대체).
     "INTERNAL_SERVICE_TOKEN": "test-internal-token",
     "PAYMENT_SERVICE_URL": "http://localhost:8001",
+    # Kafka — Settings required. 단위 테스트는 producer/consumer 직접 사용 안 함.
+    "KAFKA_BOOTSTRAP_SERVERS": "localhost:9092",
 }
 for _k, _v in _DEFAULTS.items():
     os.environ.setdefault(_k, _v)

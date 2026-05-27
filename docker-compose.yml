@@ -1,9 +1,9 @@
 # version: '3.8'
 
 services:
-  postgres:
+  main-postgres:
     image: postgres:16-alpine
-    container_name: cheapbob-postgres
+    container_name: cheapbob-main-postgres
     environment:
       POSTGRES_USER: cho
       POSTGRES_PASSWORD: hyeonsang
@@ -18,10 +18,10 @@ services:
       timeout: 5s
       retries: 5
 
-  postgres-payment:
+  payment-postgres:
     # payment-backend 전용 별도 인스턴스. MSA 데이터 분리 — 같은 호스트에서 다른 컨테이너로 운용.
     image: postgres:16-alpine
-    container_name: cheapbob-postgres-payment
+    container_name: cheapbob-payment-postgres
     environment:
       POSTGRES_USER: cho
       POSTGRES_PASSWORD: hyeonsang
@@ -160,7 +160,7 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      postgres:
+      main-postgres:
         condition: service_healthy
       mongodb:
         condition: service_healthy
@@ -194,7 +194,7 @@ services:
       # /api/internal/* 를 거부해야 한다. dev 한정 localhost 접근만 허용.
       - "8001:8001"
     depends_on:
-      postgres-payment:
+      payment-postgres:
         condition: service_healthy
       kafka:
         condition: service_healthy
@@ -213,9 +213,9 @@ networks:
 
 volumes:
   postgresql-data:
-    name: cheapbob-postgres-data
+    name: cheapbob-main-postgres-data
   postgresql-payment-data:
-    name: cheapbob-postgres-payment-data
+    name: cheapbob-payment-postgres-data
   mongodb-data:
     name: cheapbob-mongodb-data
   redis-data:
