@@ -28,8 +28,15 @@ from app.domain.order.schema.order import (
 from app.domain.order.schema.dashboard import DashboardResponse, DashboardStockItem
 from app.domain.order.repository.order_history_item import OrderHistoryItemRepository
 from app.domain.order.repository.order_current_item import OrderCurrentItemRepository
+from app.domain.order.event.refund import (
+    EVENT_TYPE_ORDER_REFUND_REQUESTED,
+    SCHEMA_VERSION,
+    TOPIC_ORDER_REFUND_REQUESTED,
+    OrderRefundRequestedPayload,
+)
 from app.domain.order.dto.order import OrderStatus
 from app.database.session import UnitOfWork, transactional
+from app.core.outbox.enqueue import enqueue_event
 from app.core.logger import get_logger
 from app.core.internal_client.payment import (
     InternalPaymentClient,
@@ -233,62 +240,44 @@ class SellerOrderService:
     async def cancel_store_reservation_orders(
         self, *, store_id: str, store_name: str, reason: str,
     ) -> tuple[int, int, int]:
-        """가게의 모든 reservation 상태 주문을 환불 + 취소 + 재고 복원."""
+        """가게의 모든 reservation 상태 주문 환불 시작.
+
+        sync 환불 루프 → outbox 이벤트로 전환. PortOne refund / OrderCurrentItem
+        cancel / stock restore / 이메일 발송은 saga 의 뒷 단계 
+        (payment-backend → PaymentRefundCompletedEventHandler) 가 책임.
+
+        Returns: (started, failed, total_amount).
+          - started: 환불 이벤트 발행한 주문 수 (실제 환불 완료가 아님).
+          - failed: 결제 설정 누락/일시 장애로 이벤트조차 못 보낸 주문 수.
+          - total_amount: started 합산 금액.
+        """
+        # 사전 — 결제 설정 누락이면 모든 주문에 대해 동일 실패가 나니, 한 번에 짧게 차단.
         try:
             has = await self.internal_payment_client.has_complete_info(store_id)
         except PaymentServiceUnavailableError:
-            logger.exception("[{}] payment-backend 일시 장애 — reservation 주문 환불 보류", store_name)
+            logger.exception(
+                "[{}] payment-backend 일시 장애 — reservation 주문 환불 보류", store_name,
+            )
             return 0, 0, 0
         if not has:
             logger.error("[{}] 결제 설정이 없어 reservation 주문 환불 불가", store_name)
             return 0, 0, 0
 
-        orders = await self.order_query_service.list_store_current_orders(store_id)
-        reservation_orders = [
-            o for o in orders if o.status == OrderStatus.reservation
-        ]
-        if not reservation_orders:
-            logger.info("[{}] 취소/환불 대상 reservation 주문 없음", store_name)
-            return 0, 0, 0
-
-        cancelled = 0
-        failed = 0
-        total_amount = 0
-        for order in reservation_orders:
-            try:
-                await self.internal_payment_client.refund(
-                    payment_id=order.payment_id, store_id=store_id, reason=reason,
-                )
-                quantity = await self._cancel_record(order.payment_id, reason)
-                await self.seller_product_service.restore_purchased_stock(
-                    product_id=order.product_id, quantity=quantity,
-                )
-                await self._send_cancel_email_safe(order.customer_id, store_name)
-
-                cancelled += 1
-                total_amount += order.total_amount
-                logger.info(
-                    "[{}] 주문 취소/환불 - payment_id: {}, 고객: {}, 금액: {:,}원",
-                    store_name, order.payment_id, order.customer_id,
-                    order.total_amount,
-                )
-            except (PaymentServiceError, PaymentServiceUnavailableError) as e:
-                failed += 1
-                logger.error(
-                    "[{}] 주문 {} 환불 실패: {}",
-                    store_name, order.payment_id, e,
-                )
-            except Exception:
-                failed += 1
-                logger.exception(
-                    "[{}] 주문 {} 취소/환불 중 오류",
-                    store_name, order.payment_id,
-                )
-        return cancelled, failed, total_amount
+        started, total_amount = await self._emit_refund_events_for_store(
+            store_id=store_id, store_name=store_name, reason=reason,
+        )
+        return started, 0, total_amount
 
 
     async def refund_all_uncompleted(self) -> tuple[int, int, int]:
-        """모든 가게의 reservation/accept 상태 미완료 주문을 환불 + 취소."""
+        """모든 가게의 reservation/accept 상태 미완료 주문 환불 시작.
+
+        saga 패턴. 사전 체크 (가게별 has_complete_info) 후 살아남은 가게의
+        모든 주문에 대해 1 트랜잭션 안에서 outbox 이벤트 일괄 발행.
+
+        Returns: (started, failed, total_amount).
+        """
+        # 1. 미완료 주문 목록 (relations 포함).
         all_orders = await self._list_all_current_with_relations()
         uncompleted = [
             o for o in all_orders
@@ -302,10 +291,9 @@ class SellerOrderService:
         for o in uncompleted:
             orders_by_store[o.product.store_id].append(o)
 
-        cancelled = 0
+        # 2. 가게별 사전 has_complete_info — tx 밖에서 sync HTTP (CB 보호).
+        eligible: dict[str, list] = {}
         failed = 0
-        total_amount = 0
-        reason = "영업 시간 종료로 인한 자동 환불"
         for store_id, store_orders in orders_by_store.items():
             try:
                 has = await self.internal_payment_client.has_complete_info(store_id)
@@ -323,38 +311,116 @@ class SellerOrderService:
                 )
                 failed += len(store_orders)
                 continue
+            eligible[store_id] = store_orders
 
+        if not eligible:
+            return 0, failed, 0
+
+        # 3. 살아남은 가게의 모든 이벤트를 한 tx 로 발행.
+        started, total_amount = await self._emit_refund_events_for_stores(
+            eligible, reason="영업 시간 종료로 인한 자동 환불",
+        )
+        return started, failed, total_amount
+
+
+    @transactional
+    async def _emit_refund_events_for_store(
+        self, *, store_id: str, store_name: str, reason: str,
+    ) -> tuple[int, int]:
+        """단일 가게 reservation 주문 → outbox 이벤트. (started, total_amount)."""
+        orders = await OrderCurrentItemRepository(
+            self._session,
+        ).get_store_current_orders_with_relations(store_id)
+        reservation_orders = [
+            o for o in orders if o.status == OrderStatus.reservation
+        ]
+        if not reservation_orders:
+            logger.info("[{}] 취소/환불 대상 reservation 주문 없음", store_name)
+            return 0, 0
+
+        started = 0
+        total_amount = 0
+        for order in reservation_orders:
+            await self._enqueue_refund_requested(
+                payment_id=order.payment_id,
+                store_id=store_id,
+                store_name=store_name,
+                customer_id=order.customer_id,
+                product_id=order.product_id,
+                quantity=order.quantity,
+                reason=reason,
+            )
+            started += 1
+            total_amount += order.total_amount
+            logger.info(
+                "[{}] 주문 환불 이벤트 발행 - payment_id: {}, 고객: {}, 금액: {:,}원",
+                store_name, order.payment_id, order.customer_id, order.total_amount,
+            )
+        return started, total_amount
+
+
+    @transactional
+    async def _emit_refund_events_for_stores(
+        self, eligible: dict[str, list], reason: str,
+    ) -> tuple[int, int]:
+        """eligible 가게의 모든 미완료 주문에 대해 한 tx 로 이벤트 발행.
+
+        (started, total_amount).
+        """
+        started = 0
+        total_amount = 0
+        for store_id, store_orders in eligible.items():
             store_name = store_orders[0].product.store.store_name
             for order in store_orders:
-                try:
-                    await self.internal_payment_client.refund(
-                        payment_id=order.payment_id, store_id=store_id, reason=reason,
-                    )
-                    quantity = await self._cancel_record(order.payment_id, reason)
-                    await self.seller_product_service.restore_purchased_stock(
-                        product_id=order.product_id, quantity=quantity,
-                    )
-                    await self._send_cancel_email_safe(
-                        order.customer_id, store_name,
-                    )
-                    cancelled += 1
-                    total_amount += order.total_amount
-                    logger.info(
-                        "주문 {} 환불 완료 - 고객: {}, 상품: {}, 금액: {:,}원",
-                        order.payment_id, order.customer_id,
-                        order.product.product_name, order.total_amount,
-                    )
-                except (PaymentServiceError, PaymentServiceUnavailableError) as e:
-                    failed += 1
-                    logger.error(
-                        "주문 {} 환불 실패: {}", order.payment_id, e,
-                    )
-                except Exception:
-                    failed += 1
-                    logger.exception(
-                        "주문 {} 환불 처리 중 오류", order.payment_id,
-                    )
-        return cancelled, failed, total_amount
+                await self._enqueue_refund_requested(
+                    payment_id=order.payment_id,
+                    store_id=store_id,
+                    store_name=store_name,
+                    customer_id=order.customer_id,
+                    product_id=order.product_id,
+                    quantity=order.quantity,
+                    reason=reason,
+                )
+                started += 1
+                total_amount += order.total_amount
+                logger.info(
+                    "주문 {} 환불 이벤트 발행 - 고객: {}, 상품: {}, 금액: {:,}원",
+                    order.payment_id, order.customer_id,
+                    order.product.product_name, order.total_amount,
+                )
+        return started, total_amount
+
+
+    async def _enqueue_refund_requested(
+        self,
+        *,
+        payment_id: str,
+        store_id: str,
+        store_name: str,
+        customer_id: str,
+        product_id: str,
+        quantity: int,
+        reason: str,
+    ) -> None:
+        """공통 enqueue helper — payload 구성 일관성."""
+        payload = OrderRefundRequestedPayload(
+            payment_id=payment_id,
+            store_id=store_id,
+            store_name=store_name,
+            customer_id=customer_id,
+            product_id=product_id,
+            quantity=quantity,
+            reason=reason,
+        )
+        await enqueue_event(
+            self._session,
+            aggregate_type="Payment",
+            aggregate_id=payment_id,
+            event_type=EVENT_TYPE_ORDER_REFUND_REQUESTED,
+            topic=TOPIC_ORDER_REFUND_REQUESTED,
+            payload=payload.model_dump(),
+            headers={"schema_version": SCHEMA_VERSION},
+        )
 
 
     async def complete_store_accepted_orders(
@@ -400,15 +466,6 @@ class SellerOrderService:
         return await OrderCurrentItemRepository(self._session).complete_order(
             payment_id,
         )
-
-
-    async def _send_cancel_email_safe(self, customer_id: str, store_name: str) -> None:
-        try:
-            await send_seller_cancel_email(customer_id, store_name)
-        except Exception:
-            logger.exception(
-                "취소 이메일 발송 실패 (customer: {})", customer_id,
-            )
 
 
     @transactional

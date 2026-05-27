@@ -52,9 +52,16 @@ def create_app() -> FastAPI:
         from app.domain.payment.event.seller_withdrawn import (
             TOPIC_SELLER_STORE_WITHDRAWN,
         )
+        from app.domain.payment.event.refund import (
+            TOPIC_ORDER_REFUND_REQUESTED,
+        )
         consumer_runner.register(
             TOPIC_SELLER_STORE_WITHDRAWN,
             container.seller_store_withdrawn_event_handler().handle,
+        )
+        consumer_runner.register(
+            TOPIC_ORDER_REFUND_REQUESTED,
+            container.order_refund_requested_event_handler().handle,
         )
 
         await kafka_producer.start()

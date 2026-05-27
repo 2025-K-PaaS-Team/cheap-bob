@@ -5,8 +5,8 @@ main-backend 와 코드 중복은 의도적 (shared 패턴 미적용). JWT_SECRE
 """
 from typing import Dict, Optional, Tuple
 from jose import JWTError, jwt
-from datetime import datetime, timedelta, timezone
 from fastapi import Response
+from datetime import datetime, timedelta, timezone
 
 from app.config.setting import settings
 

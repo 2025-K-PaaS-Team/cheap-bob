@@ -11,6 +11,9 @@ from app.domain.payment.service.cart_item import CartItemService
 from app.domain.payment.event.seller_withdrawn import (
     SellerStoreWithdrawnEventHandler,
 )
+from app.domain.payment.event.refund_requested_handler import (
+    OrderRefundRequestedEventHandler,
+)
 from app.database.session import UnitOfWork
 from app.core.portone import PortOnePaymentClient
 from app.core.outbox.relay import OutboxRelay
@@ -93,6 +96,12 @@ class Container(containers.DeclarativeContainer):
         SellerStoreWithdrawnEventHandler,
         uow=uow,
         store_payment_info_service=store_payment_info_service,
+    )
+    order_refund_requested_event_handler = providers.Factory(
+        OrderRefundRequestedEventHandler,
+        uow=uow,
+        store_payment_info_service=store_payment_info_service,
+        payment_gateway_service=payment_gateway_service,
     )
 
 

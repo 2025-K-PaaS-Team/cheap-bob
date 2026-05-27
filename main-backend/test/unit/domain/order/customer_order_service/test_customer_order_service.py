@@ -9,10 +9,6 @@ from test.unit.domain.order.customer_order_service.mock_factory import Backgroun
 import pytest
 from datetime import datetime, timedelta, timezone
 
-from app.core.internal_client.payment import (
-    PaymentServiceError,
-    PaymentServiceUnavailableError,
-)
 from app.domain.order.service.exception import (
     OrderAlreadyCanceledError,
     OrderAlreadyCompletedError,
@@ -24,6 +20,10 @@ from app.domain.order.service.exception import (
     OrderRefundError,
 )
 from app.domain.order.dto.order import OrderStatus
+from app.core.internal_client.payment import (
+    PaymentServiceError,
+    PaymentServiceUnavailableError,
+)
 
 
 # ────────────────────────────────────────────────────────────────────

@@ -22,8 +22,17 @@ class PaymentVerificationError(DomainError):
 
 
 class PaymentRefundError(DomainError):
-    """PortOne 환불 실패."""
+    """PortOne 환불 실패 — terminal (이미 취소됨 / 4xx). retry 불가, caller 가 운영자 알람."""
     status_code = 500
+
+
+class PaymentRefundTransientError(PaymentRefundError):
+    """PortOne 5xx / 네트워크 — transient. consumer retry 안전.
+
+    PaymentRefundError 의 서브타입 — 기존 catch (PaymentRefundError) 도 그대로 잡힌다.
+    refund 핸들러만 분기를 위해 이 클래스로 좁힌다.
+    """
+    status_code = 503
 
 
 class PaymentNotFoundError(DomainError):

@@ -34,24 +34,17 @@ class OrderQueryServiceMockFactory:
     def create(cls) -> AsyncMock:
         mock = AsyncMock()
         mock.list_store_current_orders.return_value = []
-        mock.cancel_order.return_value = 1
-        return mock
-
-
-class SellerProductServiceMockFactory:
-    @classmethod
-    def create(cls) -> AsyncMock:
-        mock = AsyncMock()
-        mock.restore_purchased_stock.return_value = None
         return mock
 
 
 class InternalPaymentClientMockFactory:
-    """payment-backend 호출 mock — has_complete_info / refund 두 메서드만 본 서비스에서 사용."""
+    """payment-backend 호출 mock — Phase 5.2 후로 has_complete_info 한 메서드만 사용.
+
+    refund 는 outbox 이벤트로 위임됐다.
+    """
 
     @classmethod
     def create(cls) -> AsyncMock:
         mock = AsyncMock()
         mock.has_complete_info.return_value = True
-        mock.refund.return_value = None
         return mock

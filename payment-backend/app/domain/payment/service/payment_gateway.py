@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 
 from app.domain.payment.service.exception import (
     PaymentRefundError,
+    PaymentRefundTransientError,
     PaymentVerificationError,
 )
 from app.core.portone import (
@@ -61,7 +62,13 @@ class PaymentGatewayService:
     async def refund(
         self, *, payment_id: str, secret_key: str, reason: str,
     ) -> Dict[str, Any]:
-        """포트원 환불."""
+        """포트원 환불.
+
+        Raises:
+            PaymentRefundError:        terminal — PortOne 4xx (이미 취소 / 결제 없음 등).
+                                       retry 가 결과를 바꾸지 못함.
+            PaymentRefundTransientError: 5xx / 네트워크. consumer 가 retry 가능.
+        """
         try:
             return await self.portone_client.cancel_payment(
                 payment_id, api_secret=secret_key, reason=reason,
@@ -69,4 +76,4 @@ class PaymentGatewayService:
         except PortOnePaymentNotFoundError as e:
             raise PaymentRefundError(f"환불 처리 실패: {e}") from e
         except PortOneTransientError as e:
-            raise PaymentRefundError(f"환불 게이트웨이 일시 장애: {e}") from e
+            raise PaymentRefundTransientError(f"환불 게이트웨이 일시 장애: {e}") from e

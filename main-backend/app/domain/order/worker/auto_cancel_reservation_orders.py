@@ -1,8 +1,7 @@
 """픽업 마감 시간(pickup_end_time) 에 reservation 상태 주문을 취소/환불하는 스케줄 작업.
 
 `register_daily_schedules` 가 매일 새벽에 fired 되어, 오늘 열려 있는 가게마다
-픽업 마감 시각에 1회성 job 을 등록한다. 실제 비즈니스 로직은
-`SellerOrderService.cancel_store_reservation_orders()` 에 위치.
+픽업 마감 시각에 1회성 job 을 등록한다. 실제 비즈니스 로직은 `SellerOrderService.cancel_store_reservation_orders()` 에 위치.
 """
 from typing import List
 from datetime import datetime, timedelta, timezone
@@ -26,10 +25,12 @@ class AutoCancelReservationOrdersTask:
     async def cancel_and_refund_store_reservation_orders(
         store_id: str, store_name: str,
     ):
-        """단일 가게의 reservation 주문 환불/취소/재고 복원."""
+        """단일 가게의 reservation 주문 환불 이벤트 발행 — 실제 PortOne 호출 / cancel /
+        stock restore / 이메일 은 saga 의 뒷 단계 (payment-backend 컨슈머) 가 책임.
+        """
         start = datetime.now(timezone.utc)
         try:
-            cancelled, failed, total_amount = await container.seller_order_service(
+            started, failed, total_amount = await container.seller_order_service(
             ).cancel_store_reservation_orders(
                 store_id=store_id,
                 store_name=store_name,
@@ -43,9 +44,9 @@ class AutoCancelReservationOrdersTask:
 
         elapsed = (datetime.now(timezone.utc) - start).total_seconds()
         logger.info(
-            "[{}] 픽업 마감 주문 자동 취소/환불 완료: 성공 {}건, 실패 {}건, "
-            "환불 {:,}원 ({:.2f}s)",
-            store_name, cancelled, failed, total_amount, elapsed,
+            "[{}] 픽업 마감 주문 자동 환불 이벤트 발행 완료: 시작 {}건, 보류 {}건, "
+            "발행 {:,}원 ({:.2f}s)",
+            store_name, started, failed, total_amount, elapsed,
         )
 
 

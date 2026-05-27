@@ -86,21 +86,6 @@ async def exists_info(
     return ExistsInfoResponse(exists=exists)
 
 
-@internal_router.delete(
-    "/store-info/{store_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-@inject
-async def delete_store_payment_info(
-    store_id: str,
-    store_payment_info_service: StorePaymentInfoService = Depends(
-        Provide["store_payment_info_service"],
-    ),
-):
-    """seller 탈퇴 cleanup. 없으면 204 (멱등)."""
-    await store_payment_info_service.delete_by_store(store_id)
-
-
 @internal_router.post(
     "/store-info",
     status_code=status.HTTP_204_NO_CONTENT,

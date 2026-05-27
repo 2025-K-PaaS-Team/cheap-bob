@@ -84,6 +84,20 @@ def create_app() -> FastAPI:
         outbox_relay = container.outbox_relay()
         consumer_runner = container.kafka_consumer_runner()
 
+        # 이벤트 핸들러 등록 — payment-backend → main-backend 방향 토픽.
+        from app.domain.order.event.refund import (
+            TOPIC_PAYMENT_REFUND_COMPLETED,
+            TOPIC_PAYMENT_REFUND_FAILED,
+        )
+        consumer_runner.register(
+            TOPIC_PAYMENT_REFUND_COMPLETED,
+            container.payment_refund_completed_event_handler().handle,
+        )
+        consumer_runner.register(
+            TOPIC_PAYMENT_REFUND_FAILED,
+            container.payment_refund_failed_event_handler().handle,
+        )
+
         await kafka_producer.start()
         relay_task = asyncio.create_task(outbox_relay.run())
         consumer_task = (

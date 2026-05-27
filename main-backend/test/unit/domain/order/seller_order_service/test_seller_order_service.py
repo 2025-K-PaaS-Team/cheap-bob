@@ -10,10 +10,6 @@ from test.unit.domain.order.customer_order_service.model_factory import (
 import pytest
 from datetime import datetime, timezone
 
-from app.core.internal_client.payment import (
-    PaymentServiceError,
-    PaymentServiceUnavailableError,
-)
 from app.domain.order.service.exception import (
     OrderAlreadyCanceledError,
     OrderNotFoundError,
@@ -21,6 +17,10 @@ from app.domain.order.service.exception import (
     OrderRefundError,
 )
 from app.domain.order.dto.order import OrderStatus
+from app.core.internal_client.payment import (
+    PaymentServiceError,
+    PaymentServiceUnavailableError,
+)
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -272,81 +272,133 @@ class TestGetDashboard:
 
 
 # ────────────────────────────────────────────────────────────────────
-# cancel_store_reservation_orders — worker 엔트리포인트
+# cancel_store_reservation_orders — worker 엔트리포인트 (Phase 5.3: 이벤트 발행만 책임)
 # ────────────────────────────────────────────────────────────────────
 
 @pytest.mark.unit
 class TestCancelStoreReservationOrders:
 
     async def test_returns_zero_when_payment_info_missing(
-        self, service, payment_client_mock,
+        self, service, payment_client_mock, enqueue_event_mock,
     ):
         payment_client_mock.has_complete_info.return_value = False
-        cancelled, failed, total = await service.cancel_store_reservation_orders(
+        started, failed, total = await service.cancel_store_reservation_orders(
             store_id="STR_x", store_name="가게", reason="픽업 마감",
         )
-        assert (cancelled, failed, total) == (0, 0, 0)
+        assert (started, failed, total) == (0, 0, 0)
+        enqueue_event_mock.assert_not_awaited()
 
 
     async def test_returns_zero_when_no_reservation_orders(
-        self, service, order_query_mock,
+        self, service, order_repo_mock, enqueue_event_mock,
     ):
-        order_query_mock.list_store_current_orders.return_value = [
+        order_repo_mock.get_store_current_orders_with_relations.return_value = [
             OrderFactory.create(status=OrderStatus.complete),
         ]
-        cancelled, failed, total = await service.cancel_store_reservation_orders(
+        started, failed, total = await service.cancel_store_reservation_orders(
             store_id="STR_x", store_name="가게", reason="픽업 마감",
         )
-        assert (cancelled, failed, total) == (0, 0, 0)
+        assert (started, failed, total) == (0, 0, 0)
+        enqueue_event_mock.assert_not_awaited()
 
 
-    async def test_cancels_each_reservation_order(
-        self,
-        service,
-        order_query_mock,
-        order_repo_mock,
-        payment_client_mock,
-        product_service_mock,
+    async def test_emits_refund_event_per_reservation_order(
+        self, service, order_repo_mock, enqueue_event_mock,
     ):
         a = OrderFactory.create(status=OrderStatus.reservation, total_amount=10000)
         b = OrderFactory.create(status=OrderStatus.reservation, total_amount=15000)
-        order_query_mock.list_store_current_orders.return_value = [a, b]
-        order_repo_mock.cancel_order.return_value = 1
+        c = OrderFactory.create(status=OrderStatus.complete, total_amount=99999)
+        order_repo_mock.get_store_current_orders_with_relations.return_value = [a, b, c]
 
-        cancelled, failed, total = await service.cancel_store_reservation_orders(
+        started, failed, total = await service.cancel_store_reservation_orders(
             store_id="STR_x", store_name="가게", reason="픽업 마감",
         )
 
-        assert cancelled == 2
+        assert started == 2
         assert failed == 0
-        assert total == 25000
-        assert payment_client_mock.refund.await_count == 2
+        assert total == 25000  # c (complete) 는 제외
+        assert enqueue_event_mock.await_count == 2
 
-
-    async def test_swallows_one_failure_and_continues(
-        self,
-        service,
-        order_query_mock,
-        order_repo_mock,
-        payment_client_mock,
-    ):
-        a = OrderFactory.create(status=OrderStatus.reservation, total_amount=10000)
-        b = OrderFactory.create(status=OrderStatus.reservation, total_amount=15000)
-        order_query_mock.list_store_current_orders.return_value = [a, b]
-        # a 환불 실패, b 성공.
-        payment_client_mock.refund.side_effect = [
-            PaymentServiceError(500, "net"),
-            None,
+        topics = [
+            call.kwargs["topic"] for call in enqueue_event_mock.await_args_list
         ]
-        order_repo_mock.cancel_order.return_value = 1
+        assert topics == ["order.refund.requested", "order.refund.requested"]
 
-        cancelled, failed, total = await service.cancel_store_reservation_orders(
-            store_id="STR_x", store_name="가게", reason="픽업 마감",
+        # payload v2 — store_name + customer_id 포함.
+        first = enqueue_event_mock.await_args_list[0].kwargs["payload"]
+        assert first["store_id"] == "STR_x"
+        assert first["store_name"] == "가게"
+        assert first["reason"] == "픽업 마감"
+        assert "customer_id" in first
+
+
+# ────────────────────────────────────────────────────────────────────
+# refund_all_uncompleted — daily 미완료 환불 worker (Phase 5.3)
+# ────────────────────────────────────────────────────────────────────
+
+@pytest.mark.unit
+class TestRefundAllUncompleted:
+
+    async def test_returns_zero_when_no_uncompleted(
+        self, service, order_repo_mock, enqueue_event_mock,
+    ):
+        order_repo_mock.get_all_orders_with_relations.return_value = [
+            OrderFactory.create(status=OrderStatus.complete),
+        ]
+        started, failed, total = await service.refund_all_uncompleted()
+        assert (started, failed, total) == (0, 0, 0)
+        enqueue_event_mock.assert_not_awaited()
+
+
+    async def test_skips_stores_without_payment_config(
+        self, service, order_repo_mock, payment_client_mock, enqueue_event_mock,
+    ):
+        a = OrderFactory.create(
+            status=OrderStatus.reservation, store_id="STR_noconfig",
+            total_amount=10000,
         )
+        order_repo_mock.get_all_orders_with_relations.return_value = [a]
+        payment_client_mock.has_complete_info.return_value = False
 
-        assert cancelled == 1
-        assert failed == 1
-        assert total == 15000
+        started, failed, total = await service.refund_all_uncompleted()
+        assert started == 0
+        assert failed == 1  # 1개 주문이 skip 됨
+        assert total == 0
+        enqueue_event_mock.assert_not_awaited()
+
+
+    async def test_emits_event_for_each_eligible_order(
+        self, service, order_repo_mock, payment_client_mock, enqueue_event_mock,
+    ):
+        a = OrderFactory.create(
+            status=OrderStatus.reservation, store_id="STR_ok",
+            total_amount=10000,
+        )
+        b = OrderFactory.create(
+            status=OrderStatus.accept, store_id="STR_ok",
+            total_amount=20000,
+        )
+        order_repo_mock.get_all_orders_with_relations.return_value = [a, b]
+        payment_client_mock.has_complete_info.return_value = True
+
+        started, failed, total = await service.refund_all_uncompleted()
+
+        assert started == 2
+        assert failed == 0
+        assert total == 30000
+        assert enqueue_event_mock.await_count == 2
+
+        topics = [
+            call.kwargs["topic"] for call in enqueue_event_mock.await_args_list
+        ]
+        assert topics == ["order.refund.requested", "order.refund.requested"]
+
+        # payload v2 검증 — customer_id, store_name 포함.
+        first = enqueue_event_mock.await_args_list[0].kwargs["payload"]
+        assert first["store_id"] == "STR_ok"
+        assert "store_name" in first
+        assert "customer_id" in first
+        assert first["reason"] == "영업 시간 종료로 인한 자동 환불"
 
 
 # ────────────────────────────────────────────────────────────────────

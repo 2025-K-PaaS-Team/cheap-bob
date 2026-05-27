@@ -1,3 +1,4 @@
+from unittest.mock import AsyncMock
 from test.unit.domain.order.seller_order_service.mock_factory import (
     FakeUnitOfWork,
     HistoryRepoMockFactory,
@@ -68,6 +69,16 @@ def payment_client_mock():
 
 
 @pytest.fixture
+def enqueue_event_mock(monkeypatch):
+    """워커가 outbox 이벤트를 발행하는지 검증 — sync 환불 루프 이벤트화 검증."""
+    mock = AsyncMock()
+    monkeypatch.setattr(
+        "app.domain.order.service.seller_order.enqueue_event", mock,
+    )
+    return mock
+
+
+@pytest.fixture
 def service(
     monkeypatch,
     mock_session,
@@ -77,6 +88,7 @@ def service(
     product_service_mock,
     order_query_mock,
     payment_client_mock,
+    enqueue_event_mock,
 ):
     monkeypatch.setattr(
         "app.domain.order.service.seller_order.OrderCurrentItemRepository",

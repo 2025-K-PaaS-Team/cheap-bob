@@ -48,6 +48,12 @@ from app.domain.customer.repository.customer_withdraw_reservation import (
 from app.domain.auth.service.registration_status import RegistrationStatusService
 from app.domain.auth.service.oauth import OAuthService
 from app.domain.auth.service.jwt import JwtService
+from app.domain.order.event.refund_failed_handler import (
+    PaymentRefundFailedEventHandler,
+)
+from app.domain.order.event.refund_completed_handler import (
+    PaymentRefundCompletedEventHandler,
+)
 from app.database.session import UnitOfWork
 from app.core.outbox.relay import OutboxRelay
 from app.core.kafka.producer import KafkaProducer
@@ -196,8 +202,18 @@ class Container(containers.DeclarativeContainer):
         SellerStoreCloseService,
         uow=uow,
         order_query_service=order_query_service,
-        seller_product_service=seller_product_service,
         internal_payment_client=internal_payment_client,
+    )
+
+    # ───────── 이벤트 핸들러 ─────────
+
+    payment_refund_completed_event_handler = providers.Factory(
+        PaymentRefundCompletedEventHandler,
+        uow=uow,
+        seller_product_service=seller_product_service,
+    )
+    payment_refund_failed_event_handler = providers.Factory(
+        PaymentRefundFailedEventHandler, uow=uow,
     )
     seller_settlement_service = providers.Factory(
         SellerSettlementService,

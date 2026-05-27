@@ -15,8 +15,8 @@ from app.domain.payment.schema.store_payment_settings import (
     StorePaymentSecretUpdateRequest,
     StorePaymentUpdateRequest,
 )
-from app.core.internal_client.seller import InternalSellerClient
 from app.core.openapi import create_error_responses
+from app.core.internal_client.seller import InternalSellerClient
 
 
 router = APIRouter(prefix="/seller/store/settings", tags=["Seller-Store-Settings-Payment"])

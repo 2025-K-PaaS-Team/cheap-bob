@@ -6,9 +6,9 @@ CONFLICT DO NOTHING 으로 보장한다.
 
 product_id / quantity 는 추적용 (디버깅/감사). 실제 dedupe 는 PK 만으로 충분.
 """
-from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import DateTime, Integer, String, func
+from datetime import datetime
 
 from app.database.session import Base
 

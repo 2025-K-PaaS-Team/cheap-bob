@@ -20,12 +20,12 @@ class UncompletedOrderRefundTask:
     @log_and_swallow("미완료 주문 환불 처리", logger)
     async def refund_uncompleted_orders():
         start = datetime.now(timezone.utc)
-        cancelled, failed, total_amount = await container.seller_order_service(
+        started, failed, total_amount = await container.seller_order_service(
         ).refund_all_uncompleted()
         elapsed = (datetime.now(timezone.utc) - start).total_seconds()
         logger.info(
-            "미완료 주문 환불 처리 완료: 성공 {}건, 실패 {}건, 총 환불 금액 {:,}원 ({:.2f}s)",
-            cancelled, failed, total_amount, elapsed,
+            "미완료 주문 환불 이벤트 발행 완료: 시작 {}건, 보류 {}건, 총 발행 금액 {:,}원 ({:.2f}s)",
+            started, failed, total_amount, elapsed,
         )
 
 

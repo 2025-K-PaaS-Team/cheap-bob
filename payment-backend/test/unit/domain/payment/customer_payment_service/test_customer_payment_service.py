@@ -6,6 +6,15 @@ MSA 분리 후 변경된 의존성:
   - cart_items CRUD → CartItemService (local)
 """
 from types import SimpleNamespace
+from test.unit.domain.payment.customer_payment_service.model_factory import (
+    CartItemFactory,
+    OperationInfoFactory,
+    PaymentInfoFactory,
+    ProductFactory,
+)
+from test.unit.domain.payment.customer_payment_service.mock_factory import (
+    BackgroundTasksFakeFactory,
+)
 import pytest
 from datetime import datetime, timedelta, timezone
 
@@ -24,16 +33,6 @@ from app.domain.payment.service.exception import (
     StoreNotOpenError,
 )
 from app.core.portone import PortOnePaymentStatus, PortOneTransientError
-
-from test.unit.domain.payment.customer_payment_service.model_factory import (
-    CartItemFactory,
-    OperationInfoFactory,
-    PaymentInfoFactory,
-    ProductFactory,
-)
-from test.unit.domain.payment.customer_payment_service.mock_factory import (
-    BackgroundTasksFakeFactory,
-)
 
 
 def _paid(amount: int) -> SimpleNamespace:
