@@ -19,6 +19,7 @@ from app.domain.payment.event.refund import (
     PaymentRefundCompletedPayload,
     PaymentRefundFailedPayload,
 )
+from app.core.kafka.consumer import TerminalEventError
 
 
 @pytest.mark.unit
@@ -166,9 +167,9 @@ class TestTransient:
 
 @pytest.mark.unit
 class TestPayloadValidation:
-    """malformed payload — handler 가 skip (raise 하지 않음, 무한 재배달 방지)."""
+    """malformed payload → TerminalEventError → Runner 가 DLQ 격리."""
 
-    async def test_skips_on_payload_validation_error(
+    async def test_raises_terminal_on_payload_validation_error(
         self, handler, make_msg, fixed_event_id,
         payment_gateway_mock, enqueue_event_mock,
     ):
@@ -178,8 +179,27 @@ class TestPayloadValidation:
             payload={"payment_id": "PAY_bad"},  # 나머지 필드 누락.
         )
 
-        # raise 안 하고 skip — 무한 재배달 방지.
-        await handler.handle(bad_msg)
+        # TerminalEventError raise — Runner 가 catch 해서 즉시 DLQ 로 격리.
+        with pytest.raises(TerminalEventError):
+            await handler.handle(bad_msg)
+
+        payment_gateway_mock.refund.assert_not_awaited()
+        enqueue_event_mock.assert_not_awaited()
+
+
+    async def test_raises_terminal_on_missing_event_id_header(
+        self, handler, v2_payload,
+        payment_gateway_mock, enqueue_event_mock,
+    ):
+        from types import SimpleNamespace
+        msg = SimpleNamespace(
+            headers=[],  # event_id 헤더 없음.
+            value=v2_payload,
+            offset=99,
+        )
+
+        with pytest.raises(TerminalEventError):
+            await handler.handle(msg)
 
         payment_gateway_mock.refund.assert_not_awaited()
         enqueue_event_mock.assert_not_awaited()
