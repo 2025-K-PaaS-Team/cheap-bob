@@ -17,9 +17,15 @@ from app.domain.seller.repository.store import StoreRepository
 from app.domain.seller.repository.seller_withdraw_reservation import (
     SellerWithdrawReservationRepository,
 )
+from app.domain.seller.event.withdrawn import (
+    EVENT_TYPE_SELLER_STORE_WITHDRAWN,
+    SCHEMA_VERSION,
+    TOPIC_SELLER_STORE_WITHDRAWN,
+    SellerStoreWithdrawnPayload,
+)
 from app.database.session import UnitOfWork, transactional
+from app.core.outbox.enqueue import enqueue_event
 from app.core.logger import get_logger
-from app.core.internal_client.payment import InternalPaymentClient
 
 
 _KST = timezone(timedelta(hours=9))
@@ -31,7 +37,9 @@ logger = get_logger("seller.service.seller_withdraw")
 class SellerWithdrawService:
     """판매자 탈퇴 / 탈퇴 취소.
 
-    payment 도메인 분리 후 store_payment_info 삭제는 payment-backend internal API 호출.
+    store_payment_info 삭제는 outbox 이벤트로 위임 — payment-backend 가 다운 중이어도
+    Kafka 큐에 안전히 남았다가 살아나면 처리된다. 비즈니스 cascade 와 이벤트 enqueue 는 같은
+    트랜잭션에서 commit 되므로 dual-write 없음.
     """
 
     def __init__(
@@ -39,12 +47,10 @@ class SellerWithdrawService:
         uow: UnitOfWork,
         withdraw_repo: SellerWithdrawReservationRepository,
         seller_account_service: SellerAccountService,
-        internal_payment_client: InternalPaymentClient,
     ):
         self.uow = uow
         self.withdraw_repo = withdraw_repo
         self.seller_account_service = seller_account_service
-        self.internal_payment_client = internal_payment_client
 
 
     async def request_withdraw(self, *, seller_email: str, store_id: str) -> None:
@@ -99,10 +105,11 @@ class SellerWithdrawService:
 
     @transactional
     async def _hard_delete_seller_with_stores(self, email: str) -> bool:
-        """가게 자산 cascade 정리 + Seller hard-delete. store_payment_info 삭제는 payment-backend 호출.
+        """가게 자산 cascade 정리 + Seller hard-delete.
 
-        주의: payment-backend 호출은 본 tx 와 별개. 실패 시 cascade 가 끊겨 상태 부정합 위험.
-        1차 cut 에서는 실패 시 critical 로깅 후 계속 진행 — 운영자 수동 청소.
+        store_payment_info 삭제는 outbox 로 이벤트 발행 — 같은 트랜잭션에서 enqueue 되므로
+        cascade commit 시점에 이벤트도 영속화. payment-backend 가 다운이면 Relay 가 다음
+        tick 에서 발행, 컨슈머 살아나면 처리. 운영자 수동 청소 불필요.
         """
         store_repo = StoreRepository(self._session)
         product_repo = StoreProductInfoRepository(self._session)
@@ -116,16 +123,20 @@ class SellerWithdrawService:
             for product in await product_repo.get_by_store_id(store.store_id):
                 await product_repo.delete(product.product_id)
 
-            try:
-                await self.internal_payment_client.delete_store_payment_info(
-                    store.store_id,
-                )
-            except Exception:
-                logger.exception(
-                    "[CRITICAL] payment-backend store_payment_info 삭제 실패 store_id={} "
-                    "— 운영자 수동 청소 필요",
-                    store.store_id,
-                )
+            # payment-backend 에 store_payment_info 삭제 위임 — outbox 이벤트.
+            # 같은 tx commit = 이벤트 영속화. at-least-once + payment-backend 측 멱등.
+            payload = SellerStoreWithdrawnPayload(
+                store_id=store.store_id, seller_email=email,
+            )
+            await enqueue_event(
+                self._session,
+                aggregate_type="Store",
+                aggregate_id=store.store_id,
+                event_type=EVENT_TYPE_SELLER_STORE_WITHDRAWN,
+                topic=TOPIC_SELLER_STORE_WITHDRAWN,
+                payload=payload.model_dump(),
+                headers={"schema_version": SCHEMA_VERSION},
+            )
 
             for op in await op_repo.get_many(
                 filters={"store_id": store.store_id},

@@ -43,16 +43,6 @@ class SellerAccountServiceMockFactory:
         return mock
 
 
-class InternalPaymentClientMockFactory:
-    """payment-backend 호출 mock — withdraw 가 사용하는 delete_store_payment_info 만."""
-
-    @classmethod
-    def create(cls) -> AsyncMock:
-        mock = AsyncMock()
-        mock.delete_store_payment_info.return_value = None
-        return mock
-
-
 class StoreRepoMockFactory:
     @classmethod
     def create(cls) -> AsyncMock:

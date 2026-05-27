@@ -48,6 +48,15 @@ def create_app() -> FastAPI:
         outbox_relay = container.outbox_relay()
         consumer_runner = container.kafka_consumer_runner()
 
+        # 이벤트 핸들러 등록 — 토픽별로 1개의 핸들러.
+        from app.domain.payment.event.seller_withdrawn import (
+            TOPIC_SELLER_STORE_WITHDRAWN,
+        )
+        consumer_runner.register(
+            TOPIC_SELLER_STORE_WITHDRAWN,
+            container.seller_store_withdrawn_event_handler().handle,
+        )
+
         await kafka_producer.start()
         relay_task = asyncio.create_task(outbox_relay.run())
         consumer_task = (

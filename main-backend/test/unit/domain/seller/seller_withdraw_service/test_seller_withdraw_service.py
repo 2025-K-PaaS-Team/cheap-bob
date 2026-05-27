@@ -110,7 +110,7 @@ class TestProcessPendingWithdrawals:
         seller_account_mock,
         store_repo_mock,
         product_repo_mock,
-        payment_client_mock,
+        enqueue_event_mock,
         operation_repo_mock,
         image_repo_mock,
         sns_repo_mock,
@@ -126,10 +126,16 @@ class TestProcessPendingWithdrawals:
         processed = await service.process_pending_withdrawals()
 
         assert processed == 1
-        # cascade 진입점이 호출됐는지 — payment 는 internal API 위임.
-        payment_client_mock.delete_store_payment_info.assert_awaited_once_with(
-            "STR_x",
-        )
+        # payment 삭제는 outbox 이벤트로 위임 — 호출 자체와 키 필드 검증.
+        enqueue_event_mock.assert_awaited_once()
+        kwargs = enqueue_event_mock.await_args.kwargs
+        assert kwargs["aggregate_type"] == "Store"
+        assert kwargs["aggregate_id"] == "STR_x"
+        assert kwargs["event_type"] == "SellerStoreWithdrawn"
+        assert kwargs["topic"] == "seller.store.withdrawn"
+        assert kwargs["payload"] == {
+            "store_id": "STR_x", "seller_email": "seller@example.com",
+        }
         store_repo_mock.delete.assert_awaited_once_with("STR_x")
         seller_account_mock.hard_delete.assert_awaited_once_with(
             "seller@example.com",

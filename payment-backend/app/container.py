@@ -8,6 +8,9 @@ from app.domain.payment.service.seller_payment_settings import (
 from app.domain.payment.service.payment_gateway import PaymentGatewayService
 from app.domain.payment.service.customer_payment import CustomerPaymentService
 from app.domain.payment.service.cart_item import CartItemService
+from app.domain.payment.event.seller_withdrawn import (
+    SellerStoreWithdrawnEventHandler,
+)
 from app.database.session import UnitOfWork
 from app.core.portone import PortOnePaymentClient
 from app.core.outbox.relay import OutboxRelay
@@ -82,6 +85,14 @@ class Container(containers.DeclarativeContainer):
         cart_item_service=cart_item_service,
         internal_seller_client=internal_seller_client,
         internal_order_client=internal_order_client,
+    )
+
+    # ───────── 이벤트 핸들러 ─────────
+    # main.py lifespan 에서 instance().handle 을 KafkaConsumerRunner.register 에 등록.
+    seller_store_withdrawn_event_handler = providers.Factory(
+        SellerStoreWithdrawnEventHandler,
+        uow=uow,
+        store_payment_info_service=store_payment_info_service,
     )
 
 

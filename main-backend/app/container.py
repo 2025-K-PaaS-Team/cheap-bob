@@ -167,7 +167,6 @@ class Container(containers.DeclarativeContainer):
         uow=uow,
         withdraw_repo=seller_withdraw_reservation_repository,
         seller_account_service=seller_account_service,
-        internal_payment_client=internal_payment_client,
     )
 
     # ───────── order — payment-backend 호출 ─────────
