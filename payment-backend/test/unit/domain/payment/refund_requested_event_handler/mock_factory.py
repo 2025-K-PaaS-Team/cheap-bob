@@ -42,6 +42,8 @@ class PaymentGatewayServiceMockFactory:
         mock = AsyncMock()
         # 정상 케이스 default — refund 성공.
         mock.refund.return_value = {"status": "success"}
+        # default — fetch_status 는 None (결제 없음). race fix 분기에서 4xx + None = failed.
+        mock.fetch_status.return_value = None
         return mock
 
 

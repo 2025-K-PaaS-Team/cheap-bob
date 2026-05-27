@@ -125,19 +125,26 @@ class TestConfigMissing:
 
 @pytest.mark.unit
 class TestPortOneRefused:
-    """PortOne 4xx terminal → payment.refund.failed (kind=portone_refused)."""
+    """PortOne 4xx terminal → payment.refund.failed (kind=portone_refused).
 
-    async def test_emits_failed_event_on_terminal_portone_error(
+    Race fix 후: PaymentRefundError 받으면 fetch_status 로 진위 확인 분기.
+      - status=CANCELLED → completed 흡수 (race)
+      - 그 외 (None / PAID / FAILED 등) → failed 발행
+    """
+
+    async def test_emits_failed_event_when_not_cancelled(
         self, handler, msg, payment_gateway_mock, enqueue_event_mock,
     ):
+        # refund 4xx + fetch_status=None (default) → 진짜 거부 → failed.
         payment_gateway_mock.refund.side_effect = PaymentRefundError(
             "PortOne cancel 401",
         )
 
         await handler.handle(msg)
 
-        # PortOne 호출 발생.
+        # PortOne refund + fetch_status 모두 호출됨.
         payment_gateway_mock.refund.assert_awaited_once()
+        payment_gateway_mock.fetch_status.assert_awaited_once()
 
         # failed 이벤트 발행.
         kwargs = enqueue_event_mock.await_args.kwargs
@@ -145,6 +152,65 @@ class TestPortOneRefused:
         failed = PaymentRefundFailedPayload.model_validate(kwargs["payload"])
         assert failed.error_kind == "portone_refused"
         assert "PortOne cancel 401" in (failed.error_detail or "")
+
+
+@pytest.mark.unit
+class TestRaceAbsorption:
+    """수동 cancel 흐름이 먼저 PortOne 취소 완료 → 워커 이벤트가 뒤늦게 도달 → 흡수.
+
+    payment-backend refund 호출이 4xx 받지만 fetch_status 가 CANCELLED 확인 →
+    completed 발행 (failed 아님). main-backend completed 핸들러는 quantity=0 으로
+    이메일/restore skip 처리 — 중복 방지.
+    """
+
+    async def test_absorbs_to_completed_when_portone_already_cancelled(
+        self, handler, msg, v2_payload,
+        payment_gateway_mock, enqueue_event_mock,
+    ):
+        from types import SimpleNamespace
+        from app.core.portone import PortOnePaymentStatus
+
+        # race: refund 시도 시 PortOne 이 이미 cancelled 상태라 4xx 반환.
+        payment_gateway_mock.refund.side_effect = PaymentRefundError(
+            "PortOne cancel 400: already cancelled",
+        )
+        # fetch_status 가 CANCELLED 확인 — race 신호.
+        payment_gateway_mock.fetch_status.return_value = SimpleNamespace(
+            status=PortOnePaymentStatus.CANCELLED,
+        )
+
+        await handler.handle(msg)
+
+        # 진위 확인 1회.
+        payment_gateway_mock.fetch_status.assert_awaited_once()
+
+        # completed 이벤트 발행 (failed 아님).
+        assert enqueue_event_mock.await_count == 1
+        kwargs = enqueue_event_mock.await_args.kwargs
+        assert kwargs["topic"] == "payment.refund.completed"
+        completed = PaymentRefundCompletedPayload.model_validate(kwargs["payload"])
+        # echo 검증 — race 흡수 경로도 v2 필드 모두 보존.
+        assert completed.payment_id == v2_payload["payment_id"]
+        assert completed.store_name == v2_payload["store_name"]
+        assert completed.customer_id == v2_payload["customer_id"]
+
+
+    async def test_raises_transient_when_fetch_status_fails(
+        self, handler, msg, payment_gateway_mock, enqueue_event_mock,
+    ):
+        """진위 확인 자체가 transient 실패면 결정 보류 → retry."""
+        from app.core.portone import PortOneTransientError
+
+        payment_gateway_mock.refund.side_effect = PaymentRefundError("PortOne 4xx")
+        payment_gateway_mock.fetch_status.side_effect = PortOneTransientError(
+            "PortOne 5xx",
+        )
+
+        with pytest.raises(PaymentRefundTransientError):
+            await handler.handle(msg)
+
+        # 결정 못함 — outbox 발행 없음 (rollback).
+        enqueue_event_mock.assert_not_awaited()
 
 
 @pytest.mark.unit
