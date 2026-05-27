@@ -1,3 +1,4 @@
+import asyncio
 import sys
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
@@ -42,9 +43,35 @@ def create_app() -> FastAPI:
         scheduler.start()
         logger.info("스케줄러 상태: {}", "실행 중" if scheduler.is_running else "중지됨")
 
+        # Kafka / Outbox — producer 먼저, 그 다음 Relay / Consumer 백그라운드 태스크.
+        kafka_producer = container.kafka_producer()
+        outbox_relay = container.outbox_relay()
+        consumer_runner = container.kafka_consumer_runner()
+
+        await kafka_producer.start()
+        relay_task = asyncio.create_task(outbox_relay.run())
+        consumer_task = (
+            asyncio.create_task(consumer_runner.run())
+            if consumer_runner.topics() else None
+        )
+
         yield
 
         logger.info("payment-backend 종료 중...")
+        if consumer_task is not None:
+            consumer_runner.request_stop()
+            try:
+                await asyncio.wait_for(consumer_task, timeout=5)
+            except asyncio.TimeoutError:
+                consumer_task.cancel()
+
+        outbox_relay.request_stop()
+        try:
+            await asyncio.wait_for(relay_task, timeout=5)
+        except asyncio.TimeoutError:
+            relay_task.cancel()
+
+        await kafka_producer.stop()
         scheduler.stop()
         await container.portone_client().close()
         await container.internal_seller_client().close()
@@ -76,7 +103,15 @@ def create_app() -> FastAPI:
 
     @app.get("/health")
     async def health_check():
-        return {"status": "ok"}
+        # 외부 의존성 (main-backend, PortOne) breaker 상태 노출 — 운영 가시성.
+        return {
+            "status": "ok",
+            "breakers": [
+                container.internal_seller_client().breaker.snapshot(),
+                container.internal_order_client().breaker.snapshot(),
+                container.portone_client().breaker.snapshot(),
+            ],
+        }
 
     app.container = container
     return app

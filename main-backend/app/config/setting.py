@@ -76,6 +76,25 @@ class Settings(BaseSettings):
     # 본 main-backend 가 payment-backend 의 /api/internal/* 를 호출할 base URL.
     PAYMENT_SERVICE_URL: str
 
+    # Kafka — Outbox 발행 + 이벤트 소비.
+    # bootstrap_servers 는 컴마 구분 멀티 브로커 허용 (단일 노드 dev 에서는 한 개).
+    KAFKA_BOOTSTRAP_SERVERS: str
+    KAFKA_CLIENT_ID: str = "cheapbob-main-backend"
+    KAFKA_CONSUMER_GROUP: str = "main-backend-consumer"
+
+    # Outbox Relay — main.py lifespan 에서 백그라운드 태스크로 폴링 발행.
+    # ENABLED=false 면 enqueue 만 되고 발행이 안 됨 — 마이그레이션/디버깅 용도.
+    OUTBOX_RELAY_ENABLED: bool = True
+    OUTBOX_RELAY_BATCH_SIZE: int = 100
+    OUTBOX_RELAY_POLL_INTERVAL_MS: int = 200
+    OUTBOX_RELAY_IDLE_BACKOFF_MS: int = 1000
+
+    # Resilience — Circuit Breaker / Retry. internal_client 의 HTTP 호출에 wrap.
+    CB_FAILURE_THRESHOLD: int = 5
+    CB_RECOVERY_TIMEOUT_SEC: float = 10.0
+    RETRY_MAX_ATTEMPTS: int = 3
+    RETRY_BASE_DELAY_MS: int = 200
+
     # 슈퍼 어드민 이메일 정보 설정
     SUPER_ADMIN_SMTP_USER: str
     SUPER_ADMIN_SMTP_PASSWORD: str

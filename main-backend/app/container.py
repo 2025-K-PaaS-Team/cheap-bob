@@ -49,6 +49,9 @@ from app.domain.auth.service.registration_status import RegistrationStatusServic
 from app.domain.auth.service.oauth import OAuthService
 from app.domain.auth.service.jwt import JwtService
 from app.database.session import UnitOfWork
+from app.core.outbox.relay import OutboxRelay
+from app.core.kafka.producer import KafkaProducer
+from app.core.kafka.consumer import KafkaConsumerRunner
 from app.core.internal_client.payment import InternalPaymentClient
 from app.config.setting import settings
 
@@ -95,6 +98,15 @@ class Container(containers.DeclarativeContainer):
     # ───────── internal payment client (MSA 호출) ─────────
 
     internal_payment_client = providers.Singleton(InternalPaymentClient)
+
+    # ───────── Kafka / Outbox ─────────
+    # producer 는 lifespan 의 start/stop 으로 lifecycle 관리. OutboxRelay 가 send 시 사용.
+    kafka_producer = providers.Singleton(KafkaProducer)
+    outbox_relay = providers.Singleton(
+        OutboxRelay, uow=uow, producer=kafka_producer,
+    )
+    # 컨슈머 — 도메인별 핸들러는 main.py lifespan 에서 .register() 로 등록 후 .run().
+    kafka_consumer_runner = providers.Singleton(KafkaConsumerRunner)
 
     # ───────── seller ─────────
 

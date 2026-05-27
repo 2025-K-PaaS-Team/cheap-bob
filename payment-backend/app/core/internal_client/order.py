@@ -1,6 +1,14 @@
-"""payment-backend → main-backend.order HTTP 클라이언트."""
-from typing import Optional
+"""payment-backend → main-backend.order HTTP 클라이언트.
 
+Resilience:
+  - timeout (httpx.Timeout)
+  - CircuitBreaker — BackendUnavailableError 누적 시 OPEN.
+                    OrderCreateFailedError (4xx) 는 breaker 영향 없음 — 비즈니스 실패 신호.
+  - retry_with_backoff — 5xx/네트워크만 재시도. OrderCreateFailedError, CircuitBreakerOpenError 즉시 raise.
+
+멱등성: backend 의 create_order_from_cart 가 payment_id 기준 UNIQUE 멱등. retry 안전.
+"""
+from typing import Awaitable, Callable, Optional, TypeVar
 import httpx
 
 from app.domain.payment.service.exception import (
@@ -8,11 +16,18 @@ from app.domain.payment.service.exception import (
     OrderCreateFailedError,
 )
 from app.domain.payment.dto.internal import CreateOrderFromCartRequest
+from app.core.resilience import (
+    CircuitBreaker,
+    CircuitBreakerOpenError,
+    retry_with_backoff,
+)
 from app.core.logger import get_logger
 from app.config.setting import settings
 
 
 logger = get_logger("internal_client.order")
+
+T = TypeVar("T")
 
 
 class InternalOrderClient:
@@ -24,10 +39,34 @@ class InternalOrderClient:
             timeout=timeout_s,
             headers={"X-Internal-Token": settings.INTERNAL_SERVICE_TOKEN},
         )
+        self._breaker = CircuitBreaker(
+            name="main-backend:order",
+            failure_threshold=settings.CB_FAILURE_THRESHOLD,
+            recovery_timeout=settings.CB_RECOVERY_TIMEOUT_SEC,
+            expected_exception=BackendUnavailableError,
+        )
+
+
+    @property
+    def breaker(self) -> CircuitBreaker:
+        return self._breaker
 
 
     async def close(self) -> None:
         await self._client.aclose()
+
+
+    async def _resilient(self, do_call: Callable[[], Awaitable[T]]) -> T:
+        async def _attempt() -> T:
+            return await self._breaker.call(do_call)
+
+        return await retry_with_backoff(
+            _attempt,
+            max_attempts=settings.RETRY_MAX_ATTEMPTS,
+            base_delay_ms=settings.RETRY_BASE_DELAY_MS,
+            retriable=(BackendUnavailableError,),
+            do_not_retry=(CircuitBreakerOpenError, OrderCreateFailedError),
+        )
 
 
     async def create_order_from_cart(
@@ -41,14 +80,34 @@ class InternalOrderClient:
         sale: Optional[int],
         total_amount: int,
     ) -> None:
-        """main-backend 가 customer preference snapshot 을 자체 lookup 후 order_current_item 생성.
-
-        payment_id 가 UNIQUE 멱등 키 — 두 번째 호출은 noop (200/204).
+        """payment_id UNIQUE 멱등 — retry 안전.
 
         Raises:
-            OrderCreateFailedError: main-backend 가 4xx 비-멱등 오류 (validation 등) 반환.
-            BackendUnavailableError: 5xx / 네트워크.
+            OrderCreateFailedError: main-backend 4xx (validation 등).
+            BackendUnavailableError: 5xx / 네트워크 (retry 소진 후 raise).
         """
+        await self._resilient(lambda: self._do_create_order_from_cart(
+            payment_id=payment_id,
+            product_id=product_id,
+            customer_id=customer_id,
+            quantity=quantity,
+            price=price,
+            sale=sale,
+            total_amount=total_amount,
+        ))
+
+
+    async def _do_create_order_from_cart(
+        self,
+        *,
+        payment_id: str,
+        product_id: str,
+        customer_id: str,
+        quantity: int,
+        price: int,
+        sale: Optional[int],
+        total_amount: int,
+    ) -> None:
         body = CreateOrderFromCartRequest(
             payment_id=payment_id,
             product_id=product_id,

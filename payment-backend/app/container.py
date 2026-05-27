@@ -10,6 +10,9 @@ from app.domain.payment.service.customer_payment import CustomerPaymentService
 from app.domain.payment.service.cart_item import CartItemService
 from app.database.session import UnitOfWork
 from app.core.portone import PortOnePaymentClient
+from app.core.outbox.relay import OutboxRelay
+from app.core.kafka.producer import KafkaProducer
+from app.core.kafka.consumer import KafkaConsumerRunner
 from app.core.internal_client.seller import InternalSellerClient
 from app.core.internal_client.order import InternalOrderClient
 from app.core.auth import JwtService
@@ -47,6 +50,13 @@ class Container(containers.DeclarativeContainer):
 
     internal_seller_client = providers.Singleton(InternalSellerClient)
     internal_order_client = providers.Singleton(InternalOrderClient)
+
+    # ───────── Kafka / Outbox ─────────
+    kafka_producer = providers.Singleton(KafkaProducer)
+    outbox_relay = providers.Singleton(
+        OutboxRelay, uow=uow, producer=kafka_producer,
+    )
+    kafka_consumer_runner = providers.Singleton(KafkaConsumerRunner)
 
     # ───────── payment ─────────
 

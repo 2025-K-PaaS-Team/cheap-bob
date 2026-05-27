@@ -6,9 +6,12 @@
 
 from app.domain.payment.model.store_payment_info import StorePaymentInfo
 from app.domain.payment.model.cart_item import CartItem
+from app.core.outbox.model import OutboxEvent, ProcessedEvent
 
 
 __all__ = [
     "StorePaymentInfo",
     "CartItem",
+    "OutboxEvent",
+    "ProcessedEvent",
 ]

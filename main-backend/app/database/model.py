@@ -23,6 +23,7 @@ from app.domain.customer.model.customer_favorite import CustomerFavorite
 from app.domain.customer.model.customer_detail import CustomerDetail
 from app.domain.customer.model.customer_allergy import CustomerAllergy
 from app.domain.customer.model.customer import Customer
+from app.core.outbox.model import OutboxEvent, ProcessedEvent
 
 
 __all__ = [
@@ -44,4 +45,6 @@ __all__ = [
     "ProductNutrition",
     "StockOperationLog",
     "OrderCurrentItem",
+    "OutboxEvent",
+    "ProcessedEvent",
 ]

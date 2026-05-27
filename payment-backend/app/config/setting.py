@@ -46,6 +46,23 @@ class Settings(BaseSettings):
     INTERNAL_SERVICE_TOKEN: str
     BACKEND_SERVICE_URL: str
 
+    # Kafka — Outbox 발행 + 이벤트 소비.
+    KAFKA_BOOTSTRAP_SERVERS: str
+    KAFKA_CLIENT_ID: str = "cheapbob-payment-backend"
+    KAFKA_CONSUMER_GROUP: str = "payment-backend-consumer"
+
+    # Outbox Relay — main.py lifespan 에서 백그라운드 태스크로 폴링 발행.
+    OUTBOX_RELAY_ENABLED: bool = True
+    OUTBOX_RELAY_BATCH_SIZE: int = 100
+    OUTBOX_RELAY_POLL_INTERVAL_MS: int = 200
+    OUTBOX_RELAY_IDLE_BACKOFF_MS: int = 1000
+
+    # Resilience — Circuit Breaker / Retry. internal_client / PortOne 호출에 wrap.
+    CB_FAILURE_THRESHOLD: int = 5
+    CB_RECOVERY_TIMEOUT_SEC: float = 10.0
+    RETRY_MAX_ATTEMPTS: int = 3
+    RETRY_BASE_DELAY_MS: int = 200
+
     # SMTP — 결제 확정 시 예약 이메일 발송.
     SUPER_ADMIN_SMTP_USER: str
     SUPER_ADMIN_SMTP_PASSWORD: str

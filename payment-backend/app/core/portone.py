@@ -11,16 +11,30 @@ graceful 실패 정책:
   - 404 / 4xx           → `PortOnePaymentNotFoundError` (claim 거부)
   - 5xx / timeout / 네트워크 → `PortOneTransientError` (caller 가 일시 장애로 인지)
   - HTTPException 은 본 모듈에서 raise 하지 않는다 — CONVENTION §11. router 에서 변환.
+
+Resilience:
+  - timeout (httpx.Timeout)
+  - CircuitBreaker — PortOneTransientError 누적 시 OPEN. NotFoundError 는 breaker 영향 없음.
+  - retry_with_backoff — 5xx/네트워크만 재시도. fetch_payment 는 read-only 라 retry 안전.
+                       cancel_payment 도 PortOne 쪽이 멱등 (같은 paymentId 두 번 cancel 시 400).
 """
-from typing import Any, Optional
+from typing import Any, Awaitable, Callable, Optional, TypeVar
 import httpx
 from enum import Enum
 from dataclasses import dataclass
 
+from app.core.resilience import (
+    CircuitBreaker,
+    CircuitBreakerOpenError,
+    retry_with_backoff,
+)
 from app.core.logger import get_logger
+from app.config.setting import settings
 
 
 logger = get_logger("core.portone")
+
+T = TypeVar("T")
 
 
 class PortOnePaymentNotFoundError(Exception):
@@ -68,16 +82,65 @@ class PortOnePaymentClient:
         timeout_s: float = 3.0,
     ):
         self._client = httpx.AsyncClient(base_url=base_url, timeout=timeout_s)
+        self._breaker = CircuitBreaker(
+            name="portone",
+            failure_threshold=settings.CB_FAILURE_THRESHOLD,
+            recovery_timeout=settings.CB_RECOVERY_TIMEOUT_SEC,
+            expected_exception=PortOneTransientError,
+        )
+
+
+    @property
+    def breaker(self) -> CircuitBreaker:
+        return self._breaker
 
 
     async def close(self) -> None:
         await self._client.aclose()
 
 
+    async def _resilient(self, do_call: Callable[[], Awaitable[T]]) -> T:
+        async def _attempt() -> T:
+            return await self._breaker.call(do_call)
+
+        return await retry_with_backoff(
+            _attempt,
+            max_attempts=settings.RETRY_MAX_ATTEMPTS,
+            base_delay_ms=settings.RETRY_BASE_DELAY_MS,
+            retriable=(PortOneTransientError,),
+            do_not_retry=(CircuitBreakerOpenError, PortOnePaymentNotFoundError),
+        )
+
+
     async def fetch_payment(
         self, payment_id: str, *, api_secret: str,
     ) -> PortOnePayment:
-        """Raises: PortOnePaymentNotFoundError (4xx), PortOneTransientError (5xx/network)."""
+        """Raises: PortOnePaymentNotFoundError (4xx), PortOneTransientError (5xx/network).
+
+        retry 안전 — GET 이라 멱등.
+        """
+        return await self._resilient(
+            lambda: self._do_fetch_payment(payment_id, api_secret=api_secret),
+        )
+
+
+    async def cancel_payment(
+        self, payment_id: str, *, api_secret: str, reason: str,
+    ) -> dict[str, Any]:
+        """Raises: PortOnePaymentNotFoundError (4xx), PortOneTransientError (5xx/network).
+
+        retry 안전 — PortOne 측이 paymentId 기준 멱등 (두 번째 cancel 은 400).
+        """
+        return await self._resilient(
+            lambda: self._do_cancel_payment(
+                payment_id, api_secret=api_secret, reason=reason,
+            ),
+        )
+
+
+    async def _do_fetch_payment(
+        self, payment_id: str, *, api_secret: str,
+    ) -> PortOnePayment:
         url = f"/payments/{payment_id}"
         try:
             resp = await self._client.get(
@@ -107,10 +170,9 @@ class PortOnePaymentClient:
         return _parse_payment(data, payment_id)
 
 
-    async def cancel_payment(
+    async def _do_cancel_payment(
         self, payment_id: str, *, api_secret: str, reason: str,
     ) -> dict[str, Any]:
-        """Raises: PortOnePaymentNotFoundError (4xx), PortOneTransientError (5xx/network)."""
         url = f"/payments/{payment_id}/cancel"
         try:
             resp = await self._client.post(

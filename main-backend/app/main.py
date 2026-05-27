@@ -1,3 +1,4 @@
+import asyncio
 import sys
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
@@ -77,9 +78,38 @@ def create_app() -> FastAPI:
         except Exception:
             logger.exception("동적 스케줄 복원 중 오류 발생")
 
+        # Kafka / Outbox — producer 먼저 start (Relay 가 send 시 필요), Relay 와 Consumer 는
+        # 백그라운드 태스크.
+        kafka_producer = container.kafka_producer()
+        outbox_relay = container.outbox_relay()
+        consumer_runner = container.kafka_consumer_runner()
+
+        await kafka_producer.start()
+        relay_task = asyncio.create_task(outbox_relay.run())
+        consumer_task = (
+            asyncio.create_task(consumer_runner.run())
+            if consumer_runner.topics() else None
+        )
+
         yield
 
         logger.info("애플리케이션 종료 중...")
+        # 종료 순서: 컨슈머 → Relay → Producer. Relay 가 in-flight send 를 끝낸 뒤
+        # producer.stop 이 와야 메시지 손실이 없다.
+        if consumer_task is not None:
+            consumer_runner.request_stop()
+            try:
+                await asyncio.wait_for(consumer_task, timeout=5)
+            except asyncio.TimeoutError:
+                consumer_task.cancel()
+
+        outbox_relay.request_stop()
+        try:
+            await asyncio.wait_for(relay_task, timeout=5)
+        except asyncio.TimeoutError:
+            relay_task.cancel()
+
+        await kafka_producer.stop()
         scheduler.stop()
         await container.internal_payment_client().close()
         await close_mongodb()
@@ -115,7 +145,12 @@ def create_app() -> FastAPI:
 
     @app.get("/health")
     async def health_check():
-        return {"status": "ok"}
+        # 외부 의존성 breaker 상태 + outbox lag 를 함께 노출 — 운영 알람 룰의 입력.
+        breaker_snapshot = container.internal_payment_client().breaker.snapshot()
+        return {
+            "status": "ok",
+            "breakers": [breaker_snapshot],
+        }
 
     app.container = container
     return app

@@ -2,9 +2,13 @@
 
 main-backend 의 /api/internal/seller/* 를 호출. X-Internal-Token 헤더로 인증.
 실패 시 stock/operation 별 도메인 예외로 매핑.
-"""
-from typing import Optional
 
+Resilience:
+  - timeout (httpx.Timeout)
+  - CircuitBreaker — BackendUnavailableError 누적 시 OPEN. 도메인 예외는 breaker 영향 없음.
+  - retry_with_backoff — 5xx/네트워크만 재시도. 도메인 4xx 는 즉시 raise.
+"""
+from typing import Awaitable, Callable, Optional, TypeVar
 import httpx
 
 from app.domain.payment.service.exception import (
@@ -20,11 +24,18 @@ from app.domain.payment.dto.internal import (
     RestoreStockRequest,
     TodayOperationResponse,
 )
+from app.core.resilience import (
+    CircuitBreaker,
+    CircuitBreakerOpenError,
+    retry_with_backoff,
+)
 from app.core.logger import get_logger
 from app.config.setting import settings
 
 
 logger = get_logger("internal_client.seller")
+
+T = TypeVar("T")
 
 
 class InternalSellerClient:
@@ -36,14 +47,90 @@ class InternalSellerClient:
             timeout=timeout_s,
             headers={"X-Internal-Token": settings.INTERNAL_SERVICE_TOKEN},
         )
+        self._breaker = CircuitBreaker(
+            name="main-backend:seller",
+            failure_threshold=settings.CB_FAILURE_THRESHOLD,
+            recovery_timeout=settings.CB_RECOVERY_TIMEOUT_SEC,
+            expected_exception=BackendUnavailableError,
+        )
+
+
+    @property
+    def breaker(self) -> CircuitBreaker:
+        return self._breaker
 
 
     async def close(self) -> None:
         await self._client.aclose()
 
 
+    async def _resilient(self, do_call: Callable[[], Awaitable[T]]) -> T:
+        async def _attempt() -> T:
+            return await self._breaker.call(do_call)
+
+        return await retry_with_backoff(
+            _attempt,
+            max_attempts=settings.RETRY_MAX_ATTEMPTS,
+            base_delay_ms=settings.RETRY_BASE_DELAY_MS,
+            retriable=(BackendUnavailableError,),
+            do_not_retry=(
+                CircuitBreakerOpenError,
+                # 도메인 4xx — retry 가 결과를 바꾸지 못함.
+                StockInsufficientError,
+                StockConflictError,
+                ProductNotFoundError,
+                StoreNotFoundError,
+            ),
+        )
+
+
+    # ───────── public API ─────────
+
+
     async def find_product(self, product_id: str) -> Optional[ProductResponse]:
-        """없으면 None."""
+        return await self._resilient(lambda: self._do_find_product(product_id))
+
+
+    async def get_today_operation(self, store_id: str) -> Optional[TodayOperationResponse]:
+        return await self._resilient(lambda: self._do_get_today_operation(store_id))
+
+
+    async def consume_stock(
+        self, *, payment_id: str, product_id: str, quantity: int,
+    ) -> None:
+        """(payment_id, "consume") 단위로 진짜 멱등 — backend 의 stock_operation_log INSERT
+        ON CONFLICT DO NOTHING 이 같은 키의 재호출을 SQL 레벨에서 차단한다. retry 안전.
+
+        Raises:
+            StockInsufficientError: 재고 부족 (HTTP 400).
+            StockConflictError:     낙관적 락 충돌 (HTTP 409).
+            BackendUnavailableError: 그 외 5xx / 네트워크.
+        """
+        await self._resilient(lambda: self._do_consume_stock(
+            payment_id=payment_id, product_id=product_id, quantity=quantity,
+        ))
+
+
+    async def restore_stock(
+        self, *, payment_id: str, product_id: str, quantity: int,
+    ) -> None:
+        """(payment_id, "restore") 단위로 진짜 멱등."""
+        await self._resilient(lambda: self._do_restore_stock(
+            payment_id=payment_id, product_id=product_id, quantity=quantity,
+        ))
+
+
+    async def get_store_id_by_seller_email(self, seller_email: str) -> str:
+        """seller_email → store_id."""
+        return await self._resilient(
+            lambda: self._do_get_store_id_by_seller_email(seller_email),
+        )
+
+
+    # ───────── private — 실제 HTTP 호출 ─────────
+
+
+    async def _do_find_product(self, product_id: str) -> Optional[ProductResponse]:
         try:
             resp = await self._client.get(
                 f"/api/internal/seller/products/{product_id}",
@@ -65,8 +152,9 @@ class InternalSellerClient:
         return ProductResponse.model_validate(resp.json())
 
 
-    async def get_today_operation(self, store_id: str) -> Optional[TodayOperationResponse]:
-        """오늘 영업 정보. None = 오늘 영업일 아님."""
+    async def _do_get_today_operation(
+        self, store_id: str,
+    ) -> Optional[TodayOperationResponse]:
         try:
             resp = await self._client.get(
                 f"/api/internal/seller/stores/{store_id}/today-operation",
@@ -90,17 +178,9 @@ class InternalSellerClient:
         return TodayOperationResponse.model_validate(resp.json())
 
 
-    async def consume_stock(
+    async def _do_consume_stock(
         self, *, payment_id: str, product_id: str, quantity: int,
     ) -> None:
-        """(payment_id, "consume") 단위로 진짜 멱등 — main-backend 의 stock_operation_log INSERT
-        ON CONFLICT DO NOTHING 이 같은 키의 재호출을 SQL 레벨에서 차단한다. retry 안전.
-
-        Raises:
-            StockInsufficientError: 재고 부족 (HTTP 400).
-            StockConflictError:     낙관적 락 충돌 (HTTP 409).
-            BackendUnavailableError: 그 외 5xx / 네트워크.
-        """
         body = ConsumeStockRequest(
             payment_id=payment_id, product_id=product_id, quantity=quantity,
         )
@@ -130,18 +210,9 @@ class InternalSellerClient:
         )
 
 
-    async def restore_stock(
+    async def _do_restore_stock(
         self, *, payment_id: str, product_id: str, quantity: int,
     ) -> None:
-        """payment_id 단위 멱등 (서버 측 ledger 가 보장). retry / sweep 중복 트리거 안전.
-
-        실패는 무조건 raise (caller 가 critical 로깅 결정).
-
-        Raises:
-            StockInsufficientError: 누계 차감보다 많이 복원 요청 (400) — caller 버그 신호.
-            StockConflictError:     낙관적 락 충돌 (409).
-            BackendUnavailableError: 5xx / 네트워크 / 그 외.
-        """
         body = RestoreStockRequest(
             payment_id=payment_id, product_id=product_id, quantity=quantity,
         )
@@ -173,13 +244,7 @@ class InternalSellerClient:
         )
 
 
-    async def get_store_id_by_seller_email(self, seller_email: str) -> str:
-        """seller_email → store_id.
-
-        Raises:
-            StoreNotFoundError:      main-backend 가 404 — 가게가 없음. DomainError 로 bubble.
-            BackendUnavailableError: 5xx / 네트워크 / 그 외 4xx.
-        """
+    async def _do_get_store_id_by_seller_email(self, seller_email: str) -> str:
         try:
             resp = await self._client.get(
                 "/api/internal/seller/store-id",
