@@ -73,7 +73,16 @@ class PaymentRefundCompletedEventHandler:
     async def _apply(
         self, *, event_id: UUID, payload: PaymentRefundCompletedPayload,
     ) -> bool:
-        """Returns True 면 신규 적용 (이메일 발송 필요), False 면 중복 (skip)."""
+        """Returns True 면 신규 적용 (이메일 발송 필요), False 면 skip.
+
+        skip 조건 두 가지:
+          1. event_id 중복 — 같은 이벤트의 재배달.
+          2. quantity == 0 — saga 흡수 케이스. payment-backend handler 가 PortOne 4xx 받고
+             fetch_status 가 CANCELLED 면 race (수동 cancel 흐름이 먼저 처리) 로 판단하고
+             completed 발행. 본 핸들러 도착 시점에는 OrderCurrentItem 이 이미 cancel —
+             cancel_order 가 quantity=0 반환. 수동 cancel 흐름이 이미 이메일/stock 처리했으니
+             중복 발송/복원 방지.
+        """
         is_new = await ProcessedEventRepository(self._session).try_mark(
             event_id=event_id, topic=TOPIC_PAYMENT_REFUND_COMPLETED,
         )
@@ -84,15 +93,20 @@ class PaymentRefundCompletedEventHandler:
             )
             return False
 
-        # cancel_order — 이미 cancel 이면 quantity 0 반환 (idempotent).
         quantity = await OrderCurrentItemRepository(self._session).cancel_order(
             payload.payment_id, payload.reason,
         )
-        # restore_stock — quantity 양수일 때만 (idempotency 2차 방어).
-        if quantity:
-            await self.seller_product_service.restore_purchased_stock(
-                product_id=payload.product_id, quantity=quantity,
+        if quantity == 0:
+            # race 흡수 — 다른 흐름이 이미 처리. restore + 이메일 모두 skip.
+            logger.info(
+                "이미 cancel 상태 — saga 흡수 (restore/이메일 skip) payment_id={}",
+                payload.payment_id,
             )
+            return False
+
+        await self.seller_product_service.restore_purchased_stock(
+            product_id=payload.product_id, quantity=quantity,
+        )
 
         logger.info(
             "환불 완료 처리 payment_id={} product_id={} quantity={}",

@@ -31,6 +31,7 @@ from app.domain.payment.service.exception import (
     PaymentRefundError,
     PaymentRefundTransientError,
 )
+from app.core.portone import PortOnePaymentStatus, PortOneTransientError
 from app.domain.payment.event.refund import (
     EVENT_TYPE_PAYMENT_REFUND_COMPLETED,
     EVENT_TYPE_PAYMENT_REFUND_FAILED,
@@ -121,20 +122,69 @@ class OrderRefundRequestedEventHandler:
             )
             raise
         except PaymentRefundError as e:
-            # PortOne 4xx — 이미 취소됐거나 결제 없음. terminal. failed 이벤트 발행.
-            logger.error(
-                "[CRITICAL] PortOne 환불 거부 (terminal) payment_id={}: {}",
-                payload.payment_id, e,
-            )
-            await self._enqueue_failed(
-                payload=payload, error_kind="portone_refused", error_detail=str(e),
+            # PortOne 4xx — 두 가지 가능성:
+            #   (a) race: 셀러/고객 수동 cancel 흐름이 먼저 PortOne 취소 완료 → 이미 cancelled
+            #   (b) 진짜 거부 (결제 없음, 다른 정책 거부 등)
+            # fetch_status 로 진위 확인 → CANCELLED 면 (a), success 로 흡수.
+            await self._absorb_or_emit_failed(
+                payload=payload, info=info, refund_err=e,
             )
             return
 
-        # 3) 성공 — completed 이벤트 발행. requested 의 모든 필드를 echo.
-        # 손으로 필드를 하나하나 옮기면 schema 진화 시 누락 위험 (e.g., v2 의 store_name /
-        # customer_id 누락 사고). 두 schema 가 의도적으로 동일 필드 set 이므로 model_dump
-        # 로 통째 echo — 향후 v3 필드 추가에도 자동으로 안전.
+        # 3) 성공 — completed 발행.
+        await self._enqueue_completed(payload)
+        logger.info("환불 성공 → completed 발행 payment_id={}", payload.payment_id)
+
+
+    async def _absorb_or_emit_failed(
+        self,
+        *,
+        payload: OrderRefundRequestedPayload,
+        info,
+        refund_err: PaymentRefundError,
+    ) -> None:
+        """PortOne 4xx 분기 — race vs 진짜 거부.
+
+        fetch_status 가 CANCELLED 면 누군가 (수동 cancel 흐름) 가 먼저 처리 — completed
+        흡수 (main-backend completed 핸들러가 quantity=0 으로 이메일 skip, idempotent).
+        그 외 (PAID / 결제 없음 / 다른 상태) 는 진짜 거부 — failed 발행.
+        """
+        try:
+            portone = await self.payment_gateway_service.fetch_status(
+                payment_id=payload.payment_id,
+                secret_key=info.portone_secret_key,
+            )
+        except PortOneTransientError as t:
+            # 진위 확인조차 못함 — transient 로 변환 retry.
+            raise PaymentRefundTransientError(
+                f"환불 후처리 진위 확인 일시 장애: {t}",
+            ) from t
+
+        if portone is not None and portone.status == PortOnePaymentStatus.CANCELLED:
+            logger.info(
+                "PortOne 이미 cancelled — race 흡수, completed 발행 payment_id={}",
+                payload.payment_id,
+            )
+            await self._enqueue_completed(payload)
+            return
+
+        logger.error(
+            "[CRITICAL] PortOne 환불 거부 (terminal) payment_id={} status={}: {}",
+            payload.payment_id,
+            portone.status.value if portone else "NOT_FOUND",
+            refund_err,
+        )
+        await self._enqueue_failed(
+            payload=payload,
+            error_kind="portone_refused",
+            error_detail=str(refund_err),
+        )
+
+
+    async def _enqueue_completed(
+        self, payload: OrderRefundRequestedPayload,
+    ) -> None:
+        """requested → completed echo (model_dump 자동화 — schema 진화 안전)."""
         completed = PaymentRefundCompletedPayload(**payload.model_dump())
         await enqueue_event(
             self._session,
@@ -145,7 +195,6 @@ class OrderRefundRequestedEventHandler:
             payload=completed.model_dump(),
             headers={"schema_version": SCHEMA_VERSION},
         )
-        logger.info("환불 성공 → completed 발행 payment_id={}", payload.payment_id)
 
 
     async def _enqueue_failed(
